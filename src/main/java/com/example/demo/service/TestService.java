@@ -16,15 +16,15 @@ public class TestService {
 
     @Transactional
     public User register(RegisterRequest registerRequest){
-        return userRepository.save(new User(registerRequest.userId(), registerRequest.password()));
+        return userRepository.save(new User(registerRequest.getUserId(), registerRequest.getPassword()));
     }
 
     @Transactional
     public int updateUser(RegisterRequest registerRequest, int id) {
         User user = findUserByIdOrElseThrow(id);
 
-        user.setUserId(registerRequest.userId());
-        user.setPassword(registerRequest.password());
+        user.setUserId(registerRequest.getUserId());
+        user.setPassword(registerRequest.getPassword());
 
         return userMapper.updateUser(user);
     }

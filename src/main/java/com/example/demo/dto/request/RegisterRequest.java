@@ -1,6 +1,11 @@
 package com.example.demo.dto.request;
 
-public record RegisterRequest(
-        String userId, String password
-) {
+import lombok.*;
+
+@Getter
+@Setter
+@RequiredArgsConstructor
+public class RegisterRequest{
+	private final String userId;
+	private final String password;
 }
