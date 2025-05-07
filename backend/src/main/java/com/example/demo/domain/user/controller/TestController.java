@@ -1,11 +1,13 @@
-package com.example.demo.controller;
+package com.example.demo.domain.user.controller;
 
-import com.example.demo.dto.request.RegisterRequest;
-import com.example.demo.entity.User;
-import com.example.demo.service.TestService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.example.demo.domain.user.dto.request.RegisterRequest;
+import com.example.demo.domain.user.entity.User;
+import com.example.demo.domain.user.service.TestService;
 
 @RestController
 @RequiredArgsConstructor

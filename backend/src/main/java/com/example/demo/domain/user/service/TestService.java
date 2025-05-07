@@ -1,12 +1,14 @@
-package com.example.demo.service;
+package com.example.demo.domain.user.service;
 
-import com.example.demo.dto.request.RegisterRequest;
-import com.example.demo.entity.User;
-import com.example.demo.mapper.UserMapper;
-import com.example.demo.repository.UserRepository;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import com.example.demo.domain.user.dto.request.RegisterRequest;
+import com.example.demo.domain.user.entity.User;
+import com.example.demo.domain.user.mapper.UserMapper;
+import com.example.demo.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor

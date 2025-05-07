@@ -1,4 +1,4 @@
-package com.example.demo.dto.request;
+package com.example.demo.domain.community.dto.request;
 
 import lombok.*;
 
