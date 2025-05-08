@@ -1,48 +1,43 @@
 <template>
   <div>
-    <HeaderBeforeLogin />
-    <HelloWorld msg="임시 메인 페이지" />
-    <div class="background-container">
-      <img alt="Vue logo" src="./assets/logo.png" />
-    </div>
-    <HelloWorld msg="Freelancer_servcice" />
+    <CommonHeader />
+    <div class="main"><router-view /> <CommonModalContainer /></div>
+    <CommonFooter />
+    <CommonAlert />
   </div>
 </template>
 
 <script>
-import HeaderBeforeLogin from './fo/components/common/HeaderBeforeLogin.vue'
-import HelloWorld from './fo/components/common/HelloWorld.vue'
+import CommonHeader from './fo/components/common/CommonHeader.vue'
+import CommonFooter from './fo/components/common/CommonFooter.vue'
+import CommonModalContainer from './fo/components/common/CommonModalContainer.vue'
+import CommonAlert from './fo/components/common/CommonAlert.vue'
 
 export default {
   name: 'App',
   components: {
-    HeaderBeforeLogin,
-    HelloWorld,
+    CommonHeader,
+    CommonFooter,
+    CommonModalContainer,
+    CommonAlert,
   },
 }
 </script>
 
 <style>
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 0px;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-/* 회색 배경 */
-.background-container {
-  background-color: #d3d3d3; /* 회색 배경 */
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.background-container img {
-  max-width: 100%;
-  height: auto;
+.main {
+  flex: 1;
+  min-height: 700px;
 }
 </style>
