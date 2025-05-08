@@ -7,6 +7,13 @@
     <div class="header-body border-0 box-shadow-none">
       <div class="header-container container">
         <div class="header-row">
+          <div class="header-left d-flex align-items-center order-0 order-lg-0">
+            <a href="/" class="text-primary fs-3 text-decoration-none home">
+              Freelancer<br />
+              Service
+            </a>
+          </div>
+
           <!-- 네비게이션 메뉴 -->
           <div
             class="header-nav header-nav-line header-nav-top-line header-nav-top-line-with-border order-2 order-lg-1"
@@ -85,5 +92,11 @@ export default {
 <style scoped>
 .header-spacing {
   margin-top: 2px; /* 상단 여백 추가 */
+}
+
+.home {
+  font-weight: bold;
+  display: block;
+  text-align: center;
 }
 </style>
