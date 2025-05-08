@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import MainPage from '../views/MainPage.vue'
 import TestPage from '../views/TestPage.vue'
-
+import ProjectPostPage from '../views/project/ProjectPostPage.vue'
 const routes = [
   {
     path: '/',
@@ -15,6 +15,12 @@ const routes = [
     component: TestPage,
     name: 'TestConfirm',
   },
+
+  {
+    path: '/project',
+    component: ProjectPostPage,
+    name: 'ProjectPost',
+  }
 ]
 
 const router = createRouter({
