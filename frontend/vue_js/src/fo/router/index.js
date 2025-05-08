@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import MainPage from '../views/MainPage.vue'
 import TestPage from '../views/TestPage.vue'
+import UserProjectSpecPage from '../views/project/UserProjectSpecPage.vue'
+import CompanyProjectSpecPage from '../views/project/CompanyProjectSpecPage.vue'
 
 const routes = [
   {
@@ -15,6 +17,19 @@ const routes = [
     component: TestPage,
     name: 'TestConfirm',
   },
+
+  {
+    path: '/project/spec/user',
+    component: UserProjectSpecPage,
+    name: 'UserProjectSpec',
+  },
+
+  {
+    path: '/project/spec/company',
+    component: CompanyProjectSpecPage,
+    name: 'CompanyProjectSpec',
+  },
+
 ]
 
 const router = createRouter({
