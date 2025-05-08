@@ -1,5 +1,4 @@
 <template lang="">
-    <HeaderBeforeLogin/>
     <div class="d-flex layout-wrapper mx-auto">
         <aside class="sidebar bg-light" style="width: 220px;">
             <MyPageSideBar/>
@@ -109,15 +108,27 @@
 
                 <!-- 기술 -->
                 <div class="form-group mb-3">
-                    <label class="form-label mb-1 text-2" style="font-weight: bold;">사용 기술
-                        <a href="#" @click.prevent="addSkill" class="text-grey text-decoration-none small ms-2">+ 추가하기</a>
-                    </label>
+                    <div class="d-flex align-items-center mb-1">
+                        <label class="form-label text-2 fw-bold mb-0">사용 기술</label>
+                        <a href="#" @click.prevent="openSkillModal" class="text-grey text-decoration-none small ms-2">+ 추가하기</a>
+                    </div>
+
+                    <SkillSelectModal
+                      v-if="modalStore.modalComponent?.name === 'SkillSelectModal'"
+                      @confirm="onSkillsConfirmed"
+                    />
+
+
+                    <!-- 선택된 기술 미리보기 -->
                     <div id="selectedSkillsPreview" class="mb-2 d-flex gap-2 flex-wrap">
                         <ProjectSkillButtonGroup 
+                        v-if="selectedSkills.length > 0" 
+                        :selectedSkills="selectedSkills"
                         @remove="removeSkill"
-                        v-if = "selectedSkills.length > 0" :selectedSkills = "selectedSkills"/>
+                        />
                     </div>
-                </div>
+                  </div>
+
                 <div class="form-group mb-3">
                     <label class="form-label mb-1 text-2" style="font-weight: bold;">우대 기술
                         <a href="#" @click.prevent="addPreferSkill" class="text-grey text-decoration-none small ms-2">+ 추가하기</a>
@@ -191,13 +202,16 @@
     
 </div>
 </template>
+
 <script setup>
-import HeaderBeforeLogin from '../../components/common/HeaderBeforeLogin.vue'
+import SkillSelectModal from '../../components/project/SkillSelectModal.vue'
 import MyPageSideBar from '../../components/project/MyPageSideBar.vue'
 import ProjectRecruitButtonGroup from '../../components/project/ProjectRecruitButtonGroup.vue'
 import ProjectSkillButtonGroup from '../../components/project/ProjectSkillButtonGroup.vue'
 import ProjectInverviewTimeButtonGroupVue from '../../components/project/ProjectInverviewTimeButtonGroup.vue'
-import { ref, watch, computed  } from 'vue';
+import { useModalStore } from '../../stores/modalStore.js'
+
+import { ref, watch, computed  } from 'vue'
 
 const projectTitle = ref('');
 const selectedCity = ref('');
@@ -218,8 +232,18 @@ const selectedSkills = ref([]);
 const selectedPreferSkills = ref([]);
 const preferContent = ref('');
 const description = ref('');
-const notifyEnabled = ref(false)
+const notifyEnabled = ref(false);
 
+
+const modalStore = useModalStore();
+const openSkillModal = () => {
+  modalStore.openModal(SkillSelectModal)
+}
+
+const onSkillsConfirmed = (skills) => {
+  selectedSkills.value = skills
+  console.log('부모에서 받은 skills:', skills)
+}
 
 // 테스트용 함수
 const addContract = () => {
@@ -231,11 +255,9 @@ const addJob = () => {
   selectedJobs.value.push({ id: Date.now(), name: '백엔드드' })
 }
 
-// 테스트용 함수
-const addSkill = () => {
-  selectedSkills.value.push({ id: Date.now(), name: 'Vue.js', imageUrl: 'https://vuejs.org/logo.png' })
-}
-
+// const updateSkills = (skills) => {
+//   selectedSkills.value = skills
+// }
 // 테스트용 함수
 const addPreferSkill = () => {
   selectedPreferSkills.value.push({ id: Date.now(), name: 'TypeScript', imageUrl: 'https://www.typescriptlang.org/icons/icon-48x48.png' })
@@ -249,8 +271,8 @@ const removeJob = (id) => {
     selectedJobs.value = selectedJobs.value.filter(job => job.id !== id)
 }
 
-const removeSkill = (id) => {
-    selectedSkills.value = selectedSkills.value.filter(skill => skill.id !== id)
+const removeSkill = (name) => {
+    selectedSkills.value = selectedSkills.value.filter(skill => skill.name !== name)
 }
 
 const removePreferSkill = (id) => {
@@ -290,6 +312,10 @@ const recruitPeriodDisplay = computed({
   }
 })
 
+
+watch(selectedSkills,(newVal) => {
+  console.log('프로젝트 제목 변경됨:', newVal)
+})
 
 watch(projectTitle, (newVal) => {
   console.log('프로젝트 제목 변경됨:', newVal)
