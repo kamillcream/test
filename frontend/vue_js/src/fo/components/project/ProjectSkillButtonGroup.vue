@@ -10,7 +10,7 @@
         <span>{{skill.name}}</span>
         <a
           href="#"
-          @click.prevent="deleteSkill(skill.id)"
+          @click.prevent="deleteSkill(skill.name)"
           class="position-absolute end-0 me-2 text-grey text-decoration-none"
           style="top: 50%; transform: translateY(-50%);"
           title="삭제"
@@ -28,8 +28,8 @@ export default {
   },
   emits: ['remove'],
   methods: {
-    deleteSkill(id) {
-      this.$emit('remove', id)
+    deleteSkill(name) {
+      this.$emit('remove', name)
     }
   }
 }
