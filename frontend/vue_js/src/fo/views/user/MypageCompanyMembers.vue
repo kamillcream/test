@@ -72,18 +72,16 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'MypageCompanyMembers',
-  data() {
-    return {
-      searchType: 'all',
-      searchText: '',
-      currentPage: 1,
-      totalPages: 3,
-      members: [
-        {
-          id: 1,
+<script setup>
+import { ref } from 'vue'
+
+const searchType =ref('all')
+const searchText =ref('')
+const currentPage =ref('1')
+const totalPages =ref('3')
+const members =ref([
+  {
+    id: 1,
           name: '홍길동',
           intro: '안녕하세요. Java 개발자입니다.',
           career: '0년차',
@@ -124,25 +122,25 @@ export default {
           joinDate: '2023-06-01',
           leaveDate: '2024-12-01'
         }
-      ]
-    }
-  },
-  methods: {
-    search() {
-      // TODO: 검색 로직 구현
-      console.log('검색:', this.searchType, this.searchText)
-    },
-    fireMember(id) {
-      // TODO: 퇴사 처리 로직 구현
-      console.log('퇴사 처리:', id)
-    },
-    changePage(page) {
-      if (page < 1 || page > this.totalPages) return
-      this.currentPage = page
-      // TODO: 페이지 변경 로직 구현
-    }
+  ])
+
+  function search() {
+    //검색 로직 구현
+    console.log('검색:', searchType.value, searchText.value)
   }
-}
+
+  function fireMember(id) {
+    //퇴사 처리 로직 구현
+    console.log('퇴사 처리:', id)
+  }
+
+  function changePage(page) {
+    if (page < 1 || page > totalPages.value) return
+    currentPage.value = page
+    //페이지 변경 로직 구현
+  }
+
+
 </script>
 
 <style scoped>

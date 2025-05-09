@@ -72,52 +72,48 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'ScrapList',
-  data() {
-    return {
-      scraps: [
-        {
-          id: 1,
-          company: 'EST Soft',
-          status: '모집중',
-          employeeCount: 50,
-          qualification: '서울 / 신입 / 학력무관 / JAVA',
-          openDate: '2025.04.30'
-        },
-        {
-          id: 2,
-          company: 'EST Soft',
-          status: '모집중',
-          employeeCount: 50,
-          qualification: '서울 / 신입 / 학력무관 / JAVA',
-          openDate: '2025.04.30'
-        },
-        {
-          id: 3,
-          company: 'EST Soft',
-          status: '모집중',
-          employeeCount: 50,
-          qualification: '서울 / 신입 / 학력무관 / JAVA',
-          openDate: '2025.04.30'
-        },
-        {
-          id: 4,
-          company: 'EST Soft',
-          status: '모집 마감',
-          employeeCount: 50,
-          qualification: '서울 / 신입 / 학력무관 / JAVA',
-          openDate: '2025.04.30'
-        }
-      ]
-    }
+<script setup>
+import { ref } from 'vue'
+//좌측 마이페이지 사이드바 
+
+
+const scraps = ref([
+  {
+    id: 1,
+    company: 'EST Soft',
+    status: '모집중',
+    employeeCount: 50,
+    qualification: '서울 / 신입 / 학력무관 / JAVA',
+    openDate: '2025.04.30'
   },
-  methods: {
-    removeScrap(id) {
-      this.scraps = this.scraps.filter(s => s.id !== id)
-    }
+  {
+    id: 2,
+    company: 'EST Soft',
+    status: '모집중',
+    employeeCount: 50,
+    qualification: '서울 / 신입 / 학력무관 / JAVA',
+    openDate: '2025.04.30'
+  },
+  {
+    id: 3,
+    company: 'EST Soft',
+    status: '모집중',
+    employeeCount: 50,
+    qualification: '서울 / 신입 / 학력무관 / JAVA',
+    openDate: '2025.04.30'
+  },
+  {
+    id: 4,
+    company: 'EST Soft',
+    status: '모집 마감',
+    employeeCount: 50,
+    qualification: '서울 / 신입 / 학력무관 / JAVA',
+    openDate: '2025.04.30'
   }
+])
+
+function removeScrap(id) {
+  scraps.value = scraps.value.filter(s => s.id !== id)
 }
 </script>
 

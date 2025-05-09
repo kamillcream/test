@@ -59,38 +59,37 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'ResumeList',
-  data() {
-    return {
-      resumes: [
-        { id: 1, title: '이력서 제목', date: '2025.04.30', isMain: true },
-        { id: 2, title: '이력서 제목 - 복사본', date: '2025.04.30', isMain: false },
-        { id: 3, title: '이력서 제목', date: '2025.04.30', isMain: false },
-        { id: 4, title: '이력서 제목', date: '2025.04.30', isMain: false },
-        { id: 5, title: '이력서 제목', date: '2025.04.30', isMain: false }
-      ]
-    }
-  },
-  methods: {
-    removeResume(id) {
-      this.resumes = this.resumes.filter(r => r.id !== id)
-    },
-    setMainResume(id) {
-      this.resumes.forEach(r => r.isMain = false)
-      const main = this.resumes.find(r => r.id === id)
-      if (main) main.isMain = true
-    },
-    editResume(/*id*/) {
-      // 수정 페이지 이동
-    },
-    copyResume(/*id*/) {
-      // 복사 기능
-    },
-    registerResume() {
-      // 등록 페이지 이동
-    }
-  }
+<script setup>
+import { ref } from 'vue'
+
+const resumes = ref([
+  { id: 1, title: '이력서 제목', date: '2025.04.30', isMain: true },
+  { id: 2, title: '이력서 제목 - 복사본', date: '2025.04.30', isMain: false },
+  { id: 3, title: '이력서 제목', date: '2025.04.30', isMain: false },
+  { id: 4, title: '이력서 제목', date: '2025.04.30', isMain: false },
+  { id: 5, title: '이력서 제목', date: '2025.04.30', isMain: false }
+])
+
+function removeResume(id){
+  resumes.value =resumes.value.filter(r => r.id !== id)
 }
+
+function setMainResume(id) {
+  resumes.value.forEach(r => r.isMain = false)
+  const main = resumes.value.find(r => r.id === id)
+  if (main) main.isMain = true
+}
+
+function editResume(/*id*/) {
+  // 수정 페이지 이동
+}
+
+function copyResume(/*id*/) {
+  // 복사 기능
+}
+
+function registerResume() {
+  // 등록 페이지 이동
+}
+
 </script> 
