@@ -19,7 +19,7 @@
 
 <script setup>
 import CommonPagination from '../components/common/CommonPagination.vue'
-import ExampleConfirmModal from '../components/Example/ExampleConfirmModal.vue'
+import CommonConfirmModal from '../components/common/CommonConfirmModal.vue'
 import CommonPageHeader from '../components/common/CommonPageHeader.vue'
 import { useModalStore } from '../stores/modalStore'
 import { useAlertStore } from '../stores/alertStore'
@@ -29,7 +29,7 @@ const alertStore = useAlertStore()
 const modalStore = useModalStore()
 
 function openConfirm() {
-  modalStore.openModal(ExampleConfirmModal, {
+  modalStore.openModal(CommonConfirmModal, {
     title: '기본 모달창',
     message: '정말 삭제하시겠습니까?',
     onConfirm: () => {
@@ -41,7 +41,7 @@ function openConfirm() {
 }
 
 function openConfirmLarge() {
-  modalStore.openModal(ExampleConfirmModal, {
+  modalStore.openModal(CommonConfirmModal, {
     title: '기본 모달창 (Large)',
     message: '정말 삭제하시겠습니까?',
     size: 'modal-lg', // 큰 모달

@@ -52,11 +52,17 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleEscape)
 })
 
+let prevScrollY = 0 // 초기값 설정
+
 watch(isOpen, (newVal) => {
   if (newVal) {
+    // 모달이 열릴 때 현재 스크롤 위치를 저장
+    prevScrollY = window.scrollY
     document.body.style.overflow = 'hidden'
   } else {
+    // 모달이 닫힐 때 저장된 스크롤 위치로 복원
     document.body.style.overflow = ''
+    window.scrollTo(0, prevScrollY) // 이전 위치로 복원
   }
 })
 </script>

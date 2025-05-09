@@ -2,10 +2,10 @@
   <div>
     <div class="post-comments mt-5 post-comments">
       <h4 class="mb-3" style="font-size: 1.5rem">
-        댓글 ({{ comments.length }})
+        댓글 ({{ props.comments.length }})
       </h4>
       <ul class="comments">
-        <li v-for="comment in comments" :key="comment">
+        <li v-for="comment in props.comments" :key="comment">
           <div class="comment">
             <div
               class="img-thumbnail img-thumbnail-no-borders d-none d-sm-block"
@@ -105,10 +105,8 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  name: 'BoardComment',
-  props: { comments: Array },
-}
+<script setup>
+import { defineProps } from 'vue'
+const props = defineProps({ comments: Array })
 </script>
 <style></style>

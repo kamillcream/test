@@ -61,5 +61,5 @@
 </template>
 
 <script setup>
-import CommonPageHeader from '../common/CommonPageHeader.vue'
+import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 </script>
