@@ -1,0 +1,228 @@
+<template>
+  <section>
+    <CommonPageHeader
+      title=""
+      strongText="회원 로그인"
+      :breadcrumbs="[{ text: 'Home', link: '/' }, { text: 'Login' }]"
+    />
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+          <div class="card border-0 shadow-lg">
+            <div class="card-body p-4">
+              <!-- 회원 유형 토글 버튼 -->
+              <div class="btn-group w-100 mb-4" role="group">
+                <button
+                  class="btn w-50"
+                  :class="
+                    userType === 'PERSONAL'
+                      ? 'btn-primary'
+                      : 'btn-outline-primary'
+                  "
+                  @click="userType = 'PERSONAL'"
+                >
+                  개인회원
+                </button>
+                <button
+                  class="btn w-50"
+                  :class="
+                    userType === 'COMPANY'
+                      ? 'btn-primary'
+                      : 'btn-outline-primary'
+                  "
+                  @click="userType = 'COMPANY'"
+                >
+                  기업회원
+                </button>
+              </div>
+
+              <!-- 로그인 폼 -->
+              <form @submit.prevent="login">
+                <input
+                  type="hidden"
+                  :value="userType === 'PERSONAL' ? 'p' : 'c'"
+                  name="login_tab"
+                />
+
+                <!-- ID 입력 -->
+                <div class="mb-3">
+                  <label for="id" class="form-label">아이디</label>
+                  <input
+                    v-if="userType === 'PERSONAL'"
+                    v-model="form.id"
+                    type="text"
+                    class="form-control"
+                    id="id"
+                    required
+                  />
+                  <input
+                    v-else
+                    v-model="form.cid"
+                    type="text"
+                    class="form-control"
+                    id="cid"
+                    required
+                  />
+                </div>
+
+                <!-- 비밀번호 입력 -->
+                <div class="mb-3">
+                  <label for="password" class="form-label">비밀번호</label>
+                  <input
+                    v-if="userType === 'PERSONAL'"
+                    v-model="form.password"
+                    type="password"
+                    class="form-control"
+                    id="password"
+                    maxlength="32"
+                    required
+                  />
+                  <input
+                    v-else
+                    v-model="form.cpassword"
+                    type="password"
+                    class="form-control"
+                    id="cpassword"
+                    maxlength="32"
+                    required
+                  />
+                </div>
+
+                <div class="form-check mb-2">
+                  <input
+                    v-model="form.autologin"
+                    type="checkbox"
+                    class="form-check-input"
+                    :id="'autologin_' + userType"
+                  />
+                  <label class="form-check-label" :for="'autologin_' + userType"
+                    >로그인 유지</label
+                  >
+                </div>
+
+                <div class="form-check mb-4">
+                  <input
+                    v-model="form.id_save"
+                    type="checkbox"
+                    class="form-check-input"
+                    :id="'id_save_' + userType"
+                  />
+                  <label class="form-check-label" :for="'id_save_' + userType"
+                    >아이디 저장</label
+                  >
+                </div>
+
+                <div class="d-grid mb-3">
+                  <button type="submit" class="btn btn-primary btn-block">
+                    로그인
+                  </button>
+                </div>
+
+                <div class="d-flex justify-content-between mb-4">
+                  <router-link
+                    :to="
+                      userType === 'PERSONAL'
+                        ? '/personalRegister'
+                        : '/companyRegister'
+                    "
+                  >
+                    회원가입
+                  </router-link>
+
+                  <a href="/findAccount">아이디/비밀번호 찾기</a>
+                </div>
+              </form>
+
+              <!-- 소셜 로그인 -->
+              <hr class="my-4" />
+              <p class="text-center mb-3">소셜 계정으로 로그인</p>
+              <div class="d-flex justify-content-center gap-3">
+                <button
+                  v-for="provider in socialProviders"
+                  :key="provider.name"
+                  class="btn btn-icon rounded-circle border"
+                  :title="provider.title"
+                >
+                  <img
+                    :src="provider.img"
+                    alt=""
+                    class="w-100 h-100 object-fit-cover rounded-circle"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script setup>
+import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
+import { ref } from 'vue'
+
+const userType = ref('PERSONAL')
+const form = ref({
+  id: '',
+  password: '',
+  cid: '',
+  cpassword: '',
+  autologin: false,
+  id_save: false,
+})
+
+const login = () => {
+  const type = userType.value
+  const payload =
+    type === 'PERSONAL'
+      ? { login_tab: 'p', id: form.value.id, password: form.value.password }
+      : { login_tab: 'c', id: form.value.cid, password: form.value.cpassword }
+
+  console.log('Login 요청', payload)
+}
+
+const socialProviders = [
+  {
+    name: 'kakao',
+    title: '카카오 로그인',
+    img: '/img/social/kakao.png',
+  },
+  {
+    name: 'naver',
+    title: '네이버 로그인',
+    img: '/img/social/naver.png',
+  },
+  {
+    name: 'google',
+    title: '구글 로그인',
+    img: '/img/social/google.png',
+  },
+  {
+    name: 'apple',
+    title: '애플 로그인',
+    img: '/img/social/apple.png',
+  },
+]
+</script>
+
+<style scoped>
+.btn-icon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.btn-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border: none;
+}
+</style>
