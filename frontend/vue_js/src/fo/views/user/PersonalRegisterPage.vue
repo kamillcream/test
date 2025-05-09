@@ -114,7 +114,7 @@
                     type="text"
                     v-model="form.addressDetail"
                     class="form-control form-control-lg"
-                    placeholder="상세 주소 입력"
+                    placeholder=""
                   />
                 </div>
               </div>

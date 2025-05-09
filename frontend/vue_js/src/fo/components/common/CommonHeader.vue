@@ -4,7 +4,7 @@
     class="header-effect-shrink header-spacing"
     data-plugin-options='{"stickyEnabled": true}'
   >
-    <div class="header-body border-0 box-shadow-none">
+    <div class="header-body border-0">
       <div class="header-container container">
         <div class="header-row">
           <div class="header-left d-flex align-items-center order-0 order-lg-0">
@@ -83,20 +83,47 @@
   </header>
 </template>
 
-<script>
-export default {
-  name: 'HeaderBeforeLogin',
+<script setup>
+import { onMounted, onBeforeUnmount } from 'vue'
+
+const handleScroll = () => {
+  const header = document.querySelector('.header-body')
+  if (window.scrollY > 50) {
+    header.classList.add('shrink')
+  } else {
+    header.classList.remove('shrink')
+  }
 }
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
-<style scoped>
-.header-spacing {
-  margin-top: 2px; /* 상단 여백 추가 */
-}
-
+<style>
 .home {
   font-weight: bold;
   display: block;
   text-align: center;
+}
+
+.header-body {
+  position: fixed !important;
+  top: 0;
+  z-index: 999;
+  width: 100%;
+  background: white;
+  height: 100px; /* 초기 높이 설정 */
+  transition: height 0.3s ease, box-shadow 0.3s ease; /* transition을 height와 box-shadow에만 적용 */
+  margin-top: 2px; /* 상단 여백 추가 */
+}
+
+.header-body.shrink {
+  height: 70px; /* 스크롤 시 헤더 크기 줄어듬 */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 스크롤 시 그림자 효과 */
 }
 </style>

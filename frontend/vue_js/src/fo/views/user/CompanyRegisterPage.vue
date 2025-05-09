@@ -58,6 +58,17 @@
                   />
                 </div>
               </div>
+              <!-- 휴대폰 -->
+              <div class="row">
+                <div class="form-group col-lg-6">
+                  <label class="form-label">휴대폰 번호</label>
+                  <input
+                    type="text"
+                    v-model="form.phone"
+                    class="form-control form-control-lg"
+                  />
+                </div>
+              </div>
               <!-- 기업명 -->
               <div class="row">
                 <div class="form-group col-lg-6">
@@ -66,6 +77,8 @@
                     type="text"
                     v-model="form.companyName"
                     class="form-control form-control-lg"
+                    readonly
+                    @click="openCompanyModal"
                   />
                 </div>
                 <div class="form-group col-lg-6">
@@ -78,6 +91,30 @@
                 </div>
               </div>
 
+              <!-- 주소 -->
+              <div class="row">
+                <div class="form-group col-lg-7 mb-2">
+                  <label class="form-label">주소</label>
+                  <input
+                    type="text"
+                    v-model="form.address"
+                    class="form-control form-control-lg"
+                    placeholder="주소를 검색하세요"
+                    readonly
+                    @click="openPostcode"
+                  />
+                </div>
+
+                <div class="form-group col-lg-5">
+                  <label class="form-label">상세 주소</label>
+                  <input
+                    type="text"
+                    v-model="form.addressDetail"
+                    class="form-control form-control-lg"
+                    placeholder=""
+                  />
+                </div>
+              </div>
               <!-- 이메일 -->
               <div class="row">
                 <div class="form-group col-lg-12">
@@ -185,6 +222,7 @@ import { useModalStore } from '@/fo/stores/modalStore'
 import { personalAgreementText } from '@/assets/terms'
 import TermsAgreementModal from '@/fo/components/user/TermsAgreementModal.vue'
 import { useAlertStore } from '@/fo/stores/alertStore'
+import CompanyVerificationModal from '@/fo/components/user/CompanyVerificationModal.vue'
 
 const modalStore = useModalStore()
 const alertStore = useAlertStore()
@@ -232,6 +270,15 @@ function sendVerification() {
 
 function verifyCode() {
   alert('인증번호 확인 요청')
+}
+
+function openCompanyModal() {
+  modalStore.openModal(CompanyVerificationModal, {
+    onConfirm: () => {
+      alertStore.show('기업 인증에 성공하였습니다.', 'success')
+      modalStore.closeModal()
+    },
+  })
 }
 
 // 약관 모달을 열기 위한 함수

@@ -19,9 +19,13 @@
         tabindex="-1"
         style="display: block"
       >
-        <div :class="['modal-dialog', modalProps.size || '']">
+        <!-- modalProps.size가 없을 경우 빈 문자열로 대체 -->
+        <div :class="['modal-dialog', currentModalProps.size || '']">
           <div class="modal-content">
-            <component :is="modalComponent" v-bind="modalProps" />
+            <component
+              :is="currentModalComponent"
+              v-bind="currentModalProps || {}"
+            />
           </div>
         </div>
       </div>
@@ -31,12 +35,25 @@
 
 <script setup>
 import { useModalStore } from '@/fo/stores/modalStore'
-import { onMounted, onBeforeUnmount, watch } from 'vue'
+import { onMounted, onBeforeUnmount, watch, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 
 const modalStore = useModalStore()
-const { isOpen, modalComponent, modalProps } = storeToRefs(modalStore)
+const { isOpen, modalStack } = storeToRefs(modalStore)
 const { closeModal } = modalStore
+
+// 가장 최근에 열린 모달을 가져오는 함수
+const currentModalComponent = computed(() => {
+  return modalStack.value.length > 0
+    ? modalStack.value[modalStack.value.length - 1].component
+    : null
+})
+
+const currentModalProps = computed(() => {
+  return modalStack.value.length > 0
+    ? modalStack.value[modalStack.value.length - 1].props
+    : {}
+})
 
 const handleEscape = (event) => {
   if (event.key === 'Escape') {
