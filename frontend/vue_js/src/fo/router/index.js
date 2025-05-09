@@ -16,6 +16,7 @@ import PersonalRegisterPage from '../views/user/PersonalRegisterPage.vue'
 import CompanyRegisterPage from '../views/user/CompanyRegisterPage.vue'
 import AffiliationList from '../views/company/AffiliationList.vue'
 import QnaList from '../views/community/QnaList.vue'
+import MyPage from '../views/user/MyPage.vue'
 
 const routes = [
   {
@@ -114,6 +115,18 @@ const routes = [
     path: '/companyRegister',
     component: CompanyRegisterPage,
     name: 'CompanyRegiste',
+  },
+
+  {
+    path: '/myPage',
+    component: MyPage,
+    children: [
+      // {
+      //   path: '',
+      //   name: 'MyPageHome',
+      //   component: MyPageHome
+      // },
+    ],
   },
 ]
 
