@@ -9,6 +9,8 @@ import LoginPage from '../components/user/LoginPage.vue'
 import FindAccountPage from '../components/user/FindAccountPage.vue'
 import FindIdResultPage from '../components/user/FindIdResultPage.vue'
 import ResetPasswordPage from '../components/user/ResetPasswordPage.vue'
+import AffiliationList from '../views/company/AffiliationList.vue'
+import QnaList from '../views/community/QnaList.vue'
 
 const routes = [
   {
@@ -37,10 +39,19 @@ const routes = [
   },
 
   {
+    path: '/qna',
+    component: QnaList,
+    name: 'QnaList',
+  },
+
+  {
     path: '/qna/:board_sq',
     component: QnaDetail,
     name: 'QnaDetail',
     props: true,
+  },
+
+  {
     path: '/login',
     component: LoginPage,
     name: 'Login',
@@ -62,6 +73,12 @@ const routes = [
     path: '/resetPassword',
     component: ResetPasswordPage,
     name: 'ResetPassword',
+  },
+
+  {
+    path: '/affiliation',
+    component: AffiliationList,
+    name: 'affiliationList',
   },
 ]
 
