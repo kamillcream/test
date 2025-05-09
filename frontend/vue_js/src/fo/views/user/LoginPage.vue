@@ -119,7 +119,16 @@
                 </div>
 
                 <div class="d-flex justify-content-between mb-4">
-                  <a href="#">회원가입</a>
+                  <router-link
+                    :to="
+                      userType === 'PERSONAL'
+                        ? '/personalRegister'
+                        : '/companyRegister'
+                    "
+                  >
+                    회원가입
+                  </router-link>
+
                   <a href="/findAccount">아이디/비밀번호 찾기</a>
                 </div>
               </form>
@@ -150,7 +159,7 @@
 </template>
 
 <script setup>
-import CommonPageHeader from '../common/CommonPageHeader.vue'
+import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 import { ref } from 'vue'
 
 const userType = ref('PERSONAL')

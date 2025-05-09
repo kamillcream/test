@@ -2,18 +2,17 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import MainPage from '../views/MainPage.vue'
 import TestPage from '../views/TestPage.vue'
-<<<<<<< HEAD
 import ProjectPostPage from '../views/project/ProjectPostPage.vue'
-=======
 import BoardList from '../views/community/BoardList.vue'
 import BoardDetail from '../views/community/BoardDetail.vue'
 import QnaDetail from '../views/community/QnaDetail.vue'
-import LoginPage from '../components/user/LoginPage.vue'
-import FindAccountPage from '../components/user/FindAccountPage.vue'
-import FindIdResultPage from '../components/user/FindIdResultPage.vue'
-import ResetPasswordPage from '../components/user/ResetPasswordPage.vue'
+import LoginPage from '../views/user/LoginPage.vue'
+import FindAccountPage from '../views/user/FindAccountPage.vue'
+import FindIdResultPage from '../views/user/FindIdResultPage.vue'
+import ResetPasswordPage from '../views/user/ResetPasswordPage.vue'
+import PersonalRegisterPage from '../views/user/PersonalRegisterPage.vue'
+import CompanyRegisterPage from '../views/user/CompanyRegisterPage.vue'
 
->>>>>>> main
 const routes = [
   {
     path: '/',
@@ -28,12 +27,11 @@ const routes = [
   },
 
   {
-<<<<<<< HEAD
     path: '/project',
     component: ProjectPostPage,
     name: 'ProjectPost',
   }
-=======
+
     path: '/board',
     component: BoardList,
     name: 'BoardList',
@@ -51,6 +49,27 @@ const routes = [
     component: QnaDetail,
     name: 'QnaDetail',
     props: true,
+  },
+  {
+    path: '/board',
+    component: BoardList,
+    name: 'BoardList',
+  },
+
+  {
+    path: '/board/:board_sq',
+    component: BoardDetail,
+    name: 'BoardDetail',
+    props: true,
+  },
+
+  {
+    path: '/qna/:board_sq',
+    component: QnaDetail,
+    name: 'QnaDetail',
+    props: true,
+  },
+  {
     path: '/login',
     component: LoginPage,
     name: 'Login',
@@ -73,7 +92,20 @@ const routes = [
     component: ResetPasswordPage,
     name: 'ResetPassword',
   },
->>>>>>> main
+
+
+  {
+    path: '/personalRegister',
+    component: PersonalRegisterPage,
+    name: 'PersonalRegister',
+  },
+
+  {
+    path: '/companyRegister',
+    component: CompanyRegisterPage,
+    name: 'CompanyRegiste',
+  },
+
 ]
 
 const router = createRouter({
