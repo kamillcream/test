@@ -25,19 +25,13 @@ export default {
 </script>
 
 <style>
-html,
-body {
-  height: 100%;
-  margin: 0;
-}
-
 #app {
   flex-direction: column;
-  min-height: 100vh;
 }
 
 .main {
   flex: 1;
   min-height: 700px;
+  padding-top: 100px;
 }
 </style>

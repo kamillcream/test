@@ -3,27 +3,35 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useModalStore = defineStore('modal', () => {
-  const modalComponent = ref(null) // 어떤 모달 컴포넌트를 띄울지
-  const modalProps = ref({}) // 모달에 전달할 props
+  const modalStack = ref([]) // 모달 스택을 배열로 관리
   const isOpen = ref(false) // 모달 열림 여부
 
+  // 모달 열기
   function openModal(component, props = {}) {
-    modalComponent.value = component
-    modalProps.value = props
+    modalStack.value.push({ component, props }) // 새로운 모달을 스택에 추가
     isOpen.value = true
   }
 
+  // 모달 닫기
   function closeModal() {
-    isOpen.value = false
-    modalComponent.value = null
-    modalProps.value = {}
+    modalStack.value.pop() // 현재 모달을 스택에서 제거
+    if (modalStack.value.length > 0) {
+      isOpen.value = true // 스택에 남아있는 모달을 다시 열기
+    } else {
+      isOpen.value = false // 더 이상 모달이 없으면 모달 닫기
+    }
+  }
+
+  // 현재 모달 정보를 가져오기
+  function getCurrentModal() {
+    return modalStack.value[modalStack.value.length - 1]
   }
 
   return {
-    modalComponent,
-    modalProps,
+    modalStack,
     isOpen,
     openModal,
     closeModal,
+    getCurrentModal,
   }
 })
