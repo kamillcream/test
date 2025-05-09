@@ -16,7 +16,7 @@
         <tr></tr>
         <tr v-for="board in boardList" :key="board.board_sq">
           <td class="text-start px-3">
-            <a :href="`/board/${board.board_sq}`"
+            <a :href="`/${isQna ? 'qna' : 'board'}/${board.board_sq}`"
               >{{ board.board_ttl
               }}<span
                 class="text-grey ml-1 px-2"
@@ -51,11 +51,6 @@
           <td>{{ board.recommend_cnt }}</td>
           <td v-if="isQna">
             <span
-              v-if="board.board_adopt_status_cd == 0"
-              class="badge bg-danger"
-              >미해결</span
-            >
-            <span
               v-if="board.board_adopt_status_cd == 1"
               class="badge bg-secondary"
               >자체해결</span
@@ -69,6 +64,11 @@
               v-if="board.board_adopt_status_cd == 3"
               class="badge bg-success"
               >채택완료</span
+            >
+            <span
+              v-if="board.board_adopt_status_cd == 4"
+              class="badge bg-danger"
+              >미해결</span
             >
           </td>
         </tr>

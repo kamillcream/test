@@ -1,60 +1,72 @@
 <template>
-  <div class="container py-5 mt-3">
-    <div class="post-content ms-0">
-      <BoardPost :boardInfo="boardInfo" :isQna="true" />
-
-      <!-- 답변 영역 -->
-      <div class="answers-section mt-5">
-        <h4 class="mb-4" style="font-size: 1.5rem">
-          답변 ({{ boardInfo.answers.length }})
-        </h4>
-
-        <div
-          v-for="answer in boardInfo.answers"
-          :key="answer"
-          class="card p-4 mb-3 border-0"
-          style="
-            background-color: #f4f4f4;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-          "
-        >
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <h5 class="mb-0 text-dark" style="font-size: 1.3rem">
-              {{ answer.answer_ttl }}
-            </h5>
-            <span
-              v-if="answer.answer_is_adopted_yn == 'Y'"
-              class="badge bg-primary"
-              style="font-size: 1.1rem"
-              >채택 답변</span
-            >
-          </div>
+  <section>
+    <CommonPageHeader
+      title=""
+      strongText="QnA 게시판"
+      :breadcrumbs="[{ text: 'Home', link: '/' }, { text: '커뮤니티' }]"
+    />
+    <div class="container py-5 mt-3">
+      <div class="post-content ms-0">
+        <BoardPost :boardInfo="boardInfo" :isQna="true" />
+        <!-- 답변 영역 -->
+        <div class="answers-section mt-5">
+          <h4 class="mb-4" style="font-size: 1.5rem">
+            답변 ({{ boardInfo.answers.length }})
+          </h4>
           <div
-            class="d-flex justify-content-between text-muted"
-            style="font-size: 1.1rem"
+            v-for="answer in boardInfo.answers"
+            :key="answer"
+            class="card p-4 mb-3 border-0"
+            @click="clickApplication"
+            style="
+              background-color: #f4f4f4;
+              border-radius: 10px;
+              display: flex;
+              flex-direction: column;
+            "
           >
-            <div>
-              <i class="far fa-user"></i> By
-              <span>{{ answer.user_nm }}</span> &nbsp;&nbsp;
-              <i class="far fa-calendar-alt"></i>{{ answer.created_at }}
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0 text-dark" style="font-size: 1.3rem">
+                {{ answer.answer_ttl }}
+              </h5>
+              <span
+                v-if="answer.answer_is_adopted_yn == 'Y'"
+                class="badge bg-primary"
+                style="font-size: 1.1rem"
+                >채택 답변</span
+              >
             </div>
-            <div>
-              조회 {{ answer.view_cnt }} · 댓글 {{ answer.comment_cnt }} · 추천
-              {{ answer.recommend_cnt }}
+            <div
+              class="d-flex justify-content-between text-muted"
+              style="font-size: 1.1rem"
+            >
+              <div>
+                <i class="far fa-user"></i> By
+                <span>{{ answer.user_nm }}</span> &nbsp;&nbsp;
+                <i class="far fa-calendar-alt"></i>{{ answer.created_at }}
+              </div>
+              <div>
+                조회 {{ answer.view_cnt }} · 댓글 {{ answer.comment_cnt }} ·
+                추천
+                {{ answer.recommend_cnt }}
+              </div>
             </div>
           </div>
         </div>
+        <BoardComment :comments="boardInfo.comments" />
       </div>
-      <BoardComment :comments="boardInfo.comments" />
     </div>
-  </div>
+  </section>
 </template>
 <script setup>
+import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 import BoardComment from '@/fo/components/community/BoardComment.vue'
 import BoardPost from '@/fo/components/community/BoardPost.vue'
+import AnswerDetailModal from '@/fo/components/community/AnswerDetailModal.vue'
+import { useModalStore } from '@/fo/stores/modalStore'
 // import { defineProps } from 'vue'
+
+const modalStore = useModalStore()
 
 // const props = defineProps({ board_sq: String })
 
@@ -64,7 +76,7 @@ const boardInfo = {
   user_sq: 1,
   user_nm: '홍길동',
   created_at: '2025-04-17',
-  board_adopt_status_cd: 0,
+  board_adopt_status_cd: 4,
   view_cnt: 123,
   recommend_cnt: 45,
   board_description_edt:
@@ -129,6 +141,11 @@ const boardInfo = {
       recommend_cnt: 6,
     },
   ],
+}
+
+// 답변 작성 모달
+const clickApplication = () => {
+  modalStore.openModal(AnswerDetailModal, { size: 'modal-lg' })
 }
 </script>
 <style></style>

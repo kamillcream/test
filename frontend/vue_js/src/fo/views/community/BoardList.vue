@@ -1,69 +1,72 @@
 <template>
-  <div class="container py-5 mt-3">
-    <!-- 게시판 제목 -->
-    <BoardTtl text="일반 게시판" />
-
-    <!-- 검색창 및 필터 영역 -->
-    <div
-      class="row align-items-center justify-content-between py-3 border-bottom mb-3"
-    >
-      <div class="col-md-6">
-        <form class="d-flex">
-          <select class="form-select w-auto me-2">
-            <option selected>전체</option>
-            <option>제목</option>
-            <option>내용</option>
-          </select>
-          <input
-            class="form-control w-auto me-2"
-            type="search"
-            placeholder="검색어 입력"
-          />
-          <button class="btn btn-primary px-3" type="submit">검색</button>
-        </form>
-      </div>
-      <div class="col-md-6 text-end">
-        <select class="form-select w-auto d-inline-block">
-          <option selected>최신순</option>
-          <option>오래된순</option>
-          <option>조회순</option>
-          <option>추천순</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- 게시판 리스트 -->
-    <div class="row">
-      <div class="col">
-        <BoardTable
-          :boardList="
-            boardList.slice(
-              (currentPage - 1) * viewBoxCnt,
-              currentPage * viewBoxCnt,
-            )
-          "
-          :isQna="false"
-        />
-        <!-- 등록 버튼 -->
-        <!-- [추가] 클릭 시 Qna 게시글 작성 오픈 -->
-        <div class="d-flex justify-content-end mb-3">
-          <a href="post-create.html" class="btn btn-primary px-4">등록</a>
+  <section>
+    <CommonPageHeader
+      title=""
+      strongText="일반 게시판"
+      :breadcrumbs="[{ text: 'Home', link: '/' }, { text: '커뮤니티' }]"
+    />
+    <div class="container py-5 mt-3">
+      <!-- 검색창 및 필터 영역 -->
+      <div
+        class="row align-items-center justify-content-between py-3 border-bottom mb-3"
+      >
+        <div class="col-md-6">
+          <form class="d-flex">
+            <select class="form-select w-auto me-2">
+              <option selected>전체</option>
+              <option>제목</option>
+              <option>내용</option>
+            </select>
+            <input
+              class="form-control w-auto me-2"
+              type="search"
+              placeholder="검색어 입력"
+            />
+            <button class="btn btn-primary px-3" type="submit">검색</button>
+          </form>
         </div>
-        <!-- 페이지네이션: 우측 하단 정렬 -->
-        <CommonPagination
-          :currentPage="currentPage"
-          :totalPages="totalPages"
-          @update:currentPage="currentPage = $event"
-        />
+        <div class="col-md-6 text-end">
+          <select class="form-select w-auto d-inline-block">
+            <option selected>최신순</option>
+            <option>오래된순</option>
+            <option>조회순</option>
+            <option>추천순</option>
+          </select>
+        </div>
+      </div>
+      <!-- 게시판 리스트 -->
+      <div class="row">
+        <div class="col">
+          <BoardTable
+            :boardList="
+              boardList.slice(
+                (currentPage - 1) * viewBoxCnt,
+                currentPage * viewBoxCnt,
+              )
+            "
+            :isQna="false"
+          />
+          <!-- 등록 버튼 -->
+          <!-- [추가] 클릭 시 Qna 게시글 작성 오픈 -->
+          <div class="d-flex justify-content-end mb-3">
+            <a href="/board/register" class="btn btn-primary px-4">등록</a>
+          </div>
+          <!-- 페이지네이션: 우측 하단 정렬 -->
+          <CommonPagination
+            :currentPage="currentPage"
+            :totalPages="totalPages"
+            @update:currentPage="currentPage = $event"
+          />
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 <script setup>
-import BoardTtl from '@/fo/components/community/BoardTtl.vue'
 import BoardTable from '@/fo/components/community/BoardTable.vue'
 import CommonPagination from '@/fo/components/common/CommonPagination.vue'
 import { ref } from 'vue'
+import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 
 const boardList = [
   {

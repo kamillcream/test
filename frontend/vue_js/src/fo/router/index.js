@@ -16,6 +16,8 @@ import PersonalRegisterPage from '../views/user/PersonalRegisterPage.vue'
 import CompanyRegisterPage from '../views/user/CompanyRegisterPage.vue'
 import AffiliationList from '../views/company/AffiliationList.vue'
 import QnaList from '../views/community/QnaList.vue'
+import BoardResister from '../views/community/BoardResister.vue'
+import QnaResister from '../views/community/QnaResister.vue'
 
 const routes = [
   {
@@ -55,6 +57,12 @@ const routes = [
   },
 
   {
+    path: '/board/register',
+    component: BoardResister,
+    name: 'BoardResister',
+  },
+
+  {
     path: '/board/:board_sq',
     component: BoardDetail,
     name: 'BoardDetail',
@@ -65,6 +73,12 @@ const routes = [
     path: '/qna',
     component: QnaList,
     name: 'QnaList',
+  },
+
+  {
+    path: '/qna/register',
+    component: QnaResister,
+    name: 'QnaResister',
   },
 
   {
