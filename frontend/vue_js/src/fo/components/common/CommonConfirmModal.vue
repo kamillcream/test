@@ -2,6 +2,12 @@
   <div>
     <div class="modal-header">
       <h5 class="modal-title">{{ title }}</h5>
+      <button
+        type="button"
+        class="btn-close"
+        @click="closeModal"
+        aria-hidden="true"
+      ></button>
     </div>
     <div class="modal-body">
       <p>{{ message }}</p>
