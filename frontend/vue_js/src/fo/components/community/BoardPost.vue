@@ -123,10 +123,12 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  name: 'BoardPost',
-  props: { boardInfo: Array, isQna: Boolean },
-}
+<script setup>
+import { computed, defineProps } from 'vue'
+
+const props = defineProps({ boardInfo: Array, isQna: Boolean })
+
+const boardInfo = computed(() => props.boardInfo)
+const isQna = computed(() => props.isQna)
 </script>
 <style></style>

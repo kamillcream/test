@@ -76,11 +76,13 @@
     </table>
   </div>
 </template>
-<script>
-export default {
-  name: 'BoardTable',
-  props: { boardList: Array, isQna: Boolean },
-}
+<script setup>
+import { computed, defineProps } from 'vue'
+
+const props = defineProps({ boardList: Array, isQna: Boolean })
+
+const boardList = computed(() => props.boardList)
+const isQna = computed(() => props.isQna)
 </script>
 <style>
 .tag {

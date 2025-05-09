@@ -51,91 +51,84 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import BoardComment from '@/fo/components/community/BoardComment.vue'
 import BoardPost from '@/fo/components/community/BoardPost.vue'
+// import { defineProps } from 'vue'
 
-export default {
-  name: 'QnaDetail',
-  data() {
-    return {
-      // 게시글 정보
-      boardInfo: {
-        board_sq: 1,
-        board_ttl: 'React.js와 Vue.js의 차이점은 무엇인가요?',
-        user_sq: 1,
-        user_nm: '홍길동',
-        created_at: '2025-04-17',
-        board_adopt_status_cd: 0,
-        view_cnt: 123,
-        recommend_cnt: 45,
-        board_description_edt:
-          'React.js와 Vue.js는 모두 인기 있는 프론트엔드 라이브러리인데, 각 기술의 주요 차이점은 무엇인가요? 두 기술 중 어떤 상황에서 어떤 것을 선택하는 것이 좋을지 궁금합니다.',
-        attachments: ['React_vs_Vue_개발비교.pdf', 'React_기초_가이드.pdf'],
-        skill_tags: ['React.js', 'Vue.js'],
-        normal_tags: ['프론트엔드', '사이드 프로젝트'],
-        answers: [
-          {
-            answer_sq: 1,
-            user_nm: '김철수',
-            answer_ttl: 'React.js와 Vue.js의 차이점',
-            answer_description_edt: '',
-            created_at: '2025-04-16',
-            view_cnt: 123,
-            recommend_cnt: 45,
-            comment_cnt: 3,
-            answer_is_adopted_yn: 'Y',
-          },
-          {
-            answer_sq: 2,
-            user_nm: '이영희',
-            answer_ttl: '어떤 프로젝트에서 React.js가 더 적합할까요?',
-            answer_description_edt: '',
-            created_at: '2025-04-15',
-            view_cnt: 98,
-            recommend_cnt: 12,
-            comment_cnt: 0,
-            answer_is_adopted_yn: 'N',
-          },
-          {
-            answer_sq: 3,
-            user_nm: '박민수',
-            answer_ttl: '당신에게 맞는 프론트엔드 스킬',
-            answer_description_edt: '',
-            created_at: '2025-04-14',
-            view_cnt: 32,
-            recommend_cnt: 5,
-            comment_cnt: 1,
-            answer_is_adopted_yn: 'N',
-          },
-        ],
-        comments: [
-          {
-            comment_sq: 1,
-            user_sq: 4,
-            user_profile_img_url: 'imgurl',
-            user_nm: '홍길동',
-            comment_description_edt:
-              'React.js는 대규모 애플리케이션에서 많이 사용되는 것 같아요 Vue.js는 더 직관적이고 빠르게 시작할 수 있어서 소규모 프로젝트에서 유리할 수 있을 것 같네요',
-            created_at: '2025년 1월 12일 1:38 PM',
-            recommend_cnt: 6,
-          },
-          {
-            comment_sq: 2,
-            user_sq: 3,
-            user_profile_img_url: 'imgurl',
-            user_nm: '박영수',
-            comment_description_edt:
-              'Vue.js는 더 간단하고 빠르게 구현할 수 있는 것 같아요. React는 다양한 기능을 확장할 수 있어서 유연하게 사용할 수 있죠.',
-            created_at: '2025년 1월 12일 1:45 PM',
-            recommend_cnt: 6,
-          },
-        ],
-      },
-    }
-  },
-  components: { BoardPost, BoardComment },
-  props: { board_sq: String },
+// const props = defineProps({ board_sq: String })
+
+const boardInfo = {
+  board_sq: 1,
+  board_ttl: 'React.js와 Vue.js의 차이점은 무엇인가요?',
+  user_sq: 1,
+  user_nm: '홍길동',
+  created_at: '2025-04-17',
+  board_adopt_status_cd: 0,
+  view_cnt: 123,
+  recommend_cnt: 45,
+  board_description_edt:
+    'React.js와 Vue.js는 모두 인기 있는 프론트엔드 라이브러리인데, 각 기술의 주요 차이점은 무엇인가요? 두 기술 중 어떤 상황에서 어떤 것을 선택하는 것이 좋을지 궁금합니다.',
+  attachments: ['React_vs_Vue_개발비교.pdf', 'React_기초_가이드.pdf'],
+  skill_tags: ['React.js', 'Vue.js'],
+  normal_tags: ['프론트엔드', '사이드 프로젝트'],
+  answers: [
+    {
+      answer_sq: 1,
+      user_nm: '김철수',
+      answer_ttl: 'React.js와 Vue.js의 차이점',
+      answer_description_edt: '',
+      created_at: '2025-04-16',
+      view_cnt: 123,
+      recommend_cnt: 45,
+      comment_cnt: 3,
+      answer_is_adopted_yn: 'Y',
+    },
+    {
+      answer_sq: 2,
+      user_nm: '이영희',
+      answer_ttl: '어떤 프로젝트에서 React.js가 더 적합할까요?',
+      answer_description_edt: '',
+      created_at: '2025-04-15',
+      view_cnt: 98,
+      recommend_cnt: 12,
+      comment_cnt: 0,
+      answer_is_adopted_yn: 'N',
+    },
+    {
+      answer_sq: 3,
+      user_nm: '박민수',
+      answer_ttl: '당신에게 맞는 프론트엔드 스킬',
+      answer_description_edt: '',
+      created_at: '2025-04-14',
+      view_cnt: 32,
+      recommend_cnt: 5,
+      comment_cnt: 1,
+      answer_is_adopted_yn: 'N',
+    },
+  ],
+  comments: [
+    {
+      comment_sq: 1,
+      user_sq: 4,
+      user_profile_img_url: 'imgurl',
+      user_nm: '홍길동',
+      comment_description_edt:
+        'React.js는 대규모 애플리케이션에서 많이 사용되는 것 같아요 Vue.js는 더 직관적이고 빠르게 시작할 수 있어서 소규모 프로젝트에서 유리할 수 있을 것 같네요',
+      created_at: '2025년 1월 12일 1:38 PM',
+      recommend_cnt: 6,
+    },
+    {
+      comment_sq: 2,
+      user_sq: 3,
+      user_profile_img_url: 'imgurl',
+      user_nm: '박영수',
+      comment_description_edt:
+        'Vue.js는 더 간단하고 빠르게 구현할 수 있는 것 같아요. React는 다양한 기능을 확장할 수 있어서 유연하게 사용할 수 있죠.',
+      created_at: '2025년 1월 12일 1:45 PM',
+      recommend_cnt: 6,
+    },
+  ],
 }
 </script>
 <style></style>
