@@ -5,6 +5,7 @@ import TestPage from '../views/TestPage.vue'
 import UserProjectSpecPage from '../views/project/UserProjectSpecPage.vue'
 import CompanyProjectSpecPage from '../views/project/CompanyProjectSpecPage.vue'
 import ProjectPostPage from '../views/project/ProjectPostPage.vue'
+import ProjectListPage from '../views/project/ProjectListPage.vue'
 import BoardList from '../views/community/BoardList.vue'
 import BoardDetail from '../views/community/BoardDetail.vue'
 import QnaDetail from '../views/community/QnaDetail.vue'
@@ -31,7 +32,7 @@ const routes = [
   },
 
   {
-    path: '/project/spec/user',
+    path: '/project/spec/user/:project_sq',
     component: UserProjectSpecPage,
     name: 'UserProjectSpec',
   },
@@ -46,6 +47,12 @@ const routes = [
     path: '/project',
     component: ProjectPostPage,
     name: 'ProjectPost',
+  },
+
+  {
+    path: '/projects',
+    component: ProjectListPage,
+    name: 'ProjectList',
   },
 
   {
