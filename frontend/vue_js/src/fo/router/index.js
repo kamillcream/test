@@ -2,6 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import MainPage from '../views/MainPage.vue'
 import TestPage from '../views/TestPage.vue'
+<<<<<<< HEAD
+import ProjectPostPage from '../views/project/ProjectPostPage.vue'
+=======
 import BoardList from '../views/community/BoardList.vue'
 import BoardDetail from '../views/community/BoardDetail.vue'
 import QnaDetail from '../views/community/QnaDetail.vue'
@@ -10,6 +13,7 @@ import FindAccountPage from '../components/user/FindAccountPage.vue'
 import FindIdResultPage from '../components/user/FindIdResultPage.vue'
 import ResetPasswordPage from '../components/user/ResetPasswordPage.vue'
 
+>>>>>>> main
 const routes = [
   {
     path: '/',
@@ -24,6 +28,12 @@ const routes = [
   },
 
   {
+<<<<<<< HEAD
+    path: '/project',
+    component: ProjectPostPage,
+    name: 'ProjectPost',
+  }
+=======
     path: '/board',
     component: BoardList,
     name: 'BoardList',
@@ -63,6 +73,7 @@ const routes = [
     component: ResetPasswordPage,
     name: 'ResetPassword',
   },
+>>>>>>> main
 ]
 
 const router = createRouter({
