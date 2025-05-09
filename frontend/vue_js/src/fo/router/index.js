@@ -8,13 +8,18 @@ import ProjectPostPage from '../views/project/ProjectPostPage.vue'
 import BoardList from '../views/community/BoardList.vue'
 import BoardDetail from '../views/community/BoardDetail.vue'
 import QnaDetail from '../views/community/QnaDetail.vue'
-import LoginPage from '../views/user/LoginPage.vue'
-import FindAccountPage from '../views/user/FindAccountPage.vue'
-import FindIdResultPage from '../views/user/FindIdResultPage.vue'
-import ResetPasswordPage from '../views/user/ResetPasswordPage.vue'
+import LoginPage from '../components/user/LoginPage.vue'
+import FindAccountPage from '../components/user/FindAccountPage.vue'
+import FindIdResultPage from '../components/user/FindIdResultPage.vue'
+import ResetPasswordPage from '../components/user/ResetPasswordPage.vue'
 import PersonalRegisterPage from '../views/user/PersonalRegisterPage.vue'
 import CompanyRegisterPage from '../views/user/CompanyRegisterPage.vue'
+<<<<<<< HEAD
 
+=======
+import AffiliationList from '../views/company/AffiliationList.vue'
+import QnaList from '../views/community/QnaList.vue'
+>>>>>>> ffa52ea07a8dfd1ef74b05b38fc0ac48e9637177
 
 const routes = [
   {
@@ -40,10 +45,15 @@ const routes = [
     component: CompanyProjectSpecPage,
     name: 'CompanyProjectSpec',
   },
+<<<<<<< HEAD
+=======
+  
+>>>>>>> ffa52ea07a8dfd1ef74b05b38fc0ac48e9637177
   {
     path: '/project',
     component: ProjectPostPage,
     name: 'ProjectPost',
+<<<<<<< HEAD
   },
   {
     path: '/board',
@@ -63,7 +73,10 @@ const routes = [
     component: QnaDetail,
     name: 'QnaDetail',
     props: true,
+=======
+>>>>>>> ffa52ea07a8dfd1ef74b05b38fc0ac48e9637177
   },
+  
   {
     path: '/board',
     component: BoardList,
@@ -78,11 +91,18 @@ const routes = [
   },
 
   {
+    path: '/qna',
+    component: QnaList,
+    name: 'QnaList',
+  },
+
+  {
     path: '/qna/:board_sq',
     component: QnaDetail,
     name: 'QnaDetail',
     props: true,
   },
+  
   {
     path: '/login',
     component: LoginPage,
@@ -107,6 +127,11 @@ const routes = [
     name: 'ResetPassword',
   },
 
+  {
+    path: '/affiliation',
+    component: AffiliationList,
+    name: 'affiliationList',
+  },
 
   {
     path: '/personalRegister',

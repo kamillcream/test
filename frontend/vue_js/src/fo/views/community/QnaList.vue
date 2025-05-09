@@ -52,109 +52,96 @@
 
         <!-- 페이지네이션 -->
         <!-- [교체] 추후 컴포넌트로 교체 필요 -->
-        <div class="d-flex justify-content-end mt-5 pt-3">
-          <ul class="pagination mb-0">
-            <li class="page-item">
-              <a class="page-link" href="#"
-                ><i class="fas fa-angle-left"></i
-              ></a>
-            </li>
-            <li class="page-item active">
-              <a class="page-link" href="#">1</a>
-            </li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item">
-              <a class="page-link" href="#"
-                ><i class="fas fa-angle-right"></i
-              ></a>
-            </li>
-          </ul>
-        </div>
+
+        <CommonPagination
+          :currentPage="currentPage"
+          :totalPages="totalPages"
+          @update:currentPage="currentPage = $event"
+        />
       </div>
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import BoardTtl from '@/fo/components/community/BoardTtl.vue'
 import BoardTable from '@/fo/components/community/BoardTable.vue'
+import CommonPagination from '@/fo/components/common/CommonPagination.vue'
+import { ref } from 'vue'
 
-export default {
-  name: 'QnaList',
-  data() {
-    return {
-      // 게시글 리스트
-      // 채택상태 0 미해결 / 1 진행중 / 2 채택완료 / 3 자체해결
-      boardList: [
-        {
-          board_sq: 1,
-          board_ttl: '이력서 피드백 부탁드립니다! (프론트엔드 신입)',
-          skill_tags: ['React.js', 'Vue.js'],
-          tags: ['신입'],
-          user_nm: 'jun_dev',
-          created_at: '2025-04-17',
-          board_adopt_status_cd: 2,
-          answer_cnt: 2,
-          view_cnt: 88,
-          comment_cnt: 5,
-          recommend_cnt: 14,
-        },
-        {
-          board_sq: 2,
-          board_ttl: 'React 사이드 프로젝트 모집합니다. 디자이너 구해요!',
-          skill_tags: ['React.js'],
-          tags: ['사이드프로젝트', '팀모집', '디자인'],
-          user_nm: 'codingmate',
-          created_at: '2025-04-16',
-          board_adopt_status_cd: 1,
-          answer_cnt: 0,
-          view_cnt: 142,
-          comment_cnt: 7,
-          recommend_cnt: 11,
-        },
-        {
-          board_sq: 3,
-          board_ttl: '백엔드 스터디 같이 하실 분 구합니다!',
-          skill_tags: ['Spring Boot', 'Java'],
-          tags: ['스터디', '백엔드'],
-          user_nm: 'sunny_backend',
-          created_at: '2025-04-14',
-          board_adopt_status_cd: 3,
-          answer_cnt: 1,
-          view_cnt: 76,
-          comment_cnt: 2,
-          recommend_cnt: 5,
-        },
-        {
-          board_sq: 4,
-          board_ttl: '포트폴리오 피드백 해주실 분 계신가요?',
-          skill_tags: ['HTML'],
-          tags: ['포트폴리오', 'UI/UX', '신입'],
-          user_nm: 'soyoung',
-          created_at: '2025-04-13',
-          board_adopt_status_cd: 0,
-          answer_cnt: 0,
-          view_cnt: 103,
-          comment_cnt: 3,
-          recommend_cnt: 9,
-        },
-        {
-          board_sq: 5,
-          board_ttl: '면접 스터디 멤버 추가 모집합니다 (CS 중심)',
-          skill_tags: ['Node.js'],
-          tags: ['면접', '스터디', '온라인'],
-          user_nm: 'study_cs',
-          created_at: '2025-04-12',
-          board_adopt_status_cd: 2,
-          answer_cnt: 3,
-          view_cnt: 192,
-          comment_cnt: 6,
-          recommend_cnt: 17,
-        },
-      ],
-    }
+const boardList = [
+  {
+    board_sq: 1,
+    board_ttl: '이력서 피드백 부탁드립니다! (프론트엔드 신입)',
+    skill_tags: ['React.js', 'Vue.js'],
+    tags: ['신입'],
+    user_nm: 'jun_dev',
+    created_at: '2025-04-17',
+    board_adopt_status_cd: 2,
+    answer_cnt: 2,
+    view_cnt: 88,
+    comment_cnt: 5,
+    recommend_cnt: 14,
   },
-  components: { BoardTtl, BoardTable },
-}
+  {
+    board_sq: 2,
+    board_ttl: 'React 사이드 프로젝트 모집합니다. 디자이너 구해요!',
+    skill_tags: ['React.js'],
+    tags: ['사이드프로젝트', '팀모집', '디자인'],
+    user_nm: 'codingmate',
+    created_at: '2025-04-16',
+    board_adopt_status_cd: 1,
+    answer_cnt: 0,
+    view_cnt: 142,
+    comment_cnt: 7,
+    recommend_cnt: 11,
+  },
+  {
+    board_sq: 3,
+    board_ttl: '백엔드 스터디 같이 하실 분 구합니다!',
+    skill_tags: ['Spring Boot', 'Java'],
+    tags: ['스터디', '백엔드'],
+    user_nm: 'sunny_backend',
+    created_at: '2025-04-14',
+    board_adopt_status_cd: 3,
+    answer_cnt: 1,
+    view_cnt: 76,
+    comment_cnt: 2,
+    recommend_cnt: 5,
+  },
+  {
+    board_sq: 4,
+    board_ttl: '포트폴리오 피드백 해주실 분 계신가요?',
+    skill_tags: ['HTML'],
+    tags: ['포트폴리오', 'UI/UX', '신입'],
+    user_nm: 'soyoung',
+    created_at: '2025-04-13',
+    board_adopt_status_cd: 0,
+    answer_cnt: 0,
+    view_cnt: 103,
+    comment_cnt: 3,
+    recommend_cnt: 9,
+  },
+  {
+    board_sq: 5,
+    board_ttl: '면접 스터디 멤버 추가 모집합니다 (CS 중심)',
+    skill_tags: ['Node.js'],
+    tags: ['면접', '스터디', '온라인'],
+    user_nm: 'study_cs',
+    created_at: '2025-04-12',
+    board_adopt_status_cd: 2,
+    answer_cnt: 3,
+    view_cnt: 192,
+    comment_cnt: 6,
+    recommend_cnt: 17,
+  },
+]
+
+// 한 화면에 보일 박스 숫자 설정
+const viewBoxCnt = 12
+
+const currentPage = ref(1)
+
+// [수정] 추후 데이터에 맞게 수정
+const totalPages = Math.ceil(boardList.length / viewBoxCnt)
 </script>
 <style></style>
