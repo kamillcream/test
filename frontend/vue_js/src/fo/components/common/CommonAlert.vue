@@ -47,7 +47,7 @@ const { hide } = alertStore
 const alertStyle = computed(() => {
   return {
     position: 'fixed',
-    top: `${scrollTop.value + 10}px`, // 스크롤 위치 + 약간의 여백
+    bottom: `${scrollTop.value + 10}px`, // 스크롤 위치 + 약간의 여백
     left: '50%',
     transform: 'translateX(-50%)',
     zIndex: 9999,

@@ -1,5 +1,3 @@
-// src/assets/terms.js
-
 export const personalAgreementText = `
   <p><strong>1. 수집하는 개인정보 항목</strong></p>
   <p>회사는 회원가입, 상담, 서비스 신청 등을 위해 아래와 같은 개인정보를 수집하고 있습니다.</p>
