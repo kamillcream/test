@@ -2,10 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import MainPage from '../views/MainPage.vue'
 import TestPage from '../views/TestPage.vue'
-<<<<<<< HEAD
 import UserProjectSpecPage from '../views/project/UserProjectSpecPage.vue'
 import CompanyProjectSpecPage from '../views/project/CompanyProjectSpecPage.vue'
-=======
 import ProjectPostPage from '../views/project/ProjectPostPage.vue'
 import BoardList from '../views/community/BoardList.vue'
 import BoardDetail from '../views/community/BoardDetail.vue'
@@ -16,7 +14,7 @@ import FindIdResultPage from '../views/user/FindIdResultPage.vue'
 import ResetPasswordPage from '../views/user/ResetPasswordPage.vue'
 import PersonalRegisterPage from '../views/user/PersonalRegisterPage.vue'
 import CompanyRegisterPage from '../views/user/CompanyRegisterPage.vue'
->>>>>>> 23b38a6d62f18c5a273e9f6733f3c858af18648b
+
 
 const routes = [
   {
@@ -32,7 +30,6 @@ const routes = [
   },
 
   {
-<<<<<<< HEAD
     path: '/project/spec/user',
     component: UserProjectSpecPage,
     name: 'UserProjectSpec',
@@ -42,12 +39,13 @@ const routes = [
     path: '/project/spec/company',
     component: CompanyProjectSpecPage,
     name: 'CompanyProjectSpec',
-=======
+  },
+  {
     path: '/project',
     component: ProjectPostPage,
     name: 'ProjectPost',
-  }
-
+  },
+  {
     path: '/board',
     component: BoardList,
     name: 'BoardList',
@@ -120,7 +118,6 @@ const routes = [
     path: '/companyRegister',
     component: CompanyRegisterPage,
     name: 'CompanyRegiste',
->>>>>>> 23b38a6d62f18c5a273e9f6733f3c858af18648b
   },
 
 ]
