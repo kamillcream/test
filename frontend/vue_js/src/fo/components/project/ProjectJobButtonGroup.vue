@@ -33,7 +33,6 @@ defineProps({
 const emit = defineEmits(['remove'])
 
 const deleteJob = (job) => {
-  console.log('🔥 emit remove:', job)
   emit('remove', job)
 }
 </script>
