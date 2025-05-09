@@ -67,7 +67,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import CommonPageHeader from '../common/CommonPageHeader.vue'
+import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 
 const router = useRouter()
 

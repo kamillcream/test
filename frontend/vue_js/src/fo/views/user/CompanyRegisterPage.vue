@@ -1,9 +1,9 @@
 <template>
   <section>
     <CommonPageHeader
-      title="개인"
+      title="기업"
       strongText="회원가입"
-      :breadcrumbs="[{ text: 'Home', link: '/' }, { text: 'Login' }]"
+      :breadcrumbs="[{ text: 'Home', link: '/' }, { text: 'Register' }]"
     />
 
     <div class="row justify-content-md-center">
@@ -13,7 +13,7 @@
             <h4
               class="color-primary font-weight-semibold text-7 text-uppercase mb-3"
             >
-              회원가입
+              기업 회원가입
             </h4>
             <form @submit.prevent="handleSubmit">
               <!-- 아이디 -->
@@ -47,49 +47,32 @@
                   />
                 </div>
               </div>
-
-              <!-- 이름 -->
+              <!-- 담당자 이름 -->
               <div class="row">
-                <div class="form-group col-lg">
-                  <label class="form-label">이름</label>
+                <div class="form-group col-lg-6">
+                  <label class="form-label">담당자 이름</label>
                   <input
                     type="text"
-                    v-model="form.name"
+                    v-model="form.contactName"
                     class="form-control form-control-lg"
                   />
                 </div>
               </div>
-
-              <!-- 생년월일 / 성별 -->
+              <!-- 기업명 -->
               <div class="row">
-                <div class="form-group col-lg-8">
-                  <label class="form-label">생년월일</label>
+                <div class="form-group col-lg-6">
+                  <label class="form-label">기업명</label>
                   <input
-                    type="date"
-                    v-model="form.dob"
+                    type="text"
+                    v-model="form.companyName"
                     class="form-control form-control-lg"
                   />
                 </div>
-                <div class="form-group col-lg-4">
-                  <label class="form-label">성별</label>
-                  <select
-                    v-model="form.gender"
-                    class="form-control form-control-lg"
-                  >
-                    <option disabled value="">성별</option>
-                    <option value="male">남성</option>
-                    <option value="female">여성</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- 휴대폰 -->
-              <div class="row">
-                <div class="form-group col-lg">
-                  <label class="form-label">휴대폰 번호</label>
+                <div class="form-group col-lg-6">
+                  <label class="form-label">사업자 번호</label>
                   <input
                     type="text"
-                    v-model="form.phone"
+                    v-model="form.businessNumber"
                     class="form-control form-control-lg"
                   />
                 </div>
@@ -107,8 +90,6 @@
                       placeholder="이메일 아이디"
                     />
                     <span class="input-group-text">@</span>
-
-                    <!-- 도메인 입력 인풋 -->
                     <input
                       type="text"
                       v-model="form.emailDomain"
@@ -116,8 +97,6 @@
                       class="form-control form-control-lg"
                       placeholder="도메인 입력"
                     />
-
-                    <!-- 셀렉트 박스 -->
                     <select
                       v-model="selectedDomain"
                       @change="handleDomainChange"
@@ -131,7 +110,6 @@
                       <option value="hotmail.com">hotmail.com</option>
                       <option value="custom">직접입력</option>
                     </select>
-
                     <button
                       type="button"
                       class="btn btn-primary btn-lg"
@@ -145,7 +123,7 @@
 
               <!-- 인증번호 -->
               <div class="row">
-                <div class="form-group col-lg-8">
+                <div class="form-group col-lg-6">
                   <label class="form-label">인증번호</label>
                   <div class="input-group">
                     <input
@@ -174,9 +152,10 @@
                       id="terms"
                       class="form-check-input"
                     />
-                    <label for="terms" class="form-check-label">
-                      약관에 동의합니다. <a href="#">이용약관</a>
+                    <label for="terms" class="form-check-label me-1">
+                      약관에 동의합니다.
                     </label>
+                    <a class="font-primary" @click="openTermsModal">이용약관</a>
                   </div>
                 </div>
               </div>
@@ -201,16 +180,22 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
-import CommonPageHeader from '../common/CommonPageHeader.vue'
+import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
+import { useModalStore } from '@/fo/stores/modalStore'
+import { personalAgreementText } from '@/assets/terms'
+import TermsAgreementModal from '@/fo/components/user/TermsAgreementModal.vue'
+import { useAlertStore } from '@/fo/stores/alertStore'
+
+const modalStore = useModalStore()
+const alertStore = useAlertStore()
 
 const form = reactive({
   id: '',
   password: '',
   confirmPassword: '',
-  name: '',
-  dob: '',
-  gender: '',
-  phone: '',
+  companyName: '',
+  contactName: '',
+  businessNumber: '',
   emailId: '',
   emailDomain: '',
   verificationCode: '',
@@ -247,6 +232,19 @@ function sendVerification() {
 
 function verifyCode() {
   alert('인증번호 확인 요청')
+}
+
+// 약관 모달을 열기 위한 함수
+function openTermsModal() {
+  modalStore.openModal(TermsAgreementModal, {
+    title: '개인정보 수집 및 이용 동의서',
+    body: personalAgreementText,
+    onConfirm: () => {
+      alertStore.show('약관 동의 처리되었습니다.', 'success')
+      form.terms = true
+      modalStore.closeModal()
+    },
+  })
 }
 </script>
 
