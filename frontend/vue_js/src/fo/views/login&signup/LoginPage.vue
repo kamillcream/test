@@ -15,22 +15,22 @@
                 <button
                   class="btn w-50"
                   :class="
-                    userType === 'PERSONAL'
+                    loginType === 'PERSONAL'
                       ? 'btn-primary'
                       : 'btn-outline-primary'
                   "
-                  @click="userType = 'PERSONAL'"
+                  @click="loginType = 'PERSONAL'"
                 >
                   개인회원
                 </button>
                 <button
                   class="btn w-50"
                   :class="
-                    userType === 'COMPANY'
+                    loginType === 'COMPANY'
                       ? 'btn-primary'
                       : 'btn-outline-primary'
                   "
-                  @click="userType = 'COMPANY'"
+                  @click="loginType = 'COMPANY'"
                 >
                   기업회원
                 </button>
@@ -40,7 +40,7 @@
               <form @submit.prevent="login">
                 <input
                   type="hidden"
-                  :value="userType === 'PERSONAL' ? 'p' : 'c'"
+                  :value="loginType === 'PERSONAL' ? 'p' : 'c'"
                   name="login_tab"
                 />
 
@@ -48,7 +48,7 @@
                 <div class="mb-3">
                   <label for="id" class="form-label">아이디</label>
                   <input
-                    v-if="userType === 'PERSONAL'"
+                    v-if="loginType === 'PERSONAL'"
                     v-model="form.id"
                     type="text"
                     class="form-control"
@@ -69,7 +69,7 @@
                 <div class="mb-3">
                   <label for="password" class="form-label">비밀번호</label>
                   <input
-                    v-if="userType === 'PERSONAL'"
+                    v-if="loginType === 'PERSONAL'"
                     v-model="form.password"
                     type="password"
                     class="form-control"
@@ -93,9 +93,11 @@
                     v-model="form.autologin"
                     type="checkbox"
                     class="form-check-input"
-                    :id="'autologin_' + userType"
+                    :id="'autologin_' + loginType"
                   />
-                  <label class="form-check-label" :for="'autologin_' + userType"
+                  <label
+                    class="form-check-label"
+                    :for="'autologin_' + loginType"
                     >로그인 유지</label
                   >
                 </div>
@@ -105,9 +107,9 @@
                     v-model="form.id_save"
                     type="checkbox"
                     class="form-check-input"
-                    :id="'id_save_' + userType"
+                    :id="'id_save_' + loginType"
                   />
-                  <label class="form-check-label" :for="'id_save_' + userType"
+                  <label class="form-check-label" :for="'id_save_' + loginType"
                     >아이디 저장</label
                   >
                 </div>
@@ -120,11 +122,10 @@
 
                 <div class="d-flex justify-content-between mb-4">
                   <router-link
-                    :to="
-                      userType === 'PERSONAL'
-                        ? '/personalRegister'
-                        : '/companyRegister'
-                    "
+                    :to="{
+                      path: '/signUp',
+                      query: { loginType },
+                    }"
                   >
                     회원가입
                   </router-link>
@@ -162,7 +163,7 @@
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 import { ref } from 'vue'
 
-const userType = ref('PERSONAL')
+const loginType = ref('PERSONAL')
 const form = ref({
   id: '',
   password: '',
@@ -173,7 +174,7 @@ const form = ref({
 })
 
 const login = () => {
-  const type = userType.value
+  const type = loginType.value
   const payload =
     type === 'PERSONAL'
       ? { login_tab: 'p', id: form.value.id, password: form.value.password }
