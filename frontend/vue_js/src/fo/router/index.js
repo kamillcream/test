@@ -23,6 +23,9 @@ import AffiliatedJobApplicationsPage from '../views/mypage/personal/AffiliatedJo
 import AffiliatedScrapPage from '../views/mypage/personal/AffiliatedScrapPage.vue'
 import ResumeListPage from '../views/mypage/personal/ResumeListPage.vue'
 import AffiliatedMembersPage from '../views/mypage/company/AffiliatedMembersPage.vue'
+import AffiliationApplicantListPage from '../views/mypage/company/AffiliationApplicantListPage.vue'
+import ProjectListPage from '../views/mypage/company/ProjectListPage.vue'
+import ResumeFormPage from '../views/mypage/personal/ResumeFormPage.vue'
 
 const routes = [
   {
@@ -155,6 +158,11 @@ const routes = [
         name: 'ResumeList',
         component: ResumeListPage,
       },
+      {
+        path: 'resumeForm',
+        name: 'ResumeForm',
+        component: ResumeFormPage,
+      },
 
       //company
       {
@@ -166,6 +174,16 @@ const routes = [
         path: 'affiliatedMembers',
         name: 'AffiliatedMembers',
         component: AffiliatedMembersPage,
+      },
+      {
+        path: 'affiliationApplicantList',
+        name: 'AffiliationApplicantList',
+        component: AffiliationApplicantListPage,
+      },
+      {
+        path: 'projectListPage',
+        name: 'ProjectListPage',
+        component: ProjectListPage,
       },
     ],
   },
