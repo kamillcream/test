@@ -1,9 +1,9 @@
 <template>
   <div>
     <CommonHeader />
+    <CommonAlert />
     <div class="main"><router-view /> <CommonModalContainer /></div>
     <CommonFooter />
-    <CommonAlert />
   </div>
 </template>
 
