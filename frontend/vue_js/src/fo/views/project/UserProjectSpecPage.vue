@@ -295,18 +295,5 @@ const project = {
   scrap: 12,
   hits: 367,
 }
-
-// export default {
-//   name: 'UserProjectSpecPage',
-//   components: {
-//     HeaderBeforeLogin
-//   },
-//   props: {
-//     project: {
-//       type: Object,
-//       required: true
-//     }
-//   }
-// }
 </script>
 <style lang=""></style>
