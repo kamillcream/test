@@ -253,7 +253,7 @@
   </div>
 </template>
 <script setup>
-import UserResumeModal from '@/fo/components/mypage/UserResumeModal.vue'
+import UserResumeModal from '@/fo/components/mypage/common/CommonResumeModal.vue'
 import { useModalStore } from '../../stores/modalStore.js'
 
 const modalStore = useModalStore()
