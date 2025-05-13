@@ -26,7 +26,7 @@
                   <li class="dropdown">
                     <a
                       class="dropdown-item dropdown-toggle active current-page-active"
-                      href="#"
+                      href="/affiliation"
                     >
                       소속 <i class="fas fa-chevron-down"></i>
                     </a>
@@ -48,10 +48,10 @@
                     </a>
                     <ul class="dropdown-menu">
                       <li>
-                        <a class="dropdown-item" href="#">일반 게시판</a>
+                        <a class="dropdown-item" href="/board">일반 게시판</a>
                       </li>
                       <li>
-                        <a class="dropdown-item" href="#">Q&A 게시판</a>
+                        <a class="dropdown-item" href="/qna">Q&A 게시판</a>
                       </li>
                     </ul>
                   </li>
@@ -118,7 +118,9 @@ onBeforeUnmount(() => {
   width: 100%;
   background: white;
   height: 100px; /* 초기 높이 설정 */
-  transition: height 0.3s ease, box-shadow 0.3s ease; /* transition을 height와 box-shadow에만 적용 */
+  transition:
+    height 0.3s ease,
+    box-shadow 0.3s ease; /* transition을 height와 box-shadow에만 적용 */
   margin-top: 2px; /* 상단 여백 추가 */
 }
 

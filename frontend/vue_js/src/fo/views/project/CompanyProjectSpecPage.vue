@@ -219,14 +219,36 @@
 
             <hr class="solid my-4" />
 
-            <!-- 버튼 영역 (중앙 정렬, 크기 증가) -->
             <div class="d-flex justify-content-center align-items-center gap-3">
-              <a href="#" class="btn btn-lg btn-rounded btn-primary btn-lg"
-                >수정하기</a
+              <a
+                @click="openMemberModal"
+                v-if="companyId !== 'test1'"
+                href="#"
+                class="btn btn-lg btn-rounded btn-primary btn-lg"
               >
-              <a href="#" class="btn btn-lg btn-rounded btn-light btn-lg"
-                >삭제하기</a
+                지원하기
+              </a>
+              <a
+                v-if="companyId !== 'test1'"
+                href="#"
+                class="btn btn-lg btn-rounded btn-light btn-lg"
               >
+                스크랩
+              </a>
+              <a
+                v-if="companyId === 'test1'"
+                href="#"
+                class="btn btn-lg btn-rounded btn-primary btn-lg"
+              >
+                수정하기
+              </a>
+              <a
+                v-if="companyId === 'test1'"
+                href="#"
+                class="btn btn-lg btn-rounded btn-light btn-lg"
+              >
+                삭제하기
+              </a>
             </div>
           </div>
 
@@ -242,10 +264,27 @@
   </div>
 </template>
 <script setup>
-//import { useRoute } from 'vue-router'
+import { onMounted, onBeforeUnmount } from 'vue'
+import AffiliationMemberModal from '@/fo/components/company/AffiliationMemberModal.vue'
+import { useModalStore } from '../../stores/modalStore.js'
 
-//const route = useRoute()
-//const projectSq = route.params.project_sq
+const modalStore = useModalStore()
+
+const openMemberModal = () => {
+  modalStore.openModal(AffiliationMemberModal, {
+    size: 'modal-xl',
+  })
+}
+
+onMounted(() => {
+  // 바깥 페이지 스크롤 막기
+  document.body.style.overflow = 'hidden'
+})
+
+onBeforeUnmount(() => {
+  // 모달 닫히면 스크롤 복구
+  document.body.style.overflow = ''
+})
 const project = {
   title: 'AI 학습 데이터 플랫폼 구축',
   company: 'DataForge Inc.',
@@ -277,18 +316,5 @@ const project = {
   scrap: 12,
   hits: 367,
 }
-
-// export default {
-//   name: 'UserProjectSpecPage',
-//   components: {
-//     HeaderBeforeLogin
-//   },
-//   props: {
-//     project: {
-//       type: Object,
-//       required: true
-//     }
-//   }
-// }
 </script>
 <style lang=""></style>

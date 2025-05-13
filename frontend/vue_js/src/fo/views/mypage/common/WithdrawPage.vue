@@ -1,0 +1,105 @@
+<template>
+  <div>
+    <div class="overflow-hidden mb-3">
+      <h2 class="font-weight-normal text-7 mb-0">회원 탈퇴</h2>
+    </div>
+
+    <form role="form" class="needs-validation" novalidate>
+      <!-- 탈퇴 유의사항 textarea -->
+      <div class="form-group row mb-4">
+        <label class="col-lg-3 col-form-label form-control-label text-2"
+          >회원 탈퇴 안내</label
+        >
+        <div class="col-lg-9">
+          <textarea
+            class="form-control text-2"
+            rows="8"
+            readonly
+            style="resize: none; overflow-y: scroll"
+          >
+※ 회원 탈퇴 전 꼭 확인해주세요.
+
+1. 탈퇴 시 해당 계정으로 등록된 모든 정보는 삭제되며, 복구가 불가능합니다.
+2. 탈퇴 후에는 동일한 아이디로 재가입이 제한될 수 있습니다.
+3. 작성하신 게시물, 댓글 등 일부 콘텐츠는 탈퇴 후에도 사이트에 남아있을 수 있습니다.
+4. 유료 서비스 이용 중 탈퇴할 경우, 잔여 이용 기간에 대한 보상 또는 환불은 제공되지 않습니다.
+
+위의 내용을 충분히 확인하신 후 탈퇴를 진행해 주세요.
+                </textarea
+          >
+        </div>
+      </div>
+
+      <!-- 아이디 입력 -->
+      <div class="form-group row">
+        <label
+          class="col-lg-3 col-form-label form-control-label text-2 required"
+          >아이디</label
+        >
+        <div class="col-lg-9">
+          <input
+            class="form-control text-3 h-auto py-2"
+            type="text"
+            name="userId"
+            required
+          />
+          <div class="invalid-feedback text-danger" style="display: block">
+            아이디를 입력해 주세요.
+          </div>
+        </div>
+      </div>
+
+      <!-- 탈퇴 신청자 입력 -->
+      <div class="form-group row">
+        <label
+          class="col-lg-3 col-form-label form-control-label text-2 required"
+          >탈퇴 신청자</label
+        >
+        <div class="col-lg-9">
+          <input
+            class="form-control text-3 h-auto py-2"
+            type="text"
+            name="applicantName"
+            required
+          />
+          <div class="invalid-feedback text-danger" style="display: block">
+            탈퇴 신청자명을 입력해 주세요.
+          </div>
+        </div>
+      </div>
+
+      <!-- 체크박스 -->
+      <div class="form-group row">
+        <div class="col-lg-12">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="agreeCheck"
+              required
+            />
+            <label class="form-check-label text-2" for="agreeCheck">
+              회원 탈퇴 안내 사항을 모두 읽었으며, 이에 동의합니다.
+            </label>
+          </div>
+          <div class="invalid-feedback text-danger ps-4" style="display: block">
+            안내 사항에 동의해야 탈퇴가 가능합니다.
+          </div>
+        </div>
+      </div>
+
+      <!-- 탈퇴하기 버튼 -->
+      <div class="form-group row mt-4">
+        <div class="col text-center">
+          <button
+            type="submit"
+            class="btn btn-danger btn-modern"
+            data-loading-text="처리 중..."
+          >
+            탈퇴하기
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</template>

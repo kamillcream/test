@@ -4,19 +4,33 @@ import MainPage from '../views/MainPage.vue'
 import TestPage from '../views/TestPage.vue'
 import UserProjectSpecPage from '../views/project/UserProjectSpecPage.vue'
 import CompanyProjectSpecPage from '../views/project/CompanyProjectSpecPage.vue'
-import ProjectPostPage from '../views/project/ProjectPostPage.vue'
-import ProjectListPage from '../views/project/ProjectListPage.vue'
-import BoardList from '../views/community/BoardList.vue'
-import BoardDetail from '../views/community/BoardDetail.vue'
-import QnaDetail from '../views/community/QnaDetail.vue'
-import LoginPage from '../views/user/LoginPage.vue'
-import FindAccountPage from '../views/user/FindAccountPage.vue'
-import FindIdResultPage from '../views/user/FindIdResultPage.vue'
-import ResetPasswordPage from '../views/user/ResetPasswordPage.vue'
-import PersonalRegisterPage from '../views/user/PersonalRegisterPage.vue'
-import CompanyRegisterPage from '../views/user/CompanyRegisterPage.vue'
-import AffiliationList from '../views/company/AffiliationList.vue'
-import QnaList from '../views/community/QnaList.vue'
+import ProjectPostPage from '../views/mypage/common/ProjectPostPage.vue'
+
+import BoardListPage from '../views/community/BoardListPage.vue'
+import BoardDetailPage from '../views/community/BoardDetailPage.vue'
+import QnaDetailPage from '../views/community/QnaDetailPage.vue'
+import BoardResisterPage from '../views/community/BoardResisterPage.vue'
+import QnaResisterPage from '../views/community/QnaResisterPage.vue'
+
+import LoginPage from '../views/login&signup/LoginPage.vue'
+import FindAccountPage from '../views/login&signup/FindAccountPage.vue'
+import FindIdResultPage from '../views/login&signup/FindIdResultPage.vue'
+import ResetPasswordPage from '../views/login&signup/ResetPasswordPage.vue'
+import SignUpPage from '../views/login&signup/SignUpPage.vue'
+
+import AffiliationListPage from '../views/company/AffiliationListPage.vue'
+import QnaListPage from '../views/community/QnaListPage.vue'
+import MyPageLayout from '../views/mypage/MyPageLayout.vue'
+import InformationEditPage from '../views/mypage/common/InformationEditPage.vue'
+import ResumeListPage from '../views/mypage/personal/ResumeListPage.vue'
+import AffiliatedMembersPage from '../views/mypage/company/AffiliatedMembersPage.vue'
+import AffiliationApplicantListPage from '../views/mypage/company/AffiliationApplicantListPage.vue'
+import ProjectListPage from '../views/mypage/common/ProjectListPage.vue'
+import ResumeFormPage from '../views/mypage/personal/ResumeFormPage.vue'
+import WithdrawPage from '../views/mypage/common/WithdrawPage.vue'
+import AffiliatedJobApplicationsPage from '../views/mypage/personal/AffiliatedJobApplicationsPage.vue'
+import AffiliatedScrapPage from '../views/mypage/personal/AffiliatedScrapPage.vue'
+import AffiliationEditPage from '../views/mypage/company/AffiliationEditPage.vue'
 
 const routes = [
   {
@@ -48,7 +62,6 @@ const routes = [
     component: ProjectPostPage,
     name: 'ProjectPost',
   },
-
   {
     path: '/projects',
     component: ProjectListPage,
@@ -57,27 +70,39 @@ const routes = [
 
   {
     path: '/board',
-    component: BoardList,
-    name: 'BoardList',
+    component: BoardListPage,
+    name: 'BoardListPage',
+  },
+
+  {
+    path: '/board/register',
+    component: BoardResisterPage,
+    name: 'BoardResisterPage',
   },
 
   {
     path: '/board/:board_sq',
-    component: BoardDetail,
-    name: 'BoardDetail',
+    component: BoardDetailPage,
+    name: 'BoardDetailPage',
     props: true,
   },
 
   {
     path: '/qna',
-    component: QnaList,
-    name: 'QnaList',
+    component: QnaListPage,
+    name: 'QnaListPage',
+  },
+
+  {
+    path: '/qna/register',
+    component: QnaResisterPage,
+    name: 'QnaResisterPage',
   },
 
   {
     path: '/qna/:board_sq',
-    component: QnaDetail,
-    name: 'QnaDetail',
+    component: QnaDetailPage,
+    name: 'QnaDetailPage',
     props: true,
   },
 
@@ -107,23 +132,84 @@ const routes = [
 
   {
     path: '/affiliation',
-    component: AffiliationList,
-    name: 'affiliationList',
+    component: AffiliationListPage,
+    name: 'AffiliationListPage',
   },
 
   {
-    path: '/personalRegister',
-    component: PersonalRegisterPage,
-    name: 'PersonalRegister',
+    path: '/signUp',
+    component: SignUpPage,
+    name: 'SignUp',
   },
 
   {
-    path: '/companyRegister',
-    component: CompanyRegisterPage,
-    name: 'CompanyRegiste',
+    path: '/myPage',
+    component: MyPageLayout,
+    children: [
+      // 기본 화면 설정
+      {
+        path: '', // 여기! 기본 자식 경로
+        name: 'MyPageDefault',
+        component: InformationEditPage,
+      },
+      //common
+      {
+        path: 'informationEdit',
+        name: 'InformationEdit',
+        component: InformationEditPage,
+      },
+      {
+        path: 'withdraw',
+        name: 'Withdraw',
+        component: WithdrawPage,
+      },
+
+      //personal
+      {
+        path: 'affiliatedJobApplications',
+        name: 'AffiliatedJobApplications',
+        component: AffiliatedJobApplicationsPage,
+      },
+      {
+        path: 'affiliatedScrap',
+        name: 'AffiliatedScrap',
+        component: AffiliatedScrapPage,
+      },
+      {
+        path: 'resumeList',
+        name: 'ResumeList',
+        component: ResumeListPage,
+      },
+      {
+        path: 'resumeForm',
+        name: 'ResumeForm',
+        component: ResumeFormPage,
+      },
+
+      //company
+      {
+        path: 'affiliationEdit',
+        name: 'AffiliationEdit',
+        component: AffiliationEditPage,
+      },
+      {
+        path: 'affiliatedMembers',
+        name: 'AffiliatedMembers',
+        component: AffiliatedMembersPage,
+      },
+      {
+        path: 'affiliationApplicantList',
+        name: 'AffiliationApplicantList',
+        component: AffiliationApplicantListPage,
+      },
+      {
+        path: 'projectListPage',
+        name: 'ProjectListPage',
+        component: ProjectListPage,
+      },
+    ],
   },
 ]
-
 const router = createRouter({
   history: createWebHistory(),
   routes,

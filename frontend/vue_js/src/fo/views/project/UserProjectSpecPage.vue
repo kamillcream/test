@@ -1,5 +1,4 @@
 <template lang="">
-  <HeaderBeforeLogin />
   <div class="container py-5">
     <div class="row pt-4 mt-2 mb-5">
       <!-- 좌측: 지원 자격 (스크롤 없애기) -->
@@ -202,14 +201,12 @@
                 <p class="mb-1 text-color-primary">
                   <i class="fas fa-caret-right me-2"></i
                   ><strong class="text-color-primary">모집 기간 :</strong>
-                  {{ project.recruitStartDt }} ~
-                  {{ project.recruitEndDt }}
+                  {{ project.recruitStartDt }} ~ {{ project.recruitEndDt }}
                 </p>
                 <p class="mb-1 text-color-primary">
                   <i class="fas fa-caret-right me-2"></i
                   ><strong class="text-color-primary">인터뷰 기간 :</strong>
-                  {{ project.interviewStartDt }} ~
-                  {{ project.interviewEndDt }}
+                  {{ project.interviewStartDt }} ~ {{ project.interviewEndDt }}
                 </p>
                 <p class="mb-0 text-color-primary">
                   <i class="fas fa-caret-right me-2"></i
@@ -223,7 +220,10 @@
 
             <!-- 버튼 영역 (중앙 정렬, 크기 증가) -->
             <div class="d-flex justify-content-center align-items-center gap-3">
-              <a href="#" class="btn btn-lg btn-rounded btn-primary btn-lg"
+              <a
+                @click="openResumeModal"
+                href="#"
+                class="btn btn-lg btn-rounded btn-primary btn-lg"
                 >지원하기</a
               >
               <!-- 스크랩 버튼 -->
@@ -253,11 +253,16 @@
   </div>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
+import UserResumeModal from '@/fo/components/mypage/common/CommonResumeModal.vue'
+import { useModalStore } from '../../stores/modalStore.js'
 
-const route = useRoute()
-const projectSq = route.params.project_sq
-console.log(projectSq)
+const modalStore = useModalStore()
+
+const openResumeModal = () => {
+  modalStore.openModal(UserResumeModal, {
+    size: 'modal-md',
+  })
+}
 
 const project = {
   title: 'AI 학습 데이터 플랫폼 구축',
