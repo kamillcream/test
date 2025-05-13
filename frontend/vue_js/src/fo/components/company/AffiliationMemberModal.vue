@@ -208,7 +208,7 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useModalStore } from '../../stores/modalStore'
-import UserResumeModal from '@/fo/components/mypage/UserResumeModal.vue'
+import UserResumeModal from '@/fo/components/mypage/common/CommonResumeModal.vue'
 
 const modalStore = useModalStore()
 
