@@ -4,7 +4,7 @@ import MainPage from '../views/MainPage.vue'
 import TestPage from '../views/TestPage.vue'
 import UserProjectSpecPage from '../views/project/UserProjectSpecPage.vue'
 import CompanyProjectSpecPage from '../views/project/CompanyProjectSpecPage.vue'
-import ProjectPostPage from '../views/project/ProjectPostPage.vue'
+import ProjectPostPage from '../views/mypage/common/ProjectPostPage.vue'
 import BoardList from '../views/community/BoardList.vue'
 import BoardDetail from '../views/community/BoardDetail.vue'
 import QnaDetail from '../views/community/QnaDetail.vue'
@@ -24,7 +24,7 @@ import AffiliatedScrapPage from '../views/mypage/personal/AffiliatedScrapPage.vu
 import ResumeListPage from '../views/mypage/personal/ResumeListPage.vue'
 import AffiliatedMembersPage from '../views/mypage/company/AffiliatedMembersPage.vue'
 import AffiliationApplicantListPage from '../views/mypage/company/AffiliationApplicantListPage.vue'
-import ProjectListPage from '../views/mypage/company/ProjectListPage.vue'
+import ProjectListPage from '../views/mypage/common/ProjectListPage.vue'
 import ResumeFormPage from '../views/mypage/personal/ResumeFormPage.vue'
 
 const routes = [
