@@ -3,9 +3,9 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.example.demo.mapper.UserMapper">
+<mapper namespace="com.example.demo.domain.user.mapper.UserMapper">
 
-    <update id="updateUser" parameterType="com.example.demo.entity.User">
+    <update id="updateUser" parameterType="com.example.demo.domain.user.entity.User">
         UPDATE user
         SET user_id = #{userId},
         password = #{password}

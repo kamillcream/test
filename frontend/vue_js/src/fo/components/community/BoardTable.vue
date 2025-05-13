@@ -13,10 +13,9 @@
         </tr>
       </thead>
       <tbody>
-        <tr></tr>
         <tr v-for="board in boardList" :key="board.board_sq">
           <td class="text-start px-3">
-            <a :href="`/board/${board.board_sq}`"
+            <a :href="`/${isQna ? 'qna' : 'board'}/${board.board_sq}`"
               >{{ board.board_ttl
               }}<span
                 class="text-grey ml-1 px-2"
@@ -25,24 +24,10 @@
                 {{ board.answer_cnt }}</span
               ></a
             >
-            <div class="mt-2 d-flex justify-content-start flex-wrap gap-1">
-              <!-- 기술태그 -->
-              <span
-                v-for="skill_tag in board.skill_tags"
-                :key="skill_tag"
-                class="btn btn-primary btn-rounded btn-3d py-0 px-2"
-                style="font-size: 12px"
-                >{{ skill_tag }}</span
-              >
-              <!-- 일반 태그 -->
-              <span
-                v-for="tag in board.tags"
-                :key="tag"
-                class="btn btn-light btn-rounded btn-3d py-0 px-2"
-                style="font-size: 12px"
-                >{{ tag }}</span
-              >
-            </div>
+            <BoardTags
+              :skillTags="board.skill_tags"
+              :normalTags="board.normal_tags"
+            />
           </td>
           <td>{{ board.user_nm }}</td>
           <td>{{ board.created_at }}</td>
@@ -50,11 +35,6 @@
           <td>{{ board.comment_cnt }}</td>
           <td>{{ board.recommend_cnt }}</td>
           <td v-if="isQna">
-            <span
-              v-if="board.board_adopt_status_cd == 0"
-              class="badge bg-danger"
-              >미해결</span
-            >
             <span
               v-if="board.board_adopt_status_cd == 1"
               class="badge bg-secondary"
@@ -70,6 +50,11 @@
               class="badge bg-success"
               >채택완료</span
             >
+            <span
+              v-if="board.board_adopt_status_cd == 4"
+              class="badge bg-danger"
+              >미해결</span
+            >
           </td>
         </tr>
       </tbody>
@@ -78,6 +63,7 @@
 </template>
 <script setup>
 import { computed, defineProps } from 'vue'
+import BoardTags from './BoardTags.vue'
 
 const props = defineProps({ boardList: Array, isQna: Boolean })
 
