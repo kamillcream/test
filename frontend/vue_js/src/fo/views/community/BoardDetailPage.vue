@@ -1,14 +1,22 @@
 <template>
-  <div class="container py-5 mt-3">
-    <div class="post-content ms-0">
-      <BoardPost :boardInfo="boardInfo" :isQna="false" />
-      <BoardComment :comments="boardInfo.comments" />
+  <section>
+    <CommonPageHeader
+      title=""
+      strongText="일반 게시판"
+      :breadcrumbs="[{ text: 'Home', link: '/' }, { text: '커뮤니티' }]"
+    />
+    <div class="container py-5 mt-3">
+      <div class="post-content ms-0">
+        <BoardPost :boardInfo="boardInfo" :isQna="false" />
+        <BoardComment :comments="boardInfo.comments" />
+      </div>
     </div>
-  </div>
+  </section>
 </template>
 <script setup>
 import BoardPost from '@/fo/components/community/BoardPost.vue'
 import BoardComment from '@/fo/components/community/BoardComment.vue'
+import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 // import { defineProps } from 'vue'
 
 // const props = defineProps({ board_sq: String })

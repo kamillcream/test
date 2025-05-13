@@ -19,6 +19,7 @@
             display: flex;
             flex-direction: column;
           "
+          @click="clickApplication"
         >
           <div class="d-flex justif y-content-between align-items-center mb-2">
             <h5 class="mb-0 text-dark" style="font-size: 1.3rem">
@@ -54,7 +55,11 @@
 <script setup>
 import BoardComment from '@/fo/components/community/BoardComment.vue'
 import BoardPost from '@/fo/components/community/BoardPost.vue'
+import AnswerDetailModal from '@/fo/components/community/AnswerDetailModal.vue'
+import { useModalStore } from '@/fo/stores/modalStore'
 // import { defineProps } from 'vue'
+
+const modalStore = useModalStore()
 
 // const props = defineProps({ board_sq: String })
 
@@ -129,6 +134,11 @@ const boardInfo = {
       recommend_cnt: 6,
     },
   ],
+}
+
+// 답변 작성 모달
+const clickApplication = () => {
+  modalStore.openModal(AnswerDetailModal, { size: 'modal-lg' })
 }
 </script>
 <style></style>
