@@ -1,8 +1,22 @@
 <template lang="">
+  <CommonPageHeader
+    title=""
+    strongText="프로젝트 상세 정보"
+    :breadcrumbs="[{ text: 'Home', link: '/' }, { text: '프로젝트' }]"
+  />
   <div class="container py-5">
     <div class="row pt-4 mt-2 mb-5">
       <!-- 좌측: 지원 자격 (스크롤 없애기) -->
-      <div class="col-md-8 mb-4 mb-md-0" style="max-height: auto">
+      <div
+        class="col-md-8 mb-4 mb-md-0"
+        style="
+          border: 1px solid #dee2e6;
+          border-radius: 10px;
+          padding: 24px 32px;
+          background-color: #ffffff;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        "
+      >
         <h2 class="text-color-dark font-weight-normal text-5 mb-2">
           지원 자격 / 근무 조건
         </h2>
@@ -255,6 +269,7 @@
 <script setup>
 import UserResumeModal from '@/fo/components/mypage/common/CommonResumeModal.vue'
 import { useModalStore } from '../../stores/modalStore.js'
+import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 
 const modalStore = useModalStore()
 
@@ -295,5 +310,7 @@ const project = {
   scrap: 12,
   hits: 367,
 }
+
+// TODO: 스크랩 토글
 </script>
 <style lang=""></style>
