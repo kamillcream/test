@@ -118,7 +118,9 @@ onBeforeUnmount(() => {
   width: 100%;
   background: white;
   height: 100px; /* 초기 높이 설정 */
-  transition: height 0.3s ease, box-shadow 0.3s ease; /* transition을 height와 box-shadow에만 적용 */
+  transition:
+    height 0.3s ease,
+    box-shadow 0.3s ease; /* transition을 height와 box-shadow에만 적용 */
   margin-top: 2px; /* 상단 여백 추가 */
 }
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="container py-5 mt-3">
+  <div>
     <div class="row">
       <div class="col">
         <h1 class="font-weight-normal text-10 mb-20">
@@ -20,7 +20,9 @@
           @click="setFilter(filter.type)"
         >
           {{ filter.label }}
-          <span class="badge bg-white text-primary fw-bold px-2 py-1">{{ filter.count }}</span>
+          <span class="badge bg-white text-primary fw-bold px-2 py-1">{{
+            filter.count
+          }}</span>
         </button>
       </div>
 
@@ -51,17 +53,30 @@
     <div class="row">
       <div class="col">
         <ul class="simple-post-list m-0 position-relative">
-          <li v-for="apply in applies" :key="apply.id" style="border-bottom: 1px rgb(230, 230, 230) solid">
+          <li
+            v-for="apply in applies"
+            :key="apply.id"
+            style="border-bottom: 1px rgb(230, 230, 230) solid"
+          >
             <div class="post-info position-relative">
               <!-- 제목 + 회사명 + 지원상태 버튼 -->
-              <div class="d-flex justify-content-between align-items-center gap-2">
+              <div
+                class="d-flex justify-content-between align-items-center gap-2"
+              >
                 <div class="d-flex gap-2">
                   <a href="#" class="text-6 m-0">{{ apply.company }}</a>
                 </div>
                 <div class="d-flex gap-2">
                   <template v-if="apply.status === '지원중'">
-                    <span class="btn btn-primary btn-sm">{{ apply.status }}</span>
-                    <a href="#" class="btn btn-outline btn-primary btn-sm" @click.prevent="cancelApply(apply.id)">지원 취소</a>
+                    <span class="btn btn-primary btn-sm">{{
+                      apply.status
+                    }}</span>
+                    <a
+                      href="#"
+                      class="btn btn-outline btn-primary btn-sm"
+                      @click.prevent="cancelApply(apply.id)"
+                      >지원 취소</a
+                    >
                   </template>
                   <template v-else>
                     <span class="btn btn-light btn-sm">{{ apply.status }}</span>
@@ -71,24 +86,36 @@
               </div>
 
               <!-- 지원일자 + 지원자 수 -->
-              <div class="d-flex justify-content-between align-items-center mt-2">
+              <div
+                class="d-flex justify-content-between align-items-center mt-2"
+              >
                 <div class="post-meta text-4">
-                  <span class="text-dark text-uppercase font-weight-semibold">지원일자</span>
+                  <span class="text-dark text-uppercase font-weight-semibold"
+                    >지원일자</span
+                  >
                   | {{ apply.applyDate }}
                 </div>
                 <div class="post-meta text-4">
-                  <span class="text-dark text-uppercase font-weight-semibold">지원자 수</span>
+                  <span class="text-dark text-uppercase font-weight-semibold"
+                    >지원자 수</span
+                  >
                   | {{ apply.applicantCount }}
                 </div>
               </div>
               <!-- 지원 이력서 + 열람일자 -->
-              <div class="d-flex justify-content-between align-items-center mt-2">
+              <div
+                class="d-flex justify-content-between align-items-center mt-2"
+              >
                 <div class="post-meta text-4">
-                  <span class="text-dark text-uppercase font-weight-semibold">지원 이력서</span>
+                  <span class="text-dark text-uppercase font-weight-semibold"
+                    >지원 이력서</span
+                  >
                   | {{ apply.resumeTitle }}
                 </div>
                 <div class="post-meta text-4">
-                  <span class="text-dark text-uppercase font-weight-semibold">열람일자</span>
+                  <span class="text-dark text-uppercase font-weight-semibold"
+                    >열람일자</span
+                  >
                   | {{ apply.readDate }}
                 </div>
               </div>
@@ -100,15 +127,30 @@
         <div class="mt-5 py-5">
           <ul class="pagination float-end">
             <li class="page-item">
-              <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)">
+              <a
+                class="page-link"
+                href="#"
+                @click.prevent="changePage(currentPage - 1)"
+              >
                 <i class="fas fa-angle-left"></i>
               </a>
             </li>
-            <li v-for="page in totalPages" :key="page" class="page-item" :class="{ active: currentPage === page }">
-              <a class="page-link" href="#" @click.prevent="changePage(page)">{{ page }}</a>
+            <li
+              v-for="page in totalPages"
+              :key="page"
+              class="page-item"
+              :class="{ active: currentPage === page }"
+            >
+              <a class="page-link" href="#" @click.prevent="changePage(page)">{{
+                page
+              }}</a>
             </li>
             <li class="page-item">
-              <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)">
+              <a
+                class="page-link"
+                href="#"
+                @click.prevent="changePage(currentPage + 1)"
+              >
                 <i class="fas fa-angle-right"></i>
               </a>
             </li>
@@ -132,7 +174,7 @@ export default {
       filters: [
         { type: 'all', label: '전체', count: 10 },
         { type: 'read', label: '열람', count: 5 },
-        { type: 'unread', label: '미열람', count: 5 }
+        { type: 'unread', label: '미열람', count: 5 },
       ],
       applies: [
         {
@@ -143,7 +185,7 @@ export default {
           applyDate: '2025.04.30',
           applicantCount: 50,
           resumeTitle: '안녕하세요. JAVA 개발자입니다.',
-          readDate: '2025.05.15'
+          readDate: '2025.05.15',
         },
         {
           id: 2,
@@ -153,7 +195,7 @@ export default {
           applyDate: '2025.04.30',
           applicantCount: '미열람',
           resumeTitle: '안녕하세요. JAVA 개발자입니다.',
-          readDate: '2025.05.15'
+          readDate: '2025.05.15',
         },
         {
           id: 3,
@@ -163,7 +205,7 @@ export default {
           applyDate: '2025.04.30',
           applicantCount: '미열람',
           resumeTitle: '안녕하세요. JAVA 개발자입니다.',
-          readDate: '2025.05.15'
+          readDate: '2025.05.15',
         },
         {
           id: 4,
@@ -173,9 +215,9 @@ export default {
           applyDate: '2025.04.30',
           applicantCount: '미열람',
           resumeTitle: '안녕하세요. JAVA 개발자입니다.',
-          readDate: '2025.05.15'
-        }
-      ]
+          readDate: '2025.05.15',
+        },
+      ],
     }
   },
   methods: {
@@ -195,8 +237,8 @@ export default {
       if (page < 1 || page > this.totalPages) return
       this.currentPage = page
       // 페이지 변경 로직 구현
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -205,4 +247,4 @@ export default {
   list-style: none;
   padding: 0;
 }
-</style> 
+</style>

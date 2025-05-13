@@ -20,7 +20,7 @@
             flex-direction: column;
           "
         >
-          <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="d-flex justif y-content-between align-items-center mb-2">
             <h5 class="mb-0 text-dark" style="font-size: 1.3rem">
               {{ answer.answer_ttl }}
             </h5>
