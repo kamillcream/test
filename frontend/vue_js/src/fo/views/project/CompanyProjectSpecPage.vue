@@ -235,21 +235,17 @@
             <div class="d-flex justify-content-center align-items-center gap-3">
               <a
                 @click="openMemberModal"
-                v-if="companyId !== 'test1'"
                 href="#"
                 class="btn btn-lg btn-rounded btn-primary btn-lg"
               >
                 지원하기
               </a>
-              <a
-                v-if="companyId !== 'test1'"
-                href="#"
-                class="btn btn-lg btn-rounded btn-light btn-lg"
-              >
+              <a href="#" class="btn btn-lg btn-rounded btn-light btn-lg">
                 스크랩
               </a>
               <a
                 v-if="companyId === 'test1'"
+                @click="goToProjectPost"
                 href="#"
                 class="btn btn-lg btn-rounded btn-primary btn-lg"
               >
@@ -257,6 +253,7 @@
               </a>
               <a
                 v-if="companyId === 'test1'"
+                @click="deleteProject"
                 href="#"
                 class="btn btn-lg btn-rounded btn-light btn-lg"
               >
@@ -281,6 +278,10 @@ import { onMounted, onBeforeUnmount } from 'vue'
 import AffiliationMemberModal from '@/fo/components/company/AffiliationMemberModal.vue'
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 import { useModalStore } from '../../stores/modalStore.js'
+import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const modalStore = useModalStore()
 
@@ -331,6 +332,26 @@ const project = {
   hits: 367,
 }
 
+const goToProjectPost = (project) => {
+  router.push({
+    name: 'ProjectPostPage',
+    params: {
+      project_sq: project.id,
+    },
+  })
+}
+
+const deleteProject = () => {
+  modalStore.openModal(CommonConfirmModal, {
+    title: '프로젝트 삭제',
+    message: '한 번 삭제한 프로젝트는 복구할 수 없습니다. 삭제하시겠습니까?',
+    onConfirm: () => {
+      console.log('삭제 확정됨')
+      // api 요청 추가
+      // 예: await projectService.delete(projectId)
+    },
+  })
+}
 // TODO: 스크랩 토글
 </script>
 <style lang=""></style>
