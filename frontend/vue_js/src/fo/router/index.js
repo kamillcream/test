@@ -52,7 +52,7 @@ const routes = [
   },
 
   {
-    path: '/project/spec/company',
+    path: '/project/spec/company/:project_sq',
     component: CompanyProjectSpecPage,
     name: 'CompanyProjectSpec',
   },
@@ -61,11 +61,6 @@ const routes = [
     path: '/project',
     component: ProjectPostPage,
     name: 'ProjectPost',
-  },
-  {
-    path: '/projects',
-    component: ProjectListPage,
-    name: 'ProjectList',
   },
 
   {
