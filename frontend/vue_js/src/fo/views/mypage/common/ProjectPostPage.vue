@@ -340,7 +340,7 @@ import ProjectSkillButtonGroup from '@/fo/components/project/ProjectSkillButtonG
 import ProjectInverviewTimeButtonGroupVue from '@/fo/components/project/ProjectInverviewTimeButtonGroup.vue'
 import { useModalStore } from '../../../stores/modalStore.js'
 
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const projectTitle = ref('')
 const selectedCity = ref('')
@@ -361,6 +361,28 @@ const description = ref('')
 const notifyEnabled = ref(false)
 
 const modalStore = useModalStore()
+
+// 모달 열려있는 동안 부모 페이지 스크롤 비활성화, 닫히면 다시 활성화
+const isOpen = computed(() => modalStore.isOpen)
+
+let prevScrollY = 0
+
+watch(isOpen, (newVal) => {
+  if (newVal) {
+    prevScrollY = window.scrollY
+    document.body.style.setProperty('overflow', 'hidden', 'important')
+    document.documentElement.style.setProperty(
+      'overflow',
+      'hidden',
+      'important',
+    )
+  } else {
+    document.body.style.removeProperty('overflow')
+    document.documentElement.style.removeProperty('overflow')
+    window.scrollTo(0, prevScrollY)
+  }
+})
+
 const openSkillModal = () => {
   modalStore.openModal(SkillSelectModal, {
     onConfirm: onSkillsConfirmed,
@@ -507,7 +529,7 @@ const recruitPeriodDisplay = computed({
 .layout-wrapper {
   display: flex;
   max-width: 1200px;
-  margin: 0 auto; /* 👉 중앙 정렬 */
+  margin: 0 auto;
 }
 
 .sidebar {
@@ -517,6 +539,6 @@ const recruitPeriodDisplay = computed({
 
 .content {
   flex-grow: 1;
-  max-width: calc(100% - 220px); /* 👉 사이드바 제외한 공간 */
+  max-width: calc(100% - 220px);
 }
 </style>
