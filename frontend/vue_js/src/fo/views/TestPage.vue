@@ -37,7 +37,6 @@ function openConfirm() {
       modalStore.closeModal()
     },
   })
-  console.log(modalStore.isOpen) // 상태 확인
 }
 
 function openConfirmLarge() {
@@ -50,7 +49,6 @@ function openConfirmLarge() {
       modalStore.closeModal()
     },
   })
-  console.log(modalStore.isOpen) // 상태 확인
 }
 </script>
 
