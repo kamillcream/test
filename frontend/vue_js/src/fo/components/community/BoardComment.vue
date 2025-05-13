@@ -1,9 +1,7 @@
 <template>
   <div>
     <div class="post-comments mt-5 post-comments">
-      <h4 class="mb-3" style="font-size: 1.5rem">
-        댓글 ({{ props.comments.length }})
-      </h4>
+      <h4 class="mb-3 font-size-15">댓글 ({{ props.comments.length }})</h4>
       <ul class="comments">
         <li v-for="comment in props.comments" :key="comment">
           <div class="comment">
@@ -16,52 +14,50 @@
                 :src="`${comment.user_profile_img_url}`"
               />
             </div>
-            <div class="comment-block" style="font-size: 1.2rem">
+            <div class="comment-block font-size-12">
               <div class="comment-arrow"></div>
               <!-- 이름 + 신고/하트 -->
               <div
-                class="d-flex justify-content-between align-items-center"
-                style="margin-bottom: 10px"
+                class="d-flex justify-content-between align-items-center mb-2"
               >
-                <span class="comment-by text-primary" style="font-size: 1.3rem">
+                <span class="comment-by text-primary font-size-13">
                   <strong>{{ comment.user_nm }}</strong>
                 </span>
                 <!-- 작성자 본인일 경우 -->
                 <!-- [추가] 본인 인증 로직 -->
                 <span v-if="comment.user_sq == 3" class="comment-icons d-flex">
-                  <a
-                    href="#"
-                    class="text-danger"
-                    style="font-size: 1rem; margin-right: 15px"
-                  >
+                  <button href="#" class="text-danger me-2 font-size-10">
                     <span class="ms-2 text-primary">수정</span>
-                  </a>
-                  <a href="#" class="text-danger" style="font-size: 1rem">
+                  </button>
+                  <button
+                    href="#"
+                    class="text-danger font-size-10"
+                    @click="openDeleteConfirm"
+                  >
                     <span class="ms-2 text-primary">삭제</span>
-                  </a>
+                  </button>
                 </span>
                 <!-- 작성자 아닌 경우 -->
                 <span v-else class="comment-icons d-flex">
-                  <a
-                    href="#"
-                    class="text-danger"
-                    style="font-size: 1rem; margin-right: 15px"
-                  >
+                  <button class="text-danger me-2 font-size-10">
                     <span class="ms-2 text-primary"
                       >추천 {{ comment.recommend_cnt }}</span
                     >
-                  </a>
-                  <a href="#" class="text-danger" style="font-size: 1rem">
+                  </button>
+                  <button
+                    class="text-danger font-size-10"
+                    @click="clickRepostApplication"
+                  >
                     <span class="ms-2 text-primary">신고</span>
-                  </a>
+                  </button>
                 </span>
               </div>
               <!-- 내용 -->
-              <p style="font-size: 1.2rem">
+              <p class="font-size-12">
                 {{ comment.comment_description_edt }}
               </p>
               <!-- 날짜 + 수정/삭제 (홍길동과 동일하게 float-end 사용) -->
-              <span class="date float-end" style="font-size: 1.1rem">
+              <span class="date float-end font-size-11">
                 {{ comment.created_at }}
               </span>
             </div>
@@ -96,6 +92,7 @@
                 value="댓글 작성"
                 class="btn btn-primary text-3"
                 data-loading-text="로딩 중..."
+                @submit="openRegisterConfirm"
               />
             </div>
           </div>
@@ -106,7 +103,76 @@
   </div>
 </template>
 <script setup>
+import { useAlertStore } from '@/fo/stores/alertStore'
+import { useModalStore } from '@/fo/stores/modalStore'
 import { defineProps } from 'vue'
+import CommonConfirmModal from '../common/CommonConfirmModal.vue'
+import RepostModal from './RepostModal.vue'
+
+const alertStore = useAlertStore()
+
+const modalStore = useModalStore()
+
 const props = defineProps({ comments: Array })
+
+// 삭제 컨펌 모달
+const openDeleteConfirm = () => {
+  modalStore.openModal(CommonConfirmModal, {
+    title: '게시글 삭제',
+    message: '정말 삭제하시겠습니까?',
+    onConfirm: () => {
+      // 성공
+      alertStore.show('삭제하였습니다.', 'success')
+      // 실패
+      // alertStore.show('삭제에 실패하였습니다.', 'danger')
+      modalStore.closeModal()
+    },
+  })
+}
+
+// 댓글 등록 컨펌 모달
+const openRegisterConfirm = () => {
+  modalStore.openModal(CommonConfirmModal, {
+    title: '댓글 등록',
+    message: '댓글을 등록하시겠습니까?',
+    onConfirm: () => {
+      // 성공
+      alertStore.show('등록되었습니다.', 'success')
+      // 실패
+      // alertStore.show('등록에 실패하였습니다.', 'danger')
+      modalStore.closeModal()
+    },
+  })
+}
+
+// 신고 모달
+const clickRepostApplication = () => {
+  modalStore.openModal(RepostModal, {})
+}
 </script>
-<style></style>
+<style>
+button {
+  background: inherit;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  overflow: visible;
+  cursor: pointer;
+}
+.font-size-10 {
+  font-size: 1rem;
+}
+.font-size-11 {
+  font-size: 1.1rem;
+}
+.font-size-12 {
+  font-size: 1.2rem;
+}
+.font-size-13 {
+  font-size: 1.3rem;
+}
+.font-size-15 {
+  font-size: 1.5rem;
+}
+</style>
