@@ -235,7 +235,7 @@
             <!-- 버튼 영역 (중앙 정렬, 크기 증가) -->
             <div class="d-flex justify-content-center align-items-center gap-3">
               <a
-                @click="openResumeModal"
+                @click="applyCheck"
                 href="#"
                 class="btn btn-lg btn-rounded btn-primary btn-lg"
                 >지원하기</a
@@ -269,14 +269,23 @@
 <script setup>
 import UserResumeModal from '@/fo/components/mypage/common/CommonResumeModal.vue'
 import { useModalStore } from '../../stores/modalStore.js'
+import { useAlertStore } from '../../stores/alertStore.js'
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
+import { ref } from 'vue'
 
 const modalStore = useModalStore()
+const alert = useAlertStore()
 
-const openResumeModal = () => {
-  modalStore.openModal(UserResumeModal, {
-    size: 'modal-md',
-  })
+const hasApplied = ref(false) // 추후 api 불러와 받은 값으로 변경
+
+const applyCheck = () => {
+  if (hasApplied.value) {
+    alert.show('이미 지원한 프로젝트입니다.', 'danger')
+  } else {
+    modalStore.openModal(UserResumeModal, {
+      size: 'modal-md',
+    })
+  }
 }
 
 const project = {
