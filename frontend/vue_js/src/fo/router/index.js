@@ -5,40 +5,29 @@ import TestPage from '../views/TestPage.vue'
 import UserProjectSpecPage from '../views/project/UserProjectSpecPage.vue'
 import CompanyProjectSpecPage from '../views/project/CompanyProjectSpecPage.vue'
 import ProjectPostPage from '../views/project/ProjectPostPage.vue'
-<<<<<<< HEAD
 import BoardListPage from '../views/community/BoardListPage.vue'
 import BoardDetailPage from '../views/community/BoardDetailPage.vue'
 import QnaDetailPage from '../views/community/QnaDetailPage.vue'
 import BoardResisterPage from '../views/community/BoardResisterPage.vue'
 import QnaResisterPage from '../views/community/QnaResisterPage.vue'
-=======
-import BoardList from '../views/community/BoardList.vue'
-import BoardDetail from '../views/community/BoardDetail.vue'
-import QnaDetail from '../views/community/QnaDetail.vue'
->>>>>>> f30348154436a87dbcf99ccf9296d9dd17f0726b
 import LoginPage from '../views/login&signup/LoginPage.vue'
 import FindAccountPage from '../views/login&signup/FindAccountPage.vue'
 import FindIdResultPage from '../views/login&signup/FindIdResultPage.vue'
 import ResetPasswordPage from '../views/login&signup/ResetPasswordPage.vue'
 import SignUpPage from '../views/login&signup/SignUpPage.vue'
-<<<<<<< HEAD
 import AffiliationListPage from '../views/company/AffiliationListPage.vue'
 import QnaListPage from '../views/community/QnaListPage.vue'
-=======
-import AffiliationList from '../views/company/AffiliationList.vue'
-import QnaList from '../views/community/QnaList.vue'
->>>>>>> f30348154436a87dbcf99ccf9296d9dd17f0726b
 import MyPageLayout from '../views/mypage/MyPageLayout.vue'
 import InformationEditPage from '../views/mypage/common/InformationEditPage.vue'
-import AffiliationEditPage from '../views/mypage/company/AffiliationEditPage.vue'
-import WithdrawPage from '../views/mypage/common/WithdrawPage.vue'
-import AffiliatedJobApplicationsPage from '../views/mypage/personal/AffiliatedJobApplicationsPage.vue'
-import AffiliatedScrapPage from '../views/mypage/personal/AffiliatedScrapPage.vue'
 import ResumeListPage from '../views/mypage/personal/ResumeListPage.vue'
 import AffiliatedMembersPage from '../views/mypage/company/AffiliatedMembersPage.vue'
 import AffiliationApplicantListPage from '../views/mypage/company/AffiliationApplicantListPage.vue'
 import ProjectListPage from '../views/mypage/company/ProjectListPage.vue'
 import ResumeFormPage from '../views/mypage/personal/ResumeFormPage.vue'
+import WithdrawPage from '../views/mypage/common/WithdrawPage.vue'
+import AffiliatedJobApplicationsPage from '../views/mypage/personal/AffiliatedJobApplicationsPage.vue'
+import AffiliatedScrapPage from '../views/mypage/personal/AffiliatedScrapPage.vue'
+import AffiliationEditPage from '../views/mypage/company/AffiliationEditPage.vue'
 
 const routes = [
   {
