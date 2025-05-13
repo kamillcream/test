@@ -10,10 +10,9 @@
     <div class="form-group mb-4">
       <label class="form-label mb-1 text-2">내용</label>
       <div
-        class="border rounded p-3"
+        class="border rounded p-3 edt-area"
         id="editor"
         contenteditable="true"
-        style="min-height: 200px; background-color: #fff"
       >
         <p class="text-muted m-0">
           에디터 영역입니다. 여기에 내용을 입력하세요.
@@ -95,4 +94,9 @@ const removeNTag = (tag) => {
   console.log(normalTags.value)
 }
 </script>
-<style></style>
+<style>
+.edt_area {
+  min-height: 200px;
+  background-color: #fff;
+}
+</style>

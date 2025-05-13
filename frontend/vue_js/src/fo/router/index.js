@@ -5,19 +5,19 @@ import TestPage from '../views/TestPage.vue'
 import UserProjectSpecPage from '../views/project/UserProjectSpecPage.vue'
 import CompanyProjectSpecPage from '../views/project/CompanyProjectSpecPage.vue'
 import ProjectPostPage from '../views/project/ProjectPostPage.vue'
-import BoardList from '../views/community/BoardList.vue'
-import BoardDetail from '../views/community/BoardDetail.vue'
-import QnaDetail from '../views/community/QnaDetail.vue'
+import BoardListPage from '../views/community/BoardListPage.vue'
+import BoardDetailPage from '../views/community/BoardDetailPage.vue'
+import QnaDetailPage from '../views/community/QnaDetailPage.vue'
 import LoginPage from '../views/user/LoginPage.vue'
 import FindAccountPage from '../views/user/FindAccountPage.vue'
 import FindIdResultPage from '../views/user/FindIdResultPage.vue'
 import ResetPasswordPage from '../views/user/ResetPasswordPage.vue'
 import PersonalRegisterPage from '../views/user/PersonalRegisterPage.vue'
 import CompanyRegisterPage from '../views/user/CompanyRegisterPage.vue'
-import AffiliationList from '../views/company/AffiliationList.vue'
-import QnaList from '../views/community/QnaList.vue'
-import BoardResister from '../views/community/BoardResister.vue'
-import QnaResister from '../views/community/QnaResister.vue'
+import AffiliationListPage from '../views/company/AffiliationListPage.vue'
+import QnaListPage from '../views/community/QnaListPage.vue'
+import BoardResisterPage from '../views/community/BoardResisterPage.vue'
+import QnaResisterPage from '../views/community/QnaResisterPage.vue'
 
 const routes = [
   {
@@ -52,39 +52,39 @@ const routes = [
 
   {
     path: '/board',
-    component: BoardList,
-    name: 'BoardList',
+    component: BoardListPage,
+    name: 'BoardListPage',
   },
 
   {
     path: '/board/register',
-    component: BoardResister,
-    name: 'BoardResister',
+    component: BoardResisterPage,
+    name: 'BoardResisterPage',
   },
 
   {
     path: '/board/:board_sq',
-    component: BoardDetail,
-    name: 'BoardDetail',
+    component: BoardDetailPage,
+    name: 'BoardDetailPage',
     props: true,
   },
 
   {
     path: '/qna',
-    component: QnaList,
-    name: 'QnaList',
+    component: QnaListPage,
+    name: 'QnaListPage',
   },
 
   {
     path: '/qna/register',
-    component: QnaResister,
-    name: 'QnaResister',
+    component: QnaResisterPage,
+    name: 'QnaResisterPage',
   },
 
   {
     path: '/qna/:board_sq',
-    component: QnaDetail,
-    name: 'QnaDetail',
+    component: QnaDetailPage,
+    name: 'QnaDetailPage',
     props: true,
   },
 
@@ -114,8 +114,8 @@ const routes = [
 
   {
     path: '/affiliation',
-    component: AffiliationList,
-    name: 'affiliationList',
+    component: AffiliationListPage,
+    name: 'affiliationListPage',
   },
 
   {

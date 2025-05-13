@@ -72,7 +72,29 @@ const boardList = [
   {
     board_sq: 1,
     board_ttl: '이력서 피드백 부탁드립니다! (프론트엔드 신입)',
-    tags: ['HTML', '이력서', '신입'],
+    normal_tags: [
+      'HTML',
+      '이력서',
+      '신입',
+      'HTML',
+      '이력서',
+      '신입',
+      'HTML',
+      '이력서',
+      '신입',
+      'HTML',
+      '이력서',
+      '신입',
+      'HTML',
+      '이력서',
+      '신입',
+      'HTML',
+      '이력서',
+      '신입',
+      'HTML',
+      '이력서',
+      '신입',
+    ],
     user_nm: 'jun_dev',
     created_at: '2025-04-17',
     view_cnt: 88,
@@ -82,7 +104,7 @@ const boardList = [
   {
     board_sq: 2,
     board_ttl: 'React 사이드 프로젝트 팀원 모집합니다 (기획 완료)',
-    tags: ['React', '팀모집', '사이드'],
+    normal_tags: ['React', '팀모집', '사이드'],
     user_nm: 'codingmate',
     created_at: '2025-04-16',
     view_cnt: 142,
@@ -92,7 +114,7 @@ const boardList = [
   {
     board_sq: 3,
     board_ttl: '스터디 같이 하실 분! (백엔드 Java 중심)',
-    tags: ['Java', '스터디', '백엔드'],
+    normal_tags: ['Java', '스터디', '백엔드'],
     user_nm: 'sunny_backend',
     created_at: '2025-04-14',
     view_cnt: 76,
@@ -102,7 +124,7 @@ const boardList = [
   {
     board_sq: 4,
     board_ttl: '포트폴리오용 프로젝트 피드백 부탁드려요!',
-    tags: ['포트폴리오', 'UI/UX', '신입'],
+    normal_tags: ['포트폴리오', 'UI/UX', '신입'],
     user_nm: 'soyoung',
     created_at: '2025-04-13',
     view_cnt: 103,
@@ -112,7 +134,7 @@ const boardList = [
   {
     board_sq: 5,
     board_ttl: 'CS 기반 면접 스터디 멤버 구합니다 (온라인)',
-    tags: ['CS', '스터디', '온라인'],
+    normal_tags: ['CS', '스터디', '온라인'],
     user_nm: 'study_cs',
     created_at: '2025-04-12',
     view_cnt: 192,
@@ -122,7 +144,7 @@ const boardList = [
   {
     board_sq: 1,
     board_ttl: '이력서 피드백 부탁드립니다! (프론트엔드 신입)',
-    tags: ['HTML', '이력서', '신입'],
+    normal_tags: ['HTML', '이력서', '신입'],
     user_nm: 'jun_dev',
     created_at: '2025-04-17',
     view_cnt: 88,
@@ -132,7 +154,7 @@ const boardList = [
   {
     board_sq: 2,
     board_ttl: 'React 사이드 프로젝트 팀원 모집합니다 (기획 완료)',
-    tags: ['React', '팀모집', '사이드'],
+    normal_tags: ['React', '팀모집', '사이드'],
     user_nm: 'codingmate',
     created_at: '2025-04-16',
     view_cnt: 142,
@@ -142,7 +164,7 @@ const boardList = [
   {
     board_sq: 3,
     board_ttl: '스터디 같이 하실 분! (백엔드 Java 중심)',
-    tags: ['Java', '스터디', '백엔드'],
+    normal_tags: ['Java', '스터디', '백엔드'],
     user_nm: 'sunny_backend',
     created_at: '2025-04-14',
     view_cnt: 76,
@@ -152,7 +174,7 @@ const boardList = [
   {
     board_sq: 4,
     board_ttl: '포트폴리오용 프로젝트 피드백 부탁드려요!',
-    tags: ['포트폴리오', 'UI/UX', '신입'],
+    normal_tags: ['포트폴리오', 'UI/UX', '신입'],
     user_nm: 'soyoung',
     created_at: '2025-04-13',
     view_cnt: 103,
@@ -162,7 +184,7 @@ const boardList = [
   {
     board_sq: 5,
     board_ttl: 'CS 기반 면접 스터디 멤버 구합니다 (온라인)',
-    tags: ['CS', '스터디', '온라인'],
+    normal_tags: ['CS', '스터디', '온라인'],
     user_nm: 'study_cs',
     created_at: '2025-04-12',
     view_cnt: 192,
@@ -172,7 +194,7 @@ const boardList = [
   {
     board_sq: 1,
     board_ttl: '이력서 피드백 부탁드립니다! (프론트엔드 신입)',
-    tags: ['HTML', '이력서', '신입'],
+    normal_tags: ['HTML', '이력서', '신입'],
     user_nm: 'jun_dev',
     created_at: '2025-04-17',
     view_cnt: 88,
@@ -182,7 +204,7 @@ const boardList = [
   {
     board_sq: 2,
     board_ttl: 'React 사이드 프로젝트 팀원 모집합니다 (기획 완료)',
-    tags: ['React', '팀모집', '사이드'],
+    normal_tags: ['React', '팀모집', '사이드'],
     user_nm: 'codingmate',
     created_at: '2025-04-16',
     view_cnt: 142,
@@ -192,7 +214,7 @@ const boardList = [
   {
     board_sq: 3,
     board_ttl: '스터디 같이 하실 분! (백엔드 Java 중심)',
-    tags: ['Java', '스터디', '백엔드'],
+    normal_tags: ['Java', '스터디', '백엔드'],
     user_nm: 'sunny_backend',
     created_at: '2025-04-14',
     view_cnt: 76,
@@ -202,7 +224,7 @@ const boardList = [
   {
     board_sq: 4,
     board_ttl: '포트폴리오용 프로젝트 피드백 부탁드려요!',
-    tags: ['포트폴리오', 'UI/UX', '신입'],
+    normal_tags: ['포트폴리오', 'UI/UX', '신입'],
     user_nm: 'soyoung',
     created_at: '2025-04-13',
     view_cnt: 103,
@@ -212,7 +234,7 @@ const boardList = [
   {
     board_sq: 5,
     board_ttl: 'CS 기반 면접 스터디 멤버 구합니다 (온라인)',
-    tags: ['CS', '스터디', '온라인'],
+    normal_tags: ['CS', '스터디', '온라인'],
     user_nm: 'study_cs',
     created_at: '2025-04-12',
     view_cnt: 192,
@@ -222,7 +244,7 @@ const boardList = [
   {
     board_sq: 1,
     board_ttl: '이력서 피드백 부탁드립니다! (프론트엔드 신입)',
-    tags: ['HTML', '이력서', '신입'],
+    normal_tags: ['HTML', '이력서', '신입'],
     user_nm: 'jun_dev',
     created_at: '2025-04-17',
     view_cnt: 88,
@@ -232,7 +254,7 @@ const boardList = [
   {
     board_sq: 2,
     board_ttl: 'React 사이드 프로젝트 팀원 모집합니다 (기획 완료)',
-    tags: ['React', '팀모집', '사이드'],
+    normal_tags: ['React', '팀모집', '사이드'],
     user_nm: 'codingmate',
     created_at: '2025-04-16',
     view_cnt: 142,
@@ -242,7 +264,7 @@ const boardList = [
   {
     board_sq: 3,
     board_ttl: '스터디 같이 하실 분! (백엔드 Java 중심)',
-    tags: ['Java', '스터디', '백엔드'],
+    normal_tags: ['Java', '스터디', '백엔드'],
     user_nm: 'sunny_backend',
     created_at: '2025-04-14',
     view_cnt: 76,
@@ -252,7 +274,7 @@ const boardList = [
   {
     board_sq: 4,
     board_ttl: '포트폴리오용 프로젝트 피드백 부탁드려요!',
-    tags: ['포트폴리오', 'UI/UX', '신입'],
+    normal_tags: ['포트폴리오', 'UI/UX', '신입'],
     user_nm: 'soyoung',
     created_at: '2025-04-13',
     view_cnt: 103,
@@ -262,7 +284,7 @@ const boardList = [
   {
     board_sq: 5,
     board_ttl: 'CS 기반 면접 스터디 멤버 구합니다 (온라인)',
-    tags: ['CS', '스터디', '온라인'],
+    normal_tags: ['CS', '스터디', '온라인'],
     user_nm: 'study_cs',
     created_at: '2025-04-12',
     view_cnt: 192,
@@ -272,7 +294,7 @@ const boardList = [
   {
     board_sq: 1,
     board_ttl: '이력서 피드백 부탁드립니다! (프론트엔드 신입)',
-    tags: ['HTML', '이력서', '신입'],
+    normal_tags: ['HTML', '이력서', '신입'],
     user_nm: 'jun_dev',
     created_at: '2025-04-17',
     view_cnt: 88,
@@ -282,7 +304,7 @@ const boardList = [
   {
     board_sq: 2,
     board_ttl: 'React 사이드 프로젝트 팀원 모집합니다 (기획 완료)',
-    tags: ['React', '팀모집', '사이드'],
+    normal_tags: ['React', '팀모집', '사이드'],
     user_nm: 'codingmate',
     created_at: '2025-04-16',
     view_cnt: 142,
@@ -292,7 +314,7 @@ const boardList = [
   {
     board_sq: 3,
     board_ttl: '스터디 같이 하실 분! (백엔드 Java 중심)',
-    tags: ['Java', '스터디', '백엔드'],
+    normal_tags: ['Java', '스터디', '백엔드'],
     user_nm: 'sunny_backend',
     created_at: '2025-04-14',
     view_cnt: 76,
@@ -302,7 +324,7 @@ const boardList = [
   {
     board_sq: 4,
     board_ttl: '포트폴리오용 프로젝트 피드백 부탁드려요!',
-    tags: ['포트폴리오', 'UI/UX', '신입'],
+    normal_tags: ['포트폴리오', 'UI/UX', '신입'],
     user_nm: 'soyoung',
     created_at: '2025-04-13',
     view_cnt: 103,
@@ -312,7 +334,7 @@ const boardList = [
   {
     board_sq: 5,
     board_ttl: 'CS 기반 면접 스터디 멤버 구합니다 (온라인)',
-    tags: ['CS', '스터디', '온라인'],
+    normal_tags: ['CS', '스터디', '온라인'],
     user_nm: 'study_cs',
     created_at: '2025-04-12',
     view_cnt: 192,

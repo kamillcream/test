@@ -1,11 +1,7 @@
 <template>
   <div>
     <div class="modal-header">
-      <h4
-        class="modal-title"
-        id="schoolSearchModalLabel"
-        style="font-weight: bold"
-      >
+      <h4 class="modal-title text-bold" id="schoolSearchModalLabel">
         소속 신청하기
       </h4>
       <button
@@ -16,15 +12,12 @@
         aria-hidden="true"
       ></button>
     </div>
-    <div class="modal-body" style="background-color: #f5f5f5">
+    <div class="modal-body bg-f5">
       <!-- 회색 배경 -->
 
       <!-- 회사명 -->
       <div class="mb-3">
-        <label
-          for="companyName"
-          class="form-label text-primary"
-          style="font-weight: bold"
+        <label for="companyName" class="form-label text-primary text-bold"
           >회사명</label
         >
         <div class="text-dark" id="companyName">
@@ -34,10 +27,7 @@
 
       <!-- 대표자명 -->
       <div class="mb-3">
-        <label
-          for="ceoName"
-          class="form-label text-primary"
-          style="font-weight: bold"
+        <label for="ceoName" class="form-label text-primary text-bold"
           >대표자명</label
         >
         <div class="text-dark" id="ceoName">{{ afltnInfo.user_nm }}</div>
@@ -45,10 +35,7 @@
 
       <!-- 개업년수 -->
       <div class="mb-3">
-        <label
-          for="yearsInBusiness"
-          class="form-label text-primary"
-          style="font-weight: bold"
+        <label for="yearsInBusiness" class="form-label text-primary text-bold"
           >개업년수</label
         >
         <!-- [수정] 오픈일자부터 개업일수 계산 -->
@@ -59,10 +46,7 @@
 
       <!-- 회사위치 -->
       <div class="mb-3">
-        <label
-          for="companyLocation"
-          class="form-label text-primary"
-          style="font-weight: bold"
+        <label for="companyLocation" class="form-label text-primary text-bold"
           >회사위치</label
         >
         <div class="text-dark" id="companyLocation">
@@ -74,8 +58,7 @@
       <div class="mb-3">
         <label
           for="companyDescription"
-          class="form-label text-primary"
-          style="font-weight: bold"
+          class="form-label text-primary text-bold"
           >회사 설명</label
         >
         <div class="text-dark" id="companyDescription">
@@ -87,8 +70,7 @@
       <div class="mb-3">
         <label
           for="companyDescription"
-          class="form-label text-primary"
-          style="font-weight: bold"
+          class="form-label text-primary text-bold"
           >관련 태그</label
         >
         <div class="d-flex flex-wrap gap-2 mb-3">
@@ -103,10 +85,7 @@
 
       <!-- 이력서 선택 -->
       <div class="mb-3">
-        <label
-          for="resume"
-          class="form-label text-primary"
-          style="font-weight: bold"
+        <label for="resume" class="form-label text-primary text-bold"
           >소속 신청할 이력서</label
         >
 
@@ -119,10 +98,7 @@
 
       <!-- 간단한 자기소개 -->
       <div class="mb-3">
-        <label
-          for="selfIntroduction"
-          class="form-label text-primary"
-          style="font-weight: bold"
+        <label for="selfIntroduction" class="form-label text-primary text-bold"
           >간단한 자기소개</label
         >
         <textarea
@@ -164,4 +140,11 @@ const closeModal = () => {
 // 소속 신청하기 버튼 클릭 이벤트
 const clickRecruit = () => {}
 </script>
-<style></style>
+<style>
+.text-bold {
+  font-weight: bold;
+}
+.bg-f5 {
+  background: #f5f5f5;
+}
+</style>

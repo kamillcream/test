@@ -10,36 +10,26 @@
         <BoardPost :boardInfo="boardInfo" :isQna="true" />
         <!-- 답변 영역 -->
         <div class="answers-section mt-5">
-          <h4 class="mb-4" style="font-size: 1.5rem">
+          <h4 class="mb-4 font-size-m">
             답변 ({{ boardInfo.answers.length }})
           </h4>
           <div
             v-for="answer in boardInfo.answers"
             :key="answer"
-            class="card p-4 mb-3 border-0"
+            class="card p-4 mb-3 border-0 answer-box"
             @click="clickApplication"
-            style="
-              background-color: #f4f4f4;
-              border-radius: 10px;
-              display: flex;
-              flex-direction: column;
-            "
           >
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 class="mb-0 text-dark" style="font-size: 1.3rem">
+              <h5 class="mb-0 text-dark font-size-s">
                 {{ answer.answer_ttl }}
               </h5>
               <span
                 v-if="answer.answer_is_adopted_yn == 'Y'"
-                class="badge bg-primary"
-                style="font-size: 1.1rem"
+                class="badge bg-primary font-size-xs"
                 >채택 답변</span
               >
             </div>
-            <div
-              class="d-flex justify-content-between text-muted"
-              style="font-size: 1.1rem"
-            >
+            <div class="d-flex justify-content-between text-muted font-size-xs">
               <div>
                 <i class="far fa-user"></i> By
                 <span>{{ answer.user_nm }}</span> &nbsp;&nbsp;
@@ -148,4 +138,20 @@ const clickApplication = () => {
   modalStore.openModal(AnswerDetailModal, { size: 'modal-lg' })
 }
 </script>
-<style></style>
+<style>
+.font-size-xs {
+  font-size: 1.1rem;
+}
+.font-size-x {
+  font-size: 1.3rem;
+}
+.font-size-m {
+  font-size: 1.5rem;
+}
+.answer-box {
+  background-color: #f4f4f4;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+}
+</style>

@@ -52,7 +52,7 @@
         </div>
 
         <!-- 직접입력칸 -->
-        <div class="mt-3" id="customReasonContainer" style="display: block">
+        <div class="mt-3 text-area" id="customReasonContainer">
           <label for="customReason" class="form-label">기타 사유 입력</label>
           <textarea
             class="form-control"
@@ -86,4 +86,8 @@ const closeModal = () => {
   modalStore.closeModal()
 }
 </script>
-<style></style>
+<style>
+.text-area {
+  display: block;
+}
+</style>

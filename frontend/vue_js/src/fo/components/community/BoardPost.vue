@@ -5,49 +5,46 @@
         <div v-if="isQna" class="d-flex flex-wrap gap-2 mb-2">
           <span
             v-if="boardInfo.board_adopt_status_cd == 1"
-            class="badge bg-secondary badge-xs"
-            style="font-size: large"
+            class="badge bg-secondary badge-xs font-size-l"
             >자체해결</span
           >
           <span
             v-if="boardInfo.board_adopt_status_cd == 2"
-            class="badge bg-warning badge-xs"
-            style="font-size: large"
+            class="badge bg-warning badge-xs font-size-l"
             >진행중</span
           >
           <span
             v-if="boardInfo.board_adopt_status_cd == 3"
-            class="badge bg-success badge-xs"
-            style="font-size: large"
+            class="badge bg-success badge-xs font-size-l"
             >채택완료</span
           >
           <span
             v-if="boardInfo.board_adopt_status_cd == 4"
-            class="badge bg-danger badge-xs"
-            style="font-size: large"
+            class="badge bg-danger badge-xs font-size-l"
             >미해결</span
           >
         </div>
+        <div v-if="isAdopted" class="d-flex flex-wrap gap-2 mb-2">
+          <span class="badge bg-primary badge-xs font-size-l">채택 답변</span>
+        </div>
         <!-- 제목 + 오른쪽 아이콘들 -->
-        <div class="d-flex justify-content-between align-items-start">
-          <a href="blog-post.html">{{ boardInfo.board_ttl }}</a>
+        <div class="d-flex justify-content-between align-items-start ttl-area">
+          <p class="text-primary board-ttl">{{ boardInfo.board_ttl }}</p>
           <!-- 아이콘 버튼 -->
-          <span class="post-icons d-flex">
+          <span class="post-icons d-flex ttl-icon-area">
             <!-- 조회수 버튼 추가 -->
             <button
-              class="btn btn-light btn-rounded text-grey d-flex align-items-center me-2"
-              style="font-size: 1rem"
+              class="btn btn-light btn-rounded text-grey d-flex align-items-center me-2 font-size-xs"
             >
-              <i class="fa-solid fa-eye" style="font-size: 1.2rem"></i>
+              <i class="fa-solid fa-eye font-size-s"></i>
               <span class="me-2 ms-2 text-grey">조회수</span>
               <span>{{ boardInfo.view_cnt }}</span>
             </button>
             <!-- 추천 버튼 -->
             <button
-              class="btn btn-light btn-rounded text-grey d-flex align-items-center me-2"
-              style="font-size: 1rem"
+              class="btn btn-light btn-rounded text-grey d-flex align-items-center me-2 font-size-xs"
             >
-              <i class="fa-regular fa-thumbs-up" style="font-size: 1.2rem"></i>
+              <i class="fa-regular fa-thumbs-up font-size-s"></i>
               <span class="me-2 ms-2 text-grey">추천</span>
               <span>{{ boardInfo.recommend_cnt }}</span>
             </button>
@@ -55,24 +52,23 @@
             <!-- [추가] 본인 인증 로직 -->
             <button
               v-if="boardInfo.user_sq != viewUsersq"
-              class="btn btn-light btn-rounded text-grey d-flex align-items-center me-2"
-              style="font-size: 1rem"
+              class="btn btn-light btn-rounded text-grey d-flex align-items-center me-2 font-size-xs"
               @click="clickRepostApplication"
             >
-              <i class="fa-solid fa-land-mine-on" style="font-size: 1.2rem"></i>
+              <i class="fa-solid fa-land-mine-on font-size-s"></i>
               <span class="me-2 ms-2 text-grey">신고</span>
             </button>
           </span>
         </div>
       </h1>
       <div class="post-meta">
-        <span
+        <span class="me-2"
           ><i class="far fa-user"></i> By
           <a href="#">{{ boardInfo.user_nm }}</a>
         </span>
         <span
-          ><i class="far fa-calendar-alt"></i>
-          <a href="#">{{ boardInfo.created_at }}</a></span
+          ><i class="far fa-calendar-alt me-1"></i>
+          <a href="#"> {{ boardInfo.created_at }}</a></span
         >
       </div>
     </div>
@@ -101,14 +97,14 @@
         v-for="skill_tag in boardInfo.skill_tags"
         :key="skill_tag"
         href="#"
-        class="btn btn-rounded btn-primary"
+        class="btn btn-rounded btn-primary me-2"
         >{{ skill_tag }}</a
       >
       <a
         v-for="normal_tag in boardInfo.normal_tags"
         :key="normal_tag"
         href="#"
-        class="btn btn-rounded btn-light"
+        class="btn btn-rounded btn-light me-2"
         >{{ normal_tag }}</a
       >
     </div>
@@ -119,21 +115,31 @@
       <button
         v-if="isQna"
         type="button"
-        class="btn btn-primary"
+        class="btn btn-primary me-2"
         @click="clickApplication"
       >
         답변 작성
       </button>
-      <button v-if="isQna" type="button" class="btn btn-primary">
+      <button v-if="isQna" type="button" class="btn btn-primary me-2">
         자체 해결
       </button>
-      <button v-if="isQna" type="button" class="btn btn-primary">미해결</button>
-      <a :href="`/${isQna ? 'qna' : 'board'}/register`" class="btn btn-primary"
+      <button v-if="isQna" type="button" class="btn btn-primary me-2">
+        미해결
+      </button>
+      <a
+        :href="`/${isQna ? 'qna' : 'board'}/register`"
+        class="btn btn-primary me-2"
         >수정</a
       >
       <button type="button" class="btn btn-primary" @click="openConfirm">
         삭제
       </button>
+    </div>
+    <div
+      v-if="boardInfo.user_sq == Qusetion_user_sq"
+      class="post-admin mt-4 text-end"
+    >
+      <a href="#" class="btn btn-primary">답변 채택하기</a>
     </div>
   </div>
 </template>
@@ -191,5 +197,23 @@ button {
   padding: 0;
   overflow: visible;
   cursor: pointer;
+}
+.font-size-xs {
+  font-size: 1rem;
+}
+.font-size-s {
+  font-size: 1.2rem;
+}
+.font-size-l {
+  font-size: large;
+}
+.ttl-area {
+  flex-wrap: wrap;
+}
+.board-ttl {
+  line-height: 1.2;
+}
+.ttl-icon-area {
+  margin-left: auto;
 }
 </style>
