@@ -355,14 +355,14 @@
 </template>
 
 <script setup>
-import CalendarModal from '../../components/project/CalendarModal.vue'
-import SkillSelectModal from '../../components/project/SkillSelectModal.vue'
+import CalendarModal from '@/fo/components/project/CalendarModal.vue'
+import SkillSelectModal from '@/fo/components/project/SkillSelectModal.vue'
 //import InterviewTimeModal from '../../components/project/InterviewTimeModal.vue'
 import MyPageSideBar from '@/fo/components/mypage/MyPageSideBar.vue'
-import ProjectRecruitButtonGroup from '../../components/project/ProjectRecruitButtonGroup.vue'
-import ProjectSkillButtonGroup from '../../components/project/ProjectSkillButtonGroup.vue'
-import ProjectInverviewTimeButtonGroupVue from '../../components/project/ProjectInverviewTimeButtonGroup.vue'
-import { useModalStore } from '../../stores/modalStore.js'
+import ProjectRecruitButtonGroup from '@/fo/components/project/ProjectRecruitButtonGroup.vue'
+import ProjectSkillButtonGroup from '@/fo/components/project/ProjectSkillButtonGroup.vue'
+import ProjectInverviewTimeButtonGroupVue from '@/fo/components/project/ProjectInverviewTimeButtonGroup.vue'
+import { useModalStore } from '@/fo/stores/modalStore.js'
 
 import { ref, computed } from 'vue'
 

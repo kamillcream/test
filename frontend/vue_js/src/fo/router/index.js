@@ -4,17 +4,20 @@ import MainPage from '../views/MainPage.vue'
 import TestPage from '../views/TestPage.vue'
 import UserProjectSpecPage from '../views/project/UserProjectSpecPage.vue'
 import CompanyProjectSpecPage from '../views/project/CompanyProjectSpecPage.vue'
-import ProjectPostPage from '../views/project/ProjectPostPage.vue'
+import ProjectPostPage from '../views/mypage/common/ProjectPostPage.vue'
+
 import BoardListPage from '../views/community/BoardListPage.vue'
 import BoardDetailPage from '../views/community/BoardDetailPage.vue'
 import QnaDetailPage from '../views/community/QnaDetailPage.vue'
 import BoardResisterPage from '../views/community/BoardResisterPage.vue'
 import QnaResisterPage from '../views/community/QnaResisterPage.vue'
+
 import LoginPage from '../views/login&signup/LoginPage.vue'
 import FindAccountPage from '../views/login&signup/FindAccountPage.vue'
 import FindIdResultPage from '../views/login&signup/FindIdResultPage.vue'
 import ResetPasswordPage from '../views/login&signup/ResetPasswordPage.vue'
 import SignUpPage from '../views/login&signup/SignUpPage.vue'
+
 import AffiliationListPage from '../views/company/AffiliationListPage.vue'
 import QnaListPage from '../views/community/QnaListPage.vue'
 import MyPageLayout from '../views/mypage/MyPageLayout.vue'
@@ -22,7 +25,7 @@ import InformationEditPage from '../views/mypage/common/InformationEditPage.vue'
 import ResumeListPage from '../views/mypage/personal/ResumeListPage.vue'
 import AffiliatedMembersPage from '../views/mypage/company/AffiliatedMembersPage.vue'
 import AffiliationApplicantListPage from '../views/mypage/company/AffiliationApplicantListPage.vue'
-import ProjectListPage from '../views/mypage/company/ProjectListPage.vue'
+import ProjectListPage from '../views/mypage/common/ProjectListPage.vue'
 import ResumeFormPage from '../views/mypage/personal/ResumeFormPage.vue'
 import WithdrawPage from '../views/mypage/common/WithdrawPage.vue'
 import AffiliatedJobApplicationsPage from '../views/mypage/personal/AffiliatedJobApplicationsPage.vue'
@@ -59,7 +62,6 @@ const routes = [
     component: ProjectPostPage,
     name: 'ProjectPost',
   },
-
   {
     path: '/board',
     component: BoardListPage,
