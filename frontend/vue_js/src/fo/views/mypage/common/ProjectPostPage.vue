@@ -330,15 +330,15 @@
 </template>
 
 <script setup>
-import CalendarModal from '../../components/project/CalendarModal.vue'
-import SkillSelectModal from '../../components/project/SkillSelectModal.vue'
-import WorkTypeModal from '../../components/project/WorkTypeModal.vue'
-import JobModal from '../../components/project/JobModal.vue'
-import InterviewTimeModal from '../../components/project/InterviewTimeModal.vue'
-import ProjectJobButtonGroup from '../../components/project/ProjectJobButtonGroup.vue'
-import ProjectSkillButtonGroup from '../../components/project/ProjectSkillButtonGroup.vue'
-import ProjectInverviewTimeButtonGroupVue from '../../components/project/ProjectInverviewTimeButtonGroup.vue'
-import { useModalStore } from '../../stores/modalStore.js'
+import CalendarModal from '@/fo/components/project/CalendarModal.vue'
+import SkillSelectModal from '@/fo/components/project/SkillSelectModal.vue'
+import WorkTypeModal from '@/fo/components/project/WorkTypeModal.vue'
+import JobModal from '@/fo/components/project/JobModal.vue'
+import InterviewTimeModal from '@/fo/components/project/InterviewTimeModal.vue'
+import ProjectJobButtonGroup from '@/fo/components/project/ProjectJobButtonGroup.vue'
+import ProjectSkillButtonGroup from '@/fo/components/project/ProjectSkillButtonGroup.vue'
+import ProjectInverviewTimeButtonGroupVue from '@/fo/components/project/ProjectInverviewTimeButtonGroup.vue'
+import { useModalStore } from '../../../stores/modalStore.js'
 
 import { ref, computed } from 'vue'
 
