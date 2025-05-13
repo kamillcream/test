@@ -348,7 +348,6 @@ const confirmSelection = () => {
   padding-left: 5px;
 }
 .drp-selected::before {
-  content: '선택 일자: ';
   font-weight: normal;
   color: #555;
   margin-right: 4px;
