@@ -25,7 +25,7 @@ import InformationEditPage from '../views/mypage/common/InformationEditPage.vue'
 import ResumeListPage from '../views/mypage/personal/ResumeListPage.vue'
 import AffiliatedMembersPage from '../views/mypage/company/AffiliatedMembersPage.vue'
 import AffiliationApplicantListPage from '../views/mypage/company/AffiliationApplicantListPage.vue'
-import ProjectListPage from '../views/mypage/company/ProjectListPage.vue'
+import ProjectListPage from '../views/mypage/common/ProjectListPage.vue'
 import ResumeFormPage from '../views/mypage/personal/ResumeFormPage.vue'
 import WithdrawPage from '../views/mypage/common/WithdrawPage.vue'
 import AffiliatedJobApplicationsPage from '../views/mypage/personal/AffiliatedJobApplicationsPage.vue'
@@ -49,13 +49,13 @@ const routes = [
   },
 
   {
-    path: '/project/spec/user',
+    path: '/project/spec/user/:project_sq',
     component: UserProjectSpecPage,
     name: 'UserProjectSpec',
   },
 
   {
-    path: '/project/spec/company',
+    path: '/project/spec/company/:project_sq',
     component: CompanyProjectSpecPage,
     name: 'CompanyProjectSpec',
   },
