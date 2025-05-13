@@ -58,12 +58,6 @@ const routes = [
   },
 
   {
-    path: '/project',
-    component: ProjectPostPage,
-    name: 'ProjectPost',
-  },
-
-  {
     path: '/board',
     component: BoardListPage,
     name: 'BoardListPage',
@@ -201,6 +195,12 @@ const routes = [
         path: 'projectListPage',
         name: 'ProjectListPage',
         component: ProjectListPage,
+      },
+
+      {
+        path: 'projectPostPage',
+        name: 'ProjectPostPage',
+        component: ProjectPostPage,
       },
     ],
   },
