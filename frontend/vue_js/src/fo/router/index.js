@@ -32,6 +32,9 @@ import AffiliatedJobApplicationsPage from '../views/mypage/personal/AffiliatedJo
 import AffiliatedScrapPage from '../views/mypage/personal/AffiliatedScrapPage.vue'
 import AffiliationEditPage from '../views/mypage/company/AffiliationEditPage.vue'
 
+import AppliedProjectsPage from '../views/mypage/personal/AppliedProjectsPage.vue'
+import ProjectScrapPage from '../views/mypage/personal/ProjectScrapPage.vue'
+
 const routes = [
   {
     path: '/',
@@ -180,7 +183,16 @@ const routes = [
         name: 'ResumeForm',
         component: ResumeFormPage,
       },
-
+      {
+        path: 'appliedProjects',
+        name: 'appliedProjects',
+        component: AppliedProjectsPage,
+      },
+      {
+        path: 'projectScrap',
+        name: 'projectScrap',
+        component: ProjectScrapPage,
+      },
       //company
       {
         path: 'affiliationEdit',
