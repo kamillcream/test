@@ -5,11 +5,21 @@ spring:
     password: admin123!!
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  jpa:
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
 
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml
-  type-aliases-package: com.example.demo.entity
+  type-aliases-package: com.example.demo.**.entity
 
 server:
   port: 8080
   #address: 0.0.0.0 배포 시 활성화
+logging:
+   level:
+    org.mybatis: DEBUG
+    com.example.demo: DEBUG
+    org.hibernate.SQL: DEBUG
