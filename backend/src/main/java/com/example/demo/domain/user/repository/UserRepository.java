@@ -2,8 +2,8 @@ package com.example.demo.domain.user.repository;
 
 import org.springframework.stereotype.Repository;
 
-import com.example.demo.domain.user.dto.request.UserJoinRequestDto;
-import com.example.demo.domain.user.dto.response.UserJoinResponseDto;
+import com.example.demo.domain.user.dto.AddressDTO;
+import com.example.demo.domain.user.dto.UserDTO;
 import com.example.demo.domain.user.mapper.UserMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -14,15 +14,27 @@ public class UserRepository {
 
     private final UserMapper userMapper;
 
-    public void save(UserJoinRequestDto user) {
-        userMapper.insertUser(user);
+    public boolean existsByUserId(String userId) {
+        return userMapper.existsByUserId(userId);
     }
 
-    public boolean isEmailExists(String email) {
-        return userMapper.countByEmail(email) > 0;
+    public boolean existsByUserEmail(String userEmail) {
+        return userMapper.existsByUserEmail(userEmail);
     }
 
-    public UserJoinResponseDto findByEmail(String email) {
-        return userMapper.findByEmail(email);
+    public boolean existsByUserPhoneNum(String userPhoneNum) {
+        return userMapper.existsByUserPhoneNum(userPhoneNum);
+    }
+
+    public Long findAreaCodeSqBySigungu(String sigungu) {
+        return userMapper.selectAreaCodeSqBySigungu(sigungu);
+    }
+
+    public int insertAddress(AddressDTO dto) {
+        return userMapper.insertAddress(dto); // addressSq 자동 세팅
+    }
+
+    public int insertUser(UserDTO dto) {
+        return userMapper.insertUser(dto);
     }
 }

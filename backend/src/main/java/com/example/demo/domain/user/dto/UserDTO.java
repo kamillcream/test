@@ -1,11 +1,12 @@
-package com.example.demo.domain.user.dto.request;
-
-import lombok.Data;
+package com.example.demo.domain.user.dto;
 
 import java.time.LocalDate;
 
+import lombok.Data;
+
 @Data
-public class UserJoinRequestDto {
+public class UserDTO {
+    private Long addressSq;
     private String userId;
     private String userEmail;
     private String userPw;
@@ -15,5 +16,6 @@ public class UserJoinRequestDto {
     private LocalDate userBirthDt;
     private Long userTypeCd;
     private Long userSignupTypeCd;
+    private String userProfileImageUrl;
     private String userAgreedPrivacyPolicyYn;
 }

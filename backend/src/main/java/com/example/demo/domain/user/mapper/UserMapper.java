@@ -2,13 +2,22 @@ package com.example.demo.domain.user.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.example.demo.domain.user.dto.request.UserJoinRequestDto;
-import com.example.demo.domain.user.dto.response.UserJoinResponseDto;
-
+import com.example.demo.domain.user.dto.AddressDTO;
+import com.example.demo.domain.user.dto.UserDTO;
 
 @Mapper
 public interface UserMapper {
-    void insertUser(UserJoinRequestDto user);
-    int countByEmail(String userEmail);
-    UserJoinResponseDto findByEmail(String userEmail);
+
+    Long selectAreaCodeSqBySigungu(String sigungu);
+
+    int insertAddress(AddressDTO addressDTO);
+
+    int insertUser(UserDTO userDTO);
+
+    boolean existsByUserId(String userId);
+
+    boolean existsByUserEmail(String userEmail);
+
+    boolean existsByUserPhoneNum(String userPhoneNum);
+
 }

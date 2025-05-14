@@ -5,21 +5,22 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.domain.user.dto.request.UserJoinRequestDto;
+import com.example.demo.domain.user.dto.request.RequestSignUpDTO;
 import com.example.demo.domain.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-public class JoinController {
+public class SingUpController {
 
     private final UserService userService;
 
-    @PostMapping("/personalJoin")
-    public ResponseEntity<String> join(@RequestBody UserJoinRequestDto requestDto) {
+    // 개인 회원가입
+    @PostMapping("/personal/signup")
+    public ResponseEntity<?> signUp(@RequestBody RequestSignUpDTO dto) {
         try {
-            userService.join(requestDto);
+            userService.signUp(dto);
             return ResponseEntity.ok("회원가입 성공");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

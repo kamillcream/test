@@ -43,9 +43,11 @@ public class EmailVerificationService {
     }
 
     public boolean verifyCode(String email, String code) {
+        System.out.println("code" + code);
         String storedCode = redisRepository.getVerificationCode(email);
         System.out.println("stordeCode:" + storedCode);
         boolean success = storedCode != null && storedCode.equals(code);
+        System.out.println("success" + success);
         if (success)
             redisRepository.deleteCode(email); // 일회성 인증
         return success;
