@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.domain.community.mapper.BoardMapper">
+     
+     <resultMap id="BoardResultMap" type="com.example.demo.domain.community.entity.Board">
+	    <result column="board_sq" property="boardSq"/>
+        <result column="user_sq" property="userSq"/>
+        <result column="board_ttl" property="boardTtl"/>
+        <result column="board_description_edt" property="boardDescriptionEdt"/>
+        <result column="board_typ" property="boardTyp"/>
+        <result column="board_type_cd" property="boardTypeCd"/>
+        <result column="board_view_cnt" property="boardViewCnt"/>
+        <result column="board_comment_cnt" property="boardCommentCnt"/>
+        <result column="board_recommend_cnt" property="boardRecommendCnt"/>
+        <result column="board_adopt_status_cd" property="boardAdoptStatusCd"/>
+        <result column="board_is_deleted_yn" property="boardIsDeletedYn"/>
+        <result column="board_created_at" property="boardCreatedAt"/>
+	  </resultMap>
+
+    <select id="findByIdBoard" resultMap="BoardResultMap">
+        SELECT * FROM TBL_BOARD_M WHERE board_sq = #{boardSq} AND board_type_cd = #{boardTypeCd}
+    </select>
+
+    <select id="findAll" resultMap="BoardResultMap">
+        SELECT * FROM TBL_BOARD_M WHERE board_is_deleted_yn = 'N' AND board_type_cd = #{boardTypeCd}
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.domain.community.entity.Board" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO TBL_BOARD_M (user_sq, board_ttl, board_description_edt, board_adopt_status_cd, board_typ, board_type_cd) VALUES (#{userSq}, #{boardTtl}, #{boardDescriptionEdt}, 1501, #{boardTyp}, #{boardTypeCd})
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.domain.community.entity.Board">
+        UPDATE TBL_BOARD_M
+        SET board_ttl = #{boardTtl},
+        board_description_edt = #{boardDescriptionEdt},
+        board_adopt_status_cd = #{boardAdoptStatusCd}
+        WHERE board_sq = #{boardSq}
+    </update>
+
+    <update id="delete" parameterType="com.example.demo.domain.community.entity.Board">
+        UPDATE TBL_BOARD_M
+        SET board_is_deleted_yn = 'Y'
+        WHERE board_sq = #{boardSq}
+    </update>
+
+    <update id="addViewCnt" parameterType="com.example.demo.domain.community.entity.Board">
+        UPDATE TBL_BOARD_M
+        SET board_view_cnt = board_view_cnt + 1
+        WHERE board_sq = #{boardSq}
+    </update>
+
+</mapper>
