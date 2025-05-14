@@ -119,12 +119,13 @@ const rightMonth = ref({ month: 5, year: 2025 })
 
 const emit = defineEmits(['confirm'])
 
+const modalStore = useModalStore()
+
 const formatDate = (d) => {
   const date = new Date(d)
-  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date
-    .getDate()
+  return `${date.getFullYear()}-${(date.getMonth() + 1)
     .toString()
-    .padStart(2, '0')}`
+    .padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`
 }
 
 const formattedRange = computed(() => {
@@ -207,6 +208,7 @@ function selectDate(date) {
 
 function clearRange() {
   selectedRange.value = [null, null]
+  modalStore.closeModal()
 }
 
 function isInRange(d) {
@@ -306,7 +308,7 @@ const convertDate = (date) => {
   height: 40px;
   line-height: 40px;
   text-align: center;
-  border-radius: 50%;
+  border-radius: 0;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }

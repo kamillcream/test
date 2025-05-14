@@ -1,110 +1,221 @@
 <template lang="">
   <Teleport to="body">
-  <div class="modal-backdrop">
-    <div class="modal-content-wrapper">
-      <div class="modal-header">
-        <h5 class="modal-title" id="customModalLabel">기술 선택</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+    <div class="modal-backdrop">
+      <div class="modal-content-wrapper">
+        <div class="modal-header">
+          <h5 class="modal-title" id="customModalLabel">기술 선택</h5>
+        </div>
+        <div class="modal-body">
+          <form id="techForm">
+            <h6 class="section-title">언어</h6>
+            <div class="row row-cols-3 card-grid mb-3" id="langSection">
+              <div class="col" v-for="language in languages" :key="language">
+                <button
+                  type="button"
+                  class="tech-card"
+                  :class="{ selected: isSelected(language) }"
+                  @click="toggleSkill(language)"
+                >
+                  <img
+                    :src="`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${language
+                      .toLowerCase()
+                      .replace('#', 'sharp')
+                      .replace('++', 'plusplus')}/${language
+                      .toLowerCase()
+                      .replace('#', 'sharp')
+                      .replace('++', 'plusplus')}-original.svg`"
+                    :alt="language"
+                    v-if="
+                      ![
+                        '전자정부 프레임워크',
+                        'myBatis',
+                        'Notepad++',
+                        'PyCharm',
+                        'Sublime Text',
+                      ].includes(language)
+                    "
+                  />
+                  <span>{{ language }}</span>
+                </button>
+              </div>
+            </div>
+
+            <h6 class="section-title">프레임워크</h6>
+            <div class="row row-cols-3 card-grid mb-3" id="frameworkSection">
+              <div class="col" v-for="framework in frameworks" :key="framework">
+                <button
+                  type="button"
+                  class="tech-card"
+                  :class="{ selected: isSelected(framework) }"
+                  @click="toggleSkill(framework)"
+                >
+                  <img
+                    v-if="
+                      ![
+                        '전자정부 프레임워크',
+                        'myBatis',
+                        'Ember',
+                        'BackboneJS',
+                      ].includes(framework)
+                    "
+                    :src="`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${framework
+                      .toLowerCase()
+                      .replaceAll(/\.| /g, '')
+                      .replace('springboot', 'spring')}/${framework
+                      .toLowerCase()
+                      .replaceAll(/\.| /g, '')
+                      .replace('springboot', 'spring')}-original.svg`"
+                    :alt="framework"
+                  />
+                  <span>{{ framework }}</span>
+                </button>
+              </div>
+            </div>
+
+            <h6 class="section-title">툴</h6>
+            <div class="row row-cols-3 card-grid mb-3" id="toolSection">
+              <div class="col" v-for="tool in tools" :key="tool">
+                <button
+                  type="button"
+                  class="tech-card"
+                  :class="{ selected: isSelected(tool) }"
+                  @click="toggleSkill(tool)"
+                >
+                  <img
+                    v-if="
+                      !['Notepad++', 'PyCharm', 'Sublime Text'].includes(tool)
+                    "
+                    :src="`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${tool
+                      .toLowerCase()
+                      .replace(' ', '')
+                      .replace('++', 'plusplus')}/${tool
+                      .toLowerCase()
+                      .replace(' ', '')
+                      .replace('++', 'plusplus')}-original.svg`"
+                    :alt="tool"
+                  />
+                  <span>{{ tool }}</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-end">
+              <button
+                @click="confirmSelection"
+                type="button"
+                class="btn btn-primary"
+              >
+                선택 완료
+              </button>
+              <button
+                @click="useModalStore().closeModal()"
+                type="button"
+                class="btn btn-secondary ms-2"
+              >
+                닫기
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-      <div class="modal-body">
-        <form id="techForm">
-          <h6 class="section-title">언어</h6>
-          <div class="row row-cols-3 card-grid mb-3" id="langSection">
-            <div class="col" v-for="language in languages" :key="language">
-              <button type="button" class="tech-card" :class="{ selected: isSelected(language) }" @click="toggleSkill(language)">
-                <img :src="`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${language.toLowerCase().replace('#','sharp').replace('++','plusplus')}/${language.toLowerCase().replace('#','sharp').replace('++','plusplus')}-original.svg`" :alt="language" v-if="!['전자정부 프레임워크','myBatis','Notepad++','PyCharm','Sublime Text'].includes(language)" />
-                <span>{{ language }}</span>
-              </button>
-            </div>
-          </div>
-
-          <h6 class="section-title">프레임워크</h6>
-          <div class="row row-cols-3 card-grid mb-3" id="frameworkSection">
-            <div class="col" v-for="framework in frameworks" :key="framework">
-              <button type="button" class="tech-card" :class="{ selected: isSelected(framework) }" @click="toggleSkill(framework)">
-                <img v-if="!['전자정부 프레임워크','myBatis','Ember','BackboneJS'].includes(framework)" :src="`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${framework.toLowerCase().replaceAll(/\.| /g,'').replace('springboot','spring')}/${framework.toLowerCase().replaceAll(/\.| /g,'').replace('springboot','spring')}-original.svg`" :alt="framework" />
-                <span>{{ framework }}</span>
-              </button>
-            </div>
-          </div>
-
-          <h6 class="section-title">툴</h6>
-          <div class="row row-cols-3 card-grid mb-3" id="toolSection">
-            <div class="col" v-for="tool in tools" :key="tool">
-              <button type="button" class="tech-card" :class="{ selected: isSelected(tool) }" @click="toggleSkill(tool)">
-                <img v-if="!['Notepad++','PyCharm','Sublime Text'].includes(tool)" :src="`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${tool.toLowerCase().replace(' ','').replace('++','plusplus')}/${tool.toLowerCase().replace(' ','').replace('++','plusplus')}-original.svg`" :alt="tool" />
-                <span>{{ tool }}</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="mt-4 d-flex justify-content-end">
-            <button @click="confirmSelection" type="button" class="btn btn-primary">선택 완료</button>
-            <button type="button" class="btn btn-secondary ms-2" data-bs-dismiss="modal">닫기</button>
-          </div>
-        </form>
-      </div>
-    
     </div>
-  </div>
   </Teleport>
 </template>
 
-<script>
-import { ref } from 'vue'
+<script setup>
+import { ref, defineEmits, defineProps } from 'vue'
 import { useModalStore } from '../../stores/modalStore.js'
 
-export default {
-  name: 'SkillSelectModal',
-  emits: ['confirm', 'remove'],
-  setup(props, { emit }) {
-    const selectedSkills = ref([])
+const emit = defineEmits(['confirm', 'remove'])
+const props = defineProps({
+  onConfirm: Function,
+  skills: {
+    type: Array,
+    default: () => [],
+  },
+})
 
-    const languages = ref(['Java','Python','JavaScript','PHP','TypeScript','C','C#','C++','Go'])
-    const frameworks = ref(['Spring Boot','Spring','React.js','Vue.js','Angular.js','Express.js','Django','Bootstrap','Ember','BackboneJS','전자정부 프레임워크','myBatis'])
-    const tools = ref(['VSCode','IntelliJ','Vim','Android Studio','Eclipse','Visual Studio','Notepad++','PyCharm','Sublime Text'])
+const selectedSkills = ref([...props.skills])
 
-    const toggleSkill = (skillName) => {
-      const index = selectedSkills.value.findIndex(s => s.name === skillName)
-      if (index === -1) {
-        selectedSkills.value.push({
-          name: skillName,
-          imageUrl: generateIconUrl(skillName)
-        })
-      } else {
-        selectedSkills.value.splice(index, 1)
-      }
-    }
+const languages = ref([
+  'Java',
+  'Python',
+  'JavaScript',
+  'PHP',
+  'TypeScript',
+  'C',
+  'C#',
+  'C++',
+  'Go',
+])
 
-    const generateIconUrl = (name) => {
-      const exceptionList = ['전자정부 프레임워크', 'myBatis', 'Notepad++', 'PyCharm', 'Sublime Text']
-      if (exceptionList.includes(name)) return null
+const frameworks = ref([
+  'Spring Boot',
+  'Spring',
+  'React.js',
+  'Vue.js',
+  'Angular.js',
+  'Express.js',
+  'Django',
+  'Bootstrap',
+  'Ember',
+  'BackboneJS',
+  '전자정부 프레임워크',
+  'myBatis',
+])
 
-      const processed = name.toLowerCase().replace('#', 'sharp').replace('++', 'plusplus')
-      return `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${processed}/${processed}-original.svg`
-    }
+const tools = ref([
+  'VSCode',
+  'IntelliJ',
+  'Vim',
+  'Android Studio',
+  'Eclipse',
+  'Visual Studio',
+  'Notepad++',
+  'PyCharm',
+  'Sublime Text',
+])
 
-    const isSelected = (skillName) =>
-    selectedSkills.value.some(s => s.name === skillName || s === skillName)
-
-    const confirmSelection = () => {
-      emit('confirm', selectedSkills.value)
-      const modalStore = useModalStore()
-      modalStore.closeModal()   
-    }
-
-    return {
-      selectedSkills,
-      languages,
-      frameworks,
-      tools,
-      toggleSkill,
-      isSelected,
-      confirmSelection
-    }
+const toggleSkill = (skillName) => {
+  const index = selectedSkills.value.findIndex((s) => s.name === skillName)
+  if (index === -1) {
+    selectedSkills.value.push({
+      name: skillName,
+      imageUrl: generateIconUrl(skillName),
+    })
+  } else {
+    selectedSkills.value.splice(index, 1)
   }
 }
+
+const generateIconUrl = (name) => {
+  const exceptionList = [
+    '전자정부 프레임워크',
+    'myBatis',
+    'Notepad++',
+    'PyCharm',
+    'Sublime Text',
+  ]
+  if (exceptionList.includes(name)) return null
+
+  const processed = name
+    .toLowerCase()
+    .replace('#', 'sharp')
+    .replace('++', 'plusplus')
+
+  return `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${processed}/${processed}-original.svg`
+}
+
+const isSelected = (skillName) =>
+  selectedSkills.value.some((s) => s.name === skillName || s === skillName)
+
+const confirmSelection = () => {
+  emit('confirm', selectedSkills.value)
+  const modalStore = useModalStore()
+  modalStore.closeModal()
+}
 </script>
+
 <style scoped>
 .modal-backdrop {
   position: fixed;
