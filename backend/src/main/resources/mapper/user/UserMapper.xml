@@ -1,15 +1,65 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.demo.domain.user.mapper.UserMapper">
 
-    <update id="updateUser" parameterType="com.example.demo.domain.user.entity.User">
-        UPDATE user
-        SET user_id = #{userId},
-        password = #{password}
-        WHERE id = #{id}
-    </update>
+     <!-- 1. 지역코드 조회 -->
+  <select id="selectAreaCodeSqBySigungu" parameterType="string" resultType="long">
+    SELECT area_code_sq
+    FROM TBL_AREA_C
+    WHERE area_sigungu = #{sigungu}
+    LIMIT 1
+  </select>
+
+  <!-- 2. 주소 INSERT -->
+  <insert id="insertAddress" parameterType="com.example.demo.domain.user.dto.AddressDTO"
+          useGeneratedKeys="true" keyProperty="addressSq">
+    INSERT INTO TBL_ADDRESS_S (
+      zonecode, address, detail_address, sigungu,
+      latitude, longitude,
+      area_code_sq
+    ) VALUES (
+      #{zonecode}, #{address}, #{detailAddress}, #{sigungu},
+      #{latitude}, #{longitude},
+      #{areaCodeSq}
+    )
+  </insert>
+
+  <!-- 3. 사용자 INSERT -->
+  <insert id="insertUser" parameterType="com.example.demo.domain.user.dto.UserDTO">
+    INSERT INTO TBL_USER_M (
+      address_sq, user_id, user_email, user_pw,
+      user_nm, user_gender_cd, user_phone_num, user_birth_dt,
+      user_type_cd, user_signup_type_cd,
+      user_agreed_privacy_policy_yn
+    ) VALUES (
+      #{addressSq}, #{userId}, #{userEmail}, #{userPw},
+      #{userNm}, #{userGenderCd}, #{userPhoneNum}, #{userBirthDt},
+      #{userTypeCd}, #{userSignupTypeCd},
+      #{userAgreedPrivacyPolicyYn}
+    )
+  </insert>
+
+    <!-- 아이디 중복 확인 -->
+    <select id="existsByUserId" parameterType="string" resultType="boolean">
+    SELECT EXISTS (
+        SELECT 1 FROM TBL_USER_M WHERE user_id = #{userId} AND user_is_deleted_yn = 'N'
+    )
+    </select>
+
+    <!-- 이메일 중복 확인 -->
+    <select id="existsByUserEmail" parameterType="string" resultType="boolean">
+    SELECT EXISTS (
+        SELECT 1 FROM TBL_USER_M WHERE user_email = #{userEmail} AND user_is_deleted_yn = 'N'
+    )
+    </select>
+
+    <!-- 휴대폰 번호 중복 확인 -->
+    <select id="existsByUserPhoneNum" parameterType="string" resultType="boolean">
+    SELECT EXISTS (
+        SELECT 1 FROM TBL_USER_M WHERE user_phone_num = #{userPhoneNum} AND user_is_deleted_yn = 'N'
+    )
+    </select>
 
 </mapper>

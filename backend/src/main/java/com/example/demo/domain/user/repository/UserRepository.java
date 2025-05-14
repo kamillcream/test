@@ -1,11 +1,40 @@
 package com.example.demo.domain.user.repository;
 
-
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.example.demo.domain.user.entity.User;
+import com.example.demo.domain.user.dto.AddressDTO;
+import com.example.demo.domain.user.dto.UserDTO;
+import com.example.demo.domain.user.mapper.UserMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Integer> {
+@RequiredArgsConstructor
+public class UserRepository {
+
+    private final UserMapper userMapper;
+
+    public boolean existsByUserId(String userId) {
+        return userMapper.existsByUserId(userId);
+    }
+
+    public boolean existsByUserEmail(String userEmail) {
+        return userMapper.existsByUserEmail(userEmail);
+    }
+
+    public boolean existsByUserPhoneNum(String userPhoneNum) {
+        return userMapper.existsByUserPhoneNum(userPhoneNum);
+    }
+
+    public Long findAreaCodeSqBySigungu(String sigungu) {
+        return userMapper.selectAreaCodeSqBySigungu(sigungu);
+    }
+
+    public int insertAddress(AddressDTO dto) {
+        return userMapper.insertAddress(dto); // addressSq 자동 세팅
+    }
+
+    public int insertUser(UserDTO dto) {
+        return userMapper.insertUser(dto);
+    }
 }
