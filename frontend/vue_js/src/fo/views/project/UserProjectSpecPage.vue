@@ -267,7 +267,7 @@
   </div>
 </template>
 <script setup>
-import UserResumeModal from '@/fo/components/mypage/common/CommonResumeModal.vue'
+import UserResumeModal from '@/fo/components/mypage/common/ResumeSelectModal.vue'
 import { useModalStore } from '../../stores/modalStore.js'
 import { useAlertStore } from '../../stores/alertStore.js'
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'

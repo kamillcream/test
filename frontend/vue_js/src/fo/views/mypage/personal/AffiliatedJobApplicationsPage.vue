@@ -64,7 +64,12 @@
                 class="d-flex justify-content-between align-items-center gap-2"
               >
                 <div class="d-flex gap-2">
-                  <a href="#" class="text-6 m-0">{{ apply.company }}</a>
+                  <a
+                    href="#"
+                    class="text-6 m-0"
+                    @click.prevent="openDetailModal(apply)"
+                    >{{ apply.company }}</a
+                  >
                 </div>
                 <div class="d-flex gap-2">
                   <template v-if="apply.status === '지원중'">
@@ -161,84 +166,94 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'MypageUserAppliedList',
-  data() {
-    return {
-      currentFilter: 'all',
-      searchType: 'all',
-      searchText: '',
-      currentPage: 1,
-      totalPages: 3,
-      filters: [
-        { type: 'all', label: '전체', count: 10 },
-        { type: 'read', label: '열람', count: 5 },
-        { type: 'unread', label: '미열람', count: 5 },
-      ],
-      applies: [
-        {
-          id: 1,
-          company: 'EST Soft',
-          status: '지원중',
-          result: '',
-          applyDate: '2025.04.30',
-          applicantCount: 50,
-          resumeTitle: '안녕하세요. JAVA 개발자입니다.',
-          readDate: '2025.05.15',
-        },
-        {
-          id: 2,
-          company: 'EST Soft',
-          status: '합격',
-          result: '불합격',
-          applyDate: '2025.04.30',
-          applicantCount: '미열람',
-          resumeTitle: '안녕하세요. JAVA 개발자입니다.',
-          readDate: '2025.05.15',
-        },
-        {
-          id: 3,
-          company: 'EST Soft',
-          status: '합격',
-          result: '불합격',
-          applyDate: '2025.04.30',
-          applicantCount: '미열람',
-          resumeTitle: '안녕하세요. JAVA 개발자입니다.',
-          readDate: '2025.05.15',
-        },
-        {
-          id: 4,
-          company: 'EST Soft',
-          status: '합격',
-          result: '불합격',
-          applyDate: '2025.04.30',
-          applicantCount: '미열람',
-          resumeTitle: '안녕하세요. JAVA 개발자입니다.',
-          readDate: '2025.05.15',
-        },
-      ],
-    }
+<script setup>
+import { ref } from 'vue'
+import { useModalStore } from '@/fo/stores/modalStore'
+import AffiliationRequestDetailModal from '@/fo/components/mypage/personal/AffiliationRequestDetailModal.vue'
+
+const modalStore = useModalStore()
+
+const currentFilter = ref('all')
+const searchType = ref('all')
+const searchText = ref('')
+const currentPage = ref(1)
+const totalPages = ref(3)
+
+const filters = ref([
+  { type: 'all', label: '전체', count: 10 },
+  { type: 'read', label: '열람', count: 5 },
+  { type: 'unread', label: '미열람', count: 5 },
+])
+
+const applies = ref([
+  {
+    id: 1,
+    company: 'EST Soft',
+    status: '지원중',
+    result: '',
+    applyDate: '2025.04.30',
+    applicantCount: 50,
+    resumeTitle: '안녕하세요. JAVA 개발자입니다.',
+    readDate: '2025.05.15',
   },
-  methods: {
-    setFilter(type) {
-      this.currentFilter = type
-      // 필터링 로직 구현
-    },
-    search() {
-      // 검색 로직 구현
-      console.log('검색:', this.searchType, this.searchText)
-    },
-    cancelApply(id) {
-      // 지원 취소 로직 구현
-      console.log('지원 취소:', id)
-    },
-    changePage(page) {
-      if (page < 1 || page > this.totalPages) return
-      this.currentPage = page
-      // 페이지 변경 로직 구현
-    },
+  {
+    id: 2,
+    company: 'EST Soft',
+    status: '합격',
+    result: '불합격',
+    applyDate: '2025.04.30',
+    applicantCount: '미열람',
+    resumeTitle: '안녕하세요. JAVA 개발자입니다.',
+    readDate: '2025.05.15',
   },
+  {
+    id: 3,
+    company: 'EST Soft',
+    status: '합격',
+    result: '불합격',
+    applyDate: '2025.04.30',
+    applicantCount: '미열람',
+    resumeTitle: '안녕하세요. JAVA 개발자입니다.',
+    readDate: '2025.05.15',
+  },
+  {
+    id: 4,
+    company: 'EST Soft',
+    status: '합격',
+    result: '불합격',
+    applyDate: '2025.04.30',
+    applicantCount: '미열람',
+    resumeTitle: '안녕하세요. JAVA 개발자입니다.',
+    readDate: '2025.05.15',
+  },
+])
+
+function setFilter(type) {
+  currentFilter.value = type
+  // 필터링 로직 구현
+}
+
+function search() {
+  // 검색 로직 구현
+  console.log('검색:', searchType.value, searchText.value)
+}
+
+function cancelApply(id) {
+  // 지원 취소 로직 구현
+  console.log('지원 취소:', id)
+}
+
+function changePage(page) {
+  if (page < 1 || page > totalPages.value) return
+  currentPage.value = page
+  // 페이지 변경 로직 구현
+}
+
+function openDetailModal(apply) {
+  modalStore.openModal(AffiliationRequestDetailModal, {
+    size: ' ',
+    applyData: apply,
+  })
 }
 </script>
 

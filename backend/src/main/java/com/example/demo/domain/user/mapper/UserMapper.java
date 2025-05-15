@@ -1,11 +1,23 @@
 package com.example.demo.domain.user.mapper;
 
-
 import org.apache.ibatis.annotations.Mapper;
 
-import com.example.demo.domain.user.entity.User;
+import com.example.demo.domain.user.dto.AddressDTO;
+import com.example.demo.domain.user.dto.UserDTO;
 
 @Mapper
 public interface UserMapper {
-     int updateUser(User user);
+
+    Long selectAreaCodeSqBySigungu(String sigungu);
+
+    int insertAddress(AddressDTO addressDTO);
+
+    int insertUser(UserDTO userDTO);
+
+    boolean existsByUserId(String userId);
+
+    boolean existsByUserEmail(String userEmail);
+
+    boolean existsByUserPhoneNum(String userPhoneNum);
+
 }

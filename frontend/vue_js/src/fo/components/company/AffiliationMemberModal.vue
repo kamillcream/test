@@ -219,7 +219,7 @@
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useModalStore } from '../../stores/modalStore'
 import { useAlertStore } from '../../stores/alertStore'
-import UserResumeModal from '@/fo/components/mypage/common/CommonResumeModal.vue'
+import UserResumeModal from '@/fo/components/mypage/personal/ResumeModal.vue'
 import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 
 const modalStore = useModalStore()

@@ -535,7 +535,11 @@
 
           <!-- 제출 버튼 -->
           <div class="form-group mt-4">
-            <button type="submit" class="btn btn-primary px-4 py-2">
+            <button
+              type="button"
+              class="btn btn-primary px-4 py-2"
+              @click="openDetailModal(apply)"
+            >
               이력서 등록
             </button>
           </div>
@@ -547,7 +551,25 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import { useModalStore } from '@/fo/stores/modalStore'
+import ResumeModal from '@/fo/components/mypage/personal/ResumeModal.vue'
 
+const modalStore = useModalStore()
+
+const openDetailModal = () => {
+  modalStore.openModal(ResumeModal, {
+    // TODO: 나중에 submitResume 함수로 대체 예정
+    onConfirm: () => {
+      console.log('지금은 API 없음. 대신 모달만 닫음')
+    },
+  })
+}
+// TODO 교체 예시:
+// onConfirm: submitResume
+// const submitResume = async () => {
+//   await axios.post('/api/resume', resumeData)
+//   alert('등록 완료!')
+// }
 // 이메일 도메인 목록
 const emailDomains = ['naver.com', 'gmail.com', 'daum.net', 'hanmail.net']
 
