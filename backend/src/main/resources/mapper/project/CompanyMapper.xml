@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.domain.project.mapper.CompanyMapper">
+
+	<select id="findCompanyNmByCompanySq" parameterType="Long" resultType="String">
+    SELECT company_nm
+    FROM TBL_COMPANY_S
+    WHERE company_sq = #{companySq}
+	</select>
+
+
+</mapper>

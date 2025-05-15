@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.domain.project.mapper.DistrictMapper">
+
+	<select id="findAllArea" resultType="com.example.demo.domain.project.dto.response.AreaInfoResponse">
+    SELECT area_code_sq, area_sigungu
+    FROM TBL_AREA_C
+    WHERE PARENT_AREA_CODE_SQ IS NULL
+	</select>
+	
+    <select id="findAllDistrictByParent" parameterType="Long" resultType="com.example.demo.domain.project.dto.response.AreaInfoResponse">
+    SELECT area_code_sq, area_sigungu
+    FROM TBL_AREA_C
+    WHERE PARENT_AREA_CODE_SQ = #{parentCodeSq}
+	</select>
+
+</mapper>

@@ -35,17 +35,14 @@
 
     SELECT *
     FROM TBL_PROJECT_M
-    WHERE 1 = 1
+    WHERE project_is_deleted_yn = 'N'
+    
     <if test="addressCodeSq != null">
         AND address_sq = #{addressCodeSq}
     </if>
 
     <if test="projectDeveloperGradeCd != null">
         AND project_developer_grade_cd = #{projectDeveloperGradeCd}
-    </if>
-
-    <if test="projectIsDeletedYn != null and projectIsDeletedYn != ''">
-        AND project_is_deleted_yn = #{projectIsDeletedYn}
     </if>
 
     <if test="searchKeyword != null and searchKeyword != ''">
@@ -57,27 +54,39 @@
                 AND project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
             </when>
             <otherwise>
-                AND (project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
-                     OR project_description_txt LIKE CONCAT('%', #{searchKeyword}, '%'))
+                <!-- TODO: 성능 이슈 시 UNION 또는 FULLTEXT로 분리 고려 -->
+                AND (
+                    project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR project_description_txt LIKE CONCAT('%', #{searchKeyword}, '%')
+                )
             </otherwise>
         </choose>
     </if>
 
-    ORDER BY
     <choose>
         <when test="sortBy != null and sortOrder != null">
-            ${sortBy} ${sortOrder}
+            <choose>
+                <when test="sortBy == 'project_start_dt'">
+                    ORDER BY project_start_dt ${sortOrder}
+                </when>
+                <when test="sortBy == 'project_salary'">
+                    ORDER BY project_salary ${sortOrder}
+                </when>
+                <otherwise>
+                    ORDER BY project_start_dt DESC <!-- 기본 정렬 -->
+                </otherwise>
+            </choose>
         </when>
         <otherwise>
-            project_start_dt DESC
+            ORDER BY project_start_dt DESC
         </otherwise>
     </choose>
 
     <if test="size != null and offset != null">
-    	LIMIT #{size} OFFSET #{offset}
-	</if>
-
+        LIMIT #{size} OFFSET #{offset}
+    </if>
 </select>
+
 
 	<select id="findCompanySqFromProjectSq" parameterType="Long" resultType="Long">
     SELECT company_sq
@@ -150,6 +159,39 @@
 	  </foreach>
 	</insert>
 	
+	<select id="findSkillInfoList" resultType="com.example.demo.domain.project.dto.response.SingleSkillInfoResponse">
+    SELECT 
+      p.skill_tag_nm AS parentSkillTagNm,
+      c.skill_tag_nm AS childSkillTagNm
+    FROM TBL_SKILL_TAG_C p
+    JOIN TBL_SKILL_TAG_C c ON p.skill_tag_sq = c.parent_skill_tag_sq
+    WHERE p.skill_tag_is_deleted_yn = 'N' AND c.skill_tag_is_deleted_yn = 'N'
+    ORDER BY p.skill_tag_sq, c.skill_tag_sq
+  	</select>
 	
+	
+	<select id="findWorkTypesByProjectSq" resultType="String" parameterType="Long">
+	    SELECT c.common_code_nm
+		FROM TBL_PROJECT_CONTRACT_TYPE_S m
+		JOIN TBL_COMMON_CODE_C c
+		  ON m.contract_type_cd = c.common_code_sq
+		WHERE m.project_sq = #{projectSq}
+  	</select>
+  	
+  	<select id="findJobsByProjectSq" resultType="String" parameterType="Long">
+	    SELECT c.common_code_nm
+		FROM TBL_PROJECT_RECRUIT_JOB_ROLE_S m
+		JOIN TBL_COMMON_CODE_C c
+		  ON m.recruit_job_position_type_cd = c.common_code_sq
+		WHERE m.project_sq = #{projectSq}
+  	</select>
+  	
+  	<select id="findInterviewTimesBySq" resultType="map" parameterType="Long">
+	    SELECT 
+	    MIN(interview_available_dtm) AS minTime,
+	    MAX(interview_available_dtm) AS maxTime
+	  FROM TBL_PROJECT_INTERVIEW_TIME_SLOT_S
+	  WHERE project_sq = #{projectSq}
+  	</select>
 	
 </mapper>

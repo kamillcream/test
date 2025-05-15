@@ -33,10 +33,19 @@
     WHERE skill_tag_nm = #{name}
 	</select>
 	
-	<select id="findParentSkillTagSqByName" parameterType="String" resultType="Long">
-	SELECT skill_tag_sq
-	FROM TBL_SKILL_TAG_C
-	WHERE SKILL_TAG_SQ = #{skill_tag_sq}
+	
+	<select id="findByParentCode" parameterType="Long" resultType="String">
+	SELECT common_code_nm
+	FROM TBL_COMMON_CODE_C
+	WHERE PARENT_COMMON_CODE_SQ = #{parentCodeSq}
 	</select>
+	
+	<select id="findCommonCodeNmBySq" parameterType="Long" resultType="String">
+	SELECT common_code_nm
+	FROM TBL_COMMON_CODE_C
+	WHERE COMMON_CODE_SQ = #{codeSq}
+	</select>
+	
+	
 
 </mapper>
