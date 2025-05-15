@@ -20,7 +20,6 @@
             style="cursor: pointer"
           >
             <img
-              src="img/blog/medium/blog-2.jpg"
               alt="프로젝트 이미지"
               class="rounded-circle"
               style="width: 70px; height: 70px; object-fit: cover"
@@ -36,7 +35,7 @@
                   @click.prevent="goToProjectSpec(project)"
                   class="text-dark text-decoration-none"
                 >
-                  {{ project.name }}
+                  {{ project.projectTtl }}
                 </a>
                 <span
                   class="btn btn-primary btn-sm d-flex align-items-center ms-2"
@@ -60,8 +59,8 @@
               class="d-flex justify-content-between align-items-center text-muted fs-6"
             >
               <div>
-                {{ project.local }} / {{ project.career }} /
-                {{ project.education }} / {{ project.salary }}
+                {{ project.address }} / {{ project.devGradeNm }} /
+                {{ project.requiredEduLvl }} / {{ project.salary }}
               </div>
             </div>
             <div class="d-flex flex-wrap gap-2 mt-2">
@@ -80,7 +79,7 @@
                 {{ skill.name }}
               </button>
             </div>
-            <div class="text-muted text-end">조회수: {{ project.hits }}</div>
+            <div class="text-muted text-end">조회수: {{ project.viewCnt }}</div>
           </div>
         </div>
       </div>
@@ -96,9 +95,9 @@ const router = useRouter()
 
 const goToProjectSpec = (project) => {
   router.push({
-    name: 'UserProjectSpec',
+    name: 'CompanyProjectSpec',
     params: {
-      project_sq: project.id,
+      project_sq: project.projectSq,
     },
   })
 }
