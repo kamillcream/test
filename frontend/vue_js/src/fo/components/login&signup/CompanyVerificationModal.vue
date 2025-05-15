@@ -17,7 +17,7 @@
             type="text"
             class="form-control"
             placeholder="기업명을 입력하세요"
-            name="companyName"
+            v-model="form.companyName"
           />
         </div>
         <div class="col">
@@ -25,7 +25,7 @@
             type="text"
             class="form-control"
             placeholder="대표자명을 입력하세요"
-            name="ceoName"
+            v-model="form.ceoName"
           />
         </div>
       </div>
@@ -36,7 +36,7 @@
           type="date"
           class="form-control"
           name="openDate"
-          placeholder="개업일자"
+          v-model="form.openDate"
         />
       </div>
 
@@ -46,7 +46,7 @@
           type="text"
           class="form-control"
           placeholder="사업자 등록번호를 입력하세요"
-          name="bizNumber"
+          v-model="form.bizNumber"
         />
         <button class="btn btn-primary" type="button">인증하기</button>
       </div>
@@ -54,20 +54,20 @@
       <!-- 약관 동의 -->
       <div class="form-check mb-4">
         <input
-          class="form-check-input"
-          v-model="terms"
           type="checkbox"
+          v-model="form.terms"
           id="agreeTerms"
+          class="form-check-input"
         />
-        <label class="form-check-label" for="agreeTerms">
+        <label class="form-check-label me-1" for="agreeTerms">
           약관에 동의합니다.
         </label>
-        <a href="#" @click.prevent="openTermsModal"> 이용약관</a>
+        <a class="font-primary" @click="openTermsModal"> 이용약관</a>
       </div>
 
       <!-- 인증 완료 버튼 -->
       <div class="d-grid">
-        <button type="button" class="btn btn-primary" @click="onConfirm">
+        <button type="button" class="btn btn-primary" @click="handleConfirm">
           기업 인증 완료
         </button>
       </div>
@@ -79,20 +79,27 @@
 </template>
 
 <script setup>
+import { reactive, defineProps, nextTick } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
-import { defineProps, ref, nextTick } from 'vue'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { companyAgreementText } from '@/assets/terms'
 import TermsAgreementModal from './TermsAgreementModal.vue'
 
-defineProps({
-  onConfirm: { type: Function, required: true },
+const props = defineProps({
+  onConfirm: { type: Function, required: true }, // 부모로 넘기는 콜백
 })
 
 const alertStore = useAlertStore()
 const modalStore = useModalStore()
 
-const terms = ref(false)
+// 입력값을 하나의 reactive 객체로 관리
+const form = reactive({
+  companyName: '',
+  ceoName: '',
+  openDate: '',
+  bizNumber: '',
+  terms: false,
+})
 
 function closeModal() {
   modalStore.closeModal()
@@ -102,14 +109,29 @@ function openTermsModal() {
   modalStore.openModal(TermsAgreementModal, {
     title: '기업정보 수집 및 이용 동의서',
     body: companyAgreementText,
-    onConfirm: () => {
+    onConfirm: async () => {
       alertStore.show('약관 동의 처리되었습니다.', 'success')
-      nextTick(() => {
-        terms.value = true // DOM 업데이트가 완료된 후 true로 설정 >> *안됨* 추후 수정 필요
-      })
-
       modalStore.closeModal()
+      await nextTick()
+      form.terms = true
     },
   })
+}
+
+function handleConfirm() {
+  // 유효성 검사 등 가능
+  if (!form.terms) {
+    alertStore.show('약관에 동의해주세요.', 'warning')
+    return
+  }
+
+  // 부모 컴포넌트로 데이터 전달
+  // 구조분해하여 값만 넘길 수도 있음
+  const payload = { ...form }
+  // emit처럼 사용하는 방식
+  // defineProps로 받은 onConfirm 실행
+  props.onConfirm(payload)
+
+  closeModal()
 }
 </script>

@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class UserDTO {
+    private Long userSq;
     private Long addressSq;
     private String userId;
     private String userEmail;
@@ -17,5 +18,4 @@ public class UserDTO {
     private Long userTypeCd;
     private Long userSignupTypeCd;
     private String userProfileImageUrl;
-    private String userAgreedPrivacyPolicyYn;
 }

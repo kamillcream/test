@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="handleSubmit">
+  <form @submit.prevent="validateAll">
     <!-- 아이디 -->
     <div class="row">
       <div class="form-group col-lg-6">
@@ -64,7 +64,7 @@
 
     <!-- 이름 -->
     <div class="row">
-      <div class="form-group col-lg">
+      <div class="form-group col-lg-6">
         <label class="form-label"
           >이름
           <i
@@ -86,32 +86,43 @@
     <!-- 생년월일 / 성별 -->
     <div class="row">
       <div class="form-group col-lg-8">
-        <label class="form-label"
-          >생년월일
+        <label class="form-label">
+          생년월일
           <i
             v-if="dobValid"
             class="bi bi-check-circle-fill ms-1"
             style="color: #007bff"
-          ></i
-        ></label>
+          ></i>
+        </label>
         <input
           type="date"
           v-model="form.dob"
           class="form-control form-control-lg"
+          :max="today"
+          @keydown.prevent
           @input="validateDob"
+          title="키보드 입력은 불가합니다. 달력에서 선택해주세요."
         />
         <div v-if="dobError" class="invalid-feedback">{{ dobError }}</div>
       </div>
+
       <div class="form-group col-lg-4">
-        <label class="form-label">성별</label>
+        <label class="form-label"
+          >성별
+          <i
+            v-if="genderValid"
+            class="bi bi-check-circle-fill ms-1"
+            style="color: #007bff"
+          ></i>
+        </label>
         <select
           v-model="form.gender"
           class="form-control form-control-lg"
           @change="validateGender"
         >
           <option disabled value="">성별</option>
-          <option value="male">남성</option>
-          <option value="female">여성</option>
+          <option value="101">남성</option>
+          <option value="102">여성</option>
         </select>
         <div v-if="genderError" class="invalid-feedback">{{ genderError }}</div>
       </div>
@@ -119,7 +130,7 @@
 
     <!-- 휴대폰 -->
     <div class="row">
-      <div class="form-group col-lg">
+      <div class="form-group col-lg-6">
         <label class="form-label"
           >휴대폰 번호
           <i
@@ -144,7 +155,7 @@
         <label class="form-label"
           >주소
           <i
-            v-if="adressValid"
+            v-if="addressValid"
             class="bi bi-check-circle-fill ms-1"
             style="color: #007bff"
           ></i
@@ -235,12 +246,20 @@
     <!-- 인증번호 -->
     <div class="row">
       <div class="form-group col-lg-8">
-        <label class="form-label">인증번호</label>
+        <label class="form-label"
+          >인증번호
+          <i
+            v-if="verifyCodeValid"
+            class="bi bi-check-circle-fill ms-1"
+            style="color: #007bff"
+          ></i
+        ></label>
         <div class="input-group">
           <input
             type="text"
             v-model="form.verificationCode"
             class="form-control form-control-lg"
+            @input="validateVerifycode"
           />
           <button
             type="button"
@@ -250,8 +269,8 @@
             확인
           </button>
         </div>
-        <div v-if="!isVerificationCodeEmpty" class="invalid-feedback">
-          인증번호를 입력해주세요.
+        <div v-if="verifycodeError" class="invalid-feedback">
+          {{ verifycodeError }}
         </div>
       </div>
     </div>
@@ -289,12 +308,48 @@
   </form>
 </template>
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, computed, onMounted, defineEmits } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { personalAgreementText } from '@/assets/terms'
 import TermsAgreementModal from '@/fo/components/login&signup/TermsAgreementModal.vue'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { api } from '@/axios'
+
+const emit = defineEmits(['submit'])
+
+const validateAll = () => {
+  validateId()
+  validatePassword()
+  validateConfirmPassword()
+  validateName()
+  validateDob()
+  validateGender()
+  validatePhone()
+  validateAdress()
+  validateEmail()
+  validateVerifycode()
+  validateTerms()
+
+  // 모든 유효성 통과 여부 확인
+  const isFormValid =
+    idValid.value &&
+    passwordValid.value &&
+    confirmPasswordValid.value &&
+    nameValid.value &&
+    dobValid.value &&
+    genderValid.value &&
+    phoneValid.value &&
+    addressValid.value &&
+    emailValid.value &&
+    verifyCodeValid.value && // 인증번호 유효성 처리 보완 필요
+    termsValid.value
+
+  if (isFormValid) {
+    emit('submit', { ...form })
+  } else {
+    console.warn('❌ 유효성 검사 실패. 폼 제출 불가.')
+  }
+}
 
 const form = reactive({
   id: '',
@@ -308,8 +363,14 @@ const form = reactive({
   emailDomain: '',
   verificationCode: '',
   terms: false,
+  postcode: '',
+  sigungu: '',
   address: '',
   addressDetail: '',
+  latitude: '',
+  longitude: '',
+  typeCode: 301, // 개인
+  signupTypeCode: 204, // 이메일
 })
 
 const modalStore = useModalStore()
@@ -330,8 +391,6 @@ function handleDomainChange() {
   validateEmail()
 }
 
-const isVerificationCodeEmpty = ref(true)
-
 // 이메일 인증 요청 함수
 const sendVerification = async () => {
   const email = `${form.emailId}@${form.emailDomain}`
@@ -346,27 +405,33 @@ const sendVerification = async () => {
   } catch (error) {
     console.error('이메일 인증 요청 실패:', error)
     alertStore.show('이메일 인증 요청에 실패했습니다.', 'danger')
+    verifycodeError.value = '인증번호가 일치하지않습니다.'
   }
 }
 
-// 인증 코드 확인 함수
+// 인증 코드 확인 함수 (개선 버전)
 const verifyCode = async () => {
-  if (!form.verificationCode || form.verificationCode.trim() === '') {
-    isVerificationCodeEmpty.value = false
-    return
-  } else {
-    const email = `${form.emailId}@${form.emailDomain}`
-    const code = form.verificationCode
+  verifycodeError.value = ''
+  verifyCodeValid.value = false
 
-    try {
-      const response = await api.$post('/email/verify-code', { email, code })
-      console.log('인증 성공', response)
-      alertStore.show('이메일 인증에 성공하였습니다.', 'info')
-      isVerificationCodeEmpty.value = true
-    } catch (error) {
-      console.error('인증 코드 검증 실패:', error)
-      alertStore.show('이메일 인증에 실패하였습니다.', 'danger')
-    }
+  const email = `${form.emailId}@${form.emailDomain}`
+  const code = form.verificationCode
+
+  if (!code) {
+    verifycodeError.value = '인증번호를 입력하세요.'
+    return
+  }
+
+  try {
+    const response = await api.$post('/email/verify-code', { email, code })
+    console.log('인증 성공', response)
+    alertStore.show('이메일 인증에 성공하였습니다.', 'info')
+    verifyCodeValid.value = true
+  } catch (error) {
+    console.error('인증 코드 검증 실패:', error)
+    verifycodeError.value = '인증번호가 일치하지 않습니다.'
+    alertStore.show('이메일 인증에 실패하였습니다.', 'danger')
+    verifyCodeValid.value = false
   }
 }
 
@@ -379,6 +444,7 @@ const genderError = ref('')
 const phoneError = ref('')
 const addressError = ref('')
 const emailError = ref('')
+const verifycodeError = ref('')
 const termsError = ref('')
 
 const idValid = ref(false)
@@ -390,6 +456,7 @@ const genderValid = ref(false)
 const phoneValid = ref(false)
 const addressValid = ref(false)
 const emailValid = ref(false)
+const verifyCodeValid = ref('')
 const termsValid = ref(false)
 
 // 아이디 유효성 검사
@@ -446,6 +513,14 @@ const validateName = () => {
   }
 }
 
+const today = computed(() => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+})
+
 // 생년월일 유효성 검사
 const validateDob = () => {
   dobError.value = ''
@@ -481,6 +556,81 @@ const validatePhone = () => {
   }
 }
 
+// 다음 주소 API
+function openPostcode() {
+  new window.daum.Postcode({
+    oncomplete: function (data) {
+      let addr = ''
+      if (data.userSelectedType === 'R') {
+        addr = data.roadAddress
+      } else {
+        addr = data.jibunAddress
+      }
+
+      form.postcode = data.zonecode
+      form.address = addr
+      form.detailAddress = ''
+
+      // 시군구 추출
+      form.sigungu = data.sigungu
+
+      // 주소 → 좌표 변환
+      const geocoder = new window.kakao.maps.services.Geocoder()
+      geocoder.addressSearch(addr, function (result, status) {
+        if (status === window.kakao.maps.services.Status.OK) {
+          form.latitude = result[0].y
+          form.longitude = result[0].x
+        } else {
+          form.latitude = null
+          form.longitude = null
+        }
+      })
+    },
+  }).open()
+}
+
+onMounted(() => {
+  // 1. Daum 우편번호 API 확인
+  if (!window.daum) {
+    console.warn('❌ Daum 우편번호 API (postcode.v2.js)가 로드되지 않았습니다.')
+  } else {
+    console.log('✅ Daum 우편번호 API 로드됨')
+  }
+
+  // 2. Kakao 지도 API 확인 및 동적 로드
+  if (!window.kakao || !window.kakao.maps) {
+    console.warn(
+      '❌ Kakao 지도 API가 로드되지 않았습니다. 스크립트를 동적으로 추가합니다.',
+    )
+
+    const kakaoScript = document.createElement('script')
+    kakaoScript.src =
+      'https://dapi.kakao.com/v2/maps/sdk.js?appkey=90610faa13d02b09f83a700d0885a872&libraries=services'
+    kakaoScript.async = true
+
+    console.log('📦 Kakao 지도 API 스크립트를 추가합니다:', kakaoScript.src)
+
+    kakaoScript.onload = () => {
+      console.log('✅ Kakao 지도 API 스크립트 onload 실행됨')
+      if (window.kakao && window.kakao.maps) {
+        console.log('✅ Kakao 지도 API가 동적으로 로드되었습니다.')
+      } else {
+        console.error(
+          '❌ Kakao 지도 API 로드 실패: maps 객체가 여전히 존재하지 않습니다.',
+        )
+      }
+    }
+
+    kakaoScript.onerror = () => {
+      console.error('❌ Kakao 지도 API 스크립트 로드 실패')
+    }
+
+    document.head.appendChild(kakaoScript)
+  } else {
+    console.log('✅ Kakao 지도 API가 이미 로드되어 있습니다.')
+  }
+})
+
 // 주소 유효성 검사
 const validateAdress = () => {
   addressError.value = ''
@@ -512,10 +662,17 @@ const validateEmail = () => {
   // 이메일 형식 검사
   else if (!/\S+@\S+\.\S+/.test(fullEmail)) {
     emailError.value = '올바른 이메일 주소 형식이 아닙니다.'
-    console.log('fullEmail', fullEmail)
   } else {
     emailValid.value = true
   }
+}
+
+const validateVerifycode = () => {
+  verifycodeError.value = ''
+  if (!form.verificationCode) {
+    verifycodeError.value = '인증번호를 입력하세요.'
+  }
+  // 인증번호 유효성 여부는 서버 검증 결과에 따라 판단 → 여기서는 설정하지 않음
 }
 
 // 약관 동의 유효성 검사

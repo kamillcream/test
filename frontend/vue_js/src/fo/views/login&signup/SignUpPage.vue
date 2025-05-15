@@ -40,9 +40,12 @@ import { ref, onMounted } from 'vue'
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 import CompanySignUpForm from '@/fo/components/login&signup/CompanySignUpForm.vue'
 import PersonalSignUpForm from '@/fo/components/login&signup/PersonalSignUpForm.vue'
+import { api } from '@/axios'
+import { useAlertStore } from '@/fo/stores/alertStore'
 
 const route = useRoute()
 const router = useRouter()
+const alertStore = useAlertStore()
 const signUpType = ref('')
 
 onMounted(() => {
@@ -55,19 +58,33 @@ onMounted(() => {
   console.log('signUpType.value', signUpType.value)
 })
 
-function handleSubmit(formData) {
-  // 유효성 검사 후 전송
-  console.log('회원가입 제출 데이터:', formData)
-  // formData로 API 호출 처리
+async function handleSubmit(rawFormData) {
+  // 백엔드 DTO에 맞게 키를 변환
+  const formData = {
+    userId: rawFormData.id,
+    userPw: rawFormData.password,
+    userNm: rawFormData.name,
+    userGenderCd: Number(rawFormData.gender),
+    userPhoneNum: rawFormData.phone,
+    userEmail: `${rawFormData.emailId}@${rawFormData.emailDomain}`,
+    userAgreedPrivacyPolicyYn: rawFormData.terms ? 'Y' : 'N',
+    userBirthDt: rawFormData.dob,
+    userTypeCd: Number(rawFormData.typeCode),
+    userSignupTypeCd: Number(rawFormData.signupTypeCode),
+    zonecode: rawFormData.postcode,
+    address: rawFormData.address,
+    detailAddress: rawFormData.detailAddress || rawFormData.addressDetail,
+    sigungu: rawFormData.sigungu,
+    latitude: Number(rawFormData.latitude),
+    longitude: Number(rawFormData.longitude),
+  }
+  console.log('formData', formData)
+  try {
+    await api.$post('/personal/signup', formData)
+    alertStore.show('회원가입이 완료되었습니다!', 'info')
+    router.push('/login')
+  } catch (err) {
+    alertStore.show('회원가입에 실패하였습니다', 'danger')
+  }
 }
 </script>
-
-<style scoped>
-select.form-control,
-select.form-control-lg {
-  line-height: 1.6;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  height: auto;
-}
-</style>

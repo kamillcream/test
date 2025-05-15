@@ -1,10 +1,12 @@
 package com.example.demo.domain.user.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.common.ApiResponse;
 import com.example.demo.domain.user.dto.request.RequestSignUpDTO;
 import com.example.demo.domain.user.service.UserService;
 
@@ -12,19 +14,14 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-public class SingUpController {
+public class SignUpController {
 
     private final UserService userService;
 
-    // 개인 회원가입
-    @PostMapping("/personal/signup")
-    public ResponseEntity<?> signUp(@RequestBody RequestSignUpDTO dto) {
-        try {
-            userService.signUp(dto);
-            return ResponseEntity.ok("회원가입 성공");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @PostMapping("/signup")
+    public ResponseEntity<ApiResponse<Void>> signUp(@RequestBody RequestSignUpDTO dto) {
+        userService.signUp(dto);
+        return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "회원가입 성공", null));
     }
 
 }
