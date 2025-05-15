@@ -10,9 +10,7 @@
         <div class="card-body">
           <form
             class="contact-form form-style-2"
-            action="php/project-register.php"
-            method="POST"
-            novalidate="novalidate"
+            @submit.prevent="submitProject"
           >
             <!-- 프로젝트 제목 -->
             <div class="row">
@@ -44,9 +42,13 @@
                   required=""
                 >
                   <option value="">선택</option>
-                  <option value="seoul">서울</option>
-                  <option value="busan">부산</option>
-                  <!-- 추가 -->
+                  <option
+                    v-for="city in cities"
+                    :key="city.code"
+                    :value="city.code"
+                  >
+                    {{ city.name }}
+                  </option>
                 </select>
               </div>
               <div class="form-group col-lg-6">
@@ -60,9 +62,13 @@
                   required=""
                 >
                   <option value="">선택</option>
-                  <option value="gangnam">강남구</option>
-                  <option value="jongno">종로구</option>
-                  <!-- 동적으로 바뀌도록 JS 연동 가능 -->
+                  <option
+                    v-for="district in districts"
+                    :key="district.code"
+                    :value="district.code"
+                  >
+                    {{ district.name }}
+                  </option>
                 </select>
               </div>
             </div>
@@ -79,9 +85,15 @@
                   required=""
                 >
                   <option value="">선택</option>
-                  <option value="1">초급 (신입~5년)</option>
-                  <option value="2">중급 (5년~10년)</option>
-                  <option value="10">고급 (10년 이상)</option>
+                  <option>초초</option>
+                  <option>초중</option>
+                  <option>초상</option>
+                  <option>중초</option>
+                  <option>중중</option>
+                  <option>중상</option>
+                  <option>상초</option>
+                  <option>상중</option>
+                  <option>상상</option>
                 </select>
               </div>
               <div class="form-group col-lg-6">
@@ -95,12 +107,13 @@
                   required=""
                 >
                   <option value="">선택</option>
-                  <option value="none">학력무관</option>
-                  <option value="highschool">고등학교 졸업</option>
-                  <option value="college">전문대 졸업</option>
-                  <option value="university">대학교 졸업</option>
-                  <option value="master">석사</option>
-                  <option value="phd">박사</option>
+                  <option>학력 무관</option>
+                  <option>고졸 이하</option>
+                  <option>고졸 이상</option>
+                  <option>대학(2,3년제)</option>
+                  <option>대졸 이상</option>
+                  <option>석사 이상</option>
+                  <option>박사 이상</option>
                 </select>
               </div>
             </div>
@@ -340,7 +353,17 @@ import ProjectSkillButtonGroup from '@/fo/components/project/ProjectSkillButtonG
 import ProjectInverviewTimeButtonGroupVue from '@/fo/components/project/ProjectInverviewTimeButtonGroup.vue'
 import { useModalStore } from '../../../stores/modalStore.js'
 
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
+
+import { api } from '@/axios.js'
+
+const cities = ref([])
+const districts = ref([])
+const devGrades = ref([])
+const educationLevels = ref([])
+const recruitJobs = ref([])
+const workTypes = ref([])
+const skills = ref([])
 
 const projectTitle = ref('')
 const selectedCity = ref('')
@@ -367,6 +390,91 @@ const isOpen = computed(() => modalStore.isOpen)
 
 let prevScrollY = 0
 
+onMounted(async () => {
+  try {
+    const response = await api.$get('/projects/infos')
+    cities.value = response.output.cities
+      .sort((a, b) => {
+        // "전국"이면 항상 맨 앞으로
+        if (a.areaNameString === '전국') return -1
+        if (b.areaNameString === '전국') return 1
+        return 0
+      })
+      .map((city) => ({
+        code: city.areaSq,
+        name: city.areaNameString,
+      }))
+    devGrades.value = response.output.devGrades
+    educationLevels.value = response.output.educationLevels
+    recruitJobs.value = response.output.recruitJobs
+    workTypes.value = response.output.workTypes
+    skills.value = response.output.skills
+    console.log(response)
+  } catch (e) {
+    console.error('프로젝트 정보 불러오기 실패', e)
+  }
+})
+
+watch(selectedCity, async (areaCodeSq) => {
+  if (!areaCodeSq) {
+    districts.value = []
+    selectedDistrict.value = ''
+    return
+  }
+
+  try {
+    const response = await api.$get(`/projects/${areaCodeSq}/districts`)
+    districts.value = response.output.map((area) => ({
+      code: area.areaSq,
+      name: area.areaNameString,
+    }))
+    selectedDistrict.value = '' // 선택 초기화
+  } catch (err) {
+    console.error('구 정보 불러오기 실패', err)
+  }
+})
+
+const submitProject = async () => {
+  const requestBody = {
+    projectId: null,
+    projectTitle: projectTitle.value,
+    projectImageUrl: '',
+
+    district: selectedCity.value,
+    subDistrict: selectedDistrict.value,
+    devGrade: selectedDevGrade.value,
+    educationLvl: selectedEducation.value,
+
+    projectStartDt: projectStartDt.value,
+    projectEndDt: projectEndDt.value,
+    recruitStartDt: recruitStartDt.value,
+    recruitEndDt: recruitEndDt.value,
+
+    workType: [...selectedWorkTypes.value], // ✅
+
+    recruitJob: [...selectedJobs.value], // ✅
+
+    preferSkills: selectedPreferSkills.value.map((skill) => skill.name),
+    usingSkills: selectedSkills.value.map((skill) => skill.name),
+
+    preference: preferContent.value,
+    description: description.value,
+
+    interviewTime: selectedInterviewTimes.value.flatMap((item) =>
+      item.times.map((time) => `${item.date}T${time}`),
+    ),
+
+    isNotification: notifyEnabled.value ? 'Y' : 'N',
+  }
+  console.log(requestBody)
+  try {
+    await api.$post('/projects', requestBody)
+    alert('등록 성공')
+  } catch (error) {
+    console.error('프로젝트 등록 실패: ', error)
+  }
+}
+
 watch(isOpen, (newVal) => {
   if (newVal) {
     prevScrollY = window.scrollY
@@ -386,13 +494,13 @@ watch(isOpen, (newVal) => {
 const openSkillModal = () => {
   modalStore.openModal(SkillSelectModal, {
     onConfirm: onSkillsConfirmed,
-    skills: selectedSkills.value,
+    skills: skills.value,
   })
 }
 const openPreferSkillModal = () => {
   modalStore.openModal(SkillSelectModal, {
     onConfirm: onPreferSkillsConfirmed,
-    skills: selectedPreferSkills.value,
+    skills: skills.value,
   })
 }
 
@@ -411,6 +519,7 @@ const openRecruitCalenderModal = () => {
 const openWorkTypeModal = () => {
   modalStore.openModal(WorkTypeModal, {
     onConfirm: onWorkTypeConfirmed,
+    works: workTypes.value,
   })
 }
 
@@ -418,7 +527,7 @@ const openJobModal = () => {
   console.log(selectedJobs.value)
   modalStore.openModal(JobModal, {
     onConfirm: onJobConfirmed,
-    jobs: selectedJobs.value,
+    jobs: recruitJobs.value,
   })
 }
 
@@ -431,6 +540,7 @@ const openInterviewTimeModal = () => {
 
 const onSkillsConfirmed = (skills) => {
   selectedSkills.value = skills
+  console.log(selectedSkills.value)
 }
 
 const onPreferSkillsConfirmed = (skills) => {
