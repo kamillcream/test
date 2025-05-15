@@ -2,7 +2,9 @@ package com.example.demo.domain.project.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -14,56 +16,80 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.common.ApiResponse;
 import com.example.demo.domain.project.dto.request.ProjectApplyRequest;
 import com.example.demo.domain.project.dto.request.ProjectCreateRequest;
 import com.example.demo.domain.project.dto.request.ProjectSearchRequest;
+import com.example.demo.domain.project.dto.response.AreaInfoResponse;
+import com.example.demo.domain.project.dto.response.GroupSkillInfoResponse;
+import com.example.demo.domain.project.dto.response.ProjectDetailResponse;
+import com.example.demo.domain.project.dto.response.ProjectFormDataResponse;
+import com.example.demo.domain.project.dto.response.ProjectListResponse;
+import com.example.demo.domain.project.dto.response.ProjectSummary;
 import com.example.demo.domain.project.entity.Project;
 import com.example.demo.domain.project.entity.ProjectApplicationEntity;
 import com.example.demo.domain.project.service.ProjectService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/projects")
+@RequestMapping("/projects")
 @RequiredArgsConstructor
+@CrossOrigin(value = "http://localhost:8504")
 public class ProjectController {
 	private final ProjectService projectService;
 	
 	@PostMapping
-	public ResponseEntity<Project> postProject(@RequestBody ProjectCreateRequest request){
-		return ResponseEntity.ok(projectService.createProject(request));
+	public ResponseEntity<ApiResponse<Void>> postProject(@Valid @RequestBody ProjectCreateRequest request){
+		projectService.createProject(request);
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 생성 성공", null));
 	}
 	
 	@GetMapping
-	public ResponseEntity<List<Project>> getProjectList(@ModelAttribute ProjectSearchRequest request){
-		return ResponseEntity.ok(projectService.fetchAllProject(request));
+	public ResponseEntity<ApiResponse<ProjectListResponse>> getProjectList(@ModelAttribute ProjectSearchRequest request){
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 목록 조회 성공", projectService.fetchAllProject(request)));
 	}
+
 	
 	@PatchMapping
-	public ResponseEntity<Project> patchProject(@RequestBody ProjectCreateRequest request){
-		return ResponseEntity.ok(projectService.updateProject(request));
+	public ResponseEntity<ApiResponse<Void>> patchProject(@RequestBody ProjectCreateRequest request){
+		projectService.updateProject(request);
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 수정 성공", null)); 
 	}
 	
 	@DeleteMapping("/{projectSq}")
-	public ResponseEntity<Project> deleteProject(@PathVariable("projectSq") Long projectSq){
-		return ResponseEntity.ok(projectService.softDeleteProject(projectSq));
+	public ResponseEntity<ApiResponse<Void>> deleteProject(@PathVariable("projectSq") Long projectSq){
+		projectService.softDeleteProject(projectSq);
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 삭제 성공", null)); 
 	}
 	
 	@PostMapping("/{projectSq}/applications")
-	public ResponseEntity<ProjectApplicationEntity> applyProject(@PathVariable("projectSq") Long projectSq, @RequestBody ProjectApplyRequest applyRequest){
-		return ResponseEntity.ok(projectService.createProjectApplication(projectSq, applyRequest));
+	public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectSq") Long projectSq, @RequestBody ProjectApplyRequest applyRequest){
+		projectService.createProjectApplication(projectSq, applyRequest);
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 지원 성공", null));
 	}
 	
 	@PostMapping("/{projectSq}/scrap")
-	public void applyProject(@PathVariable("projectSq") Long projectSq){
+	public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectSq") Long projectSq){
 		projectService.createProjectScrap(projectSq);
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 스크랩 성공", null));
 	}
 	
 	@GetMapping("/{projectSq}/details")
-	public ResponseEntity<Project> getProjectDetails(@PathVariable("projectSq") Long projectSq){
-		return ResponseEntity.ok(projectService.fetchProject(projectSq));
+	public ResponseEntity<ApiResponse<ProjectDetailResponse>> getProjectDetails(@PathVariable("projectSq") Long projectSq){
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 상세 내역 반환 성공", projectService.fetchProject(projectSq)));
 	}
 	
+	@GetMapping("/infos")
+	public ResponseEntity<ApiResponse<ProjectFormDataResponse>> getProjectFormDatas(){
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 폼 데이터 반환 성공", projectService.fetchProjectFormDatas()));
+	}
+	
+	@GetMapping("/{areaCodeSq}/districts")
+	public ResponseEntity<ApiResponse<List<AreaInfoResponse>>> getDistrictInfos(@PathVariable("areaCodeSq") Long areaCodeSq){
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "하위 행정구역 반환 성공", projectService.fetchDistricts(areaCodeSq)));
+	}
 	
 	
 	

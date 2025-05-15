@@ -11,7 +11,6 @@ import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
 
 public record ProjectCreateRequest(
-		@Null
 		long projectId,
 		@NotBlank(message = "프로젝트 제목은 필수입니다.")
 	    String projectTitle,
