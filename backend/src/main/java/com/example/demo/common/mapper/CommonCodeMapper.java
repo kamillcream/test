@@ -1,5 +1,9 @@
 package com.example.demo.common.mapper;
 
+import java.util.List;
+
+import javax.swing.ListModel;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -11,4 +15,6 @@ public interface CommonCodeMapper {
 	Long findCommonCodeSqByEngName(@Param("engName") String engName, @Param("parentCodeSq") Long parentCodeSq);
 	SkillInsertRequest findSkillTagInfoByName(@Param("name") String name);
 	Long findParentSkillTagSq(@Param("skill_tag_sq") Long skill_tag_sq);
+	List<String> findByParentCode(@Param("parentCodeSq") Long parentCodeSq);
+	String findCommonCodeNmBySq(@Param("codeSq") Long codeSq);
 }

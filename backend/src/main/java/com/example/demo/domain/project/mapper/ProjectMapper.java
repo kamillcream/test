@@ -2,6 +2,7 @@ package com.example.demo.domain.project.mapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -11,6 +12,8 @@ import com.example.demo.domain.project.dto.request.JobInsertRequest;
 import com.example.demo.domain.project.dto.request.ProjectSearchRequest;
 import com.example.demo.domain.project.dto.request.ScrapInsertRequest;
 import com.example.demo.domain.project.dto.request.SkillInsertRequest;
+import com.example.demo.domain.project.dto.response.ProjectFormDataResponse;
+import com.example.demo.domain.project.dto.response.SingleSkillInfoResponse;
 import com.example.demo.domain.project.entity.Project;
 
 @Mapper
@@ -24,4 +27,8 @@ public interface ProjectMapper {
 	SkillInsertRequest findSkillTagInfoByName(@Param("name") String name);
 	long findCompanySqFromProjectSq(long projectSq);
 	void insertScrap(ScrapInsertRequest scrapInsertRequest);
+	List<SingleSkillInfoResponse> findSkillInfoList();
+	List<String> findWorkTypesByProjectSq(@Param("projectSq") Long projectSq);
+	List<String> findJobsByProjectSq(@Param("projectSq") Long projectSq);
+	Map<String, LocalDateTime> findInterviewTimesBySq(@Param("projectSq") Long projectSq);
 }
