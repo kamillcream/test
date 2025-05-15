@@ -198,7 +198,25 @@
                     class="form-control text-3 h-auto py-2"
                     style="border: none"
                     placeholder="주소를 입력하세요"
+                    readonly
+                    @click="openAddressSearchModal"
                     required
+                  />
+                </div>
+
+                <!-- 상세 주소 -->
+                <div class="form-group col-md-12 mb-3">
+                  <label
+                    class="form-label mb-1 text-2"
+                    style="font-weight: bold"
+                    >상세 주소</label
+                  >
+                  <input
+                    v-model="resumeData.addressDetail"
+                    type="text"
+                    class="form-control text-3 h-auto py-2"
+                    style="border: none"
+                    placeholder="상세주소를 입력하세요"
                   />
                 </div>
               </div>
@@ -553,8 +571,18 @@
 import { ref, reactive } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import ResumeModal from '@/fo/components/mypage/personal/ResumeModal.vue'
+import AddressSerchModal from '@/fo/components/mypage/personal/AddressSerchModal.vue'
 
 const modalStore = useModalStore()
+
+//주소 모달창
+const openAddressSearchModal = () => {
+  modalStore.openModal(AddressSerchModal, {
+    onComplete: (selectedAddress) => {
+      resumeData.address = selectedAddress
+    },
+  })
+}
 
 const openDetailModal = () => {
   modalStore.openModal(ResumeModal, {

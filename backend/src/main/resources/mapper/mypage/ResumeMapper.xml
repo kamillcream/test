@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.domain.mypage.mapper.ResumeMapper">
+
+  <insert id="insertResume" parameterType="com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest">
+    INSERT INTO TBL_RESUME_M (
+      user_sq,
+      address_sq,
+      resume_ttl,
+      resume_photo_url,
+      resume_nm,
+      resume_birth_dt,
+      resume_phone_num,
+      resume_email,
+      resume_greeting_txt,
+      resume_is_notification_yn,
+      resume_is_representative_yn
+    )
+    VALUES (
+      #{userSq},
+      #{addressSq},
+      #{resumeTtl},
+      #{resumePhotoUrl},
+      #{resumeNm},
+      #{resumeBirthDt},
+      #{resumePhoneNum},
+      #{resumeEmail},
+      #{resumeGreetingTxt},
+      #{resumeIsNotificationYn},
+      #{resumeIsRepresentativeYn}
+    );
+  </insert>
+
+</mapper>
