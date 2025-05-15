@@ -3,6 +3,8 @@ package com.example.demo.domain.project.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,12 +18,21 @@ import com.example.demo.domain.project.dto.request.ProjectCreateRequest;
 import com.example.demo.domain.project.dto.request.ProjectSearchRequest;
 import com.example.demo.domain.project.dto.request.ScrapInsertRequest;
 import com.example.demo.domain.project.dto.request.SkillInsertRequest;
+import com.example.demo.domain.project.dto.response.AreaInfoResponse;
+import com.example.demo.domain.project.dto.response.GroupSkillInfoResponse;
+import com.example.demo.domain.project.dto.response.ProjectDetailResponse;
+import com.example.demo.domain.project.dto.response.ProjectFormDataResponse;
+import com.example.demo.domain.project.dto.response.ProjectListResponse;
+import com.example.demo.domain.project.dto.response.ProjectSummary;
+import com.example.demo.domain.project.dto.response.SingleSkillInfoResponse;
 import com.example.demo.domain.project.entity.Project;
 import com.example.demo.domain.project.entity.ProjectApplicationEntity;
 import com.example.demo.domain.project.entity.enums.ProjectApplicationStatus;
+import com.example.demo.domain.project.mapper.DistrictMapper;
 import com.example.demo.domain.project.mapper.ProjectMapper;
 import com.example.demo.domain.project.repository.ProjectApplicationRepository;
 import com.example.demo.domain.project.repository.ProjectRepository;
+import com.example.demo.domain.project.util.ProjectUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,8 +43,10 @@ public class ProjectService {
 	private final ProjectApplicationRepository projectApplicationRepository;
 	private final ProjectMapper projectMapper;
 	private final CommonCodeMapper commonCodeMapper;
+	private final DistrictMapper districtMapper;
+	private final ProjectUtil projectUtil;
 	
-	public Project createProject(ProjectCreateRequest request) {
+	public void createProject(ProjectCreateRequest request) {
 		long devgradeCodeSq = commonCodeMapper.findCommonCodeSqByName(request.devGrade(), ParentCodeEnum.DEVELOPER_GRADE.getCode());
 		long educationLvlSq = commonCodeMapper.findCommonCodeSqByName(request.educationLvl(), ParentCodeEnum.EDUCATION.getCode());
 		Project project = Project.builder()
@@ -49,6 +62,7 @@ public class ProjectService {
 					.projectRecruitStartDt(request.recruitStartDt())
 					.projectRecruitEndDt(request.recruitEndDt())
 					.projectDescriptionTxt(request.description())
+					.projectPreferenceTxt(request.preference())
 					.projectIsNotificationYn(request.isNotification())
 					.build();
 		projectRepository.save(project);
@@ -57,32 +71,61 @@ public class ProjectService {
 		createReqSkills(project.getProjectSq(), request.usingSkills());
 		createPreferSkills(project.getProjectSq(), request.preferSkills());
 		createInterviewTimes(project.getProjectSq(), request.interviewTime());
-		return project;
 	}
 	
-	public List<Project> fetchAllProject(ProjectSearchRequest request){
-		return projectMapper.findProjectsBySearch(request);
+	public ProjectListResponse fetchAllProject(ProjectSearchRequest request){
+		List<Project> projects = projectMapper.findProjectsBySearch(request);
+		List<ProjectSummary> responses = new ArrayList<>();
+		projects.forEach(
+			p->{
+				String companyNm = projectUtil.convertCompanySqToName(p.getCompanySq());
+				String address = projectUtil.convertAddressSqToName(p.getAddressSq());
+				int remainingDay = projectUtil.calcaulateRemainingDay(p.getProjectRecruitEndDt());
+				List<String> requiredSkillStrings = projectUtil.fetchReqSkillsByProjectSq(p.getProjectSq());
+				String devGradeNm = projectUtil.convertCommonCodeSqToNm(p.getProjectDeveloperGradeCd());
+				String eduLvlNm = projectUtil.convertCommonCodeSqToNm(p.getProjectRequiredEducationCd());
+				responses.add(ProjectSummary.from(p, companyNm, address, remainingDay, requiredSkillStrings, devGradeNm, eduLvlNm));
+			}
+		);
+		
+		return new ProjectListResponse(request.getOffset(), request.getSize(), responses.size(), responses);	
 	}
-	
-	public Project fetchProject(Long projectSq){
-		return projectRepository.findById(projectSq).orElseThrow();
+	public ProjectDetailResponse fetchProject(Long projectSq){
+		Project p = projectRepository.findById(projectSq).orElseThrow();
+		String companyNm = projectUtil.convertCompanySqToName(p.getCompanySq());
+		String address = projectUtil.convertAddressSqToName(p.getAddressSq());
+		List<String> requiredSkillStrings = projectUtil.fetchReqSkillsByProjectSq(p.getProjectSq());
+		List<String> preferredSkillStrings = projectUtil.fetchPreferSkillsByProjectSq(p.getProjectSq());
+		List<String> contractTypes = projectUtil.fetchWorkTypesByProjectSq(projectSq);
+		List<String> jobs = projectUtil.fetchJobsByProjectSq(projectSq);
+		Map<String, LocalDateTime> interviewTimes = projectUtil.fetchInterviewTimesBySq(projectSq);
+		String devGradeNm = projectUtil.convertCommonCodeSqToNm(p.getProjectDeveloperGradeCd());
+		String eduLvlNm = projectUtil.convertCommonCodeSqToNm(p.getProjectRequiredEducationCd());	
+		return ProjectDetailResponse.from(p,
+			    interviewTimes,
+			    companyNm,
+			    address,
+			    requiredSkillStrings,
+			    preferredSkillStrings,
+			    contractTypes,
+			    jobs,
+			    devGradeNm,
+			    eduLvlNm);
 	}
 	
 	@Transactional
-	public Project updateProject(ProjectCreateRequest request) {
+	public void updateProject(ProjectCreateRequest request) {
 		long devgradeCodeSq = commonCodeMapper.findCommonCodeSqByName(request.devGrade(), ParentCodeEnum.DEVELOPER_GRADE.getCode());
 		long educationLvlSq = commonCodeMapper.findCommonCodeSqByName(request.educationLvl(), ParentCodeEnum.EDUCATION.getCode());
 		
 		Project project = projectRepository.findById(request.projectId()).orElseThrow();
 		project.update(request, devgradeCodeSq, educationLvlSq);
-		return project;
 	}
 	
 	@Transactional
-	public Project softDeleteProject(long projectSq) {
+	public void softDeleteProject(long projectSq) {
 		Project project = projectRepository.findById(projectSq).orElseThrow();
 		project.delete();
-		return project;
 	}
 	
 	public ProjectApplicationEntity createProjectApplication(long projectSq, ProjectApplyRequest request) {
@@ -165,5 +208,41 @@ public class ProjectService {
 	        }
 	    });
 	    return requests;
+	}
+	
+	public ProjectFormDataResponse fetchProjectFormDatas() {
+		List<AreaInfoResponse> cities = districtMapper.findAllArea();
+		List<String> devGrades = commonCodeMapper.findByParentCode(ParentCodeEnum.DEVELOPER_GRADE.getCode());
+		List<String> educationLevels = commonCodeMapper.findByParentCode(ParentCodeEnum.EDUCATION.getCode());
+		List<String> workTypes = commonCodeMapper.findByParentCode(ParentCodeEnum.CONTRACT_TYPE.getCode());
+		List<String> recruitJobs = commonCodeMapper.findByParentCode(ParentCodeEnum.JOB_POSITION.getCode());
+		List<GroupSkillInfoResponse> skills = groupingSkills(projectMapper.findSkillInfoList());
+		
+		return ProjectFormDataResponse.builder()
+				.cities(cities)
+				.devGrades(devGrades)
+				.educationLevels(educationLevels)
+				.workTypes(workTypes)
+				.recruitJobs(recruitJobs)
+				.skills(skills)
+				.build();
+	}
+	
+	public List<GroupSkillInfoResponse> groupingSkills(List<SingleSkillInfoResponse> responses){
+		Map<String, List<String>> grouped = responses.stream()
+		        .collect(Collectors.groupingBy(
+		            SingleSkillInfoResponse::getParentSkillTagNm,
+		            Collectors.mapping(SingleSkillInfoResponse::getChildSkillTagNm, Collectors.toList())
+		        ));
+		
+		List<GroupSkillInfoResponse> result = grouped.entrySet().stream()
+		        .map(e -> new GroupSkillInfoResponse(e.getKey(), e.getValue()))
+		        .collect(Collectors.toList());
+		
+		return result;	
+	}
+	
+	public List<AreaInfoResponse> fetchDistricts(Long areaCodeSq){
+		return districtMapper.findAllDistrictByParent(areaCodeSq);
 	}
 }
