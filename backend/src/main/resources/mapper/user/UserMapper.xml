@@ -1,65 +1,52 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.demo.domain.user.mapper.UserMapper">
 
-     <!-- 1. 지역코드 조회 -->
-  <select id="selectAreaCodeSqBySigungu" parameterType="string" resultType="long">
-    SELECT area_code_sq
-    FROM TBL_AREA_C
-    WHERE area_sigungu = #{sigungu}
-    LIMIT 1
-  </select>
+  <!-- 1. 지역코드 조회 -->
+  <select id="selectAreaCodeSqBySigungu" parameterType="string" resultType="long"> SELECT
+    area_code_sq FROM TBL_AREA_C WHERE area_sigungu = #{sigungu} LIMIT 1 </select>
 
   <!-- 2. 주소 INSERT -->
   <insert id="insertAddress" parameterType="com.example.demo.domain.user.dto.AddressDTO"
-          useGeneratedKeys="true" keyProperty="addressSq">
-    INSERT INTO TBL_ADDRESS_S (
-      zonecode, address, detail_address, sigungu,
-      latitude, longitude,
-      area_code_sq
-    ) VALUES (
-      #{zonecode}, #{address}, #{detailAddress}, #{sigungu},
-      #{latitude}, #{longitude},
-      #{areaCodeSq}
-    )
-  </insert>
+    useGeneratedKeys="true" keyProperty="addressSq"> INSERT INTO TBL_ADDRESS_S ( zonecode, address,
+    detail_address, sigungu, latitude, longitude, area_code_sq ) VALUES ( #{zonecode}, #{address},
+    #{detailAddress}, #{sigungu}, #{latitude}, #{longitude}, #{areaCodeSq} ) </insert>
 
   <!-- 3. 사용자 INSERT -->
-  <insert id="insertUser" parameterType="com.example.demo.domain.user.dto.UserDTO">
-    INSERT INTO TBL_USER_M (
-      address_sq, user_id, user_email, user_pw,
-      user_nm, user_gender_cd, user_phone_num, user_birth_dt,
-      user_type_cd, user_signup_type_cd,
-      user_agreed_privacy_policy_yn
-    ) VALUES (
-      #{addressSq}, #{userId}, #{userEmail}, #{userPw},
-      #{userNm}, #{userGenderCd}, #{userPhoneNum}, #{userBirthDt},
-      #{userTypeCd}, #{userSignupTypeCd},
-      #{userAgreedPrivacyPolicyYn}
-    )
-  </insert>
+  <insert id="insertUser" parameterType="com.example.demo.domain.user.dto.UserDTO"> INSERT INTO
+    TBL_USER_M ( address_sq, user_id, user_email, user_pw, user_nm, user_gender_cd, user_phone_num,
+    user_birth_dt, user_type_cd, user_signup_type_cd, user_agreed_privacy_policy_yn ) VALUES (
+    #{addressSq}, #{userId}, #{userEmail}, #{userPw}, #{userNm}, #{userGenderCd}, #{userPhoneNum},
+    #{userBirthDt}, #{userTypeCd}, #{userSignupTypeCd}, #{userAgreedPrivacyPolicyYn} ) </insert>
 
-    <!-- 아이디 중복 확인 -->
-    <select id="existsByUserId" parameterType="string" resultType="boolean">
-    SELECT EXISTS (
-        SELECT 1 FROM TBL_USER_M WHERE user_id = #{userId} AND user_is_deleted_yn = 'N'
-    )
-    </select>
+  <!-- 아이디 중복 확인 -->
+  <select id="existsByUserId" parameterType="string" resultType="boolean"> SELECT EXISTS ( SELECT 1
+    FROM TBL_USER_M WHERE user_id = #{userId} AND user_is_deleted_yn = 'N' ) </select>
 
-    <!-- 이메일 중복 확인 -->
-    <select id="existsByUserEmail" parameterType="string" resultType="boolean">
-    SELECT EXISTS (
-        SELECT 1 FROM TBL_USER_M WHERE user_email = #{userEmail} AND user_is_deleted_yn = 'N'
-    )
-    </select>
+  <!-- 이메일 중복 확인 -->
+  <select id="existsByUserEmail" parameterType="string" resultType="boolean"> SELECT EXISTS ( SELECT
+    1 FROM TBL_USER_M WHERE user_email = #{userEmail} AND user_is_deleted_yn = 'N' ) </select>
 
-    <!-- 휴대폰 번호 중복 확인 -->
-    <select id="existsByUserPhoneNum" parameterType="string" resultType="boolean">
-    SELECT EXISTS (
-        SELECT 1 FROM TBL_USER_M WHERE user_phone_num = #{userPhoneNum} AND user_is_deleted_yn = 'N'
-    )
-    </select>
+  <!-- 휴대폰 번호 중복 확인 -->
+  <select id="existsByUserPhoneNum" parameterType="string" resultType="boolean"> SELECT EXISTS (
+    SELECT 1 FROM TBL_USER_M WHERE user_phone_num = #{userPhoneNum} AND user_is_deleted_yn = 'N' ) </select>
 
+
+  <!-- JWT 토큰 -->
+
+  <select id="findByUserEmail" parameterType="string"
+    resultType="com.example.demo.domain.user.dto.UserDTO"> SELECT user_sq AS userSq, user_email AS
+    userEmail, user_pw AS userPw, user_nm AS userNm, user_type_cd AS userTypeCd, user_refresh_token
+    AS userRefreshToken FROM TBL_USER_M WHERE user_email = #{userEmail} AND user_is_deleted_yn = 'N' </select>
+
+  <update id="updateRefreshToken" parameterType="map"> UPDATE TBL_USER_M SET user_refresh_token =
+    #{refreshToken}, user_modified_at_dtm = NOW() WHERE user_sq = #{userSq} </update>
+
+  <select id="findByRefreshToken" parameterType="string"
+    resultType="com.example.demo.domain.user.dto.UserDTO"> SELECT user_sq, address_sq, user_id,
+    user_email, user_pw, user_nm, user_gender_cd, user_phone_num, user_birth_dt, user_type_cd,
+    user_signup_type_cd, user_profile_image_url, user_agreed_privacy_policy_yn, user_created_at_dtm,
+    user_modified_at_dtm, user_is_deleted_yn, user_refresh_token FROM TBL_USER_M WHERE
+    user_refresh_token = #{refreshToken} AND user_is_deleted_yn = 'N' </select>
 </mapper>

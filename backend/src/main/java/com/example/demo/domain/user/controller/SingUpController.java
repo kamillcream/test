@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.domain.user.dto.request.RequestSignUpDTO;
+import com.example.demo.domain.user.dto.request.SignUpRequestDTO;
 import com.example.demo.domain.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class SingUpController {
 
     // 개인 회원가입
     @PostMapping("/personal/signup")
-    public ResponseEntity<?> signUp(@RequestBody RequestSignUpDTO dto) {
+    public ResponseEntity<?> signUp(@RequestBody SignUpRequestDTO dto) {
         try {
             userService.signUp(dto);
             return ResponseEntity.ok("회원가입 성공");

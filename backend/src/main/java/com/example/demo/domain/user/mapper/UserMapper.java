@@ -1,6 +1,7 @@
 package com.example.demo.domain.user.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.example.demo.domain.user.dto.AddressDTO;
 import com.example.demo.domain.user.dto.UserDTO;
@@ -20,4 +21,9 @@ public interface UserMapper {
 
     boolean existsByUserPhoneNum(String userPhoneNum);
 
+    UserDTO findByUserEmail(@Param("userEmail") String userEmail);
+
+    int updateRefreshToken(@Param("userSq") Long userSq, @Param("refreshToken") String refreshToken);
+
+    UserDTO findByRefreshToken(String refreshToken);
 }

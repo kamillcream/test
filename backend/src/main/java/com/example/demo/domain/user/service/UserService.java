@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.domain.user.dto.AddressDTO;
 import com.example.demo.domain.user.dto.UserDTO;
-import com.example.demo.domain.user.dto.request.RequestSignUpDTO;
+import com.example.demo.domain.user.dto.request.SignUpRequestDTO;
 import com.example.demo.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public void signUp(RequestSignUpDTO requestDto) {
+    public void signUp(SignUpRequestDTO requestDto) {
 
         // 중복 검사
         if (userRepository.existsByUserId(requestDto.getUserId())) {

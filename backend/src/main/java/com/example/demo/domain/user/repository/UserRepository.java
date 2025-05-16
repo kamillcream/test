@@ -37,4 +37,18 @@ public class UserRepository {
     public int insertUser(UserDTO dto) {
         return userMapper.insertUser(dto);
     }
+
+    // 로그인 시 사용자 조회 (이메일 기준)
+    public UserDTO findByUserEmail(String userEmail) {
+        return userMapper.findByUserEmail(userEmail);
+    }
+
+    public void updateRefreshToken(Long userSq, String refreshToken) {
+        userMapper.updateRefreshToken(userSq, refreshToken);
+    }
+
+    public UserDTO findByRefreshToken(String refreshToken) {
+        return userMapper.findByRefreshToken(refreshToken);
+    }
+
 }
