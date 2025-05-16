@@ -17,7 +17,7 @@
             type="text"
             class="form-control"
             placeholder="기업명을 입력하세요"
-            v-model="form.companyName"
+            v-model="companyPorfileStore.companyData.companyName"
           />
         </div>
         <div class="col">
@@ -25,7 +25,7 @@
             type="text"
             class="form-control"
             placeholder="대표자명을 입력하세요"
-            v-model="form.ceoName"
+            v-model="companyPorfileStore.companyData.ceoName"
           />
         </div>
       </div>
@@ -36,7 +36,7 @@
           type="date"
           class="form-control"
           name="openDate"
-          v-model="form.openDate"
+          v-model="companyPorfileStore.companyData.openDate"
         />
       </div>
 
@@ -46,7 +46,7 @@
           type="text"
           class="form-control"
           placeholder="사업자 등록번호를 입력하세요"
-          v-model="form.bizNumber"
+          v-model="companyPorfileStore.companyData.bizNumber"
         />
         <button class="btn btn-primary" type="button">인증하기</button>
       </div>
@@ -55,10 +55,11 @@
       <div class="form-check mb-4">
         <input
           type="checkbox"
-          v-model="form.terms"
+          v-model="companyPorfileStore.termsAgreed"
           id="agreeTerms"
           class="form-check-input"
         />
+
         <label class="form-check-label me-1" for="agreeTerms">
           약관에 동의합니다.
         </label>
@@ -79,27 +80,22 @@
 </template>
 
 <script setup>
-import { reactive, defineProps, nextTick } from 'vue'
+import { defineProps } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { companyAgreementText } from '@/assets/terms'
 import TermsAgreementModal from './TermsAgreementModal.vue'
+import { useCompanyProfileStore } from '@/fo/stores/companyProfileStore'
 
-const props = defineProps({
+defineProps({
   onConfirm: { type: Function, required: true }, // 부모로 넘기는 콜백
 })
 
-const alertStore = useAlertStore()
+const companyPorfileStore = useCompanyProfileStore()
 const modalStore = useModalStore()
+const alertStore = useAlertStore()
 
-// 입력값을 하나의 reactive 객체로 관리
-const form = reactive({
-  companyName: '',
-  ceoName: '',
-  openDate: '',
-  bizNumber: '',
-  terms: false,
-})
+const termsText = companyAgreementText
 
 function closeModal() {
   modalStore.closeModal()
@@ -108,29 +104,27 @@ function closeModal() {
 function openTermsModal() {
   modalStore.openModal(TermsAgreementModal, {
     title: '기업정보 수집 및 이용 동의서',
-    body: companyAgreementText,
-    onConfirm: async () => {
+    body: termsText,
+    onConfirm: () => {
       alertStore.show('약관 동의 처리되었습니다.', 'success')
-      modalStore.closeModal()
-      await nextTick()
-      form.terms = true
+      companyPorfileStore.termsAgreed = true
+      modalStore.closeModal() // 약관 모달 닫기
     },
   })
 }
 
 function handleConfirm() {
-  // 유효성 검사 등 가능
-  if (!form.terms) {
+  if (!companyPorfileStore.termsAgreed) {
     alertStore.show('약관에 동의해주세요.', 'warning')
     return
   }
 
-  // 부모 컴포넌트로 데이터 전달
-  // 구조분해하여 값만 넘길 수도 있음
-  const payload = { ...form }
-  // emit처럼 사용하는 방식
-  // defineProps로 받은 onConfirm 실행
-  props.onConfirm(payload)
+  // 인증 완료 시 스토어에 상태 저장
+  const payload = { ...companyPorfileStore.companyData }
+  companyPorfileStore.setProfile(payload)
+
+  // 필요 시 부모로 전달
+  // props.onConfirm(payload)
 
   closeModal()
 }

@@ -1,13 +1,16 @@
 package com.example.demo.domain.community.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import lombok.*;
-
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -31,17 +34,18 @@ public class Board {
     private Long boardTypeCd;
     private LocalDateTime boardCreatedAt = LocalDateTime.now();
 
-//    public Board(Long userSq, String boardTtl, String boardDescriptionEdt, String boardTyp, Long boardTypeCd){
-//        this.userSq = userSq;
-//        this.boardTtl = boardTtl;
-//        this.boardDescriptionEdt = boardDescriptionEdt;
-//        this.boardTyp = boardTyp;
-//        this.boardTypeCd = boardTypeCd;
-//        this.boardViewCnt = 0;
-//        this.boardCommentCnt = 0;
-//        this.boardRecommendCnt = 0;
-//        this.boardAdoptStatusCd = 84L;
-//        this.boardIsDeletedYn = "N";
-//        this.boardCreatedAt = LocalDateTime.now();
-//    }
+    // public Board(Long userSq, String boardTtl, String boardDescriptionEdt, String
+    // boardTyp, Long boardTypeCd){
+    // this.userSq = userSq;
+    // this.boardTtl = boardTtl;
+    // this.boardDescriptionEdt = boardDescriptionEdt;
+    // this.boardTyp = boardTyp;
+    // this.boardTypeCd = boardTypeCd;
+    // this.boardViewCnt = 0;
+    // this.boardCommentCnt = 0;
+    // this.boardRecommendCnt = 0;
+    // this.boardAdoptStatusCd = 84L;
+    // this.boardIsDeletedYn = "N";
+    // this.boardCreatedAt = LocalDateTime.now();
+    // }
 }
