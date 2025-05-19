@@ -4,10 +4,13 @@ spring:
     username: admin
     password: admin123!!
     driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
-  redis:
-    host: 15.164.85.142
-    port: 6379
-    password: redis123!!
+
+  data:
+    redis:  # ← 여기 들여쓰기 수정됨
+      host: 15.164.85.142
+      port: 6379
+      password: redis123!!
+
   mail:
     host: smtp.gmail.com
     port: 587
@@ -22,22 +25,22 @@ spring:
           starttls:
             enable: true
             required: true
+
   profiles:
     active: dev
 
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml
   configuration:
-    map-underscore-to-camel-case: true # DB 컬럼명(user_sq) ↔ Java 필드(userSq) 자동 매핑
+    map-underscore-to-camel-case: true
 
 server:
   port: 8080
-  # address: 0.0.0.0  # 배포 시 외부 접속 허용 시 사용
+  # address: 0.0.0.0
   servlet:
-    context-path: /api # ← 공백으로 들여쓰기 확인!
+    context-path: /api
 
 jwt:
   secret: MySuperSecretKeyForJWTEncoding123456
-  access-token-expiration: 1800000 # 30분 (ms)
-  refresh-token-expiration: 1209600000 # 14일 (ms)
-
+  access-token-expiration: 1800000
+  refresh-token-expiration: 1209600000
