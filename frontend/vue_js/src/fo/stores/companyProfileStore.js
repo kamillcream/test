@@ -31,6 +31,7 @@ export const useCompanyProfileStore = defineStore('companyProfile', {
         openDate: payload.openDate || '',
         bizNumber: payload.bizNumber || '',
       }
+      this.termsAgreed = payload.termsAgreed ?? false
     },
   },
 })

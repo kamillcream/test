@@ -17,6 +17,11 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
+    public boolean isUserIdExists(String userId) {
+        return userRepository.existsByUserId(userId);
+    }
+
     @Transactional
     public void signUp(RequestSignUpDTO requestDto) {
         // 1. 중복 검사

@@ -25,8 +25,6 @@ import com.example.demo.domain.user.dto.request.CompanyVerificationRequestDTO;
 @Service
 public class CompanyVerificationService {
 
-    // @Value("${external.business-verify.api-key}")
-
     public ApiResponse<Boolean> verifyCompany(CompanyVerificationRequestDTO requestDto) {
         RestTemplate restTemplate = new RestTemplate();
         URI uri = UriComponentsBuilder.fromHttpUrl("http://api.odcloud.kr/api/nts-businessman/v1/validate")
@@ -50,16 +48,14 @@ public class CompanyVerificationService {
 
         try {
             ResponseEntity<Map> resultMap = restTemplate.exchange(uri, HttpMethod.POST, entity, Map.class);
-            System.out.println("resultMap " + resultMap);
             Map<String, Object> body = resultMap.getBody();
-            System.out.println("body " + body);
+            System.out.println(body);
 
             if (body == null || !body.containsKey("data")) {
                 return ApiResponse.of(HttpStatus.OK, "사업자 정보 확인 불가", false);
             }
 
             List<Map<String, Object>> dataList = (List<Map<String, Object>>) body.get("data");
-            System.out.println(dataList);
 
             if (dataList.isEmpty()) {
                 return ApiResponse.of(HttpStatus.OK, "사업자 정보 없음", false);

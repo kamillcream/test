@@ -14,7 +14,7 @@
           type="text"
           v-model="form.id"
           class="form-control form-control-lg"
-          @input="validateId"
+          @input="onIdInput"
         />
         <div v-if="idError" class="invalid-feedback">{{ idError }}</div>
       </div>
@@ -314,6 +314,7 @@ import { personalAgreementText } from '@/assets/terms'
 import TermsAgreementModal from '@/fo/components/login&signup/TermsAgreementModal.vue'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { api } from '@/axios'
+import { debounce } from 'lodash'
 
 const emit = defineEmits(['submit'])
 
@@ -459,17 +460,43 @@ const emailValid = ref(false)
 const verifyCodeValid = ref('')
 const termsValid = ref(false)
 
-// 아이디 유효성 검사
-const validateId = () => {
+// 1. 실제 유효성 검사 + API 호출 함수 (비동기)
+const validateIdCore = async (id) => {
   idError.value = ''
   idValid.value = false
-  if (!form.id) {
+
+  if (!id) {
     idError.value = '아이디를 입력해주세요.'
-  } else if (!/^[a-zA-Z0-9]{5,20}$/.test(form.id)) {
-    idError.value = '영문 또는 숫자 5~20자로 입력해주세요.'
-  } else {
-    idValid.value = true
+    return
   }
+  if (!/^[a-zA-Z0-9]{5,20}$/.test(id)) {
+    idError.value = '영문 또는 숫자 5~20자로 입력해주세요.'
+    return
+  }
+
+  try {
+    const res = await api.$get(`/check-id?userId=${id}`)
+    if (res) {
+      idError.value = '이미 사용 중인 아이디입니다.'
+      idValid.value = false
+    } else {
+      idValid.value = true
+    }
+  } catch (e) {
+    idError.value = '서버 오류가 발생했습니다.'
+    idValid.value = false
+  }
+}
+
+// 2. 디바운스 적용 함수
+const validateId = debounce((id) => {
+  validateIdCore(id)
+}, 500) // 500ms 딜레이
+
+// 3. input 이벤트 핸들러 (v-model과 함께)
+const onIdInput = (e) => {
+  const id = e.target.value
+  validateId(id)
 }
 
 // 비밀번호 유효성 검사

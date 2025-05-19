@@ -14,7 +14,7 @@
           type="text"
           v-model="form.id"
           class="form-control form-control-lg"
-          @input="validateId"
+          @input="onIdInput"
         />
         <div v-if="idError" class="invalid-feedback">{{ idError }}</div>
       </div>
@@ -126,10 +126,17 @@
       </div>
       <div v-if="companyError" class="invalid-feedback">{{ companyError }}</div>
       <div class="form-group col-lg-6">
-        <label class="form-label">사업자 번호</label>
+        <label class="form-label"
+          >사업자 번호
+          <i
+            v-if="companyValid"
+            class="bi bi-check-circle-fill ms-1"
+            style="color: #007bff"
+          ></i
+        ></label>
         <input
           type="text"
-          v-model="form.businessNumber"
+          v-model="form.companyBizNumber"
           class="form-control form-control-lg"
         />
       </div>
@@ -295,13 +302,17 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, defineEmits } from 'vue'
+import { reactive, ref, onMounted, defineEmits, watch } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { personalAgreementText } from '@/assets/terms'
 import TermsAgreementModal from '@/fo/components/login&signup/TermsAgreementModal.vue'
 import CompanyVerificationModal from './CompanyVerificationModal.vue'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { api } from '@/axios'
+import { useCompanyProfileStore } from '@/fo/stores/companyProfileStore'
+import { debounce } from 'lodash'
+
+const companyProfileStore = useCompanyProfileStore()
 
 const emit = defineEmits(['submit'])
 
@@ -345,10 +356,10 @@ const form = reactive({
   emailDomain: '',
   verificationCode: '',
   terms: false,
-  companyName: '',
-  companyCEOName: '',
-  companyBizNumber: '',
-  companyOpenDate: '',
+  companyName: companyProfileStore.companyData.companyName,
+  companyCeoName: companyProfileStore.companyData.ceoName,
+  companyBizNumber: companyProfileStore.companyData.bizNumber,
+  companyOpenDate: companyProfileStore.companyData.openDate,
   address: '',
   addressDetail: '',
   latitude: '',
@@ -356,6 +367,17 @@ const form = reactive({
   typeCode: 302, // 기업
   signupTypeCode: 204, // 이메일
 })
+
+watch(
+  () => companyProfileStore.companyData,
+  (newVal) => {
+    form.companyName = newVal.companyName
+    form.companyCeoName = newVal.ceoName
+    form.companyBizNumber = newVal.bizNumber
+    form.companyOpenDate = newVal.openDate
+  },
+  { immediate: true, deep: true }, // 컴포넌트 진입 시 즉시 반영 + 객체 내부까지 감시
+)
 
 const modalStore = useModalStore()
 const alertStore = useAlertStore()
@@ -434,23 +456,49 @@ const passwordValid = ref(false)
 const confirmPasswordValid = ref(false)
 const nameValid = ref(false)
 const phoneValid = ref(false)
-const companyValid = ref(false)
+const companyValid = ref(companyProfileStore.termsAgreed)
 const addressValid = ref(false)
 const emailValid = ref(false)
 const verifyCodeValid = ref('')
 const termsValid = ref(false)
 
-// 아이디 유효성 검사
-const validateId = () => {
+// 1. 실제 유효성 검사 + API 호출 함수 (비동기)
+const validateIdCore = async (id) => {
   idError.value = ''
   idValid.value = false
-  if (!form.id) {
+
+  if (!id) {
     idError.value = '아이디를 입력해주세요.'
-  } else if (!/^[a-zA-Z0-9]{5,20}$/.test(form.id)) {
-    idError.value = '영문 또는 숫자 5~20자로 입력해주세요.'
-  } else {
-    idValid.value = true
+    return
   }
+  if (!/^[a-zA-Z0-9]{5,20}$/.test(id)) {
+    idError.value = '영문 또는 숫자 5~20자로 입력해주세요.'
+    return
+  }
+
+  try {
+    const res = await api.$get(`/check-id?userId=${id}`)
+    if (res) {
+      idError.value = '이미 사용 중인 아이디입니다.'
+      idValid.value = false
+    } else {
+      idValid.value = true
+    }
+  } catch (e) {
+    idError.value = '서버 오류가 발생했습니다.'
+    idValid.value = false
+  }
+}
+
+// 2. 디바운스 적용 함수
+const validateId = debounce((id) => {
+  validateIdCore(id)
+}, 500) // 500ms 딜레이
+
+// 3. input 이벤트 핸들러 (v-model과 함께)
+const onIdInput = (e) => {
+  const id = e.target.value
+  validateId(id)
 }
 
 // 비밀번호 유효성 검사
@@ -507,6 +555,14 @@ const validatePhone = () => {
   }
 }
 
+watch(
+  () => companyProfileStore.termsAgreed,
+  (newVal) => {
+    companyValid.value = newVal
+  },
+  { immediate: true, deep: true }, // 컴포넌트 진입 시 즉시 반영 + 객체 내부까지 감시
+)
+
 // 기업명&사업자번호 유효성 검사
 const validateCompany = () => {
   companyError.value = ''
@@ -522,7 +578,6 @@ function openCompanyModal() {
     title: '기업 인증',
     onConfirm: (companyData) => {
       console.log('companyData', companyData)
-      companyValid.value = true
       modalStore.closeModal()
     },
   })
