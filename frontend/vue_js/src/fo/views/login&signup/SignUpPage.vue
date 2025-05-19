@@ -42,11 +42,13 @@ import CompanySignUpForm from '@/fo/components/login&signup/CompanySignUpForm.vu
 import PersonalSignUpForm from '@/fo/components/login&signup/PersonalSignUpForm.vue'
 import { api } from '@/axios'
 import { useAlertStore } from '@/fo/stores/alertStore'
+import { useCompanyProfileStore } from '@/fo/stores/companyProfileStore'
 
 const route = useRoute()
 const router = useRouter()
 const alertStore = useAlertStore()
 const signUpType = ref('')
+const companyProfileStore = useCompanyProfileStore()
 
 onMounted(() => {
   const type = route.query.loginType
@@ -88,6 +90,7 @@ async function handleSubmit(rawFormData) {
   try {
     await api.$post('/signup', formData)
     alertStore.show('회원가입이 완료되었습니다!', 'info')
+    companyProfileStore.resetProfile() // ✅ 스토어 초기화
     router.push('/login')
   } catch (err) {
     // 서버에서 온 에러 메시지

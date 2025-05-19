@@ -21,11 +21,24 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.example.demo.common.ApiResponse;
 import com.example.demo.domain.user.dto.request.CompanyVerificationRequestDTO;
+import com.example.demo.domain.user.repository.CompanyVerificationRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class CompanyVerificationService {
 
+    private final CompanyVerificationRepository companyVerificationRepository;
+
     public ApiResponse<Boolean> verifyCompany(CompanyVerificationRequestDTO requestDto) {
+
+        // 중복 검사
+        boolean exists = companyVerificationRepository.existsByBizNum(requestDto.getBNo());
+        if (exists) {
+            return ApiResponse.of(HttpStatus.CONFLICT, "이미 등록된 사업자등록번호입니다.", false);
+        }
+
         RestTemplate restTemplate = new RestTemplate();
         URI uri = UriComponentsBuilder.fromHttpUrl("http://api.odcloud.kr/api/nts-businessman/v1/validate")
                 .queryParam("serviceKey",
