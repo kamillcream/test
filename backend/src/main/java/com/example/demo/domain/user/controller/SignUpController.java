@@ -27,8 +27,19 @@ public class SignUpController {
 
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<Void>> signUp(@RequestBody RequestSignUpDTO dto) {
-        userService.signUp(dto);
-        return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "회원가입 성공", null));
+        try {
+            userService.signUp(dto);
+            return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "회원가입 성공", null));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.of(HttpStatus.BAD_REQUEST, e.getMessage(), null));
+        } catch (Exception e) {
+            // 서버 내부 오류
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.", null));
+        }
     }
 
 }

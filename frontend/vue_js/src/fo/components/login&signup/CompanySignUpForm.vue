@@ -316,8 +316,8 @@ const companyProfileStore = useCompanyProfileStore()
 
 const emit = defineEmits(['submit'])
 
-const validateAll = () => {
-  validateId()
+const validateAll = async () => {
+  await validateIdCore(form.id)
   validatePassword()
   validateConfirmPassword()
   validateName()
@@ -341,6 +341,7 @@ const validateAll = () => {
 
   if (isFormValid) {
     emit('submit', { ...form })
+    companyProfileStore.resetProfile() // ✅ 스토어 초기화
   } else {
     console.warn('❌ 유효성 검사 실패. 폼 제출 불가.')
   }

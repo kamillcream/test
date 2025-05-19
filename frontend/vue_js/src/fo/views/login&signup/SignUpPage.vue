@@ -77,14 +77,23 @@ async function handleSubmit(rawFormData) {
     sigungu: rawFormData.sigungu,
     latitude: Number(rawFormData.latitude),
     longitude: Number(rawFormData.longitude),
+
+    // 기업 관련 추가
+    companyNm: rawFormData.companyName,
+    companyCeoNm: rawFormData.companyCeoName,
+    companyOpenDt: rawFormData.companyOpenDate,
+    companyBizNum: rawFormData.companyBizNumber,
   }
   console.log('formData', formData)
   try {
-    await api.$post('/personal/signup', formData)
+    await api.$post('/signup', formData)
     alertStore.show('회원가입이 완료되었습니다!', 'info')
     router.push('/login')
   } catch (err) {
-    alertStore.show('회원가입에 실패하였습니다', 'danger')
+    // 서버에서 온 에러 메시지
+    const errorMessage =
+      err.response?.data?.message || '회원가입에 실패하였습니다'
+    alertStore.show(errorMessage, 'danger')
   }
 }
 </script>
