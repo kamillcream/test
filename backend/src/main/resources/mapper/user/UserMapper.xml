@@ -5,61 +5,41 @@
 <mapper namespace="com.example.demo.domain.user.mapper.UserMapper">
 
      <!-- 1. 지역코드 조회 -->
-    <select id="selectAreaCodeSqBySigungu" parameterType="string" resultType="long">
-      SELECT area_code_sq
-      FROM TBL_AREA_C
-      WHERE area_sigungu = #{sigungu}
-      LIMIT 1
-    </select>
+  <select id="selectAreaCodeSqBySigungu" parameterType="string" resultType="long">
+    SELECT area_code_sq
+    FROM TBL_AREA_C
+    WHERE area_sigungu = #{sigungu}
+    LIMIT 1
+  </select>
 
-    <!-- 2. 주소 INSERT -->
-    <insert id="insertAddress" parameterType="com.example.demo.domain.user.dto.AddressDTO"
-            useGeneratedKeys="true" keyProperty="addressSq">
-      INSERT INTO TBL_ADDRESS_S (
-        zonecode, address, detail_address, sigungu,
-        latitude, longitude,
-        area_code_sq
-      ) VALUES (
-        #{zonecode}, #{address}, #{detailAddress}, #{sigungu},
-        #{latitude}, #{longitude},
-        #{areaCodeSq}
-      )
-    </insert>
+  <!-- 2. 주소 INSERT -->
+  <insert id="insertAddress" parameterType="com.example.demo.domain.user.dto.AddressDTO"
+          useGeneratedKeys="true" keyProperty="addressSq">
+    INSERT INTO TBL_ADDRESS_S (
+      zonecode, address, detail_address, sigungu,
+      latitude, longitude,
+      area_code_sq
+    ) VALUES (
+      #{zonecode}, #{address}, #{detailAddress}, #{sigungu},
+      #{latitude}, #{longitude},
+      #{areaCodeSq}
+    )
+  </insert>
 
-    <!-- 3. 사용자 INSERT -->
-    <insert id="insertUser" parameterType="com.example.demo.domain.user.dto.UserDTO" useGeneratedKeys="true" keyProperty="userSq">
-      INSERT INTO TBL_USER_M (
-        address_sq, user_id, user_email, user_pw,
-        user_nm, user_gender_cd, user_phone_num, user_birth_dt,
-        user_type_cd, user_signup_type_cd
-      ) VALUES (
-        #{addressSq}, #{userId}, #{userEmail}, #{userPw},
-        #{userNm}, #{userGenderCd}, #{userPhoneNum}, #{userBirthDt},
-        #{userTypeCd}, #{userSignupTypeCd}
-      )
-    </insert>
-
-    <!-- 기업 프로필 INSERT -->
-    <insert id="insertCompanyProfile" parameterType="com.example.demo.domain.user.dto.CompanyProfileDTO">
-      INSERT INTO TBL_COMPANY_S (
-        user_sq,
-        address_sq,
-        company_nm,
-        company_ceo_nm,
-        company_open_dt,
-        company_biz_num,
-        company_greeting_txt
-      ) VALUES (
-        #{userSq},
-        #{addressSq},
-        #{companyNm},
-        #{companyCeoNm},
-        #{companyOpenDt},
-        #{companyBizNum},
-        #{companyGreetingTxt}
-      )
-    </insert>
-
+  <!-- 3. 사용자 INSERT -->
+  <insert id="insertUser" parameterType="com.example.demo.domain.user.dto.UserDTO">
+    INSERT INTO TBL_USER_M (
+      address_sq, user_id, user_email, user_pw,
+      user_nm, user_gender_cd, user_phone_num, user_birth_dt,
+      user_type_cd, user_signup_type_cd,
+      user_agreed_privacy_policy_yn
+    ) VALUES (
+      #{addressSq}, #{userId}, #{userEmail}, #{userPw},
+      #{userNm}, #{userGenderCd}, #{userPhoneNum}, #{userBirthDt},
+      #{userTypeCd}, #{userSignupTypeCd},
+      #{userAgreedPrivacyPolicyYn}
+    )
+  </insert>
 
     <!-- 아이디 중복 확인 -->
     <select id="existsByUserId" parameterType="string" resultType="boolean">

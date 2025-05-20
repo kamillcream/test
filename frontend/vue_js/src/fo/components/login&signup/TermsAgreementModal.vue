@@ -5,7 +5,7 @@
       <button
         type="button"
         class="btn-close"
-        @click="modalStore.closeModal()"
+        @click="closeModal"
         aria-hidden="true"
       ></button>
     </div>
@@ -14,27 +14,25 @@
       <div v-html="body"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-primary" @click="onAgree">동의</button>
-      <button class="btn btn-light" @click="modalStore.closeModal()">
-        닫기
-      </button>
+      <button class="btn btn-primary" @click="onConfirm">동의</button>
+      <button class="btn btn-light" @click="closeModal">닫기</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { defineProps } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
+import { defineProps } from 'vue'
+
+defineProps({
+  title: { type: String, default: '확인' },
+  body: { type: String, required: true }, // body를 props로 받음
+  onConfirm: { type: Function, required: true },
+})
 
 const modalStore = useModalStore()
 
-const props = defineProps({
-  title: String,
-  body: String,
-  onConfirm: Function,
-})
-
-function onAgree() {
-  props.onConfirm()
+function closeModal() {
+  modalStore.closeModal()
 }
 </script>
