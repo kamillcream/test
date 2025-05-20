@@ -29,22 +29,27 @@
 import ProjectFilterBar from '@/fo/components/common/ProjectFilterBar.vue'
 import ProjectCardGroup from '@/fo/components/project/ProjectCardGroup.vue'
 import CommonPagination from '@/fo/components/common/CommonPagination.vue'
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 
 import { api } from '@/axios.js'
 const filters = ref({
   addressCodeSq: null,
   projectDeveloperGradeCd: null,
+  educationCd: null,
+  jobRoleCd: null,
   sortBy: 'project_start_dt',
   sortOrder: 'desc',
-  searchKeyword: '',
+  searchKeyword: 'api',
   searchType: '프로젝트명',
-  offset: 1,
   size: 5,
 })
 
 const currentPage = ref(1)
-const totalPages = ref(1)
+const totalPages = ref('')
+const offset = computed(() => {
+  const page = parseInt(currentPage.value) || 1
+  return (page - 1) * filters.value.size
+})
 
 const projects = ref([])
 
@@ -59,12 +64,12 @@ watch(currentPage, (newPage) => {
 
 const fetchProjects = async () => {
   try {
-    const params = { ...filters.value }
+    const params = { ...filters.value, offset: offset.value }
     const response = await api.$get('/projects', { params })
     projects.value = response.output.projects
 
     // ✅ totalCount가 응답에 있어야 정확한 페이지네이션 계산 가능
-    const totalCount = response.totalCount ?? 0 // totalCount가 반드시 있어야 함
+    const totalCount = response.output.totalCount ?? 0 // totalCount가 반드시 있어야 함
     totalPages.value = Math.max(1, Math.ceil(totalCount / filters.value.size))
   } catch (e) {
     console.error('프로젝트 정보 불러오기 실패', e)
@@ -72,6 +77,7 @@ const fetchProjects = async () => {
 }
 const updateFilters = (updated) => {
   filters.value = { ...filters.value, ...updated }
+  console.log(filters)
   currentPage.value = 1 // 필터 바꾸면 1페이지부터
   fetchProjects()
 }
