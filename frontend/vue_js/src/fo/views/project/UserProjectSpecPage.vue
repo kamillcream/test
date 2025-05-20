@@ -242,6 +242,7 @@
               >
               <!-- 스크랩 버튼 -->
               <a
+                @click="clickScrap"
                 href="#"
                 class="btn btn-lg btn-light btn-rounded d-flex align-items-center btn-lg"
               >
@@ -272,11 +273,16 @@ import { useModalStore } from '../../stores/modalStore.js'
 import { useAlertStore } from '../../stores/alertStore.js'
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { api } from '@/axios.js'
 
 const modalStore = useModalStore()
 const alert = useAlertStore()
+const route = useRoute()
+const projectSq = route.params.project_sq
 
 const hasApplied = ref(false) // 추후 api 불러와 받은 값으로 변경
+const hasScrapped = ref(false)
 
 const applyCheck = () => {
   if (hasApplied.value) {
@@ -284,7 +290,20 @@ const applyCheck = () => {
   } else {
     modalStore.openModal(UserResumeModal, {
       size: 'modal-md',
+      projectSq: projectSq,
     })
+  }
+}
+
+const clickScrap = async () => {
+  try {
+    await api.$post(`/projects/${projectSq}/scraps`, {
+      hasScrapped: hasScrapped.value,
+    })
+    alert.show('스크랩에 성공하였습니다.')
+  } catch (error) {
+    console.error(error)
+    alert.show('스크랩에 실패했습니다.', 'danger')
   }
 }
 
