@@ -16,8 +16,8 @@ public class LoginService {
     private final JwtProvider jwtProvider;
 
     @Transactional
-    public LoginResponseDTO login(String userId, String userPw) {
-        UserDTO user = userRepository.findByUserId(userId);
+    public LoginResponseDTO login(String userEmail, String userPw) {
+        UserDTO user = userRepository.findByUserEmail(userEmail);
 
         if (user == null) {
             throw new IllegalArgumentException("존재하지 않는 사용자입니다.");

@@ -21,7 +21,7 @@ public interface UserMapper {
 
     boolean existsByUserPhoneNum(String userPhoneNum);
 
-    UserDTO findByUserId(@Param("userId") String userEmail);
+    UserDTO findByUserEmail(@Param("userEmail") String userEmail);
 
     int updateRefreshToken(@Param("userSq") Long userSq, @Param("refreshToken") String refreshToken);
 

@@ -455,6 +455,10 @@
 </template>
 
 <script setup>
+import { useAuthStore } from '@/fo/stores/authStore'
+
+const authStore = useAuthStore()
+
 //추후 로그인 정보 받게되면 수정 예정
 </script>
 
