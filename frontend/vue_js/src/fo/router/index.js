@@ -214,6 +214,12 @@ const routes = [
         name: 'ProjectPostPage',
         component: ProjectPostPage,
       },
+
+      {
+        path: 'projectPostPage',
+        name: 'ProjectPostPage',
+        component: ProjectPostPage,
+      },
     ],
   },
 ]
