@@ -1,14 +1,16 @@
 // src/stores/modalStore.js
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, markRaw } from 'vue'
 
 export const useModalStore = defineStore('modal', () => {
   const modalStack = ref([]) // 모달 스택을 배열로 관리
   const isOpen = ref(false) // 모달 열림 여부
 
-  // 모달 열기
   function openModal(component, props = {}) {
-    modalStack.value.push({ component, props }) // 새로운 모달을 스택에 추가
+    modalStack.value.push({
+      component: markRaw(component), // markRaw로 감싸기
+      props,
+    })
     isOpen.value = true
   }
 

@@ -3,6 +3,7 @@ package com.example.demo.domain.user.mapper;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.example.demo.domain.user.dto.AddressDTO;
+import com.example.demo.domain.user.dto.CompanyProfileDTO;
 import com.example.demo.domain.user.dto.UserDTO;
 
 @Mapper
@@ -20,4 +21,5 @@ public interface UserMapper {
 
     boolean existsByUserPhoneNum(String userPhoneNum);
 
+    int insertCompanyProfile(CompanyProfileDTO dto);
 }
