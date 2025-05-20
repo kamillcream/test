@@ -85,15 +85,13 @@
                   required=""
                 >
                   <option value="">선택</option>
-                  <option>초초</option>
-                  <option>초중</option>
-                  <option>초상</option>
-                  <option>중초</option>
-                  <option>중중</option>
-                  <option>중상</option>
-                  <option>상초</option>
-                  <option>상중</option>
-                  <option>상상</option>
+                  <option
+                    v-for="grade in devGrades"
+                    :key="grade.id"
+                    :value="grade"
+                  >
+                    {{ grade }}
+                  </option>
                 </select>
               </div>
               <div class="form-group col-lg-6">
@@ -107,13 +105,13 @@
                   required=""
                 >
                   <option value="">선택</option>
-                  <option>학력 무관</option>
-                  <option>고졸 이하</option>
-                  <option>고졸 이상</option>
-                  <option>대학(2,3년제)</option>
-                  <option>대졸 이상</option>
-                  <option>석사 이상</option>
-                  <option>박사 이상</option>
+                  <option
+                    v-for="education in educationLevels"
+                    :key="education.id"
+                    :value="education"
+                  >
+                    {{ education }}
+                  </option>
                 </select>
               </div>
             </div>
@@ -352,10 +350,15 @@ import ProjectJobButtonGroup from '@/fo/components/project/ProjectJobButtonGroup
 import ProjectSkillButtonGroup from '@/fo/components/project/ProjectSkillButtonGroup.vue'
 import ProjectInverviewTimeButtonGroupVue from '@/fo/components/project/ProjectInverviewTimeButtonGroup.vue'
 import { useModalStore } from '../../../stores/modalStore.js'
+import { useRoute } from 'vue-router'
 
 import { ref, computed, watch, onMounted } from 'vue'
 
 import { api } from '@/axios.js'
+
+const route = useRoute()
+const projectSq = route.params.project_sq || null // 등록이면 NULL, 수정이면 숫자
+console.log(projectSq)
 
 const cities = ref([])
 const districts = ref([])
@@ -392,17 +395,17 @@ let prevScrollY = 0
 
 onMounted(async () => {
   try {
-    const response = await api.$get('/projects/infos')
+    const response = await api.$get('/projects/forms')
     cities.value = response.output.cities
       .sort((a, b) => {
         // "전국"이면 항상 맨 앞으로
-        if (a.areaNameString === '전국') return -1
-        if (b.areaNameString === '전국') return 1
+        if (a.areaName === '전국') return -1
+        if (b.areaName === '전국') return 1
         return 0
       })
       .map((city) => ({
         code: city.areaSq,
-        name: city.areaNameString,
+        name: city.areaName,
       }))
     devGrades.value = response.output.devGrades
     educationLevels.value = response.output.educationLevels
@@ -412,6 +415,42 @@ onMounted(async () => {
     console.log(response)
   } catch (e) {
     console.error('프로젝트 정보 불러오기 실패', e)
+  }
+  if (projectSq) {
+    try {
+      const { output } = await api.$get(`/projects/forms`, {
+        params: { projectSq },
+      })
+
+      const exist = output.existProjectVo
+
+      if (exist) {
+        projectTitle.value = exist.projectTtl
+        selectedCity.value = exist.parentDistrict
+        selectedDistrict.value = exist.subDistrict
+        selectedDevGrade.value = exist.devGrade
+        selectedEducation.value = exist.educationLvl
+        projectStartDt.value = exist.projectStartDt
+        projectEndDt.value = exist.projectEndDt
+        recruitStartDt.value = exist.recruitStartDt
+        recruitEndDt.value = exist.recruitEndDt
+        selectedWorkTypes.value = [...exist.contract]
+        selectedJobs.value = [...exist.jobs]
+        selectedSkills.value = [...exist.reqSkills]
+        selectedPreferSkills.value = [...exist.preferSkills]
+        preferContent.value = exist.preferredEtc
+        description.value = exist.description
+
+        selectedInterviewTimes.value = Object.entries(exist.interviewTimes).map(
+          ([date, times]) => ({
+            date,
+            times,
+          }),
+        )
+      }
+    } catch (e) {
+      console.error('기존 프로젝트 상세 조회 실패', e)
+    }
   }
 })
 
@@ -426,7 +465,7 @@ watch(selectedCity, async (areaCodeSq) => {
     const response = await api.$get(`/projects/${areaCodeSq}/districts`)
     districts.value = response.output.map((area) => ({
       code: area.areaSq,
-      name: area.areaNameString,
+      name: area.areaName,
     }))
     selectedDistrict.value = '' // 선택 초기화
   } catch (err) {
@@ -436,7 +475,7 @@ watch(selectedCity, async (areaCodeSq) => {
 
 const submitProject = async () => {
   const requestBody = {
-    projectId: null,
+    projectId: projectSq ?? null,
     projectTitle: projectTitle.value,
     projectImageUrl: '',
 
@@ -450,12 +489,16 @@ const submitProject = async () => {
     recruitStartDt: recruitStartDt.value,
     recruitEndDt: recruitEndDt.value,
 
-    workType: [...selectedWorkTypes.value], // ✅
+    workType: [...selectedWorkTypes.value],
 
-    recruitJob: [...selectedJobs.value], // ✅
+    recruitJob: [...selectedJobs.value],
 
-    preferSkills: selectedPreferSkills.value.map((skill) => skill.name),
-    usingSkills: selectedSkills.value.map((skill) => skill.name),
+    preferSkills: selectedPreferSkills.value
+      .map((s) => (typeof s === 'string' ? s : s?.name))
+      .filter((name) => !!name),
+    usingSkills: selectedSkills.value
+      .map((s) => (typeof s === 'string' ? s : s?.name))
+      .filter((name) => !!name),
 
     preference: preferContent.value,
     description: description.value,
@@ -468,8 +511,13 @@ const submitProject = async () => {
   }
   console.log(requestBody)
   try {
-    await api.$post('/projects', requestBody)
-    alert('등록 성공')
+    if (projectSq) {
+      await api.$patch('/projects', requestBody)
+      alert('수정 성공')
+    } else {
+      await api.$post('/projects', requestBody)
+      alert('등록 성공')
+    }
   } catch (error) {
     console.error('프로젝트 등록 실패: ', error)
   }
@@ -559,6 +607,7 @@ const onRecruitTimeConfirmed = ({ start, end }) => {
 
 const onInterviewTimeConfirmed = (times) => {
   selectedInterviewTimes.value = times
+  console.log(selectedInterviewTimes.value)
 }
 
 const onWorkTypeConfirmed = (workTypes) => {
@@ -590,9 +639,10 @@ const removeJob = (name) => {
 }
 
 const removeSkill = (name) => {
-  selectedSkills.value = selectedSkills.value.filter(
-    (skill) => skill.name !== name,
-  )
+  selectedSkills.value = selectedSkills.value.filter((skill) => {
+    const skillName = typeof skill === 'string' ? skill : skill.name
+    return skillName !== name
+  })
 }
 
 const removePreferSkill = (name) => {
