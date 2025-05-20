@@ -146,10 +146,10 @@ console.log(selectedTimes.value)
 
 const emit = defineEmits(['confirm'])
 
-const timeOptions = Array.from({ length: 19 }, (_, i) => {
-  const hour = 9 + Math.floor(i / 2) // 9시부터 시작
-  const minute = i % 2 === 0 ? '00' : '30'
-  return `${String(hour).padStart(2, '0')}:${minute}`
+const timeOptions = Array.from({ length: 24 * 2 }, (_, i) => {
+  const h = String(Math.floor(i / 2)).padStart(2, '0')
+  const m = i % 2 === 0 ? '00' : '30'
+  return `${h}:${m}`
 })
 
 const isSelectedTime = (time) => {

@@ -6,7 +6,7 @@
 
         <div class="grid-button-group">
           <button
-            v-for="job in props.jobs"
+            v-for="job in jobOptions"
             :key="job"
             :class="['job-button', { selected: isSelected(job) }]"
             @click="toggleJob(job)"
@@ -41,7 +41,30 @@ const props = defineProps({
 
 const modalStore = useModalStore()
 
-const selectedJobs = ref([])
+const jobOptions = [
+  '개발PM',
+  '게임개발',
+  '데이터분석가',
+  '데이터엔지니어',
+  '백엔드/서버개발',
+  '보안컨설팅',
+  '앱개발',
+  '웹개발',
+  '웹마스터',
+  '퍼블리셔',
+  '프론트엔드',
+  'BI 엔지니어',
+  '시스템엔지니어',
+  'SI개발',
+  'SQA',
+  '전문분야',
+  '검색엔진',
+  '네트워크',
+  '딥러닝',
+  '머신러닝',
+]
+
+const selectedJobs = ref([...props.jobs])
 
 const toggleJob = (job) => {
   const i = selectedJobs.value.indexOf(job)

@@ -20,30 +20,169 @@
         <h2 class="text-color-dark font-weight-normal text-5 mb-2">
           지원 자격 / 근무 조건
         </h2>
+        <ul class="list list-icons list-primary list-borders text-2">
+          <li>
+            <i class="fas fa-caret-right left-10"></i
+            ><strong class="text-color-primary">경력 / 학력 :</strong>
+            {{ project.career }} / {{ project.education }}
+          </li>
+          <li v-for="job in project.jobs" :key="job.id">
+            <i class="fas fa-caret-right left-10"></i>
+            <strong class="text-color-primary">모집 직군 :</strong> {{ job }}
+          </li>
 
-        <ul>
+          <!-- 필수 기술 -->
+          <li>
+            <i class="fas fa-caret-right left-10"></i
+            ><strong class="text-color-primary">필수 기술 </strong>
+            <ul class="ps-4 mb-2">
+              <li>
+                <strong class="text-dark">언어</strong>
+                <div
+                  v-for="language in project.skills.languages"
+                  :key="language.id"
+                  class="d-flex align-items-center gap-2 mt-1"
+                >
+                  <div class="d-flex align-items-center me-3">
+                    <img
+                      src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg"
+                      alt="Java"
+                      width="24"
+                      height="24"
+                      class="me-1"
+                    />
+                    <span>{{ language }}</span>
+                  </div>
+                </div>
+              </li>
+              <li>
+                <strong class="text-dark">Framework</strong>
+                <div
+                  v-for="framework in project.skills.frameworks"
+                  :key="framework.id"
+                  class="d-flex align-items-center gap-2 mt-1"
+                >
+                  <div class="d-flex align-items-center me-3">
+                    <img
+                      src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg"
+                      alt="Spring Boot"
+                      width="24"
+                      height="24"
+                      class="me-1"
+                    />
+                    <span>{{ framework }}</span>
+                  </div>
+                </div>
+              </li>
+              <li>
+                <strong class="text-dark">Tool</strong>
+                <div
+                  v-for="tool in project.skills.tools"
+                  :key="tool.id"
+                  class="d-flex align-items-center gap-2 mt-1"
+                >
+                  <div class="d-flex align-items-center me-3">
+                    <img
+                      src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg"
+                      alt="Git"
+                      width="24"
+                      height="24"
+                      class="me-1"
+                    />
+                    <span>{{ tool }}</span>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </li>
+
+          <!-- 우대 기술 -->
+          <li>
+            <i class="fas fa-caret-right left-10"></i
+            ><strong class="text-color-primary">우대 기술 </strong>
+            <ul class="ps-4 mb-2">
+              <li>
+                <strong class="text-dark">언어</strong>
+                <div
+                  v-for="language in project.preferSkills.languages"
+                  :key="language.id"
+                  class="d-flex align-items-center gap-2 mt-1"
+                >
+                  <div class="d-flex align-items-center me-3">
+                    <img
+                      src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg"
+                      alt="Java"
+                      width="24"
+                      height="24"
+                      class="me-1"
+                    />
+                    <span>{{ language }}</span>
+                  </div>
+                </div>
+              </li>
+              <li>
+                <strong class="text-dark">Framework</strong>
+                <div
+                  v-for="framework in project.preferSkills.frameworks"
+                  :key="framework.id"
+                  class="d-flex align-items-center gap-2 mt-1"
+                >
+                  <div class="d-flex align-items-center me-3">
+                    <img
+                      src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg"
+                      alt="Spring Boot"
+                      width="24"
+                      height="24"
+                      class="me-1"
+                    />
+                    <span>{{ framework }}</span>
+                  </div>
+                </div>
+              </li>
+              <li>
+                <strong class="text-dark">Tool</strong>
+                <div
+                  v-for="tool in project.preferSkills.tools"
+                  :key="tool.id"
+                  class="d-flex align-items-center gap-2 mt-1"
+                >
+                  <div class="d-flex align-items-center me-3">
+                    <img
+                      src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/intellij/intellij-original.svg"
+                      alt="IntelliJ"
+                      width="24"
+                      height="24"
+                      class="me-1"
+                    />
+                    <span>{{ tool }}</span>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </li>
+
           <!-- 우대 사항 -->
           <li>
             <i class="fas fa-caret-right left-10"></i
             ><strong class="text-color-primary">우대 사항 :</strong>
-            {{ project.projectPreferredEtc }}
+            {{ project.preferContent }}
           </li>
 
           <!-- 근무 조건 -->
           <li>
             <i class="fas fa-caret-right left-10"></i
             ><strong class="text-color-primary">근무 형태 :</strong>
-            {{ project.projectWorkType }}
+            {{ project.contract }}
           </li>
           <li>
             <i class="fas fa-caret-right left-10"></i
             ><strong class="text-color-primary">근무 지역 :</strong>
-            {{ project.projectAddress }}
+            {{ project.local }}
           </li>
           <li>
             <i class="fas fa-caret-right left-10"></i
             ><strong class="text-color-primary">단가 :</strong>
-            {{ project.projectSalary }}
+            {{ project.salary }}
           </li>
         </ul>
       </div>
@@ -63,21 +202,20 @@
               </div>
               <div>
                 <h2 class="text-color-dark font-weight-normal text-5 mb-0">
-                  {{ project.projectTtl }}
+                  {{ project.title }}
                 </h2>
-                <p class="text-muted mb-0">{{ project.companyNm }}</p>
+                <p class="text-muted mb-0">{{ project.company }}</p>
               </div>
             </div>
 
-            <p>{{ project.projectDetail }}</p>
+            <p>{{ project.description }}</p>
 
             <div class="card-footer bg-white border-top-0 pt-4">
               <div class="text-start text-2">
                 <p class="mb-1 text-color-primary">
                   <i class="fas fa-caret-right me-2"></i
                   ><strong class="text-color-primary">모집 기간 :</strong>
-                  {{ project.projectRecruitStartDt }} ~
-                  {{ project.projectRecruitEndDt }}
+                  {{ project.recruitStartDt }} ~ {{ project.recruitEndDt }}
                 </p>
                 <p class="mb-1 text-color-primary">
                   <i class="fas fa-caret-right me-2"></i
@@ -87,7 +225,7 @@
                 <p class="mb-0 text-color-primary">
                   <i class="fas fa-caret-right me-2"></i
                   ><strong class="text-color-primary">수행 기간 :</strong>
-                  {{ project.projectStartDt }} ~ {{ project.projectEndDt }}
+                  {{ project.StartDt }} ~ {{ project.EndDt }}
                 </p>
               </div>
             </div>
@@ -96,29 +234,29 @@
 
             <div class="d-flex justify-content-center align-items-center gap-3">
               <a
-                v-if="companyId === 'test1'"
                 @click="openMemberModal"
+                v-if="companyId !== 'test1'"
                 href="#"
                 class="btn btn-lg btn-rounded btn-primary btn-lg"
               >
                 지원하기
               </a>
               <a
-                v-if="companyId === 'test1'"
+                v-if="companyId !== 'test1'"
                 href="#"
                 class="btn btn-lg btn-rounded btn-light btn-lg"
               >
                 스크랩
               </a>
               <a
-                @click="goToProjectPost"
+                v-if="companyId === 'test1'"
                 href="#"
                 class="btn btn-lg btn-rounded btn-primary btn-lg"
               >
                 수정하기
               </a>
               <a
-                @click="deleteProject"
+                v-if="companyId === 'test1'"
                 href="#"
                 class="btn btn-lg btn-rounded btn-light btn-lg"
               >
@@ -139,40 +277,12 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { onMounted, onBeforeUnmount } from 'vue'
 import AffiliationMemberModal from '@/fo/components/company/AffiliationMemberModal.vue'
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 import { useModalStore } from '../../stores/modalStore.js'
-import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
-import { useRouter, useRoute } from 'vue-router'
 
-import { api } from '@/axios.js'
-const router = useRouter()
-const route = useRoute()
 const modalStore = useModalStore()
-
-const projectSq = route.params.project_sq
-
-const project = ref({
-  skills: { languages: [], frameworks: [], tools: [] },
-  preferSkills: { languages: [], frameworks: [], tools: [] },
-})
-
-onMounted(async () => {
-  try {
-    console.log('hello')
-
-    // 스크롤 막기
-    document.body.style.overflow = 'hidden'
-
-    const projectSq = route.params.project_sq
-
-    const response = await api.$get(`/projects/${projectSq}/details`)
-    project.value = response.output
-  } catch (e) {
-    console.error('프로젝트 상세 정보 불러오기 실패', e)
-  }
-})
 
 const openMemberModal = () => {
   modalStore.openModal(AffiliationMemberModal, {
@@ -180,37 +290,45 @@ const openMemberModal = () => {
   })
 }
 
+onMounted(() => {
+  // 바깥 페이지 스크롤 막기
+  document.body.style.overflow = 'hidden'
+})
+
 onBeforeUnmount(() => {
   // 모달 닫히면 스크롤 복구
   document.body.style.overflow = ''
 })
-
-const goToProjectPost = (project) => {
-  router.push({
-    name: 'ProjectPostPage',
-    params: {
-      project_sq: project.id,
-    },
-  })
-}
-
-const deleteProject = () => {
-  modalStore.openModal(CommonConfirmModal, {
-    title: '프로젝트 삭제',
-    message: '한 번 삭제한 프로젝트는 복구할 수 없습니다. 삭제하시겠습니까?',
-    onConfirm: async () => {
-      try {
-        console.log('삭제 확정됨')
-        const res = await api.$delete(`/projects/${projectSq}`)
-        alert(res.message || '삭제되었습니다.')
-        modalStore.closeModal()
-        router.push({ name: 'ProjectListPage' }) // 삭제 후 이동 (예시)
-      } catch (error) {
-        console.error('삭제 실패:', error)
-        alert('삭제 중 오류가 발생했습니다.')
-      }
-    },
-  })
+const project = {
+  title: 'AI 학습 데이터 플랫폼 구축',
+  company: 'DataForge Inc.',
+  description:
+    'AI 모델 성능 향상을 위한 데이터 수집·가공·시각화 플랫폼을 구축하는 프로젝트입니다.',
+  career: '3년 이상',
+  education: '대학교 졸업 이상',
+  jobs: ['데이터 엔지니어', 'ML 엔지니어'],
+  skills: {
+    languages: ['TypeScript', 'Python'],
+    frameworks: ['Django', 'FastAPI'],
+    tools: ['Docker', 'Kubernetes'],
+  },
+  preferSkills: {
+    languages: ['Go', 'Rust'],
+    frameworks: ['TensorFlow', 'PyTorch'],
+    tools: ['Airflow', 'MLflow'],
+  },
+  preferContent: '대규모 분산 처리 경험자 우대',
+  contract: '정규직 / 계약직',
+  local: '경기 성남시 분당구',
+  salary: '월 600만원 ~ 800만원',
+  recruitStartDt: '2025/05/10',
+  recruitEndDt: '2025/05/20',
+  interviewStartDt: '2025/05/22',
+  interviewEndDt: '2025/05/28',
+  StartDt: '2025/06/03',
+  EndDt: '2025/12/31',
+  scrap: 12,
+  hits: 367,
 }
 
 // TODO: 스크랩 토글

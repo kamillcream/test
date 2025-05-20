@@ -210,7 +210,7 @@ const routes = [
       },
 
       {
-        path: 'projectPostPage/:project_sq',
+        path: 'projectPostPage',
         name: 'ProjectPostPage',
         component: ProjectPostPage,
       },
