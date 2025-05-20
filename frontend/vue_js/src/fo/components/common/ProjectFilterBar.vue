@@ -12,13 +12,13 @@
         지역
       </button>
       <ul class="dropdown-menu">
-        <li v-for="local in localFilters" :key="local.id">
+        <li v-for="local in localOptions" :key="local.areaSq">
           <a
             class="dropdown-item"
             href="#"
-            @click.prevent="updateRegion(region)"
+            @click.prevent="updateRegion(local.areaSq)"
           >
-            {{ local }}
+            {{ local.areaName }}
           </a>
         </li>
       </ul>
@@ -33,13 +33,13 @@
         경력
       </button>
       <ul class="dropdown-menu">
-        <li v-for="career in careerFilters" :key="career.id">
+        <li v-for="career in careerOptions" :key="career.common_code_sq">
           <a
             class="dropdown-item"
             href="#"
-            @click.prevent="updateCareer(career)"
+            @click.prevent="updateCareer(career.common_code_sq)"
           >
-            {{ career }}
+            {{ career.common_code_nm }}
           </a>
         </li>
       </ul>
@@ -54,37 +54,17 @@
         학력
       </button>
       <ul class="dropdown-menu">
-        <li>
+        <li
+          v-for="education in educationOptions"
+          :key="education.common_code_sq"
+        >
           <a
             class="dropdown-item"
             href="#"
-            @click.prevent="updateEducation('학력무관')"
-            >학력무관</a
+            @click.prevent="updateEducation(education.common_code_sq)"
           >
-        </li>
-        <li>
-          <a
-            class="dropdown-item"
-            href="#"
-            @click.prevent="updateEducation('고등학교')"
-            >고등학교</a
-          >
-        </li>
-        <li>
-          <a
-            class="dropdown-item"
-            href="#"
-            @click.prevent="updateEducation('대학(2,3년제)')"
-            >대학(2,3년제)</a
-          >
-        </li>
-        <li>
-          <a
-            class="dropdown-item"
-            href="#"
-            @click.prevent="updateEducation('대학(4년제)')"
-            >대학(4년제)</a
-          >
+            {{ education.common_code_nm }}
+          </a>
         </li>
       </ul>
     </div>
@@ -98,9 +78,13 @@
         직종
       </button>
       <ul class="dropdown-menu">
-        <li v-for="job in jobTypeFilters" :key="job.id">
-          <a class="dropdown-item" href="#" @click.prevent="updateJobType(job)">
-            {{ job }}
+        <li v-for="job in jobTypeOptions" :key="job.common_code_sq">
+          <a
+            class="dropdown-item"
+            href="#"
+            @click.prevent="updateJobType(job.common_code_sq)"
+          >
+            {{ job.common_code_nm }}
           </a>
         </li>
       </ul>
@@ -190,51 +174,77 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    localFilters: {
-      type: Array,
-      required: true,
-    },
-    careerFilters: {
-      type: Array,
-      required: true,
-    },
-    jobTypeFilters: {
-      type: Array,
-      required: true,
-    },
-  },
-  emits: ['update'],
-  methods: {
-    updateRegion(value) {
-      this.$emit('update', { addressCodeSq: value })
-    },
-    updateExperience(value) {
-      this.$emit('update', { experience: value })
-    },
-    updateEducation(value) {
-      this.$emit('update', { education: value })
-    },
-    updateJobType(value) {
-      this.$emit('update', { jobRole: value })
-    },
-    updateTargetField(value) {
-      this.$emit('update', { searchType: value })
-    },
-    updateSort(value) {
-      if (value === '최신순') {
-        this.$emit('update', { sortBy: 'project_start_dt', sortOrder: 'desc' })
-      } else if (value === '조회순') {
-        this.$emit('update', { sortBy: 'view_count', sortOrder: 'desc' })
-      } else if (value === '지원자순') {
-        this.$emit('update', { sortBy: 'applicant_count', sortOrder: 'desc' })
-      }
-    },
-    updateKeyword(event) {
-      this.$emit('update', { searchKeyword: event.target.value })
-    },
-  },
+<script setup>
+import { ref, defineEmits, onMounted } from 'vue'
+import { api } from '@/axios.js'
+
+const localOptions = ref([])
+const careerOptions = ref([])
+const educationOptions = ref([])
+const jobTypeOptions = ref([])
+
+const emit = defineEmits(['update'])
+
+const fetchFilterOptions = async () => {
+  try {
+    const 지역 = await api.$get('/projects/filters', {
+      params: { type: '지역' },
+    })
+    const 경력 = await api.$get('/projects/filters', {
+      params: { type: '경력' },
+    })
+    const 학력 = await api.$get('/projects/filters', {
+      params: { type: '학력' },
+    })
+    const 직종 = await api.$get('/projects/filters', {
+      params: { type: '직종' },
+    })
+
+    localOptions.value = 지역.output
+    careerOptions.value = 경력.output
+    educationOptions.value = 학력.output
+    jobTypeOptions.value = 직종.output
+    console.log(localOptions.value)
+  } catch (e) {
+    console.error('필터 데이터 불러오기 실패', e)
+  }
+}
+
+onMounted(() => {
+  fetchFilterOptions()
+})
+
+const updateRegion = (value) => {
+  emit('update', { addressCodeSq: value })
+}
+
+const updateCareer = (value) => {
+  emit('update', { projectDeveloperGradeCd: value })
+}
+
+const updateEducation = (value) => {
+  emit('update', { educationCd: value })
+}
+
+const updateJobType = (value) => {
+  emit('update', { jobRoleCd: value })
+}
+
+const updateTargetField = (value) => {
+  emit('update', { searchType: value })
+}
+
+const updateSort = (value) => {
+  if (value === '최신순') {
+    emit('update', { sortBy: 'project_start_dt', sortOrder: 'desc' })
+  } else if (value === '조회순') {
+    emit('update', { sortBy: 'view_count', sortOrder: 'desc' })
+  } else if (value === '지원자순') {
+    emit('update', { sortBy: 'applicant_count', sortOrder: 'desc' })
+  }
+}
+
+const updateKeyword = (event) => {
+  emit('update', { searchKeyword: event.target.value })
 }
 </script>
