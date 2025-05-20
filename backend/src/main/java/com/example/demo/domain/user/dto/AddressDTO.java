@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class AddressDTO {
     private Long addressSq;
-    private String zonecode;
+    private Long zonecode;
     private String address;
     private String detailAddress;
     private String sigungu;

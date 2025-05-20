@@ -1,158 +1,84 @@
 <template>
-  <form @submit.prevent="validateAll">
+  <form @submit.prevent="handleSubmit">
     <!-- 아이디 -->
     <div class="row">
       <div class="form-group col-lg-6">
-        <label class="form-label"
-          >아이디<i
-            v-if="idValid"
-            class="bi bi-check-circle-fill ms-1"
-            style="color: #007bff"
-          ></i
-        ></label>
+        <label class="form-label">아이디</label>
         <input
           type="text"
           v-model="form.id"
           class="form-control form-control-lg"
-          @input="onIdInput"
         />
-        <div v-if="idError" class="invalid-feedback">{{ idError }}</div>
       </div>
     </div>
 
     <!-- 비밀번호 -->
     <div class="row">
       <div class="form-group col-lg-6">
-        <label class="form-label"
-          >비밀번호
-          <i
-            v-if="passwordValid"
-            class="bi bi-check-circle-fill ms-1"
-            style="color: #007bff"
-          ></i
-        ></label>
+        <label class="form-label">비밀번호</label>
         <input
           type="password"
           v-model="form.password"
           class="form-control form-control-lg"
-          @input="validatePassword"
         />
-        <div v-if="passwordError" class="invalid-feedback">
-          {{ passwordError }}
-        </div>
       </div>
       <div class="form-group col-lg-6">
-        <label class="form-label">
-          비밀번호 확인
-          <i
-            v-if="confirmPasswordValid"
-            class="bi bi-check-circle-fill ms-1"
-            style="color: #007bff"
-          ></i>
-        </label>
+        <label class="form-label">비밀번호 확인</label>
         <input
           type="password"
           v-model="form.confirmPassword"
           class="form-control form-control-lg"
-          @input="passwordValid ? validateConfirmPassword() : ''"
         />
-        <div v-if="confirmPasswordError" class="invalid-feedback">
-          {{ confirmPasswordError }}
-        </div>
       </div>
     </div>
-
     <!-- 담당자 이름 -->
     <div class="row">
       <div class="form-group col-lg-6">
-        <label class="form-label"
-          >담당자 이름
-          <i
-            v-if="nameValid"
-            class="bi bi-check-circle-fill ms-1"
-            style="color: #007bff"
-          ></i
-        ></label>
+        <label class="form-label">담당자 이름</label>
         <input
           type="text"
-          v-model="form.name"
+          v-model="form.contactName"
           class="form-control form-control-lg"
-          @input="validateName"
         />
-        <div v-if="nameError" class="invalid-feedback">{{ nameError }}</div>
       </div>
     </div>
-
     <!-- 휴대폰 -->
     <div class="row">
       <div class="form-group col-lg-6">
-        <label class="form-label"
-          >휴대폰 번호
-          <i
-            v-if="phoneValid"
-            class="bi bi-check-circle-fill ms-1"
-            style="color: #007bff"
-          ></i
-        ></label>
+        <label class="form-label">휴대폰 번호</label>
         <input
           type="text"
           v-model="form.phone"
           class="form-control form-control-lg"
-          @input="validatePhone"
         />
-        <div v-if="phoneError" class="invalid-feedback">{{ phoneError }}</div>
       </div>
     </div>
-
     <!-- 기업명 -->
     <div class="row">
       <div class="form-group col-lg-6">
-        <label class="form-label"
-          >기업명
-          <i
-            v-if="companyValid"
-            class="bi bi-check-circle-fill ms-1"
-            style="color: #007bff"
-          ></i
-        ></label>
+        <label class="form-label">기업명</label>
         <input
           type="text"
           v-model="form.companyName"
           class="form-control form-control-lg"
           readonly
           @click="openCompanyModal"
-          @change="validateCompany"
         />
       </div>
-      <div v-if="companyError" class="invalid-feedback">{{ companyError }}</div>
       <div class="form-group col-lg-6">
-        <label class="form-label"
-          >사업자 번호
-          <i
-            v-if="companyValid"
-            class="bi bi-check-circle-fill ms-1"
-            style="color: #007bff"
-          ></i
-        ></label>
+        <label class="form-label">사업자 번호</label>
         <input
           type="text"
-          v-model="form.companyBizNumber"
+          v-model="form.businessNumber"
           class="form-control form-control-lg"
         />
       </div>
     </div>
 
-    <!-- 회사 주소 -->
+    <!-- 주소 -->
     <div class="row">
       <div class="form-group col-lg-7 mb-2">
-        <label class="form-label"
-          >회사 주소
-          <i
-            v-if="addressValid"
-            class="bi bi-check-circle-fill ms-1"
-            style="color: #007bff"
-          ></i
-        ></label>
+        <label class="form-label">주소</label>
         <input
           type="text"
           v-model="form.address"
@@ -160,11 +86,7 @@
           placeholder="주소를 검색하세요"
           readonly
           @click="openPostcode"
-          @input="validateAdress"
         />
-        <div v-if="addressError" class="invalid-feedback">
-          {{ addressError }}
-        </div>
       </div>
 
       <div class="form-group col-lg-5">
@@ -177,39 +99,25 @@
         />
       </div>
     </div>
-
     <!-- 이메일 -->
     <div class="row">
       <div class="form-group col-lg-12">
-        <label class="form-label"
-          >이메일 주소
-          <i
-            v-if="emailValid"
-            class="bi bi-check-circle-fill ms-1"
-            style="color: #007bff"
-          ></i
-        ></label>
+        <label class="form-label">이메일 주소</label>
         <div class="input-group">
           <input
             type="text"
             v-model="form.emailId"
             class="form-control form-control-lg"
-            @input="validateEmail"
             placeholder="이메일 아이디"
           />
           <span class="input-group-text">@</span>
-
-          <!-- 도메인 입력 인풋 -->
           <input
             type="text"
             v-model="form.emailDomain"
             :readonly="!isCustomDomain"
             class="form-control form-control-lg"
-            @input="validateEmail"
             placeholder="도메인 입력"
           />
-
-          <!-- 셀렉트 박스 -->
           <select
             v-model="selectedDomain"
             @change="handleDomainChange"
@@ -223,7 +131,6 @@
             <option value="hotmail.com">hotmail.com</option>
             <option value="custom">직접입력</option>
           </select>
-
           <button
             type="button"
             class="btn btn-primary btn-lg"
@@ -232,27 +139,18 @@
             인증 요청
           </button>
         </div>
-        <div v-if="emailError" class="invalid-feedback">{{ emailError }}</div>
       </div>
     </div>
 
     <!-- 인증번호 -->
     <div class="row">
-      <div class="form-group col-lg-8">
-        <label class="form-label"
-          >인증번호
-          <i
-            v-if="verifyCodeValid"
-            class="bi bi-check-circle-fill ms-1"
-            style="color: #007bff"
-          ></i
-        ></label>
+      <div class="form-group col-lg-6">
+        <label class="form-label">인증번호</label>
         <div class="input-group">
           <input
             type="text"
             v-model="form.verificationCode"
             class="form-control form-control-lg"
-            @input="validateVerifycode"
           />
           <button
             type="button"
@@ -261,9 +159,6 @@
           >
             확인
           </button>
-        </div>
-        <div v-if="verifycodeError" class="invalid-feedback">
-          {{ verifycodeError }}
         </div>
       </div>
     </div>
@@ -277,14 +172,12 @@
             v-model="form.terms"
             id="terms"
             class="form-check-input"
-            @change="validateTerms"
           />
           <label for="terms" class="form-check-label me-1">
             약관에 동의합니다.
           </label>
           <a class="font-primary" @click="openTermsModal">이용약관</a>
         </div>
-        <div v-if="termsError" class="invalid-feedback">{{ termsError }}</div>
       </div>
     </div>
 
@@ -302,83 +195,27 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, defineEmits, watch } from 'vue'
+import { reactive, ref } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { personalAgreementText } from '@/assets/terms'
 import TermsAgreementModal from '@/fo/components/login&signup/TermsAgreementModal.vue'
-import CompanyVerificationModal from './CompanyVerificationModal.vue'
 import { useAlertStore } from '@/fo/stores/alertStore'
-import { api } from '@/axios'
-import { useCompanyProfileStore } from '@/fo/stores/companyProfileStore'
-import { debounce } from 'lodash'
-
-const companyProfileStore = useCompanyProfileStore()
-
-const emit = defineEmits(['submit'])
-
-const validateAll = async () => {
-  await validateIdCore(form.id)
-  validatePassword()
-  validateConfirmPassword()
-  validateName()
-  validatePhone()
-  validateAdress()
-  validateEmail()
-  validateVerifycode()
-  validateTerms()
-
-  // 모든 유효성 통과 여부 확인
-  const isFormValid =
-    idValid.value &&
-    passwordValid.value &&
-    confirmPasswordValid.value &&
-    nameValid.value &&
-    phoneValid.value &&
-    addressValid.value &&
-    emailValid.value &&
-    verifyCodeValid.value && // 인증번호 유효성 처리 보완 필요
-    termsValid.value
-
-  if (isFormValid) {
-    emit('submit', { ...form })
-    companyProfileStore.resetProfile() // ✅ 스토어 초기화
-  } else {
-    console.warn('❌ 유효성 검사 실패. 폼 제출 불가.')
-  }
-}
 
 const form = reactive({
   id: '',
   password: '',
   confirmPassword: '',
   name: '',
+  dob: '',
+  gender: '',
   phone: '',
   emailId: '',
   emailDomain: '',
   verificationCode: '',
   terms: false,
-  companyName: companyProfileStore.companyData.companyName,
-  companyCeoName: companyProfileStore.companyData.ceoName,
-  companyBizNumber: companyProfileStore.companyData.bizNumber,
-  companyOpenDate: companyProfileStore.companyData.openDate,
   address: '',
   addressDetail: '',
-  latitude: '',
-  longitude: '',
-  typeCode: 302, // 기업
-  signupTypeCode: 204, // 이메일
 })
-
-watch(
-  () => companyProfileStore.companyData,
-  (newVal) => {
-    form.companyName = newVal.companyName
-    form.companyCeoName = newVal.ceoName
-    form.companyBizNumber = newVal.bizNumber
-    form.companyOpenDate = newVal.openDate
-  },
-  { immediate: true, deep: true }, // 컴포넌트 진입 시 즉시 반영 + 객체 내부까지 감시
-)
 
 const modalStore = useModalStore()
 const alertStore = useAlertStore()
@@ -394,324 +231,14 @@ function handleDomainChange() {
     form.emailDomain = selectedDomain.value
     isCustomDomain.value = false
   }
-
-  validateEmail()
 }
 
-// 이메일 인증 요청 함수
-const sendVerification = async () => {
-  const email = `${form.emailId}@${form.emailDomain}`
-
-  try {
-    const response = await api.$post('/email/send-code', { email })
-    console.log('인증 이메일 전송 완료', response)
-    alertStore.show(
-      '인증 코드를 전송했습니다. 인증 코드 : ' + response.code,
-      'info',
-    )
-  } catch (error) {
-    console.error('이메일 인증 요청 실패:', error)
-    alertStore.show('이메일 인증 요청에 실패했습니다.', 'danger')
-    verifycodeError.value = '인증번호가 일치하지않습니다.'
-  }
+function sendVerification() {
+  alert(`인증 메일 전송: ${form.emailId}@${form.emailDomain}`)
 }
 
-// 인증 코드 확인 함수 (개선 버전)
-const verifyCode = async () => {
-  verifycodeError.value = ''
-  verifyCodeValid.value = false
-
-  const email = `${form.emailId}@${form.emailDomain}`
-  const code = form.verificationCode
-
-  if (!code) {
-    verifycodeError.value = '인증번호를 입력하세요.'
-    return
-  }
-
-  try {
-    const response = await api.$post('/email/verify-code', { email, code })
-    console.log('인증 성공', response)
-    alertStore.show('이메일 인증에 성공하였습니다.', 'info')
-    verifyCodeValid.value = true
-  } catch (error) {
-    console.error('인증 코드 검증 실패:', error)
-    verifycodeError.value = '인증번호가 일치하지 않습니다.'
-    alertStore.show('이메일 인증에 실패하였습니다.', 'danger')
-    verifyCodeValid.value = false
-  }
-}
-const idError = ref('')
-const passwordError = ref('')
-const confirmPasswordError = ref('')
-const nameError = ref('')
-const phoneError = ref('')
-const companyError = ref('')
-const addressError = ref('')
-const emailError = ref('')
-const verifycodeError = ref('')
-const termsError = ref('')
-
-const idValid = ref(false)
-const passwordValid = ref(false)
-const confirmPasswordValid = ref(false)
-const nameValid = ref(false)
-const phoneValid = ref(false)
-const companyValid = ref(companyProfileStore.termsAgreed)
-const addressValid = ref(false)
-const emailValid = ref(false)
-const verifyCodeValid = ref('')
-const termsValid = ref(false)
-
-// 1. 실제 유효성 검사 + API 호출 함수 (비동기)
-const validateIdCore = async (id) => {
-  idError.value = ''
-  idValid.value = false
-
-  if (!id) {
-    idError.value = '아이디를 입력해주세요.'
-    return
-  }
-  if (!/^[a-zA-Z0-9]{5,20}$/.test(id)) {
-    idError.value = '영문 또는 숫자 5~20자로 입력해주세요.'
-    return
-  }
-
-  try {
-    const res = await api.$get(`/check-id?userId=${id}`)
-    if (res) {
-      idError.value = '이미 사용 중인 아이디입니다.'
-      idValid.value = false
-    } else {
-      idValid.value = true
-    }
-  } catch (e) {
-    idError.value = '서버 오류가 발생했습니다.'
-    idValid.value = false
-  }
-}
-
-// 2. 디바운스 적용 함수
-const validateId = debounce((id) => {
-  validateIdCore(id)
-}, 500) // 500ms 딜레이
-
-// 3. input 이벤트 핸들러 (v-model과 함께)
-const onIdInput = (e) => {
-  const id = e.target.value
-  validateId(id)
-}
-
-// 비밀번호 유효성 검사
-const validatePassword = () => {
-  passwordError.value = ''
-  passwordValid.value = false
-  if (!form.password) {
-    passwordError.value = '비밀번호를 입력해주세요.'
-  } else if (
-    !/^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(form.password)
-  ) {
-    passwordError.value = '8자 이상, 영문·숫자·특수문자를 조합해 입력해주세요.'
-  } else {
-    passwordValid.value = true
-  }
-}
-
-// 비밀번호 확인 유효성 검사
-const validateConfirmPassword = () => {
-  confirmPasswordError.value = ''
-  confirmPasswordValid.value = false
-  if (!form.confirmPassword) {
-    confirmPasswordError.value = '비밀번호 확인을 입력해주세요.'
-  } else if (form.confirmPassword !== form.password) {
-    confirmPasswordError.value = '비밀번호가 일치하지 않습니다.'
-  } else {
-    confirmPasswordValid.value = true
-  }
-}
-
-// 담당자 이름 유효성 검사
-const validateName = () => {
-  nameError.value = ''
-  nameValid.value = false
-  if (!form.name) {
-    nameError.value = '이름을 입력해주세요.'
-  } else if (form.name.length < 2) {
-    nameError.value = '이름은 두 글자 이상 입력해주세요.'
-  } else {
-    nameValid.value = true
-  }
-}
-
-// 휴대폰 번호 유효성 검사
-const validatePhone = () => {
-  phoneError.value = ''
-  phoneValid.value = false
-  if (!form.phone) {
-    phoneError.value = '휴대폰 번호를 입력해주세요.'
-  } else if (!/^\d{10,11}$/.test(form.phone)) {
-    phoneError.value = '올바른 휴대폰 번호 형식이 아닙니다. (하이픈 제외)'
-  } else {
-    phoneValid.value = true
-  }
-}
-
-watch(
-  () => companyProfileStore.termsAgreed,
-  (newVal) => {
-    companyValid.value = newVal
-  },
-  { immediate: true, deep: true }, // 컴포넌트 진입 시 즉시 반영 + 객체 내부까지 감시
-)
-
-// 기업명&사업자번호 유효성 검사
-const validateCompany = () => {
-  companyError.value = ''
-  companyValid.value = false
-  if (!form.companyName) {
-    companyError.value = '기업 인증을 진행해주세요.'
-  }
-}
-
-// 기업 API 모달을 열기 위한 함수
-function openCompanyModal() {
-  modalStore.openModal(CompanyVerificationModal, {
-    title: '기업 인증',
-    onConfirm: (companyData) => {
-      console.log('companyData', companyData)
-      modalStore.closeModal()
-    },
-  })
-}
-
-// 다음 주소 API
-function openPostcode() {
-  new window.daum.Postcode({
-    oncomplete: function (data) {
-      let addr = ''
-      if (data.userSelectedType === 'R') {
-        addr = data.roadAddress
-      } else {
-        addr = data.jibunAddress
-      }
-
-      form.postcode = data.zonecode
-      form.address = addr
-      form.detailAddress = ''
-
-      // 시군구 추출
-      form.sigungu = data.sigungu
-
-      // 주소 → 좌표 변환
-      const geocoder = new window.kakao.maps.services.Geocoder()
-      geocoder.addressSearch(addr, function (result, status) {
-        if (status === window.kakao.maps.services.Status.OK) {
-          form.latitude = result[0].y
-          form.longitude = result[0].x
-        } else {
-          form.latitude = null
-          form.longitude = null
-        }
-      })
-    },
-  }).open()
-}
-
-onMounted(() => {
-  // 1. Daum 우편번호 API 확인
-  if (!window.daum) {
-    console.warn('❌ Daum 우편번호 API (postcode.v2.js)가 로드되지 않았습니다.')
-  } else {
-    console.log('✅ Daum 우편번호 API 로드됨')
-  }
-
-  // 2. Kakao 지도 API 확인 및 동적 로드
-  if (!window.kakao || !window.kakao.maps) {
-    console.warn(
-      '❌ Kakao 지도 API가 로드되지 않았습니다. 스크립트를 동적으로 추가합니다.',
-    )
-
-    const kakaoScript = document.createElement('script')
-    kakaoScript.src =
-      'https://dapi.kakao.com/v2/maps/sdk.js?appkey=90610faa13d02b09f83a700d0885a872&libraries=services'
-    kakaoScript.async = true
-
-    console.log('📦 Kakao 지도 API 스크립트를 추가합니다:', kakaoScript.src)
-
-    kakaoScript.onload = () => {
-      console.log('✅ Kakao 지도 API 스크립트 onload 실행됨')
-      if (window.kakao && window.kakao.maps) {
-        console.log('✅ Kakao 지도 API가 동적으로 로드되었습니다.')
-      } else {
-        console.error(
-          '❌ Kakao 지도 API 로드 실패: maps 객체가 여전히 존재하지 않습니다.',
-        )
-      }
-    }
-
-    kakaoScript.onerror = () => {
-      console.error('❌ Kakao 지도 API 스크립트 로드 실패')
-    }
-
-    document.head.appendChild(kakaoScript)
-  } else {
-    console.log('✅ Kakao 지도 API가 이미 로드되어 있습니다.')
-  }
-})
-
-// 주소 유효성 검사
-const validateAdress = () => {
-  addressError.value = ''
-  addressValid.value = false
-  if (!form.address) {
-    addressError.value = '주소를 입력해주세요.'
-  } else {
-    addressValid.value = true
-  }
-}
-
-// 이메일 주소 유효성 검사
-const validateEmail = () => {
-  emailError.value = ''
-  emailValid.value = false
-
-  // 이메일 아이디와 도메인 결합
-  const fullEmail =
-    form.emailId +
-    '@' +
-    (isCustomDomain.value ? form.emailDomain : selectedDomain.value)
-
-  // 이메일 아이디가 없거나, 이메일 도메인이 없을 경우
-  if (!form.emailId) {
-    emailError.value = '이메일 아이디를 입력해주세요.'
-  } else if (isCustomDomain.value && !form.emailDomain) {
-    emailError.value = '도메인을 입력해주세요.'
-  }
-  // 이메일 형식 검사
-  else if (!/\S+@\S+\.\S+/.test(fullEmail)) {
-    emailError.value = '올바른 이메일 주소 형식이 아닙니다.'
-  } else {
-    emailValid.value = true
-  }
-}
-
-const validateVerifycode = () => {
-  verifycodeError.value = ''
-  if (!form.verificationCode) {
-    verifycodeError.value = '인증번호를 입력하세요.'
-  }
-  // 인증번호 유효성 여부는 서버 검증 결과에 따라 판단 → 여기서는 설정하지 않음
-}
-
-// 약관 동의 유효성 검사
-const validateTerms = () => {
-  termsError.value = ''
-  termsValid.value = false
-  if (!form.terms) {
-    termsError.value = '필수 약관에 동의해주세요.'
-  } else {
-    termsValid.value = true
-  }
+function verifyCode() {
+  alert('인증번호 확인 요청')
 }
 
 // 약관 모달을 열기 위한 함수
@@ -734,10 +261,5 @@ select.form-control-lg {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   height: auto;
-}
-
-.invalid-feedback {
-  color: #007bff;
-  display: block;
 }
 </style>
