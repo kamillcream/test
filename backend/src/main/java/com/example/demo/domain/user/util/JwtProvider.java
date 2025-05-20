@@ -32,11 +32,17 @@ public class JwtProvider {
     }
 
     public String createAccessToken(UserDTO user) {
-        return createToken(user.getUserSq(), user.getUserTypeCd(), accessTokenExpiration);
+        return createToken(
+                user.getUserSq(),
+                user.getUserTypeCd(),
+                accessTokenExpiration);
     }
 
     public String createRefreshToken(UserDTO user) {
-        return createToken(user.getUserSq(), user.getUserTypeCd(), refreshTokenExpiration);
+        return createToken(
+                user.getUserSq(),
+                user.getUserTypeCd(),
+                refreshTokenExpiration);
     }
 
     private String createToken(Long userSq, Long userTypeCd, long expirationTime) {

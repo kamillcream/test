@@ -35,10 +35,11 @@
 
   <!-- JWT 토큰 -->
 
-  <select id="findByUserEmail" parameterType="string"
-    resultType="com.example.demo.domain.user.dto.UserDTO"> SELECT user_sq AS userSq, user_email AS
-    userEmail, user_pw AS userPw, user_nm AS userNm, user_type_cd AS userTypeCd, user_refresh_token
-    AS userRefreshToken FROM TBL_USER_M WHERE user_email = #{userEmail} AND user_is_deleted_yn = 'N' </select>
+  <select id="findByUserId" parameterType="string"
+    resultType="com.example.demo.domain.user.dto.UserDTO"> SELECT user_sq AS userSq, user_id AS
+    userId, user_email AS userEmail, user_pw AS userPw, user_nm AS userNm, user_type_cd AS
+    userTypeCd, user_refresh_token AS userRefreshToken FROM TBL_USER_M WHERE user_id = #{userId} AND
+    user_is_deleted_yn = 'N' </select>
 
   <update id="updateRefreshToken" parameterType="map"> UPDATE TBL_USER_M SET user_refresh_token =
     #{refreshToken}, user_modified_at_dtm = NOW() WHERE user_sq = #{userSq} </update>

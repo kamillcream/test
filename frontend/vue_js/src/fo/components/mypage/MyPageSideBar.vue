@@ -132,10 +132,6 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '@/fo/stores/authStore'
-
-const authStore = useAuthStore()
-
 //추후 로그인 기능 완성 이후 수정필요
 </script>
 

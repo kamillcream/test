@@ -162,6 +162,8 @@
 <script setup>
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 import { ref } from 'vue'
+import { api } from '@/axios'
+import { useUserStore } from '@/fo/stores/userStore'
 
 const loginType = ref('PERSONAL')
 const form = ref({
@@ -173,14 +175,42 @@ const form = ref({
   id_save: false,
 })
 
-const login = () => {
+const userStore = useUserStore()
+
+const login = async () => {
   const type = loginType.value
+  const userTypeCd = type === 'PERSONAL' ? 301 : 302
+
   const payload =
     type === 'PERSONAL'
-      ? { login_tab: 'p', id: form.value.id, password: form.value.password }
-      : { login_tab: 'c', id: form.value.cid, password: form.value.cpassword }
+      ? { userId: form.value.id, userPw: form.value.password, userTypeCd }
+      : { userId: form.value.cid, userPw: form.value.cpassword, userTypeCd }
 
-  console.log('Login 요청', payload)
+  try {
+    const res = await api.$post('/login', payload)
+    const data = res.output
+    console.log('로그인 반환값', data)
+
+    // 1. 로컬스토리지에 필요한 값 저장 (액세스토큰 제외)
+    localStorage.setItem('userNm', data.userNm)
+    localStorage.setItem('userTypeCd', data.userTypeCd)
+
+    // 2. Pinia 스토어에 사용자 정보 저장 (자동으로 반영됨)
+    userStore.setUser({
+      userNm: data.userNm,
+      userTypeCd: data.userTypeCd,
+    })
+    console.log('localStorage', localStorage)
+    console.log('userStore state:', { ...userStore })
+
+    alert('로그인 성공!')
+
+    // 필요시 로그인 후 페이지 이동 등 추가 작업
+    // 예: router.push('/')
+  } catch (error) {
+    console.error(error)
+    alert('로그인 실패: ' + (error.response?.data?.message || error.message))
+  }
 }
 
 const socialProviders = [
