@@ -4,6 +4,7 @@ package com.example.demo.domain.project.dto.response;
 import java.util.List;
 
 import com.example.demo.domain.project.entity.Project;
+import com.example.demo.domain.project.util.ProjectUtil;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,21 +27,19 @@ public class ProjectSummary {
 	private Long salary;
 	private List<String> reqSkills;
 	
-	public static ProjectSummary from(Project project, String companyNm, String address,
-			int remainingDay, List<String> reqSkills, String devGradeNm, String eduLvlNm
-			) {
+	public static ProjectSummary from(Project project, ProjectUtil util) {
 		return ProjectSummary.builder()
 				.projectSq(project.getProjectSq())
 				.projectTtl(project.getProjectTtl())
 				.imageUrl(project.getProjectImageUrl())
 				.viewCnt(project.getProjectViewCnt())
 				.salary(project.getProjectSalary())
-				.companyNm(companyNm)
-				.address(address)
-				.remainingDay(remainingDay)
-				.reqSkills(reqSkills)
-				.devGradeNm(devGradeNm)
-				.requiredEduLvl(eduLvlNm)
+				.companyNm(util.convertCompanySqToName(project.getCompanySq()))
+				.address(util.convertAddressSqToName(project.getAddressSq()))
+				.remainingDay(project.calcaulateRemainingDay(project.getProjectRecruitEndDt()))
+				.reqSkills(util.fetchReqSkillsByProjectSq(project.getProjectSq()))
+				.devGradeNm(util.convertCommonCodeSqToNm(project.getProjectDeveloperGradeCd()))
+				.requiredEduLvl(util.convertCommonCodeSqToNm(project.getProjectRequiredEducationCd()))
 				.build();
 	}
 }

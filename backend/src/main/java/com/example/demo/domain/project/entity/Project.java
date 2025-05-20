@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
+import org.apache.logging.log4j.status.StatusConsoleListener;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.example.demo.domain.project.dto.request.ProjectCreateRequest;
@@ -84,6 +86,25 @@ public class Project {
     @Column(name = "project_view_cnt")
     private Integer projectViewCnt;
 
+    public static Project from(ProjectCreateRequest request, long devgradeCodeSq, long educationLvlSq) {
+    	return Project.builder()
+    			.companySq(1L)
+				.addressSq(1L)
+				.projectTtl(request.projectTitle())
+				.projectImageUrl(request.projectImageUrl())
+				.projectDeveloperGradeCd(devgradeCodeSq)
+				.projectRequiredEducationCd(educationLvlSq)
+				.projectSalary(10000L)
+				.projectStartDt(request.projectStartDt())
+				.projectEndDt(request.projectEndDt())
+				.projectRecruitStartDt(request.recruitStartDt())
+				.projectRecruitEndDt(request.recruitEndDt())
+				.projectDescriptionTxt(request.description())
+				.projectPreferenceTxt(request.preference())
+				.projectIsNotificationYn(request.isNotification())
+				.build();
+    }
+    
     @PrePersist
     public void prePersist() {
         this.projectCreatedAtDtm = LocalDateTime.now();
@@ -125,5 +146,9 @@ public class Project {
     public void decreaseScrap() {
     	this.projectScrapCnt--;
     }
+    
+    public int calcaulateRemainingDay(LocalDate recruitEndDt) {
+		return (int) ChronoUnit.DAYS.between(LocalDate.now(), recruitEndDt);
+	}
     
 }

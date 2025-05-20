@@ -5,7 +5,13 @@
 
 <mapper namespace="com.example.demo.domain.project.mapper.DistrictMapper">
 
-	<select id="findAllArea" resultType="com.example.demo.domain.project.dto.response.AreaInfoResponse">
+	<select id="findAllNameParentDistrict" resultType="String">
+    SELECT area_sigungu
+    FROM TBL_AREA_C
+    WHERE PARENT_AREA_CODE_SQ IS NULL
+	</select>
+	
+	<select id="findAllParentDistrict" resultType="com.example.demo.domain.project.dto.response.AreaInfoResponse">
     SELECT area_code_sq, area_sigungu
     FROM TBL_AREA_C
     WHERE PARENT_AREA_CODE_SQ IS NULL

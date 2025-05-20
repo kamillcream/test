@@ -9,6 +9,6 @@ import com.example.demo.domain.project.dto.response.AreaInfoResponse;
 
 @Mapper
 public interface DistrictMapper {
-	List<AreaInfoResponse> findAllArea();
+	List<AreaInfoResponse> findAllParentDistrict();
 	List<AreaInfoResponse> findAllDistrictByParent(@Param("parentCodeSq") Long parentCodeSq);
 }

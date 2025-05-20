@@ -19,16 +19,22 @@ import com.example.demo.domain.project.entity.Project;
 @Mapper
 public interface ProjectMapper {
 	List<Project> findProjectsBySearch(ProjectSearchRequest request);
+	SkillInsertRequest findSkillTagInfoByName(@Param("name") String name);
+	long findCompanySqFromProjectSq(long projectSq);
+	List<SingleSkillInfoResponse> findSkillInfoList();
+	List<String> findWorkTypesByProjectSq(@Param("projectSq") Long projectSq);
+	List<String> findJobsByProjectSq(@Param("projectSq") Long projectSq);
+	Map<String, LocalDateTime> findInterviewTimeMinMaxBySq(@Param("projectSq") Long projectSq);
+	int countProjectsBySearch(ProjectSearchRequest request);
+	List<LocalDateTime> findInterviewTimesByProjectSq(@Param("projectSq") Long projectSq);
+	
+	
 	void insertContracts(@Param("projectSq") Long projectSq, @Param("contractTypes") List<ContractInsertRequest> contractTypes);
 	void insertJobs(@Param("projectSq") Long projectSq, @Param("recruitJobs") List<JobInsertRequest> recruitJobs);
 	void insertSkills(@Param("projectSq") Long projectSq, @Param("skills") List<SkillInsertRequest> skills);
 	void insertPreferSkills(@Param("projectSq") Long projectSq, @Param("preferSkills") List<SkillInsertRequest> preferSkills);
 	void insertInterviewTimes(@Param("projectSq") Long projectSq, @Param("interviewTimes") List<LocalDateTime> interviewTimes);
-	SkillInsertRequest findSkillTagInfoByName(@Param("name") String name);
-	long findCompanySqFromProjectSq(long projectSq);
 	void insertScrap(ScrapInsertRequest scrapInsertRequest);
-	List<SingleSkillInfoResponse> findSkillInfoList();
-	List<String> findWorkTypesByProjectSq(@Param("projectSq") Long projectSq);
-	List<String> findJobsByProjectSq(@Param("projectSq") Long projectSq);
-	Map<String, LocalDateTime> findInterviewTimesBySq(@Param("projectSq") Long projectSq);
+	
+	void deleteProjectScrap(@Param("projectSq") Long projectSq, @Param("userSq") Long userSq);
 }

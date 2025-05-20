@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.example.demo.domain.project.entity.Project;
 import com.example.demo.domain.project.util.DateUtil;
+import com.example.demo.domain.project.util.ProjectUtil;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,13 +46,13 @@ public class ProjectDetailResponse {
     private String isScrap;                        
     private Long userSq;      
     
-    public static ProjectDetailResponse from(Project p, Map<String, LocalDateTime> interviewTimes, String companyNm, String address, List<String> requiredSkillStrings, List<String> preferredSkillStrings
-    		, List<String> contractTypes, List<String> jobs, String devGradeNm, String eduLvlNm) {
+    public static ProjectDetailResponse from(Project p, ProjectUtil util) {
+    	Long projectSq = p.getProjectSq();
+    	Map<String, LocalDateTime> interviewTimes = util.fetchInterviewTimeMinMaxBySq(projectSq);
     	return ProjectDetailResponse.builder()
                 .projectTtl(p.getProjectTtl())
-                .companyNm(companyNm)
+                .companyNm(util.convertCompanySqToName(p.getCompanySq()))
                 .projectDetail(p.getProjectDescriptionTxt())
-
                 .interviewStartDt(DateUtil.formatLocalDate(interviewTimes.get("minTime")))
                 .interviewEndDt(DateUtil.formatLocalDate(interviewTimes.get("maxTime")))
                 .projectRecruitStartDt(p.getProjectRecruitStartDt().toString())
@@ -62,17 +63,17 @@ public class ProjectDetailResponse {
                 .projectViewCnt(p.getProjectViewCnt())
                 .projectScrapCnt(p.getProjectScrapCnt())
 
-                .projectAddress(address)
-                .projectExperience(devGradeNm)
-                .projectEducation(eduLvlNm)
+                .projectAddress(util.convertAddressSqToName(p.getAddressSq()))
+                .projectExperience(util.convertCommonCodeSqToNm(p.getProjectDeveloperGradeCd()))
+                .projectEducation(util.convertCommonCodeSqToNm(p.getProjectRequiredEducationCd()))
 
-                .projectRequiredSkills(requiredSkillStrings)
-                .projectPreferredSkills(preferredSkillStrings)
+                .projectRequiredSkills(util.fetchReqSkillsByProjectSq(p.getProjectSq()))
+                .projectPreferredSkills(util.fetchPreferSkillsByProjectSq(p.getProjectSq()))
                 .projectPreferredEtc(new ArrayList<>())
 
                 .projectSalary(p.getProjectSalary())
-                .projectJobRole(jobs)
-                .projectWorkType(contractTypes)
+                .projectJobRole(util.fetchJobsByProjectSq(projectSq))
+                .projectWorkType(util.fetchWorkTypesByProjectSq(projectSq))
 
                 .isScrap("N")
                 .userSq(1L)

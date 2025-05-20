@@ -16,6 +16,15 @@
     FROM TBL_PROJECT_PREFERRED_SKILL_TAG_S
     WHERE project_sq = #{projectSq}
 	</select>
-
+	
+	<delete id="deleteReqSkillsByProjectSq">
+	  DELETE FROM TBL_PROJECT_REQUIRED_SKILL_TAG_S
+	  WHERE project_sq = #{projectSq}
+	</delete>
+	
+	<delete id="deletePreferSkillsByProjectSq">
+	  DELETE FROM TBL_PROJECT_PREFERRED_SKILL_TAG_S
+	  WHERE project_sq = #{projectSq}
+	</delete>
 
 </mapper>

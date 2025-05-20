@@ -20,6 +20,7 @@ import com.example.demo.common.ApiResponse;
 import com.example.demo.domain.project.dto.request.ProjectApplyRequest;
 import com.example.demo.domain.project.dto.request.ProjectCreateRequest;
 import com.example.demo.domain.project.dto.request.ProjectSearchRequest;
+import com.example.demo.domain.project.dto.request.ScrapRequest;
 import com.example.demo.domain.project.dto.response.AreaInfoResponse;
 import com.example.demo.domain.project.dto.response.GroupSkillInfoResponse;
 import com.example.demo.domain.project.dto.response.ProjectDetailResponse;
@@ -70,9 +71,9 @@ public class ProjectController {
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 지원 성공", null));
 	}
 	
-	@PostMapping("/{projectSq}/scrap")
-	public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectSq") Long projectSq){
-		projectService.createProjectScrap(projectSq);
+	@PostMapping("/{projectSq}/scraps")
+	public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectSq") Long projectSq, @RequestBody ScrapRequest scrapRequest){
+		projectService.toggleProjectScrap(projectSq, scrapRequest);
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 스크랩 성공", null));
 	}
 	
@@ -81,9 +82,11 @@ public class ProjectController {
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 상세 내역 반환 성공", projectService.fetchProject(projectSq)));
 	}
 	
-	@GetMapping("/infos")
-	public ResponseEntity<ApiResponse<ProjectFormDataResponse>> getProjectFormDatas(){
-		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 폼 데이터 반환 성공", projectService.fetchProjectFormDatas()));
+	@GetMapping("/forms")
+	public ResponseEntity<ApiResponse<ProjectFormDataResponse>> getProjectFormDatas(
+	    @RequestParam(value = "projectSq", defaultValue = "0") Long projectSq) {
+	    
+	    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 폼 데이터 반환 성공", projectService.fetchProjectFormDatas(projectSq)));
 	}
 	
 	@GetMapping("/{areaCodeSq}/districts")
@@ -91,6 +94,10 @@ public class ProjectController {
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "하위 행정구역 반환 성공", projectService.fetchDistricts(areaCodeSq)));
 	}
 	
+	@GetMapping("/filters")
+	public ResponseEntity<ApiResponse<List<?>>> getSearchFilterInfos(@RequestParam("type") String type){
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 필터 내용 반환 성공", projectService.fetchFilterInfos(type)));
+	}
 	
 	
 }

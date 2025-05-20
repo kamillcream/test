@@ -28,8 +28,8 @@ public class ProjectSearchRequest {
     private Long projectDeveloperGradeCd;   // 예: 700
     private String projectIsDeletedYn;      // "Y" or "N"
     private String experience;              // 예: "3년 이상"
-    private String education;               // 예: "대졸 이상"
-    private String jobRole;                 // 예: "백엔드 개발자"
+    private Long educationCd;               // 예: "대졸 이상"
+    private Long jobRoleCd;                 // 예: "백엔드 개발자"
     private String searchKeyword;           // 예: "AI"
     private String searchType;              // 예: "기술", "프로젝트명" 등
 }

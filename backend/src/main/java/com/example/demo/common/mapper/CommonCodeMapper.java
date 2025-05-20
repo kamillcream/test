@@ -1,6 +1,7 @@
 package com.example.demo.common.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.ListModel;
 
@@ -17,4 +18,5 @@ public interface CommonCodeMapper {
 	Long findParentSkillTagSq(@Param("skill_tag_sq") Long skill_tag_sq);
 	List<String> findByParentCode(@Param("parentCodeSq") Long parentCodeSq);
 	String findCommonCodeNmBySq(@Param("codeSq") Long codeSq);
+	List<Map<Long, String>> findCommonCodeSqAndNmByParent(@Param("parentCodeSq") Long parentCodeSq);
 }

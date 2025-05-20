@@ -5,6 +5,12 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+import com.example.demo.common.ParentCodeEnum;
+import com.example.demo.common.mapper.CommonCodeMapper;
+import com.example.demo.domain.project.dto.request.ProjectApplyRequest;
+import com.example.demo.domain.project.entity.enums.ProjectApplicationStatus;
+import com.example.demo.domain.project.mapper.ProjectMapper;
+
 @Entity
 @Table(name = "TBL_PROJECT_APPLICATION_H")
 @Getter
@@ -43,6 +49,17 @@ public class ProjectApplicationEntity {
     @PrePersist
     public void prePersist() {
     	this.projectApplicationCreatedAtDtm = LocalDateTime.now();
+    }
+    
+    public static ProjectApplicationEntity from(long projectSq, ProjectMapper projectMapper,
+    		ProjectApplyRequest request, CommonCodeMapper commonCodeMapper) {
+    	return ProjectApplicationEntity.builder()
+				.projectSq(projectSq)
+				.companySq(projectMapper.findCompanySqFromProjectSq(projectSq))
+				.resumeSq(request.getResumeSq())
+				.projectApplicationStatusCd(commonCodeMapper.findCommonCodeSqByEngName(ProjectApplicationStatus.APPLIED.getCode(), ParentCodeEnum.APPLICATION.getCode()))
+				.projectApplicationMemberTypeCd(commonCodeMapper.findCommonCodeSqByEngName(request.getProjectApplicationTyp(), ParentCodeEnum.MEMBER_TYPE.getCode()))
+				.build();
     }
     
 }

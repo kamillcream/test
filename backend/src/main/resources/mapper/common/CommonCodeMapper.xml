@@ -5,6 +5,13 @@
 
 <mapper namespace="com.example.demo.common.mapper.CommonCodeMapper">
 
+	<select id="findCommonCodeSqAndNmByParent" parameterType="Long" resultType="map">
+    SELECT common_code_sq, common_code_nm
+    FROM TBL_COMMON_CODE_C
+    WHERE PARENT_COMMON_CODE_SQ = #{parentCodeSq}
+	</select>
+	
+
     <select id="findCommonCodeSqByName" parameterType="map" resultType="Long">
     SELECT common_code_sq
     FROM TBL_COMMON_CODE_C
@@ -45,7 +52,5 @@
 	FROM TBL_COMMON_CODE_C
 	WHERE COMMON_CODE_SQ = #{codeSq}
 	</select>
-	
-	
 
 </mapper>

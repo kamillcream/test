@@ -44,6 +44,19 @@
     <if test="projectDeveloperGradeCd != null">
         AND project_developer_grade_cd = #{projectDeveloperGradeCd}
     </if>
+    
+    <if test="educationCd != null">
+        AND project_required_education_cd = #{educationCd}
+    </if>
+    
+    <if test="jobRoleCd != null">
+        AND EXISTS (
+		    SELECT 1
+		    FROM TBL_PROJECT_RECRUIT_JOB_ROLE_S JR
+		    WHERE JR.project_sq = project_sq
+		      AND JR.recruit_job_position_type_cd = #{jobRoleCd}
+		)
+    </if>
 
     <if test="searchKeyword != null and searchKeyword != ''">
         <choose>
@@ -85,7 +98,61 @@
     <if test="size != null and offset != null">
         LIMIT #{size} OFFSET #{offset}
     </if>
-</select>
+	</select>
+	
+	<select id="countProjectsBySearch"
+        parameterType="com.example.demo.domain.project.dto.request.ProjectSearchRequest"
+        resultType="Integer">
+
+    SELECT COUNT(*)
+    FROM TBL_PROJECT_M
+    WHERE project_is_deleted_yn = 'N'
+    
+    <if test="addressCodeSq != null">
+        AND address_sq = #{addressCodeSq}
+    </if>
+
+    <if test="projectDeveloperGradeCd != null">
+        AND project_developer_grade_cd = #{projectDeveloperGradeCd}
+    </if>
+
+    <if test="searchKeyword != null and searchKeyword != ''">
+        <choose>
+            <when test="searchType == '기술'">
+                AND project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
+            </when>
+            <when test="searchType == '프로젝트명'">
+                AND project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
+            </when>
+            <otherwise>
+                <!-- TODO: 성능 이슈 시 UNION 또는 FULLTEXT로 분리 고려 -->
+                AND (
+                    project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR project_description_txt LIKE CONCAT('%', #{searchKeyword}, '%')
+                )
+            </otherwise>
+        </choose>
+    </if>
+
+    <choose>
+        <when test="sortBy != null and sortOrder != null">
+            <choose>
+                <when test="sortBy == 'project_start_dt'">
+                    ORDER BY project_start_dt ${sortOrder}
+                </when>
+                <when test="sortBy == 'project_salary'">
+                    ORDER BY project_salary ${sortOrder}
+                </when>
+                <otherwise>
+                    ORDER BY project_start_dt DESC <!-- 기본 정렬 -->
+                </otherwise>
+            </choose>
+        </when>
+        <otherwise>
+            ORDER BY project_start_dt DESC
+        </otherwise>
+    </choose>
+	</select>
 
 
 	<select id="findCompanySqFromProjectSq" parameterType="Long" resultType="Long">
@@ -186,12 +253,23 @@
 		WHERE m.project_sq = #{projectSq}
   	</select>
   	
-  	<select id="findInterviewTimesBySq" resultType="map" parameterType="Long">
+  	<select id="findInterviewTimeMinMaxBySq" resultType="map" parameterType="Long">
 	    SELECT 
 	    MIN(interview_available_dtm) AS minTime,
 	    MAX(interview_available_dtm) AS maxTime
 	  FROM TBL_PROJECT_INTERVIEW_TIME_SLOT_S
 	  WHERE project_sq = #{projectSq}
   	</select>
+  	
+  	<select id="findInterviewTimesByProjectSq" resultType="java.time.LocalDateTime" parameterType="Long">
+	    SELECT interview_available_dtm
+	  	FROM TBL_PROJECT_INTERVIEW_TIME_SLOT_S
+	  	WHERE project_sq = #{projectSq}
+  	</select>
+  	
+  	<delete id="deleteProjectScrap">
+	  DELETE FROM TBL_SCRAP_S
+	  WHERE project_sq = #{projectSq} AND user_sq = #{userSq}
+	</delete>
 	
 </mapper>
