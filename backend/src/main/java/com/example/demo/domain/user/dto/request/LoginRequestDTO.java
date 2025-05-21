@@ -7,4 +7,5 @@ public class LoginRequestDTO {
     private String userId;
     private String userPw;
     private Long userTypeCd;
+    private boolean autoLogin;
 }

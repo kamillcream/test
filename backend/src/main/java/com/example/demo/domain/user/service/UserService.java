@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.domain.user.dto.AddressDTO;
 import com.example.demo.domain.user.dto.UserDTO;
 import com.example.demo.domain.user.dto.request.SignUpRequestDTO;
+import com.example.demo.domain.user.dto.response.LoginResponseDTO;
 import com.example.demo.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -58,6 +59,10 @@ public class UserService {
         userDTO.setUserAgreedPrivacyPolicyYn(requestDto.getUserAgreedPrivacyPolicyYn());
 
         userRepository.insertUser(userDTO);
+    }
+
+    public LoginResponseDTO getUserInfoByUserSq(Long userSq) {
+        return userRepository.getUserInfoByUserSq(userSq);
     }
 
 }

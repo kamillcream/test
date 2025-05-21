@@ -169,6 +169,7 @@ import router from '@/fo/router'
 import { useAlertStore } from '@/fo/stores/alertStore'
 
 const alertStore = useAlertStore()
+const userStore = useUserStore()
 
 const loginType = ref('PERSONAL')
 const form = ref({
@@ -179,8 +180,6 @@ const form = ref({
   autologin: false,
   id_save: false,
 })
-
-const userStore = useUserStore()
 
 const login = async () => {
   const type = loginType.value
@@ -195,11 +194,12 @@ const login = async () => {
     const res = await api.$post('/login', payload)
     const data = res.output
 
-    // 로컬스토리지 저장
+    // 사용자 이름/유형은 로컬 + Pinia 저장
     localStorage.setItem('userNm', data.userNm)
     localStorage.setItem('userTypeCd', data.userTypeCd)
+    userStore.setUser({ userNm: data.userNm, userTypeCd: data.userTypeCd })
 
-    // 아이디 저장
+    // 아이디 저장 처리
     if (form.value.id_save) {
       if (type === 'PERSONAL') {
         localStorage.setItem('savedPersonalId', form.value.id)
@@ -213,27 +213,8 @@ const login = async () => {
       localStorage.removeItem('savedLoginType')
     }
 
-    // 자동 로그인 저장
-    if (form.value.autologin) {
-      const autologinPayload = {
-        userId: id,
-        userPw: pw,
-        userTypeCd,
-      }
-      localStorage.setItem('autologinData', JSON.stringify(autologinPayload))
-    } else {
-      localStorage.removeItem('autologinData')
-    }
-
-    // Pinia 저장
-    userStore.setUser({
-      userNm: data.userNm,
-      userTypeCd: data.userTypeCd,
-    })
-
-    alertStore.show(userStore.userNm + '님 안녕하세요.', 'success')
-    // 이동 처리
-    router.push('/') // 또는 원하는 메인 페이지 경로
+    alertStore.show(`${data.userNm}님 안녕하세요.`, 'success')
+    router.push('/')
   } catch (error) {
     console.error(error)
     alertStore.show(error.response?.data?.message || error.message, 'danger')
@@ -260,7 +241,7 @@ onMounted(() => {
   loadSavedId()
 })
 
-// loginType 변경 시 저장된 아이디 변경 반영
+// loginType 변경 시 저장된 아이디 반영
 watch(loginType, () => {
   if (loginType.value === 'PERSONAL') {
     form.value.id = localStorage.getItem('savedPersonalId') || ''
@@ -269,27 +250,12 @@ watch(loginType, () => {
   }
 })
 
+// 소셜 로그인 미지원 안내
 const socialProviders = [
-  {
-    name: 'kakao',
-    title: '카카오 로그인',
-    img: '/img/social/kakao.png',
-  },
-  {
-    name: 'naver',
-    title: '네이버 로그인',
-    img: '/img/social/naver.png',
-  },
-  {
-    name: 'google',
-    title: '구글 로그인',
-    img: '/img/social/google.png',
-  },
-  {
-    name: 'apple',
-    title: '애플 로그인',
-    img: '/img/social/apple.png',
-  },
+  { name: 'kakao', title: '카카오 로그인', img: '/img/social/kakao.png' },
+  { name: 'naver', title: '네이버 로그인', img: '/img/social/naver.png' },
+  { name: 'google', title: '구글 로그인', img: '/img/social/google.png' },
+  { name: 'apple', title: '애플 로그인', img: '/img/social/apple.png' },
 ]
 
 const handleSocialLogin = (provider) => {

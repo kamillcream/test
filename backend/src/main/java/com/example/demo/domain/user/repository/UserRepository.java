@@ -4,6 +4,7 @@ import org.springframework.stereotype.Repository;
 
 import com.example.demo.domain.user.dto.AddressDTO;
 import com.example.demo.domain.user.dto.UserDTO;
+import com.example.demo.domain.user.dto.response.LoginResponseDTO;
 import com.example.demo.domain.user.mapper.UserMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,14 @@ public class UserRepository {
 
     public UserDTO findByRefreshToken(String refreshToken) {
         return userMapper.findByRefreshToken(refreshToken);
+    }
+
+    public LoginResponseDTO getUserInfoByUserSq(Long userSq) {
+        return userMapper.findUserInfoByUserSq(userSq);
+    }
+
+    public void deleteRefreshTokenByUserSq(Long userSq) {
+        userMapper.deleteRefreshTokenByUserSq(userSq);
     }
 
 }

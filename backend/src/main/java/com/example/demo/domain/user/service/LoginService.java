@@ -84,4 +84,13 @@ public class LoginService {
             return userInfo;
         }
     }
+
+    public LoginResponseDTO getUserInfoByUserSq(Long userSq) {
+        return userRepository.getUserInfoByUserSq(userSq);
+    }
+
+    public void deleteRefreshTokenByUserSq(Long userSq) {
+        userRepository.deleteRefreshTokenByUserSq(userSq);
+    }
+
 }
