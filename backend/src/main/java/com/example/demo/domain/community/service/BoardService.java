@@ -3,10 +3,12 @@ package com.example.demo.domain.community.service;
 
 import org.springframework.stereotype.Service;
 
+import com.example.demo.domain.community.dto.*;
 import com.example.demo.domain.community.dto.request.*;
-import com.example.demo.domain.community.entity.Board;
-import com.example.demo.domain.community.mapper.BoardMapper;
+import com.example.demo.domain.community.entity.*;
+import com.example.demo.domain.community.mapper.*;
 import com.example.demo.domain.community.dto.response.*;
+import com.example.demo.domain.community.converter.*;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,16 +18,47 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class BoardService {
+
     private final BoardMapper boardMapper;
+    private final CmntTagMapper cmntTagMapper;
+    private final CommentMapper commentMapper;
+    private final AnswerMapper answerMapper;
+    private final NormalTagConverter normalTagConverter;
+    private final SkillTagConverter skillTagConverter;
+    private final RecommendationMapper recommendationMapper;
 
     @Transactional
-    public List<BoardListResponse> getAllBoards(Long boardTypeCd) {
-    	List<Board> boards = boardMapper.findAll(boardTypeCd);
-    	System.out.println(boards);
+    public List<BoardListResponse> getAllBoards(Long boardTypeCd, Long boardAdoptStatusCd, String searchType, String keyword, List<Long> searchSkillTags, String sortType, Long page, Long size) {
+    	if(page < 1) page = 1L;
+    	Long offset = (page - 1L) * size;
+    	if(sortType == null || sortType.isEmpty()) sortType = "latest";
+    	
+    	
+    	List<Board> boards = boardMapper.findAll(boardTypeCd, boardAdoptStatusCd, searchType, keyword, searchSkillTags, sortType, size, offset);
+
     	if(boards == null) {
     		throw new IllegalArgumentException("게시글이 없습니다.");
     	}
-        return boards.stream().filter(Objects::nonNull).map(BoardListResponse::fromEntity).collect(Collectors.toList());
+    	
+    	List<BoardListResponse> responses = boards.stream()
+            .filter(Objects::nonNull)
+            .map(board -> {
+                // 각 게시글의 일반 태그 조회
+                List<String> normalTags = normalTagConverter.convertNormalTagsToStrings(cmntTagMapper.findNT(board.getBoardSq(), null));
+                
+                // 각 게시글의 스킬 태그 조회
+            	List<SkillTagDTO> skillTags = skillTagConverter.convertSkillTagsToStrings(cmntTagMapper.findST(board.getBoardSq(), null));
+            	
+            	// 각 게시글의 답변 리스트 조회
+            	Integer boardAnswerCnt = answerMapper.findAllCnt(board.getBoardSq());
+            	
+                
+                // BoardListResponse 생성 (태그 포함)
+                return BoardListResponse.fromEntity(board, boardAnswerCnt, normalTags, skillTags);
+            })
+            .collect(Collectors.toList());
+
+        return responses;
     }
 
     @Transactional
@@ -33,31 +66,69 @@ public class BoardService {
     	Board board = boardMapper.findByIdBoard(boardSq, boardTypeCd);
     	if(board == null) {
     		throw new IllegalArgumentException("게시글이 존재하지 않습니다.");
-    	} else if(board.getBoardIsDeletedYn() == "Y") {
+    	} else if(board.getBoardIsDeletedYn().equals("Y")) {
     		throw new IllegalArgumentException("삭제된 게시글입니다.");
     	}
-    	System.out.println(boardSq);
-        return BoardResponse.fromEntity(board);
+
+    	List<String> normalTags = normalTagConverter.convertNormalTagsToStrings(cmntTagMapper.findNT(boardSq, null));
+    	List<SkillTagDTO> skillTags = skillTagConverter.convertSkillTagsToStrings(cmntTagMapper.findST(boardSq, null));
+    	
+    	List<Answer> answers = answerMapper.findAll(board.getBoardSq());
+    	
+    	List<AnswerListResponse> answerListResponses = answers.stream()
+            .filter(Objects::nonNull)
+            .map(answer -> {
+            	if(answer.getAnswerIsDeletedYn().equals("Y")) {
+            		return AnswerListResponse.builder().answerIsDeletedYn("Y").build(); 
+            	} else {
+            		return AnswerListResponse.fromEntity(answer);            		            		
+            	}
+            })
+            .collect(Collectors.toList());
+    	
+    	List<CommentResponse> comments = commentMapper.findByBoardSq(boardSq).stream().filter(Objects::nonNull)
+    			.map(comment -> CommentResponse.fromEntity(comment)).collect(Collectors.toList());
+    			
+    	
+        return BoardResponse.fromEntity(board, normalTags, skillTags, answerListResponses, comments);
     }
     
     @Transactional
-    public void createBoard(BoardRequest boardRequest){
+    public void createBoard(BoardRequest boardRequest, Long BoardTypeCd){
+//    	게시글 오류 처리
     	if(boardRequest.getBoardTtl() == null) {
     		throw new IllegalArgumentException("제목을 입력해주세요.");
     	} else if(boardRequest.getBoardDescriptionEdt() == null) {
     		throw new IllegalArgumentException("내용을 입력해주세요.");
     	}
-        boardMapper.insert(Board.builder()
-        		.userSq(boardRequest.getUserSq())
+    	
+    	Board board = Board.builder()
+    			.userSq(boardRequest.getUserSq())
         		.boardTtl(boardRequest.getBoardTtl())
         		.boardDescriptionEdt(boardRequest.getBoardDescriptionEdt())
-        		.boardTyp("normal")
-        		.boardTypeCd(1401L).build());
+        		.boardTyp(BoardTypeCd == 1401L ? "normal" : "qna")
+        		.boardTypeCd(BoardTypeCd).build();
+        boardMapper.insert(board);
+        
+        if (board.getBoardSq() == null) {
+            throw new IllegalStateException("게시글 생성 실패: Primary Key가 생성되지 않았습니다.");
+        }
+        
+//        일반 태그 추가
+    	cmntTagMapper.insertNT(normalTagConverter.convertStringsToNormalTags(board.getBoardSq(), null, boardRequest.getNormalTags()));
+    	
+//    	스킬태그 추가
+    	if(board.getBoardTypeCd() == 1402) {
+    		cmntTagMapper.insertST(skillTagConverter.convertStringsToSkillTags(board.getBoardSq(), null, boardRequest.getSkillTags()));
+    	}
+        
+        
 		return;
     }
 
     @Transactional
     public void updateBoard(BoardRequest boardRequest, Long boardSq, Long boardTypeCd) {
+//    	게시글 업데이트
     	if(boardRequest.getBoardTtl() == null) {
     		throw new IllegalArgumentException("제목을 입력해주세요.");
     	} else if(boardRequest.getBoardDescriptionEdt() == null) {
@@ -70,6 +141,15 @@ public class BoardService {
         board.setBoardDescriptionEdt(boardRequest.getBoardDescriptionEdt());
         
         boardMapper.update(board);
+        
+//      기존 태그 삭제
+        cmntTagMapper.deleteNT(board.getBoardSq(), null);
+        cmntTagMapper.deleteST(board.getBoardSq(), null);
+        
+//      태그 새로 추가
+    	cmntTagMapper.insertNT(normalTagConverter.convertStringsToNormalTags(board.getBoardSq(), null, boardRequest.getNormalTags()));
+		cmntTagMapper.insertST(skillTagConverter.convertStringsToSkillTags(board.getBoardSq(), null, boardRequest.getSkillTags()));
+        
 
         return;
     }
@@ -77,11 +157,34 @@ public class BoardService {
     @Transactional
     public void deleteBoard(Long boardSq) {
         boardMapper.delete(boardSq);
+
     }
 
     @Transactional
     public void addViewCntBoard(Long boardSq) {
         boardMapper.addViewCnt(boardSq);
+    }
+
+//    추천
+    @Transactional
+    public void updateBoardRecommend(Long boardSq) {
+        
+        Recommendation recommendation = recommendationMapper.findByBoardSq(boardSq);
+        
+        if(recommendation == null) {
+//        	추후 Authorization 에서 userSq 가져올 예정
+        	recommendation = Recommendation.builder().boardSq(boardSq).userSq(3L).recommendationTypeCd(1901L).build();
+        	recommendationMapper.insert(recommendation);
+        	
+        } else {
+        	recommendationMapper.delete(recommendation.getRecommendationSq());
+        }
+        
+        boardMapper.updateRecommendCnt(boardSq);
+        
+        return;
+        
+        
     }
 
 

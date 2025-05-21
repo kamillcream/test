@@ -4,12 +4,6 @@ spring:
     username: admin
     password: admin123!!
     driver-class-name: com.mysql.cj.jdbc.Driver
-
-  jpa:
-    hibernate:
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-
   redis:
     host: 15.164.85.142
     port: 6379
@@ -40,9 +34,7 @@ server:
   servlet:
     context-path: /api # ← 공백으로 들여쓰기 확인!
 
-logging:
-   level:
-    org.mybatis: DEBUG
-    com.example.demo: DEBUG
-    org.hibernate.SQL: DEBUG
-
+# 기업 인증 API
+external:
+  business-verify:
+    api-key: oo7Cptu/muq0VdvJOvEZ816dEyBChjhrqLIM0HqL2+eJeZXKg46MztkspSRsh3HBX/lyqoXbNCWB4OydznQ+mg== #

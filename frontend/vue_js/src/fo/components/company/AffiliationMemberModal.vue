@@ -94,12 +94,7 @@
               >
                 <div class="post-info position-relative">
                   <div class="d-flex gap-2">
-                    <a
-                      @click="handleResumeSpecModalClick(resume.isMain)"
-                      href="#"
-                      class="text-5 m-0"
-                      style="font-size: 14px"
-                    >
+                    <a href="#" class="text-5 m-0" style="font-size: 14px">
                       {{ resume.name }} /
                     </a>
                     <span class="text-4 m-0 text-grey" style="font-size: 14px">
@@ -195,12 +190,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button
-          @click="applyCheck"
-          type="button"
-          class="btn btn-primary"
-          data-bs-dismiss="modal"
-        >
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
           선택완료
         </button>
         <button
@@ -218,12 +208,9 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useModalStore } from '../../stores/modalStore'
-import { useAlertStore } from '../../stores/alertStore'
 import UserResumeModal from '@/fo/components/mypage/personal/ResumeModal.vue'
-import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 
 const modalStore = useModalStore()
-const alert = useAlertStore()
 
 const searchWord = ref('')
 const searchCategory = ref('전체') // 기본값이 전체.
@@ -234,7 +221,6 @@ const resumes = ref([
     greeting: '안녕하세요. Java 개발자입니다.',
     experience: '0년차',
     skills: ['Java', 'Python', 'Spring Boot'],
-    isMain: true,
   },
   {
     id: 2,
@@ -242,7 +228,6 @@ const resumes = ref([
     greeting: '이력서를 선택하세요.',
     experience: '0년차',
     skills: ['Java', 'Python', 'Spring Boot'],
-    isMain: true,
   },
   {
     id: 3,
@@ -250,7 +235,6 @@ const resumes = ref([
     greeting: '이력서를 선택하세요.',
     experience: '0년차',
     skills: ['Java', 'Python', 'Spring Boot'],
-    isMain: false,
   },
   {
     id: 4,
@@ -258,7 +242,6 @@ const resumes = ref([
     greeting: '이력서를 선택하세요.',
     experience: '0년차',
     skills: ['Java', 'Python', 'Spring Boot'],
-    isMain: true,
   },
   {
     id: 5,
@@ -266,7 +249,6 @@ const resumes = ref([
     greeting: '이력서를 선택하세요.',
     experience: '0년차',
     skills: ['Java', 'Python', 'Spring Boot'],
-    isMain: false,
   },
 ])
 
@@ -289,21 +271,11 @@ const openResumeModal = () => {
 }
 
 const toggleSelection = (resumeId, name) => {
-  const fullResume = resumes.value.find((r) => r.id === resumeId)
-
-  if (!fullResume?.isMain) {
-    alert.show(`해당 인원의 대표 이력서를 먼저 선택해주세요`, 'danger')
-    return
-  }
-
   const index = selectedResumes.value.findIndex((r) => r.id === resumeId)
 
   if (index === -1) {
-    selectedResumes.value.push({
-      id: resumeId,
-      name,
-      isMain: true, // 이미 검증된 상태
-    })
+    selectedResumes.value.push({ id: resumeId, name })
+    console.log(selectedResumes.value)
   } else {
     selectedResumes.value.splice(index, 1)
   }
@@ -338,26 +310,6 @@ const filterResumes = () => {
   }
 }
 
-const applyCheck = () => {
-  modalStore.openModal(CommonConfirmModal, {
-    title: '프로젝트 지원',
-    message: '선택한 인원들로 프로젝트에 지원하시겠습니까?',
-    onConfirm: () => {
-      console.log('삭제 확정됨')
-      // api 요청 추가
-      // 예: await projectService.delete(projectId)
-    },
-  })
-}
-
-const handleResumeSpecModalClick = (isMain) => {
-  console.log(isMain)
-  if (isMain) {
-    // 이력서 상세 모달창 호출
-  } else {
-    alert.show('해당 인원의 대표 이력서를 먼저 선택해주세요.', 'danger')
-  }
-}
 watch(searchWord, (newVal, oldVal) => {
   console.log('변경됨:', oldVal, '→', newVal)
 })

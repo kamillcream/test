@@ -24,18 +24,12 @@
           <div>
             <ul class="simple-post-list m-0">
               <li
-                class="d-flex align-items-center gap-2"
+                class="d-flex align-items-center"
                 v-for="resume in resumes"
                 :key="resume.id"
               >
-                <div class="post-info align-items-center gap-2">
+                <div class="post-info">
                   <a href="#">{{ resume.title }}</a>
-                  <span
-                    v-if="resume.isMain"
-                    class="badge bg-primary ms-2 align-middle"
-                    style="font-size: 12px; padding: 3px 6px"
-                    >대표 이력서</span
-                  >
                   <div class="post-meta">
                     <span class="text-dark text-uppercase font-weight-semibold"
                       >등록일자</span
@@ -111,22 +105,10 @@ import { useAlertStore } from '../../../stores/alertStore'
 import { api } from '@/axios.js'
 
 const resumes = ref([
-  { id: 1, title: '대표 이력서', date: '2025.04.03', isMain: false },
-  { id: 2, title: '이력서 제목 2', date: '2025.04.02', isMain: false },
-  { id: 3, title: '이력서 제목 3', date: '2025.04.01', isMain: false },
+  { id: 1, title: '이력서 제목 1', date: '2025.04.01' },
+  { id: 2, title: '이력서 제목 2', date: '2025.04.01' },
+  { id: 3, title: '이력서 제목 3', date: '2025.04.01' },
 ])
-
-onMounted(() => {
-  resumes.value.sort((a, b) => {
-    if (a.isMain) return -1
-    if (b.isMain) return 1
-    return new Date(b.date) - new Date(a.date)
-  })
-  const mainResume = resumes.value.find((resume) => resume.isMain)
-  if (mainResume) {
-    selectedResume.value = mainResume
-  }
-})
 
 const emit = defineEmits(['confirm'])
 const modalStore = useModalStore()
@@ -162,17 +144,11 @@ const confirm = async () => {
 }
 
 const selectResume = (resume) => {
-  resumes.value.forEach((r) => {
-    r.isMain = false
-  })
-
-  resume.isMain = true
   selectedResume.value = resume
 }
 
 const close = () => {
   modalStore.closeModal()
 }
-// TODO: 이력서 제목 클릭 시 이력서 상세 모달창 호출
 </script>
 <style></style>

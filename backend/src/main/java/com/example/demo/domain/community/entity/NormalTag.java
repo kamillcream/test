@@ -1,12 +1,7 @@
 package com.example.demo.domain.community.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -21,5 +16,5 @@ public class NormalTag {
     private Long boardSq;
     private Long answerSq;
     private String normalTagNm;
-    private Integer normalTagTypeCd;
+    private Long normalTagTypeCd;
 }

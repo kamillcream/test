@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.domain.mypage.mapper.ResumeListMapper">
+
+  <select id="getResumeListByMemberId" parameterType="long" resultType="com.example.demo.domain.mypage.dto.response.ResumeListResponse">
+    SELECT
+      RESUME_ID AS resumeId,
+      TITLE,
+      DATE_FORMAT(CREATED_AT, '%Y.%m.%d') AS registerDate,
+      IS_REPRESENTATIVE AS isRepresentative
+    FROM TB_RESUME
+    WHERE MEMBER_ID = #{memberId}
+    ORDER BY CREATED_AT DESC
+  </select>
+
+</mapper>

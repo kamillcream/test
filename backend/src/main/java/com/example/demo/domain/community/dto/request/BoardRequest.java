@@ -1,5 +1,7 @@
 package com.example.demo.domain.community.dto.request;
 
+import com.example.demo.domain.community.dto.*;
+
 import lombok.*;
 import java.util.*;
 
@@ -12,5 +14,6 @@ public class BoardRequest{
     private String boardDescriptionEdt;
     private Long boardAdoptStatusCd;
     private List<String> normalTags;
+    private List<SkillTagDTO> skillTags;
 	
 }

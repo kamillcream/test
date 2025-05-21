@@ -1,5 +1,6 @@
 package com.example.demo.domain.community.dto.response;
 
+import com.example.demo.domain.community.dto.SkillTagDTO;
 import com.example.demo.domain.community.entity.*;
 
 import lombok.*;
@@ -18,12 +19,13 @@ public class BoardListResponse{
     private Integer boardViewCnt;
     private Integer boardCommentCnt;
     private Integer boardRecommendCnt;
+    private Integer boardAnswerCnt;
     private Long boardAdoptStatusCd;
-    private LocalDateTime boardCreatedAt;
-//    private List<NormalTag> normalTags;  // 일반 태그
+    private LocalDateTime boardCreatedAtDtm;
+    private List<String> normalTags;  // 일반 태그
+    private List<SkillTagDTO> skillTags;
 
-    
-    public static BoardListResponse fromEntity(Board board) {
+    public static BoardListResponse fromEntity(Board board, Integer boardAnswerCnt, List<String> normalTags, List<SkillTagDTO> skillTags) {
         return new BoardListResponse(
 			board.getBoardSq(),
 			board.getUserSq(),
@@ -31,8 +33,11 @@ public class BoardListResponse{
 			board.getBoardViewCnt(),
 			board.getBoardCommentCnt(),
 			board.getBoardRecommendCnt(),
+			boardAnswerCnt,
 			board.getBoardAdoptStatusCd(),
-			board.getBoardCreatedAt()
+			board.getBoardCreatedAtDtm(),
+			normalTags,
+			skillTags
         );
     }
 	
