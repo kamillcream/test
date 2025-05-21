@@ -259,12 +259,25 @@
                 <label class="form-label mb-1 text-2" style="font-weight: bold"
                   >우대 사항</label
                 >
+
+                <!-- 태그 리스트 -->
+                <div class="mb-2">
+                  <span
+                    class="badge bg-secondary me-1"
+                    v-for="(item, index) in preferList"
+                    :key="index"
+                  >
+                    {{ item }}
+                  </span>
+                </div>
+
                 <input
                   type="text"
                   class="form-control text-3 h-auto py-2"
-                  name="qualification"
                   v-model="preferContent"
-                  required=""
+                  placeholder="쉼표(,)로 구분하여 입력"
+                  name="qualification"
+                  required
                 />
               </div>
             </div>
@@ -383,6 +396,12 @@ const selectedJobs = ref([])
 const selectedSkills = ref([])
 const selectedPreferSkills = ref([])
 const preferContent = ref('')
+const preferList = computed(() => {
+  return preferContent.value
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0)
+})
 const description = ref('')
 const notifyEnabled = ref(false)
 

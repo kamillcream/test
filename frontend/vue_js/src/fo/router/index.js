@@ -211,7 +211,7 @@ const routes = [
 
       {
         path: 'projectPostPage/:project_sq',
-        name: 'ProjectPostPage',
+        name: 'ProjectPostPageWithId',
         component: ProjectPostPage,
       },
 

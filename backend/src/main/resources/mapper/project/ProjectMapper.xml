@@ -272,4 +272,19 @@
 	  WHERE project_sq = #{projectSq} AND user_sq = #{userSq}
 	</delete>
 	
+	<delete id="deleteProjectContracts">
+	  DELETE FROM TBL_PROJECT_CONTRACT_TYPE_S
+	  WHERE project_sq = #{projectSq} 
+	</delete>
+	
+	<delete id="deleteProjectJobRoles">
+	  DELETE FROM TBL_PROJECT_RECRUIT_JOB_ROLE_S
+	  WHERE project_sq = #{projectSq} 
+	</delete>
+	
+	<delete id="deleteProjectInterviewTimes">
+	  DELETE FROM TBL_PROJECT_INTERVIEW_TIME_SLOT_S
+	  WHERE project_sq = #{projectSq} 
+	</delete>
+	
 </mapper>

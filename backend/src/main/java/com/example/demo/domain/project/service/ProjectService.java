@@ -97,6 +97,27 @@ public class ProjectService {
 	}
 	
 	@Transactional
+	public void updateContracts(Project project, ProjectCreateRequest request) {
+		long projectSq = project.getProjectSq();
+		projectMapper.deleteProjectContracts(projectSq);
+		projectMapper.insertContracts(projectSq, fillContractInsertRequest(projectSq, request.workType()));
+	}
+	
+	@Transactional
+	public void updateJobRoles(Project project, ProjectCreateRequest request) {
+		long projectSq = project.getProjectSq();
+		projectMapper.deleteProjectJobRoles(projectSq);
+		projectMapper.insertJobs(projectSq, fillJobInsertRequest(projectSq, request.recruitJob()));
+	}
+	
+	@Transactional
+	public void updateInterviewTimes(Project project, ProjectCreateRequest request) {
+		long projectSq = project.getProjectSq();
+		projectMapper.deleteProjectInterviewTimes(projectSq);
+		createInterviewTimes(projectSq, request.interviewTime());
+	}
+	
+	@Transactional
 	public void updateProject(ProjectCreateRequest request) {
 		long devgradeCodeSq = commonCodeMapper.findCommonCodeSqByName(request.devGrade(), ParentCodeEnum.DEVELOPER_GRADE.getCode());
 		long educationLvlSq = commonCodeMapper.findCommonCodeSqByName(request.educationLvl(), ParentCodeEnum.EDUCATION.getCode());
@@ -104,6 +125,9 @@ public class ProjectService {
 		Project project = projectRepository.findById(request.projectId()).orElseThrow();
 		project.update(request, devgradeCodeSq, educationLvlSq);
 		updateSkills(project, request);
+		updateContracts(project, request);
+		updateJobRoles(project, request);
+		updateInterviewTimes(project, request);
 	}
 	
 	@Transactional

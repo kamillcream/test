@@ -37,4 +37,7 @@ public interface ProjectMapper {
 	void insertScrap(ScrapInsertRequest scrapInsertRequest);
 	
 	void deleteProjectScrap(@Param("projectSq") Long projectSq, @Param("userSq") Long userSq);
+	void deleteProjectContracts(@Param("projectSq") Long projectSq);
+	void deleteProjectJobRoles(@Param("projectSq") Long projectSq);
+	void deleteProjectInterviewTimes(@Param("projectSq") Long projectSq);
 }
