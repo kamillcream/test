@@ -11,7 +11,5 @@ import com.example.demo.domain.project.dto.response.AreaInfoResponse;
 public interface DistrictMapper {
 	List<AreaInfoResponse> findAllParentDistrict();
 	List<AreaInfoResponse> findAllDistrictByParent(@Param("parentCodeSq") Long parentCodeSq);
-	AreaInfoResponse findDistrictByProject(@Param("projectSq") Long projectSq);
-	AreaInfoResponse findSubDistrictByProjectAndParent(@Param("projectSq") Long projectSq, @Param("parentCodeSq") Long parentCodeSq);
-	
+	AreaInfoResponse findParentDisctrictByCodeSq(@Param("codeSq") Long codeSq);
 }
