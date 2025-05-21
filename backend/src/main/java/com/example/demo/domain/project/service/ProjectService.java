@@ -34,8 +34,6 @@ import com.example.demo.domain.project.mapper.AddressMapper;
 import com.example.demo.domain.project.mapper.DistrictMapper;
 import com.example.demo.domain.project.mapper.ProjectMapper;
 import com.example.demo.domain.project.mapper.SkillMapper;
-import com.example.demo.domain.project.repository.ProjectApplicationRepository;
-import com.example.demo.domain.project.repository.ProjectRepository;
 import com.example.demo.domain.project.util.ProjectUtil;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.None;
 
@@ -44,8 +42,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
-	private final ProjectRepository projectRepository;
-	private final ProjectApplicationRepository projectApplicationRepository;
 	private final ProjectMapper projectMapper;
 	private final CommonCodeMapper commonCodeMapper;
 	private final DistrictMapper districtMapper;
@@ -57,7 +53,7 @@ public class ProjectService {
 		long devgradeCodeSq = commonCodeMapper.findCommonCodeSqByName(request.devGrade(), ParentCodeEnum.DEVELOPER_GRADE.getCode());
 		long educationLvlSq = commonCodeMapper.findCommonCodeSqByName(request.educationLvl(), ParentCodeEnum.EDUCATION.getCode());
 		Project project = Project.from(request, registerAddress(request), devgradeCodeSq, educationLvlSq);
-		projectRepository.save(project);
+		projectMapper.insertProject(project);
 		
 		registerSubEntities(project, request);
 	}
@@ -105,14 +101,14 @@ public class ProjectService {
 		
 		return new ProjectListResponse(request.getOffset(), request.getSize(), totalCount, responses);	
 	}
-	
-	@Transactional
+
 	public ProjectDetailResponse fetchProject(Long projectSq){
-		Project p = projectRepository.findById(projectSq).orElseThrow();
+		Project p = projectMapper.findBySq(projectSq);
 		if (p.getProjectIsDeletedYn().equals("Y")) {
 			 throw new RuntimeException("이미 삭제된 프로젝트 입니다.");
 		}
-		p.increaseViewCnt();
+
+		projectMapper.updateViewCnt(projectSq);
 		
 		List<GroupSkillInfoResponse> reqSkills = groupingSkills(projectMapper.findReqSkillsByProjectSq(projectSq));
 		List<GroupSkillInfoResponse> preferSkills = groupingSkills(projectMapper.findPreferSkillsByProjectSq(projectSq));
@@ -148,20 +144,22 @@ public class ProjectService {
 		projectMapper.deleteProjectInterviewTimes(projectSq);
 		createInterviewTimes(projectSq, request.interviewTime());
 	}
-	
-	@Transactional
-	public long updateAddress(Project project, ProjectCreateRequest request) {
-		projectMapper.deleteProjectAddress(project.getAddressSq());
-		return registerAddress(request);
+
+	public void updateAddress(Project project, ProjectCreateRequest request) {
+		projectMapper.deleteProjectAddress(project.getAddressSq()); // 기존 주소 삭제
+		long newAddressSq = registerAddress(request);               // 새 주소 insert
+		projectMapper.updateAddress(project.getProjectSq(), newAddressSq); // 바로 갱신
 	}
 	
 	@Transactional
 	public void updateProject(ProjectCreateRequest request) {
-		long devgradeCodeSq = commonCodeMapper.findCommonCodeSqByName(request.devGrade(), ParentCodeEnum.DEVELOPER_GRADE.getCode());
+		long devGradeCodeSq = commonCodeMapper.findCommonCodeSqByName(request.devGrade(), ParentCodeEnum.DEVELOPER_GRADE.getCode());
 		long educationLvlSq = commonCodeMapper.findCommonCodeSqByName(request.educationLvl(), ParentCodeEnum.EDUCATION.getCode());
 		
 		Project project = projectMapper.findBySq(request.projectId());
-		project.update(request, devgradeCodeSq, educationLvlSq);
+		project.update(request, devGradeCodeSq, educationLvlSq);
+		projectMapper.updateProject(project);
+
 		updateSubEntities(project, request);
 	}
 	
@@ -171,36 +169,34 @@ public class ProjectService {
 		updateContracts(project, request);
 		updateJobRoles(project, request);
 		updateInterviewTimes(project, request);
-		project.updateAddress(updateAddress(project, request));
+		updateAddress(project, request);
 	}
-	@Transactional
+
 	public void softDeleteProject(long projectSq) {
-		Project project = projectMapper.findBySq(projectSq);
-		project.delete();
+		projectMapper.softDeleteProject(projectSq);
 	}
-	
-	@Transactional
+
 	public void createProjectApplication(long projectSq, ProjectApplyRequest request) {
-		Project project = projectRepository.findById(projectSq).orElseThrow();
+		Project project = projectMapper.findBySq(projectSq);
 		ProjectApplicationEntity projectApplicationEntity = ProjectApplicationEntity.from(projectSq, projectMapper, request, commonCodeMapper);
-		projectApplicationRepository.save(projectApplicationEntity);
-		project.increaseApplication();
+		projectMapper.insertProjectApplication(projectApplicationEntity);
+		projectMapper.increaseApplication(projectSq);
 	}
 	
 	@Transactional
 	public void toggleProjectScrap(long projectSq, ScrapRequest scrapRequest) {
 		long userSq = 1;
 		boolean hasScrapped = scrapRequest.isHasScrapped();
-		Project project = projectRepository.findById(projectSq).orElseThrow();
 		if(!hasScrapped) {
 			long companySq = projectMapper.findCompanySqFromProjectSq(projectSq);
 			long scrapTypeCd = 1;
 			ScrapInsertRequest scrapInsertRequest = new ScrapInsertRequest(userSq, companySq, projectSq, scrapTypeCd);
 			projectMapper.insertScrap(scrapInsertRequest);
-			project.increaseScrap();
-		}else if (hasScrapped) {
+			projectMapper.increaseScrap(projectSq);
+
+		} else {
 			projectMapper.deleteProjectScrap(projectSq, userSq);
-			project.decreaseScrap();
+			projectMapper.decreaseScrap(projectSq);
 		}
 		
 	}

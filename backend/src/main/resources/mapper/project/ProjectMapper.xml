@@ -191,6 +191,52 @@
 	    FROM TBL_PROJECT_M
 	    WHERE project_sq = #{projectSq}	
 	</select>
+
+	<insert id="insertProject" parameterType="com.example.demo.domain.project.entity.Project" useGeneratedKeys="true" keyProperty="projectSq">
+		INSERT INTO TBL_PROJECT_M (
+		company_sq,
+		address_sq,
+		project_ttl,
+		project_image_url,
+		project_developer_grade_cd,
+		project_required_education_cd,
+		project_salary,
+		project_start_dt,
+		project_end_dt,
+		project_recruit_start_dt,
+		project_recruit_end_dt,
+		project_preference_txt,
+		project_description_txt,
+		project_created_at_dtm,
+		project_modified_at_dtm,
+		project_candidate_cnt,
+		project_scrap_cnt,
+		project_is_notification_yn,
+		project_is_deleted_yn,
+		project_view_cnt
+		) VALUES (
+		#{companySq},
+		#{addressSq},
+		#{projectTtl},
+		#{projectImageUrl},
+		#{projectDeveloperGradeCd},
+		#{projectRequiredEducationCd},
+		#{projectSalary},
+		#{projectStartDt},
+		#{projectEndDt},
+		#{projectRecruitStartDt},
+		#{projectRecruitEndDt},
+		#{projectPreferenceTxt},
+		#{projectDescriptionTxt},
+		NOW(),
+		NOW(),
+		0,
+		0,
+		#{projectIsNotificationYn},
+		"N",
+		0
+		)
+	</insert>
 	
 	<insert id="insertScrap" parameterType="com.example.demo.domain.project.dto.request.ScrapInsertRequest">
     INSERT INTO TBL_SCRAP_S (user_sq, company_sq, project_sq, scrap_type_cd)
@@ -248,6 +294,29 @@
         	(#{projectSq}, #{type.skillTagSq}, #{type.parentSkillTagSq}, #{type.skillTagLvl}, #{type.skillTagNm})
     	</foreach>
 	</insert>
+
+	<insert id="insertProjectApplication"
+			parameterType="com.example.demo.domain.project.entity.ProjectApplicationEntity"
+			useGeneratedKeys="true"
+			keyProperty="projectApplicationSq">
+		INSERT INTO TBL_PROJECT_APPLICATION_H (
+		project_sq,
+		resume_sq,
+		company_sq,
+		project_application_status_cd,
+		project_application_member_type_cd,
+		project_application_created_at_dtm,
+		selected_interview_dtm
+		) VALUES (
+		#{projectSq},
+		#{resumeSq},
+		#{companySq},
+		#{projectApplicationStatusCd},
+		#{projectApplicationMemberTypeCd},
+		NOW(),
+		#{selectedInterviewDtm}
+		)
+	</insert>
 	
 	<insert id="insertInterviewTimes">
 	  INSERT INTO TBL_PROJECT_INTERVIEW_TIME_SLOT_S (project_sq, interview_available_dtm)
@@ -256,6 +325,24 @@
 	    (#{projectSq}, #{time})
 	  </foreach>
 	</insert>
+
+	<update id="increaseApplication" parameterType="long">
+		UPDATE TBL_PROJECT_M
+		SET project_candidate_cnt = project_candidate_cnt + 1
+		WHERE project_sq = #{projectSq}
+	</update>
+
+	<update id="increaseScrap" parameterType="long">
+		UPDATE TBL_PROJECT_M
+		SET project_scrap_cnt = project_scrap_cnt + 1
+		WHERE project_sq = #{projectSq}
+	</update>
+
+	<update id="decreaseScrap" parameterType="long">
+		UPDATE TBL_PROJECT_M
+		SET project_scrap_cnt = project_scrap_cnt - 1
+		WHERE project_sq = #{projectSq}
+	</update>
 	
 	<select id="findSkillInfoList" resultType="com.example.demo.domain.project.dto.response.SingleSkillInfoResponse">
 	    SELECT 
@@ -347,5 +434,42 @@
 	  DELETE FROM TBL_ADDRESS_S
 	  WHERE address_sq = #{addressSq} 
 	</delete>
-	
+	<update id="updateViewCnt" parameterType="long">
+		UPDATE TBL_PROJECT_M
+		SET project_view_cnt = project_view_cnt + 1
+		WHERE project_sq = #{projectSq}
+	</update>
+	<update id="updateProject" parameterType="com.example.demo.domain.project.entity.Project">
+		UPDATE TBL_PROJECT_M
+		SET
+		project_ttl = #{projectTtl},
+		project_description_txt = #{projectDescriptionTxt},
+		project_start_dt = #{projectStartDt},
+		project_end_dt = #{projectEndDt},
+		project_recruit_start_dt = #{projectRecruitStartDt},
+		project_recruit_end_dt = #{projectRecruitEndDt},
+		project_preference_txt = #{projectPreferenceTxt},
+		project_salary = #{projectSalary},
+		project_image_url = #{projectImageUrl},
+		address_sq = #{addressSq},
+		company_sq = #{companySq},
+		project_developer_grade_cd = #{projectDeveloperGradeCd},
+		project_required_education_cd = #{projectRequiredEducationCd},
+		project_is_notification_yn = #{projectIsNotificationYn},
+		project_modified_at_dtm = NOW()
+		WHERE project_sq = #{projectSq}
+	</update>
+
+	<update id="updateAddress" parameterType="map">
+		UPDATE TBL_PROJECT_M
+		SET address_sq = #{newAddressSq}
+		WHERE project_sq = #{projectSq}
+	</update>
+
+	<update id="softDeleteProject" parameterType="long">
+		UPDATE TBL_PROJECT_M
+		SET project_is_deleted_yn = 'Y',
+		project_modified_at_dtm = NOW()
+		WHERE project_sq = #{projectSq}
+	</update>
 </mapper>

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import com.example.demo.domain.project.entity.ProjectApplicationEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -31,18 +32,28 @@ public interface ProjectMapper {
 	List<LocalDateTime> findInterviewTimesByProjectSq(@Param("projectSq") Long projectSq);
 	Project findBySq(@Param("projectSq") Long projectSq);
 	Long findAddressSqByProjectSq(@Param("projectSq") Long projecSq);
-	
-	
+
+
+	void insertProject(Project project);
+	void insertProjectApplication(ProjectApplicationEntity entity);
 	void insertContracts(@Param("projectSq") Long projectSq, @Param("contractTypes") List<ContractInsertRequest> contractTypes);
 	void insertJobs(@Param("projectSq") Long projectSq, @Param("recruitJobs") List<JobInsertRequest> recruitJobs);
 	void insertSkills(@Param("projectSq") Long projectSq, @Param("skills") List<SkillInsertRequest> skills);
 	void insertPreferSkills(@Param("projectSq") Long projectSq, @Param("preferSkills") List<SkillInsertRequest> preferSkills);
 	void insertInterviewTimes(@Param("projectSq") Long projectSq, @Param("interviewTimes") List<LocalDateTime> interviewTimes);
 	void insertScrap(ScrapInsertRequest scrapInsertRequest);
+	void increaseApplication(@Param("projectSq")  Long projectSq);
+	void increaseScrap(@Param("projectSq")  Long projectSq);
+	void decreaseScrap(@Param("projectSq")  Long projectSq);
 	
 	void deleteProjectScrap(@Param("projectSq") Long projectSq, @Param("userSq") Long userSq);
 	void deleteProjectContracts(@Param("projectSq") Long projectSq);
 	void deleteProjectJobRoles(@Param("projectSq") Long projectSq);
 	void deleteProjectInterviewTimes(@Param("projectSq") Long projectSq);
 	void deleteProjectAddress(@Param("addressSq") Long addressSq);
+
+	void updateViewCnt(@Param("projectSq") Long projectSq);
+	void updateProject(Project project);
+	void updateAddress(@Param("projectSq") Long projectSq, @Param("newAddressSq") Long newAddressSq);
+	void softDeleteProject(@Param("projectSq") Long projectSq);
 }

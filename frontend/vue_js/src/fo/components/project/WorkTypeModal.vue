@@ -5,7 +5,7 @@
 
       <div class="option-group">
         <button
-          v-for="type in types"
+          v-for="type in props.works"
           :key="type"
           type="button"
           class="option-button"
@@ -29,15 +29,21 @@
 </template>
 
 <script setup>
-import { ref, defineEmits } from 'vue'
+import { ref, defineEmits, defineProps } from 'vue'
 import { useModalStore } from '../../stores/modalStore.js'
 
 const emit = defineEmits(['confirm'])
 
 const modalStore = useModalStore()
-
-const types = ['프리랜서', '인턴', '정규직', '계약직']
 const selectedTypes = ref([])
+
+const props = defineProps({
+  onConfirm: Function,
+  works: {
+    type: Array,
+    default: () => [],
+  },
+})
 
 const toggleType = (type) => {
   const index = selectedTypes.value.indexOf(type)
@@ -104,7 +110,9 @@ const closeModal = () => {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .option-button:hover {

@@ -10,9 +10,7 @@
         <div class="card-body">
           <form
             class="contact-form form-style-2"
-            action="php/project-register.php"
-            method="POST"
-            novalidate="novalidate"
+            @submit.prevent="submitProject"
           >
             <!-- 프로젝트 제목 -->
             <div class="row">
@@ -44,9 +42,13 @@
                   required=""
                 >
                   <option value="">선택</option>
-                  <option value="seoul">서울</option>
-                  <option value="busan">부산</option>
-                  <!-- 추가 -->
+                  <option
+                    v-for="city in cities"
+                    :key="city.code"
+                    :value="city.code"
+                  >
+                    {{ city.name }}
+                  </option>
                 </select>
               </div>
               <div class="form-group col-lg-6">
@@ -60,9 +62,13 @@
                   required=""
                 >
                   <option value="">선택</option>
-                  <option value="gangnam">강남구</option>
-                  <option value="jongno">종로구</option>
-                  <!-- 동적으로 바뀌도록 JS 연동 가능 -->
+                  <option
+                    v-for="district in districts"
+                    :key="district.code"
+                    :value="district.code"
+                  >
+                    {{ district.name }}
+                  </option>
                 </select>
               </div>
             </div>
@@ -670,13 +676,13 @@ watch(isOpen, (newVal) => {
 const openSkillModal = () => {
   modalStore.openModal(SkillSelectModal, {
     onConfirm: onSkillsConfirmed,
-    skills: selectedSkills.value,
+    skills: skills.value,
   })
 }
 const openPreferSkillModal = () => {
   modalStore.openModal(SkillSelectModal, {
     onConfirm: onPreferSkillsConfirmed,
-    skills: selectedPreferSkills.value,
+    skills: skills.value,
   })
 }
 
@@ -695,6 +701,7 @@ const openRecruitCalenderModal = () => {
 const openWorkTypeModal = () => {
   modalStore.openModal(WorkTypeModal, {
     onConfirm: onWorkTypeConfirmed,
+    works: workTypes.value,
   })
 }
 
@@ -702,7 +709,7 @@ const openJobModal = () => {
   console.log(selectedJobs.value)
   modalStore.openModal(JobModal, {
     onConfirm: onJobConfirmed,
-    jobs: selectedJobs.value,
+    jobs: recruitJobs.value,
   })
 }
 
@@ -715,6 +722,7 @@ const openInterviewTimeModal = () => {
 
 const onSkillsConfirmed = (skills) => {
   selectedSkills.value = skills
+  console.log(selectedSkills.value)
 }
 
 const onPreferSkillsConfirmed = (skills) => {

@@ -157,7 +157,7 @@
 
             <div class="d-flex justify-content-center align-items-center gap-3">
               <a
-                @click="openResumeModal"
+                @click="applyCheck"
                 href="#"
                 class="btn btn-lg btn-rounded btn-primary btn-lg"
               >
@@ -187,6 +187,7 @@
 <script setup>
 import UserResumeModal from '@/fo/components/mypage/common/ResumeSelectModal.vue'
 import { useModalStore } from '../../stores/modalStore.js'
+import { useAlertStore } from '../../stores/alertStore.js'
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
