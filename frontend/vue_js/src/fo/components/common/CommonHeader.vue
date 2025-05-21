@@ -93,9 +93,6 @@
                   aria-expanded="false"
                   style="width: 36px; height: 36px; border-radius: 50%"
                 >
-                  <!-- <style>
-
-      </style> -->
                   <i class="bi bi-bell fs-5"></i>
 
                   <!-- 알림 배지 -->
@@ -113,7 +110,7 @@
                   </span>
                 </a>
 
-                <div
+                <!-- <div
                   class="dropdown-menu dropdown-menu-end p-2 shadow"
                   aria-labelledby="notificationDropdown"
                   style="min-width: 250px; max-height: 300px; overflow-y: auto"
@@ -134,6 +131,15 @@
                     href="/notifications"
                     >전체 보기</a
                   >
+                </div> -->
+                <div
+                  class="dropdown-menu dropdown-menu-end p-2 shadow"
+                  aria-labelledby="notificationDropdown"
+                  style="min-width: 250px"
+                >
+                  <div class="dropdown-item small text-muted">
+                    🔧 준비 중입니다.
+                  </div>
                 </div>
               </div>
 
