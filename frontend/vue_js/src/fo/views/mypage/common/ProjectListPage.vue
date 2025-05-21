@@ -14,7 +14,9 @@
         <a href="#" class="btn btn-rounded btn-light">등록하기</a>
       </div>
       <ProjectCardGroup :projects="projects" />
-      <!-- 페이지네이션 -->
+      <div v-if="projects.length === 0" class="text-center text-muted py-5">
+        조건에 맞는 프로젝트가 없습니다.
+      </div>
       <div>
         <CommonPagination
           :currentPage="currentPage"
@@ -37,9 +39,9 @@ const filters = ref({
   projectDeveloperGradeCd: null,
   educationCd: null,
   jobRoleCd: null,
-  sortBy: 'project_start_dt',
+  sortBy: '',
   sortOrder: 'desc',
-  searchKeyword: 'api',
+  searchKeyword: '',
   searchType: '프로젝트명',
   size: 5,
 })
@@ -68,7 +70,6 @@ const fetchProjects = async () => {
     const response = await api.$get('/projects', { params })
     projects.value = response.output.projects
 
-    // ✅ totalCount가 응답에 있어야 정확한 페이지네이션 계산 가능
     const totalCount = response.output.totalCount ?? 0 // totalCount가 반드시 있어야 함
     totalPages.value = Math.max(1, Math.ceil(totalCount / filters.value.size))
   } catch (e) {
