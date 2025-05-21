@@ -211,8 +211,8 @@ const isSelected = (skillName) =>
 
 const confirmSelection = () => {
   emit('confirm', selectedSkills.value)
-  const modalStore = useModalStore()
-  modalStore.closeModal()
+  // const modalStore = useModalStore()
+  // modalStore.closeModal()
 }
 </script>
 
