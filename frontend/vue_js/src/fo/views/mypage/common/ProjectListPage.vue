@@ -8,6 +8,9 @@
     />
     <div class="container py-4">
       <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-rounded btn-primary me-2" @click="fetchProjects">
+          검색
+        </button>
         <a href="#" class="btn btn-rounded btn-light">등록하기</a>
       </div>
       <ProjectCardGroup :projects="projects" />

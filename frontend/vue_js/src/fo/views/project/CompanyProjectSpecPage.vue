@@ -88,7 +88,7 @@
           <li>
             <i class="fas fa-caret-right left-10"></i
             ><strong class="text-color-primary">우대 사항 :</strong>
-            {{ project.preferContent }}
+            {{ project.projectPreferredEtc }}
           </li>
 
           <!-- 근무 조건 -->
@@ -100,12 +100,12 @@
           <li>
             <i class="fas fa-caret-right left-10"></i
             ><strong class="text-color-primary">근무 지역 :</strong>
-            {{ project.local }}
+            {{ project.projectAddress }}
           </li>
           <li>
             <i class="fas fa-caret-right left-10"></i
             ><strong class="text-color-primary">단가 :</strong>
-            {{ project.salary }}
+            {{ project.projectSalary }}
           </li>
         </ul>
       </div>
@@ -125,20 +125,21 @@
               </div>
               <div>
                 <h2 class="text-color-dark font-weight-normal text-5 mb-0">
-                  {{ project.title }}
+                  {{ project.projectTtl }}
                 </h2>
-                <p class="text-muted mb-0">{{ project.company }}</p>
+                <p class="text-muted mb-0">{{ project.companyNm }}</p>
               </div>
             </div>
 
-            <p>{{ project.description }}</p>
+            <p>{{ project.projectDetail }}</p>
 
             <div class="card-footer bg-white border-top-0 pt-4">
               <div class="text-start text-2">
                 <p class="mb-1 text-color-primary">
                   <i class="fas fa-caret-right me-2"></i
                   ><strong class="text-color-primary">모집 기간 :</strong>
-                  {{ project.recruitStartDt }} ~ {{ project.recruitEndDt }}
+                  {{ project.projectRecruitStartDt }} ~
+                  {{ project.projectRecruitEndDt }}
                 </p>
                 <p class="mb-1 text-color-primary">
                   <i class="fas fa-caret-right me-2"></i
@@ -148,7 +149,7 @@
                 <p class="mb-0 text-color-primary">
                   <i class="fas fa-caret-right me-2"></i
                   ><strong class="text-color-primary">수행 기간 :</strong>
-                  {{ project.StartDt }} ~ {{ project.EndDt }}
+                  {{ project.projectStartDt }} ~ {{ project.projectEndDt }}
                 </p>
               </div>
             </div>
@@ -157,29 +158,29 @@
 
             <div class="d-flex justify-content-center align-items-center gap-3">
               <a
+                v-if="companyId === 'test1'"
                 @click="openMemberModal"
-                v-if="companyId !== 'test1'"
                 href="#"
                 class="btn btn-lg btn-rounded btn-primary btn-lg"
               >
                 지원하기
               </a>
               <a
-                v-if="companyId !== 'test1'"
+                v-if="companyId === 'test1'"
                 href="#"
                 class="btn btn-lg btn-rounded btn-light btn-lg"
               >
                 스크랩
               </a>
               <a
-                v-if="companyId === 'test1'"
+                @click="goToProjectPost"
                 href="#"
                 class="btn btn-lg btn-rounded btn-primary btn-lg"
               >
                 수정하기
               </a>
               <a
-                v-if="companyId === 'test1'"
+                @click="deleteProject"
                 href="#"
                 class="btn btn-lg btn-rounded btn-light btn-lg"
               >
@@ -200,11 +201,16 @@
   </div>
 </template>
 <script setup>
-import { onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import AffiliationMemberModal from '@/fo/components/company/AffiliationMemberModal.vue'
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 import { useModalStore } from '../../stores/modalStore.js'
+import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
+import { useRouter, useRoute } from 'vue-router'
 
+import { api } from '@/axios.js'
+const router = useRouter()
+const route = useRoute()
 const modalStore = useModalStore()
 
 const projectSq = route.params.project_sq
@@ -238,11 +244,6 @@ const openMemberModal = () => {
   })
 }
 
-onMounted(() => {
-  // 바깥 페이지 스크롤 막기
-  document.body.style.overflow = 'hidden'
-})
-
 onBeforeUnmount(() => {
   // 모달 닫히면 스크롤 복구
   document.body.style.overflow = ''
@@ -250,7 +251,7 @@ onBeforeUnmount(() => {
 
 const goToProjectPost = (project) => {
   router.push({
-    name: 'ProjectPostPage',
+    name: 'ProjectPostPageWithId',
     params: {
       project_sq: project.id,
     },
