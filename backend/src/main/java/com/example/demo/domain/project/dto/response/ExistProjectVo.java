@@ -36,11 +36,13 @@ public class ExistProjectVo {
 	private String description;
 	
 	public static ExistProjectVo from(Project p, ProjectUtil util, List<String> reqSkills, 
-			List<String> preferSkills) {
+			List<String> preferSkills, AreaInfoResponse parent, AreaInfoResponse sub) {
     	Long projectSq = p.getProjectSq();
     	Map<String, List<String>> interviewTimes = util.fetchAndConvertTimeSlots(projectSq);
     	return ExistProjectVo.builder()
                 .projectTtl(p.getProjectTtl())
+                .parentDistrict(parent)
+                .subDistrict(sub)
                 .description(p.getProjectDescriptionTxt())
                 .recruitStartDt(p.getProjectRecruitStartDt().toString())
                 .recruitEndDt(p.getProjectRecruitEndDt().toString())
