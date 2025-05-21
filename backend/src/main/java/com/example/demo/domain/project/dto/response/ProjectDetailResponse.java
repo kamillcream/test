@@ -35,9 +35,9 @@ public class ProjectDetailResponse {
     private String projectExperience;              
     private String projectEducation;               
 
-    private List<String> projectRequiredSkills;    
-    private List<String> projectPreferredSkills;   
-    private List<String> projectPreferredEtc;      
+    private List<GroupSkillInfoResponse> projectRequiredSkills;    
+    private List<GroupSkillInfoResponse> projectPreferredSkills;   
+    private String projectPreferredEtc;      
 
     private Long projectSalary;                   
     private List<String> projectJobRole;          
@@ -46,7 +46,8 @@ public class ProjectDetailResponse {
     private String isScrap;                        
     private Long userSq;      
     
-    public static ProjectDetailResponse from(Project p, ProjectUtil util) {
+    public static ProjectDetailResponse from(Project p, ProjectUtil util, List<GroupSkillInfoResponse> req, List<GroupSkillInfoResponse> prefer
+    		, String address) {
     	Long projectSq = p.getProjectSq();
     	Map<String, LocalDateTime> interviewTimes = util.fetchInterviewTimeMinMaxBySq(projectSq);
     	return ProjectDetailResponse.builder()
@@ -63,13 +64,13 @@ public class ProjectDetailResponse {
                 .projectViewCnt(p.getProjectViewCnt())
                 .projectScrapCnt(p.getProjectScrapCnt())
 
-                .projectAddress(util.convertAddressSqToName(p.getAddressSq()))
+                .projectAddress(address)
                 .projectExperience(util.convertCommonCodeSqToNm(p.getProjectDeveloperGradeCd()))
                 .projectEducation(util.convertCommonCodeSqToNm(p.getProjectRequiredEducationCd()))
 
-                .projectRequiredSkills(util.fetchReqSkillsByProjectSq(p.getProjectSq()))
-                .projectPreferredSkills(util.fetchPreferSkillsByProjectSq(p.getProjectSq()))
-                .projectPreferredEtc(new ArrayList<>())
+                .projectRequiredSkills(req)
+                .projectPreferredSkills(prefer)
+                .projectPreferredEtc(p.getProjectPreferenceTxt())
 
                 .projectSalary(p.getProjectSalary())
                 .projectJobRole(util.fetchJobsByProjectSq(projectSq))
