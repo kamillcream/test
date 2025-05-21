@@ -365,7 +365,7 @@ import ProjectInverviewTimeButtonGroupVue from '@/fo/components/project/ProjectI
 import { useModalStore } from '../../../stores/modalStore.js'
 import { useRoute } from 'vue-router'
 
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, reactive } from 'vue'
 
 import { api } from '@/axios.js'
 
@@ -382,8 +382,20 @@ const workTypes = ref([])
 const skills = ref([])
 
 const projectTitle = ref('')
-const selectedCity = ref('')
-const selectedDistrict = ref('')
+const selectedCity = ref(null)
+const selectedDistrict = ref(null)
+const selectedCityName = computed(() => {
+  const raw =
+    cities.value.find((city) => city.code === selectedCity.value)?.name || ''
+  return raw.replace('전체', '') // '서울전체' → '서울'
+})
+
+const selectedDistrictName = computed(() => {
+  const raw =
+    districts.value.find((district) => district.code === selectedDistrict.value)
+      ?.name || ''
+  return raw.replace('전체', '') // 필요 시 동일하게 처리
+})
 const selectedDevGrade = ref('')
 const selectedEducation = ref('')
 const projectStartDt = ref('')
@@ -412,12 +424,50 @@ const isOpen = computed(() => modalStore.isOpen)
 
 let prevScrollY = 0
 
-onMounted(async () => {
+const form = reactive({
+  postcode: '',
+  address: '',
+  detailAddress: '',
+  sigungu: '',
+  latitude: null,
+  longitude: null,
+})
+
+const loadKakao = () => {
+  return new Promise((resolve, reject) => {
+    if (window.kakao?.maps?.services?.Geocoder) return resolve()
+
+    // 이미 로딩 중이면 기다림
+    if (!document.querySelector('script[src*="dapi.kakao.com"]')) {
+      const script = document.createElement('script')
+      script.src =
+        'https://dapi.kakao.com/v2/maps/sdk.js?appkey=90610faa13d02b09f83a700d0885a872&libraries=services'
+      script.async = false
+      document.head.appendChild(script)
+
+      script.onload = () => {
+        const start = Date.now()
+        const timer = setInterval(() => {
+          if (window.kakao?.maps?.services?.Geocoder) {
+            clearInterval(timer)
+            resolve()
+          } else if (Date.now() - start > 7000) {
+            clearInterval(timer)
+            reject('⏱ Geocoder 로딩 7초 초과 실패')
+          }
+        }, 100)
+      }
+
+      script.onerror = () => reject('❌ Kakao 지도 API 스크립트 로드 실패')
+    }
+  })
+}
+
+const loadDefaultFormData = async () => {
   try {
     const response = await api.$get('/projects/forms')
     cities.value = response.output.cities
       .sort((a, b) => {
-        // "전국"이면 항상 맨 앞으로
         if (a.areaName === '전국') return -1
         if (b.areaName === '전국') return 1
         return 0
@@ -431,49 +481,73 @@ onMounted(async () => {
     recruitJobs.value = response.output.recruitJobs
     workTypes.value = response.output.workTypes
     skills.value = response.output.skills
-    console.log(response)
   } catch (e) {
-    console.error('프로젝트 정보 불러오기 실패', e)
+    console.error('프로젝트 정보 불러오기 실패 (신규)', e)
   }
-  if (projectSq) {
-    try {
-      const { output } = await api.$get(`/projects/forms`, {
-        params: { projectSq },
+}
+
+const loadEditFormData = async (projectSq) => {
+  try {
+    const { output } = await api.$get(`/projects/forms`, {
+      params: { projectSq },
+    })
+    console.log(output)
+    cities.value = output.cities
+      .sort((a, b) => {
+        if (a.areaName === '전국') return -1
+        if (b.areaName === '전국') return 1
+        return 0
       })
+      .map((city) => ({
+        code: city.areaSq,
+        name: city.areaName,
+      }))
+    devGrades.value = output.devGrades
+    educationLevels.value = output.educationLevels
+    recruitJobs.value = output.recruitJobs
+    workTypes.value = output.workTypes
+    skills.value = output.skills
+    const exist = output.existProjectVo
+    if (!exist) return
 
-      const exist = output.existProjectVo
+    // 이후 프로젝트 상세값 덮어쓰기
+    projectTitle.value = exist.projectTtl
+    selectedCity.value = exist.parentDistrict.areaSq
+    await fetchDistricts(exist.parentDistrict.areaSq)
+    selectedDistrict.value = exist.subDistrict.areaSq
+    selectedDevGrade.value = exist.devGrade
+    selectedEducation.value = exist.educationLvl
+    projectStartDt.value = exist.projectStartDt
+    projectEndDt.value = exist.projectEndDt
+    recruitStartDt.value = exist.recruitStartDt
+    recruitEndDt.value = exist.recruitEndDt
+    selectedWorkTypes.value = [...exist.contract]
+    selectedJobs.value = [...exist.jobs]
+    selectedSkills.value = [...exist.reqSkills]
+    selectedPreferSkills.value = [...exist.preferSkills]
+    preferContent.value = exist.preferredEtc
+    description.value = exist.description
+    selectedInterviewTimes.value = Object.entries(exist.interviewTimes).map(
+      ([date, times]) => ({
+        date,
+        times,
+      }),
+    )
+    isInitialLoad.value = false
+  } catch (e) {
+    console.error('프로젝트 상세 조회 실패 (수정)', e)
+  }
+}
 
-      if (exist) {
-        projectTitle.value = exist.projectTtl
-        selectedCity.value = exist.parentDistrict
-        selectedDistrict.value = exist.subDistrict
-        selectedDevGrade.value = exist.devGrade
-        selectedEducation.value = exist.educationLvl
-        projectStartDt.value = exist.projectStartDt
-        projectEndDt.value = exist.projectEndDt
-        recruitStartDt.value = exist.recruitStartDt
-        recruitEndDt.value = exist.recruitEndDt
-        selectedWorkTypes.value = [...exist.contract]
-        selectedJobs.value = [...exist.jobs]
-        selectedSkills.value = [...exist.reqSkills]
-        selectedPreferSkills.value = [...exist.preferSkills]
-        preferContent.value = exist.preferredEtc
-        description.value = exist.description
-
-        selectedInterviewTimes.value = Object.entries(exist.interviewTimes).map(
-          ([date, times]) => ({
-            date,
-            times,
-          }),
-        )
-      }
-    } catch (e) {
-      console.error('기존 프로젝트 상세 조회 실패', e)
-    }
+onMounted(async () => {
+  if (!projectSq) {
+    await loadDefaultFormData() // 신규 등록용
+  } else {
+    await loadEditFormData(projectSq) // 수정용
   }
 })
 
-watch(selectedCity, async (areaCodeSq) => {
+const fetchDistricts = async (areaCodeSq) => {
   if (!areaCodeSq) {
     districts.value = []
     selectedDistrict.value = ''
@@ -486,20 +560,61 @@ watch(selectedCity, async (areaCodeSq) => {
       code: area.areaSq,
       name: area.areaName,
     }))
-    selectedDistrict.value = '' // 선택 초기화
   } catch (err) {
     console.error('구 정보 불러오기 실패', err)
   }
-})
+}
 
+watch([selectedCity, selectedDistrict], async () => {
+  const cityName = selectedCityName.value
+  const districtName = selectedDistrictName.value
+  if (!cityName || !districtName) return
+
+  try {
+    await loadKakao()
+    const geocoder = new window.kakao.maps.services.Geocoder()
+    const fullAddr = `${cityName} ${districtName}`
+    geocoder.addressSearch(fullAddr, (result, status) => {
+      if (status === window.kakao.maps.services.Status.OK) {
+        form.latitude = result[0].y
+        form.longitude = result[0].x
+        console.log('📍 좌표 변환 완료:', result[0])
+      } else {
+        console.warn('❌ 좌표 변환 실패:', fullAddr)
+      }
+    })
+  } catch (err) {
+    console.error('❌ Geocoder 초기화 실패:', err)
+  }
+})
+const isInitialLoad = ref(true)
+
+watch(selectedCity, async (newCityCode) => {
+  await fetchDistricts(newCityCode)
+
+  if (isInitialLoad.value) return // 최초 초기화일 때는 초기화하지 않음
+
+  // 기존 선택된 하위 지역이 목록에 없다면 초기화
+  const exists = districts.value.some(
+    (district) => district.code === selectedDistrict.value,
+  )
+
+  if (!exists) {
+    selectedDistrict.value = ''
+  }
+})
 const submitProject = async () => {
   const requestBody = {
     projectId: projectSq ?? null,
     projectTitle: projectTitle.value,
     projectImageUrl: '',
 
-    district: selectedCity.value,
-    subDistrict: selectedDistrict.value,
+    subDistrictCode: selectedDistrict.value,
+    subDistrictName: selectedDistrictName.value,
+
+    districtLat: form.latitude,
+    districtLon: form.longitude,
+
     devGrade: selectedDevGrade.value,
     educationLvl: selectedEducation.value,
 
