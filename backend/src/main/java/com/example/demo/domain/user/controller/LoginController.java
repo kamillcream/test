@@ -34,6 +34,7 @@ public class LoginController {
         public ResponseEntity<ApiResponse<LoginResponseDTO>> login(
                         @RequestBody LoginRequestDTO request,
                         HttpServletResponse httpServletResponse) {
+                System.out.println("Login API called with userId: " + request.getUserId());
 
                 LoginResultDTO result = loginService.login(request.getUserId(), request.getUserPw(),
                                 request.getUserTypeCd());
@@ -43,8 +44,8 @@ public class LoginController {
                 // 액세스 토큰 쿠키 설정 (항상 30분)
                 ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", tokens.getAccessToken())
                                 .httpOnly(true)
-                                .secure(true)
-                                .sameSite("Strict")
+                                .secure(false)
+                                .sameSite("Lax")
                                 .path("/")
                                 .maxAge(Duration.ofMinutes(30))
                                 .build();
@@ -53,8 +54,8 @@ public class LoginController {
                 ResponseCookie.ResponseCookieBuilder refreshCookieBuilder = ResponseCookie
                                 .from("refreshToken", tokens.getRefreshToken())
                                 .httpOnly(true)
-                                .secure(true)
-                                .sameSite("Strict")
+                                .secure(false)
+                                .sameSite("Lax")
                                 .path("/");
 
                 if (request.isAutoLogin()) {

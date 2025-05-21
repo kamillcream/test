@@ -22,8 +22,15 @@ import { api } from '@/axios'
 const userStore = useUserStore()
 
 onMounted(async () => {
+  const autoLogin = localStorage.getItem('autoLogin') === 'true'
+
+  if (!autoLogin) {
+    userStore.clearUser()
+    return
+  }
+
   try {
-    const res = await api.$get('/api/me') // 쿠키에서 토큰 가져가 자동 로그인
+    const res = await api.$get('/me') // 쿠키에서 토큰 가져가 자동 로그인
     userStore.setUser(res.data.output)
   } catch (e) {
     userStore.clearUser()

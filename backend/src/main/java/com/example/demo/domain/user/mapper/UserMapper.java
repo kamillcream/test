@@ -30,4 +30,6 @@ public interface UserMapper {
 
     LoginResponseDTO findUserInfoByUserSq(@Param("userSq") Long userSq);
 
+    void deleteRefreshTokenByUserSq(Long userSq);
+
 }
