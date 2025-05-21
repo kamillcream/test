@@ -38,8 +38,16 @@
     WHERE project_is_deleted_yn = 'N'
     
     <if test="addressCodeSq != null">
-        AND address_sq = #{addressCodeSq}
-    </if>
+	    AND address_sq IN (
+	        SELECT address_sq
+	        FROM TBL_ADDRESS_S
+	        WHERE area_code_sq IN (
+	            SELECT area_code_sq
+	            FROM TBL_AREA_C
+	            WHERE parent_area_code_sq = #{addressCodeSq}
+	        )
+	    )
+	</if>
 
     <if test="projectDeveloperGradeCd != null">
         AND project_developer_grade_cd = #{projectDeveloperGradeCd}
@@ -59,41 +67,52 @@
     </if>
 
     <if test="searchKeyword != null and searchKeyword != ''">
-        <choose>
-            <when test="searchType == '기술'">
-                AND project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
-            </when>
-            <when test="searchType == '프로젝트명'">
-                AND project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
-            </when>
-            <otherwise>
-                <!-- TODO: 성능 이슈 시 UNION 또는 FULLTEXT로 분리 고려 -->
-                AND (
-                    project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
-                    OR project_description_txt LIKE CONCAT('%', #{searchKeyword}, '%')
-                )
-            </otherwise>
-        </choose>
-    </if>
+	    <choose>
+	        <when test="searchType == '제목'">
+	            AND project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
+	        </when>
+	        <when test="searchType == '작성자명'">
+	            AND project_writer_name LIKE CONCAT('%', #{searchKeyword}, '%') 
+	            <!-- 테이블에 실제 작성자명 컬럼명에 맞게 수정 -->
+	        </when>
+	        <when test="searchType == '내용'">
+	            AND (
+	                project_preference_txt LIKE CONCAT('%', #{searchKeyword}, '%')
+	                OR project_description_txt LIKE CONCAT('%', #{searchKeyword}, '%')
+	            )
+	        </when>
+	        <otherwise>
+	            AND (
+	                project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
+	                OR project_description_txt LIKE CONCAT('%', #{searchKeyword}, '%')
+	                OR project_preference_txt LIKE CONCAT('%', #{searchKeyword}, '%')
+	            )
+	        </otherwise>
+	    </choose>
+	</if>
 
     <choose>
-        <when test="sortBy != null and sortOrder != null">
-            <choose>
-                <when test="sortBy == 'project_start_dt'">
-                    ORDER BY project_start_dt ${sortOrder}
-                </when>
-                <when test="sortBy == 'project_salary'">
-                    ORDER BY project_salary ${sortOrder}
-                </when>
-                <otherwise>
-                    ORDER BY project_start_dt DESC <!-- 기본 정렬 -->
-                </otherwise>
-            </choose>
-        </when>
-        <otherwise>
-            ORDER BY project_start_dt DESC
-        </otherwise>
-    </choose>
+	    <when test="sortBy != null and sortOrder != null">
+	        <choose>
+	            <when test="sortBy == 'project_start_dt'">
+	                ORDER BY project_created_at_dtm ${sortOrder}
+	            </when>
+	            <when test="sortBy == 'view_count'">
+	                ORDER BY project_view_cnt ${sortOrder}
+	            </when>
+	            <when test="sortBy == 'applicant_count'">
+	                ORDER BY project_candidate_cnt ${sortOrder}
+	            </when>
+	            <otherwise>
+	                ORDER BY project_created_at_dtm DESC
+	            </otherwise>
+	        </choose>
+	    </when>
+	    <otherwise>
+	        ORDER BY project_created_at_dtm DESC
+	    </otherwise>
+	</choose>
+
 
     <if test="size != null and offset != null">
         LIMIT #{size} OFFSET #{offset}
@@ -159,6 +178,18 @@
     SELECT company_sq
     FROM TBL_PROJECT_M
     WHERE project_sq = #{projectSq}	
+	</select>
+	
+	<select id="findBySq" parameterType="Long" resultType="com.example.demo.domain.project.entity.Project">
+    SELECT *
+    FROM TBL_PROJECT_M 
+    WHERE project_sq = #{projectSq} AND project_is_deleted_yn = 'N'
+	</select>
+	
+	<select id="findAddressSqByProjectSq" parameterType="Long" resultType="Long">
+	    SELECT address_sq
+	    FROM TBL_PROJECT_M
+	    WHERE project_sq = #{projectSq}	
 	</select>
 	
 	<insert id="insertScrap" parameterType="com.example.demo.domain.project.dto.request.ScrapInsertRequest">
@@ -227,14 +258,39 @@
 	</insert>
 	
 	<select id="findSkillInfoList" resultType="com.example.demo.domain.project.dto.response.SingleSkillInfoResponse">
-    SELECT 
-      p.skill_tag_nm AS parentSkillTagNm,
-      c.skill_tag_nm AS childSkillTagNm
-    FROM TBL_SKILL_TAG_C p
-    JOIN TBL_SKILL_TAG_C c ON p.skill_tag_sq = c.parent_skill_tag_sq
-    WHERE p.skill_tag_is_deleted_yn = 'N' AND c.skill_tag_is_deleted_yn = 'N'
-    ORDER BY p.skill_tag_sq, c.skill_tag_sq
+	    SELECT 
+	      p.skill_tag_nm AS parentSkillTagNm,
+	      c.skill_tag_nm AS childSkillTagNm
+	    FROM TBL_SKILL_TAG_C p
+	    JOIN TBL_SKILL_TAG_C c ON p.skill_tag_sq = c.parent_skill_tag_sq
+	    WHERE p.skill_tag_is_deleted_yn = 'N' AND c.skill_tag_is_deleted_yn = 'N'
+	    ORDER BY p.skill_tag_sq, c.skill_tag_sq
   	</select>
+  	
+  	<select id="findReqSkillsByProjectSq" parameterType = "Long" resultType="com.example.demo.domain.project.dto.response.SingleSkillInfoResponse">
+	    SELECT DISTINCT
+        p.skill_tag_nm AS parentSkillTagNm,
+        c.skill_tag_nm AS childSkillTagNm
+	    FROM TBL_PROJECT_REQUIRED_SKILL_TAG_S r
+	    JOIN TBL_SKILL_TAG_C c ON r.skill_tag_sq = c.skill_tag_sq
+	    JOIN TBL_SKILL_TAG_C p ON c.parent_skill_tag_sq = p.skill_tag_sq
+	    WHERE c.skill_tag_is_deleted_yn = 'N'
+	      AND p.skill_tag_is_deleted_yn = 'N'
+	    ORDER BY p.skill_tag_nm, c.skill_tag_nm
+  	</select>
+  	
+  	<select id="findPreferSkillsByProjectSq" parameterType = "Long" resultType="com.example.demo.domain.project.dto.response.SingleSkillInfoResponse">
+	    SELECT DISTINCT
+        p.skill_tag_nm AS parentSkillTagNm,
+        c.skill_tag_nm AS childSkillTagNm
+	    FROM TBL_PROJECT_PREFERRED_SKILL_TAG_S r
+	    JOIN TBL_SKILL_TAG_C c ON r.skill_tag_sq = c.skill_tag_sq
+	    JOIN TBL_SKILL_TAG_C p ON c.parent_skill_tag_sq = p.skill_tag_sq
+	    WHERE c.skill_tag_is_deleted_yn = 'N'
+	      AND p.skill_tag_is_deleted_yn = 'N'
+	    ORDER BY p.skill_tag_nm, c.skill_tag_nm
+  	</select>
+  
 	
 	
 	<select id="findWorkTypesByProjectSq" resultType="String" parameterType="Long">
@@ -285,6 +341,11 @@
 	<delete id="deleteProjectInterviewTimes">
 	  DELETE FROM TBL_PROJECT_INTERVIEW_TIME_SLOT_S
 	  WHERE project_sq = #{projectSq} 
+	</delete>
+	
+	<delete id="deleteProjectAddress">
+	  DELETE FROM TBL_ADDRESS_S
+	  WHERE address_sq = #{addressSq} 
 	</delete>
 	
 </mapper>
