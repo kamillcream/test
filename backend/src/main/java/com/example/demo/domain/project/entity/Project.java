@@ -86,10 +86,10 @@ public class Project {
     @Column(name = "project_view_cnt")
     private Integer projectViewCnt;
 
-    public static Project from(ProjectCreateRequest request, long devgradeCodeSq, long educationLvlSq) {
+    public static Project from(ProjectCreateRequest request, long addressSq, long devgradeCodeSq, long educationLvlSq) {
     	return Project.builder()
     			.companySq(1L)
-				.addressSq(1L)
+				.addressSq(addressSq)
 				.projectTtl(request.projectTitle())
 				.projectImageUrl(request.projectImageUrl())
 				.projectDeveloperGradeCd(devgradeCodeSq)
@@ -135,8 +135,24 @@ public class Project {
     	this.projectIsNotificationYn = request.isNotification();
     }
     
+    public void updateAddress(long addressSq) {
+    	this.addressSq = addressSq;
+    }
+    
     public void delete() {
     	this.projectIsDeletedYn = "Y";
+    }
+    
+    public void increaseApplication() {
+    	this.projectCandidateCnt++;
+    }
+    
+    public void decreaseApplication() {
+    	this.projectCandidateCnt--;
+    }
+    
+    public void increaseViewCnt() {
+    	this.projectViewCnt++;
     }
     
     public void increaseScrap() {
