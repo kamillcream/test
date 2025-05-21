@@ -22,11 +22,15 @@ public interface ProjectMapper {
 	SkillInsertRequest findSkillTagInfoByName(@Param("name") String name);
 	long findCompanySqFromProjectSq(long projectSq);
 	List<SingleSkillInfoResponse> findSkillInfoList();
+	List<SingleSkillInfoResponse> findReqSkillsByProjectSq(@Param("projectSq") Long projectSq);
+	List<SingleSkillInfoResponse> findPreferSkillsByProjectSq(@Param("projectSq") Long projectSq);
 	List<String> findWorkTypesByProjectSq(@Param("projectSq") Long projectSq);
 	List<String> findJobsByProjectSq(@Param("projectSq") Long projectSq);
 	Map<String, LocalDateTime> findInterviewTimeMinMaxBySq(@Param("projectSq") Long projectSq);
 	int countProjectsBySearch(ProjectSearchRequest request);
 	List<LocalDateTime> findInterviewTimesByProjectSq(@Param("projectSq") Long projectSq);
+	Project findBySq(@Param("projectSq") Long projectSq);
+	Long findAddressSqByProjectSq(@Param("projectSq") Long projecSq);
 	
 	
 	void insertContracts(@Param("projectSq") Long projectSq, @Param("contractTypes") List<ContractInsertRequest> contractTypes);
@@ -40,4 +44,5 @@ public interface ProjectMapper {
 	void deleteProjectContracts(@Param("projectSq") Long projectSq);
 	void deleteProjectJobRoles(@Param("projectSq") Long projectSq);
 	void deleteProjectInterviewTimes(@Param("projectSq") Long projectSq);
+	void deleteProjectAddress(@Param("addressSq") Long addressSq);
 }
