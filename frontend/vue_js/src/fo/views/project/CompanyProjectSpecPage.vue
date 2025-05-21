@@ -22,6 +22,68 @@
         </h2>
 
         <ul>
+          <li>
+            <i class="fas fa-caret-right left-10"></i
+            ><strong class="text-color-primary">필수 기술 </strong>
+            <ul class="ps-4 mb-2">
+              <li
+                v-for="skillGroup in project.projectRequiredSkills"
+                :key="skillGroup.parentSkillTagNm"
+              >
+                <strong class="text-dark">{{
+                  skillGroup.parentSkillTagNm
+                }}</strong>
+                <div
+                  v-for="skill in skillGroup.childSkillTagNms"
+                  :key="skill"
+                  class="d-flex align-items-center gap-2 mt-1"
+                >
+                  <div class="d-flex align-items-center me-3">
+                    <img
+                      :src="getSkillIconUrl(skill)"
+                      :alt="skill"
+                      width="24"
+                      height="24"
+                      class="me-1"
+                    />
+                    <span>{{ skill }}</span>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </li>
+
+          <li>
+            <i class="fas fa-caret-right left-10"></i
+            ><strong class="text-color-primary">우대 기술 </strong>
+            <ul class="ps-4 mb-2">
+              <li
+                v-for="skillGroup in project.projectPreferredSkills"
+                :key="skillGroup.parentSkillTagNm"
+              >
+                <strong class="text-dark">{{
+                  skillGroup.parentSkillTagNm
+                }}</strong>
+                <div
+                  v-for="skill in skillGroup.childSkillTagNms"
+                  :key="skill"
+                  class="d-flex align-items-center gap-2 mt-1"
+                >
+                  <div class="d-flex align-items-center me-3">
+                    <img
+                      :src="getSkillIconUrl(skill)"
+                      :alt="skill"
+                      width="24"
+                      height="24"
+                      class="me-1"
+                    />
+                    <span>{{ skill }}</span>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </li>
+
           <!-- 우대 사항 -->
           <li>
             <i class="fas fa-caret-right left-10"></i
@@ -31,9 +93,9 @@
 
           <!-- 근무 조건 -->
           <li>
-            <i class="fas fa-caret-right left-10"></i
-            ><strong class="text-color-primary">근무 형태 :</strong>
-            {{ project.projectWorkType }}
+            <i class="fas fa-caret-right left-10"></i>
+            <strong class="text-color-primary">근무 형태 :</strong>
+            <span>{{ project.projectWorkType?.join(' / ') }}</span>
           </li>
           <li>
             <i class="fas fa-caret-right left-10"></i
@@ -130,7 +192,7 @@
           <!-- 조회수 텍스트 (우측 하단으로 배치) -->
           <div class="position-absolute top-0 end-0 p-2">
             <span class="text-grey" style="font-size: 0.8rem"
-              >조회수: {{ project.hits }}</span
+              >조회수: {{ project.projectViewCnt }}</span
             >
           </div>
         </div>
@@ -153,15 +215,10 @@ const modalStore = useModalStore()
 
 const projectSq = route.params.project_sq
 
-const project = ref({
-  skills: { languages: [], frameworks: [], tools: [] },
-  preferSkills: { languages: [], frameworks: [], tools: [] },
-})
+const project = ref([])
 
 onMounted(async () => {
   try {
-    console.log('hello')
-
     // 스크롤 막기
     document.body.style.overflow = 'hidden'
 
@@ -169,8 +226,15 @@ onMounted(async () => {
 
     const response = await api.$get(`/projects/${projectSq}/details`)
     project.value = response.output
+    console.log(project.value)
   } catch (e) {
     console.error('프로젝트 상세 정보 불러오기 실패', e)
+    const rawMessage =
+      e?.response?.data?.message ||
+      '프로젝트 정보를 불러오는 중 오류가 발생했습니다.'
+    const message = rawMessage.replace(/^Unexpected Error:\s*/, '')
+    alert(message)
+    router.push({ name: 'ProjectListPage' })
   }
 })
 
@@ -211,6 +275,32 @@ const deleteProject = () => {
       }
     },
   })
+}
+
+const getSkillIconUrl = (skill) => {
+  const skillMap = {
+    Java: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
+    Python:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+    Django:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/django/django-plain.svg',
+    'Spring Boot':
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
+    React:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
+    'Vue.js':
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg',
+    Git: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg',
+    Docker:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg',
+    IntelliJ:
+      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/intellij/intellij-original.svg',
+  }
+
+  return (
+    skillMap[skill] ||
+    'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/code/code-original.svg'
+  )
 }
 
 // TODO: 스크랩 토글
