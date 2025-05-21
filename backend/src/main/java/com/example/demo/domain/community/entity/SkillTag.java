@@ -9,12 +9,13 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class NormalTag {
+public class SkillTag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long normalTagSq;
+    private Long boardSkillTagSq;
     private Long boardSq;
     private Long answerSq;
-    private String normalTagNm;
-    private Long normalTagTypeCd;
+    private Long skillTagSq;
+    private String skillTagNm;
+    private Long skillTagTypeCd;        // 1801 QnA / 1802 Answer
 }

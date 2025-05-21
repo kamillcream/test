@@ -3,32 +3,68 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.demo.domain.community.mapper.BoardMapper">
-     
-     <resultMap id="BoardResultMap" type="com.example.demo.domain.community.entity.Board">
-	    <result column="board_sq" property="boardSq"/>
-        <result column="user_sq" property="userSq"/>
-        <result column="board_ttl" property="boardTtl"/>
-        <result column="board_description_edt" property="boardDescriptionEdt"/>
-        <result column="board_typ" property="boardTyp"/>
-        <result column="board_type_cd" property="boardTypeCd"/>
-        <result column="board_view_cnt" property="boardViewCnt"/>
-        <result column="board_comment_cnt" property="boardCommentCnt"/>
-        <result column="board_recommend_cnt" property="boardRecommendCnt"/>
-        <result column="board_adopt_status_cd" property="boardAdoptStatusCd"/>
-        <result column="board_is_deleted_yn" property="boardIsDeletedYn"/>
-        <result column="board_created_at" property="boardCreatedAt"/>
-	  </resultMap>
 
-    <select id="findByIdBoard" resultMap="BoardResultMap">
+    <select id="findByIdBoard" resultType="com.example.demo.domain.community.entity.Board">
         SELECT * FROM TBL_BOARD_M WHERE board_sq = #{boardSq} AND board_type_cd = #{boardTypeCd}
     </select>
 
-    <select id="findAll" resultMap="BoardResultMap">
-        SELECT * FROM TBL_BOARD_M WHERE board_is_deleted_yn = 'N' AND board_type_cd = #{boardTypeCd}
+    <select id="findAll" resultType="com.example.demo.domain.community.entity.Board">
+        SELECT * FROM TBL_BOARD_M 
+        WHERE board_is_deleted_yn = 'N' AND board_type_cd = #{boardTypeCd}
+        <if test="boardAdoptStatusCd != null">
+	        AND board_adopt_status_cd = #{boardAdoptStatusCd}
+	    </if>
+        <if test="keyword != null and keyword != ''">
+	        <choose>
+	            <when test="searchType == 'title'">
+	                AND board_ttl LIKE CONCAT('%', #{keyword}, '%')
+	            </when>
+	            <when test="searchType == 'content'">
+	                AND board_description_edt LIKE CONCAT('%', #{keyword}, '%')
+	            </when>
+	            <when test="searchType == 'all'">
+	                AND (board_ttl LIKE CONCAT('%', #{keyword}, '%') 
+	                     OR board_description_edt LIKE CONCAT('%', #{keyword}, '%'))
+	            </when>
+	        </choose>
+	    </if>
+	    <if test="skillTags != null and skillTags.size > 0">
+	        AND board_sq IN (
+	            SELECT DISTINCT board_sq 
+	            FROM TBL_BOARD_SKILL_TAG_S 
+	            WHERE skill_tag_sq IN 
+	            <foreach item="tag" collection="skillTags" open="(" separator="," close=")">
+	                #{tag}
+	            </foreach>
+	        )
+	    </if>
+	    <choose>
+	        <when test="sortType == 'latest'">
+	            ORDER BY board_created_at_dtm DESC
+	        </when>
+	        <when test="sortType == 'oldest'">
+	            ORDER BY board_created_at_dtm ASC
+	        </when>
+	        <when test="sortType == 'view'">
+	            ORDER BY board_view_cnt DESC
+	        </when>
+	        <when test="sortType == 'comment'">
+	            ORDER BY board_comment_cnt DESC
+	        </when>
+	        <when test="sortType == 'recommend'">
+	            ORDER BY board_recommend_cnt DESC
+	        </when>
+	        <otherwise>
+	            ORDER BY board_created_at_dtm DESC  <!-- 기본값: 최신순 -->
+	        </otherwise>
+	    </choose>
+	    
+	    LIMIT #{size} OFFSET #{offset}
     </select>
 
-    <insert id="insert" parameterType="com.example.demo.domain.community.entity.Board" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO TBL_BOARD_M (user_sq, board_ttl, board_description_edt, board_adopt_status_cd, board_typ, board_type_cd) VALUES (#{userSq}, #{boardTtl}, #{boardDescriptionEdt}, 1501, #{boardTyp}, #{boardTypeCd})
+    <insert id="insert" parameterType="com.example.demo.domain.community.entity.Board" useGeneratedKeys="true" keyProperty="boardSq" keyColumn="board_sq">
+        INSERT INTO TBL_BOARD_M (user_sq, board_ttl, board_description_edt, board_adopt_status_cd, board_typ, board_type_cd) 
+        VALUES (#{userSq}, #{boardTtl}, #{boardDescriptionEdt}, 1501, #{boardTyp}, #{boardTypeCd})
     </insert>
 
     <update id="update" parameterType="com.example.demo.domain.community.entity.Board">
@@ -50,5 +86,25 @@
         SET board_view_cnt = board_view_cnt + 1
         WHERE board_sq = #{boardSq}
     </update>
+    
+    <update id="updateCommentCnt" parameterType="com.example.demo.domain.community.entity.Board">
+	    UPDATE TBL_BOARD_M
+	    SET board_comment_cnt = (
+	        SELECT COUNT(*) 
+	        FROM TBL_BOARD_COMMENT_S 
+	        WHERE board_sq = #{boardSq} AND comment_is_deleted_yn = "N"
+	    )
+	    WHERE board_sq = #{boardSq}
+	</update>
+    
+    <update id="updateRecommendCnt" parameterType="com.example.demo.domain.community.entity.Board">
+	    UPDATE TBL_BOARD_M
+	    SET board_recommend_cnt = (
+	        SELECT COUNT(*) 
+	        FROM TBL_RECOMMENDATION_S 
+	        WHERE board_sq = #{boardSq}
+	    )
+	    WHERE board_sq = #{boardSq}
+	</update>
 
 </mapper>
