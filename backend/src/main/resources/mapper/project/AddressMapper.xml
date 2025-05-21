@@ -10,6 +10,34 @@
     FROM TBL_ADDRESS_S
     WHERE address_sq = #{addressSq}
 	</select>
+	
+	
+	
+	<select id="findAreaInfoBySq" parameterType="Long" resultType="com.example.demo.domain.project.dto.response.AreaInfoResponse">
+    SELECT area_code_sq, sigungu
+    FROM TBL_ADDRESS_S
+    WHERE address_sq = #{addressSq}
+	</select>
+	
+	<insert id="createAddress"
+        parameterType="com.example.demo.domain.project.dto.AddressInsertDto"
+        useGeneratedKeys="true"
+        keyProperty="addressSq">
+    INSERT INTO TBL_ADDRESS_S (
+        sigungu,
+        area_code_sq,
+        latitude,
+        longitude
+    ) VALUES (
+        #{districtName},
+        #{districtCode},
+        #{districtLat},
+        #{districtLon}
+    )
+	</insert>
+
+
+
 
 
 </mapper>
