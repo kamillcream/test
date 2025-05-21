@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '../stores/userStore'
 
 import MainPage from '../views/MainPage.vue'
 import TestPage from '../views/TestPage.vue'
@@ -220,6 +221,35 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore()
+
+  const publicPages = [
+    'Login',
+    'SignUp',
+    'FindAccount',
+    'FindIdResult',
+    'ResetPassword',
+  ]
+  const authRequiredPages = [
+    'MyPageDefault',
+    'InformationEdit',
+    'Withdraw' /* ... 로그인 필요 페이지들 */,
+  ]
+
+  // 로그인 중인데 로그인/회원가입 페이지 접근 시 메인으로 리다이렉트
+  if (userStore.isLoggedIn && publicPages.includes(to.name)) {
+    return next({ name: 'Main' })
+  }
+
+  // 로그인 안 된 상태에서 로그인 필요 페이지 접근 시 로그인 페이지로 리다이렉트
+  if (!userStore.isLoggedIn && authRequiredPages.includes(to.name)) {
+    return next({ name: 'Login' })
+  }
+
+  next()
 })
 
 export default router
