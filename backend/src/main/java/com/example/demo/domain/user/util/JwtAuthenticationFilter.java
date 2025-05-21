@@ -23,17 +23,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
         String uri = request.getRequestURI();
-        System.out.println("JwtAuthenticationFilter - request URI: " + uri);
 
         // 로그인, 리프레시 토큰 요청은 필터 제외
         if (uri.startsWith("/api/login") || uri.startsWith("/api/refresh-token")) {
-            System.out.println("Skipping JWT filter for login/refresh-token");
             filterChain.doFilter(request, response);
-            System.out.println("After filterChain.doFilter for login/refresh-token");
             return;
         }
 
         String token = resolveToken(request);
+        System.out.println("토큰값" + token);
 
         try {
             if (token != null && jwtProvider.validateToken(token)) {
@@ -42,6 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 JwtAuthenticationToken authentication = new JwtAuthenticationToken(
                         userSq, userTypeCd);
+                System.out.println("authentication" + authentication);
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }

@@ -41,8 +41,8 @@
     userTypeCd, user_refresh_token AS userRefreshToken FROM TBL_USER_M WHERE user_id = #{userId} AND
     user_is_deleted_yn = 'N' </select>
 
-  <update id="updateRefreshToken" parameterType="map"> UPDATE TBL_USER_M SET user_refresh_token =
-    #{refreshToken}, user_modified_at_dtm = NOW() WHERE user_sq = #{userSq} </update>
+  <update id="updateRefreshToken"> UPDATE TBL_USER_M SET user_refresh_token = #{refreshToken},
+    user_modified_at_dtm = NOW() WHERE user_sq = #{userSq} </update>
 
   <select id="findByRefreshToken" parameterType="string"
     resultType="com.example.demo.domain.user.dto.UserDTO"> SELECT user_sq, address_sq, user_id,
@@ -52,8 +52,8 @@
     user_refresh_token = #{refreshToken} AND user_is_deleted_yn = 'N' </select>
 
   <select id="findUserInfoByUserSq" parameterType="long"
-    resultType="com.example.demo.domain.user.dto.response.LoginResponseDTO"> SELECT user_name AS
-    userName, user_type_cd AS userTypeCd FROM TBL_USER_M WHERE user_sq = #{userSq} AND
+    resultType="com.example.demo.domain.user.dto.response.LoginResponseDTO"> SELECT user_nm AS
+    userNm, user_type_cd AS userTypeCd FROM TBL_USER_M WHERE user_sq = #{userSq} AND
     user_is_deleted_yn = 'N' </select>
 
   <update id="deleteRefreshTokenByUserSq" parameterType="long"> UPDATE TBL_USER_M SET

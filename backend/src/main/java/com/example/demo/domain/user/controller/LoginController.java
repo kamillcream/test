@@ -34,7 +34,6 @@ public class LoginController {
         public ResponseEntity<ApiResponse<LoginResponseDTO>> login(
                         @RequestBody LoginRequestDTO request,
                         HttpServletResponse httpServletResponse) {
-                System.out.println("Login API called with userId: " + request.getUserId());
 
                 LoginResultDTO result = loginService.login(request.getUserId(), request.getUserPw(),
                                 request.getUserTypeCd());
@@ -111,9 +110,7 @@ public class LoginController {
 
         @PostMapping("/me")
         public ResponseEntity<ApiResponse<LoginResponseDTO>> getMyInfo(
-                        @AuthenticationPrincipal JwtAuthenticationToken authentication) {
-
-                Long userSq = (Long) authentication.getPrincipal();
+                        @AuthenticationPrincipal Long userSq) {
 
                 LoginResponseDTO userInfo = loginService.getUserInfoByUserSq(userSq);
 

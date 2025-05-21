@@ -21,19 +21,38 @@ import { api } from '@/axios'
 
 const userStore = useUserStore()
 
-onMounted(async () => {
-  const autoLogin = localStorage.getItem('autoLogin') === 'true'
-
-  if (!autoLogin) {
-    userStore.clearUser()
-    return
-  }
-
+const fetchUserInfo = async () => {
   try {
-    const res = await api.$get('/me') // 쿠키에서 토큰 가져가 자동 로그인
-    userStore.setUser(res.data.output)
-  } catch (e) {
-    userStore.clearUser()
+    const res = await api.$post('/me')
+    const data = res.output
+
+    localStorage.setItem('userNm', data.userNm)
+    localStorage.setItem('userTypeCd', data.userTypeCd)
+
+    userStore.setUser({
+      userNm: data.userNm,
+      userTypeCd: data.userTypeCd,
+    })
+  } catch (error) {
+    console.error('자동 로그인 실패:', error)
+    clearLoginState()
+  }
+}
+
+const clearLoginState = () => {
+  localStorage.removeItem('userNm')
+  localStorage.removeItem('userTypeCd')
+  localStorage.removeItem('autoLogin')
+
+  userStore.clearUser() // 이건 Pinia의 clearUser() 메서드를 너가 만들어야 해
+}
+
+onMounted(() => {
+  const autoLogin = localStorage.getItem('autoLogin') === 'true'
+  if (autoLogin) {
+    fetchUserInfo()
+  } else {
+    clearLoginState()
   }
 })
 </script>

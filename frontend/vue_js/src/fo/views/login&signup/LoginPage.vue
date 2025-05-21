@@ -189,16 +189,18 @@ const login = async () => {
   const id = type === 'PERSONAL' ? form.value.id : form.value.cid
   const pw = type === 'PERSONAL' ? form.value.password : form.value.cpassword
 
-  const payload = { userId: id, userPw: pw, userTypeCd }
+  const payload = {
+    userId: id,
+    userPw: pw,
+    userTypeCd,
+    autoLogin: form.value.autologin,
+  }
   console.log('payload', payload)
 
   try {
-    const res = await api.$post('/login', payload)
-    const data = res.output
+    await api.$post('/login', payload)
 
-    // 유저 이름, 타입 로컬스토리지 저장
-    localStorage.setItem('userNm', data.userNm)
-    localStorage.setItem('userTypeCd', data.userTypeCd)
+    await fetchUserInfo()
 
     // 아이디 저장
     if (form.value.id_save) {
@@ -221,17 +223,36 @@ const login = async () => {
       localStorage.removeItem('autoLogin')
     }
 
-    // Pinia 저장
-    userStore.setUser({
-      userNm: data.userNm,
-      userTypeCd: data.userTypeCd,
-    })
-
     alertStore.show(userStore.userNm + '님 안녕하세요.', 'success')
     router.push('/') // 메인 페이지로 이동
   } catch (error) {
     console.error(error)
     alertStore.show(error.response?.data?.message || error.message, 'danger')
+  }
+}
+
+const fetchUserInfo = async () => {
+  try {
+    const res = await api.$post('/me')
+    const data = res.output
+    console.log('data', data)
+
+    // 로컬스토리지 저장
+    localStorage.setItem('userNm', data.userNm)
+    localStorage.setItem('userTypeCd', data.userTypeCd)
+
+    // Pinia 상태 저장
+    userStore.setUser({
+      userNm: data.userNm,
+      userTypeCd: data.userTypeCd,
+    })
+  } catch (error) {
+    console.error('유저 정보 불러오기 실패:', error)
+    alertStore.show(
+      '로그인 정보가 만료되었습니다. 다시 로그인 해주세요.',
+      'danger',
+    )
+    router.push('/login')
   }
 }
 
