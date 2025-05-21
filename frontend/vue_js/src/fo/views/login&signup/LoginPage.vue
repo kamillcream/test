@@ -143,6 +143,7 @@
                   :key="provider.name"
                   class="btn btn-icon rounded-circle border"
                   :title="provider.title"
+                  @click="handleSocialLogin(provider.name)"
                 >
                   <img
                     :src="provider.img"
@@ -161,9 +162,13 @@
 
 <script setup>
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { api } from '@/axios'
 import { useUserStore } from '@/fo/stores/userStore'
+import router from '@/fo/router'
+import { useAlertStore } from '@/fo/stores/alertStore'
+
+const alertStore = useAlertStore()
 
 const loginType = ref('PERSONAL')
 const form = ref({
@@ -181,37 +186,88 @@ const login = async () => {
   const type = loginType.value
   const userTypeCd = type === 'PERSONAL' ? 301 : 302
 
-  const payload =
-    type === 'PERSONAL'
-      ? { userId: form.value.id, userPw: form.value.password, userTypeCd }
-      : { userId: form.value.cid, userPw: form.value.cpassword, userTypeCd }
+  const id = type === 'PERSONAL' ? form.value.id : form.value.cid
+  const pw = type === 'PERSONAL' ? form.value.password : form.value.cpassword
+
+  const payload = { userId: id, userPw: pw, userTypeCd }
 
   try {
     const res = await api.$post('/login', payload)
     const data = res.output
-    console.log('로그인 반환값', data)
 
-    // 1. 로컬스토리지에 필요한 값 저장 (액세스토큰 제외)
+    // 로컬스토리지 저장
     localStorage.setItem('userNm', data.userNm)
     localStorage.setItem('userTypeCd', data.userTypeCd)
 
-    // 2. Pinia 스토어에 사용자 정보 저장 (자동으로 반영됨)
+    // 아이디 저장
+    if (form.value.id_save) {
+      if (type === 'PERSONAL') {
+        localStorage.setItem('savedPersonalId', form.value.id)
+      } else {
+        localStorage.setItem('savedCompanyId', form.value.cid)
+      }
+      localStorage.setItem('savedLoginType', loginType.value)
+    } else {
+      localStorage.removeItem('savedPersonalId')
+      localStorage.removeItem('savedCompanyId')
+      localStorage.removeItem('savedLoginType')
+    }
+
+    // 자동 로그인 저장
+    if (form.value.autologin) {
+      const autologinPayload = {
+        userId: id,
+        userPw: pw,
+        userTypeCd,
+      }
+      localStorage.setItem('autologinData', JSON.stringify(autologinPayload))
+    } else {
+      localStorage.removeItem('autologinData')
+    }
+
+    // Pinia 저장
     userStore.setUser({
       userNm: data.userNm,
       userTypeCd: data.userTypeCd,
     })
-    console.log('localStorage', localStorage)
-    console.log('userStore state:', { ...userStore })
 
-    alert('로그인 성공!')
-
-    // 필요시 로그인 후 페이지 이동 등 추가 작업
-    // 예: router.push('/')
+    alertStore.show(userStore.userNm + '님 안녕하세요.', 'success')
+    // 이동 처리
+    router.push('/') // 또는 원하는 메인 페이지 경로
   } catch (error) {
     console.error(error)
-    alert('로그인 실패: ' + (error.response?.data?.message || error.message))
+    alertStore.show(error.response?.data?.message || error.message, 'danger')
   }
 }
+
+// 저장된 아이디를 form에 세팅하는 함수
+const loadSavedId = () => {
+  const savedType = localStorage.getItem('savedLoginType')
+  if (savedType) {
+    loginType.value = savedType
+  }
+  if (loginType.value === 'PERSONAL') {
+    form.value.id = localStorage.getItem('savedPersonalId') || ''
+    form.value.id_save = !!localStorage.getItem('savedPersonalId')
+  } else {
+    form.value.cid = localStorage.getItem('savedCompanyId') || ''
+    form.value.id_save = !!localStorage.getItem('savedCompanyId')
+  }
+}
+
+// 컴포넌트 마운트 시 실행
+onMounted(() => {
+  loadSavedId()
+})
+
+// loginType 변경 시 저장된 아이디 변경 반영
+watch(loginType, () => {
+  if (loginType.value === 'PERSONAL') {
+    form.value.id = localStorage.getItem('savedPersonalId') || ''
+  } else {
+    form.value.cid = localStorage.getItem('savedCompanyId') || ''
+  }
+})
 
 const socialProviders = [
   {
@@ -235,6 +291,10 @@ const socialProviders = [
     img: '/img/social/apple.png',
   },
 ]
+
+const handleSocialLogin = (provider) => {
+  alert(`${provider} 로그인은 준비 중입니다.`)
+}
 </script>
 
 <style scoped>
