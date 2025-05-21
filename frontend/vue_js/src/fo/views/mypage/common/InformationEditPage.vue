@@ -1,6 +1,6 @@
 <template>
   <section>
-    <div v-if="authStore.isCompany">
+    <div v-if="userStore.userType === 'COMPANY'">
       <div class="overflow-hidden mb-3">
         <h2 class="font-weight-normal text-7 mb-0">회원 정보 수정</h2>
       </div>
@@ -455,7 +455,9 @@
 </template>
 
 <script setup>
-//추후 로그인 정보 받게되면 수정 예정
+import { useUserStore } from '@/fo/stores/userStore'
+
+const userStore = useUserStore()
 </script>
 
 <style scoped>

@@ -159,7 +159,9 @@
                   style="min-width: 150px"
                 >
                   <li>
-                    <a class="dropdown-item" href="/profile">마이페이지</a>
+                    <router-link class="dropdown-item" to="/mypage"
+                      >마이페이지</router-link
+                    >
                   </li>
                   <li>
                     <hr class="dropdown-divider" />
