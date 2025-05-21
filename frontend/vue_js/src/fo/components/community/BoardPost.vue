@@ -4,22 +4,22 @@
       <h1 class="font-weight-semi-bold mb-0 position-relative">
         <div v-if="isQna" class="d-flex flex-wrap gap-2 mb-2">
           <span
-            v-if="boardInfo.board_adopt_status_cd == 1"
-            class="badge bg-secondary badge-xs font-size-l"
-            >자체해결</span
-          >
-          <span
-            v-if="boardInfo.board_adopt_status_cd == 2"
+            v-if="boardInfo.boardAdoptStatusCd == 1501"
             class="badge bg-warning badge-xs font-size-l"
             >진행중</span
           >
           <span
-            v-if="boardInfo.board_adopt_status_cd == 3"
+            v-if="boardInfo.boardAdoptStatusCd == 1502"
             class="badge bg-success badge-xs font-size-l"
             >채택완료</span
           >
           <span
-            v-if="boardInfo.board_adopt_status_cd == 4"
+            v-if="boardInfo.boardAdoptStatusCd == 1503"
+            class="badge bg-secondary badge-xs font-size-l"
+            >자체해결</span
+          >
+          <span
+            v-if="boardInfo.boardAdoptStatusCd == 1504"
             class="badge bg-danger badge-xs font-size-l"
             >미해결</span
           >
@@ -29,7 +29,7 @@
         </div>
         <!-- 제목 + 오른쪽 아이콘들 -->
         <div class="d-flex justify-content-between align-items-start ttl-area">
-          <p class="text-primary board-ttl">{{ boardInfo.board_ttl }}</p>
+          <p class="text-primary board-ttl">{{ boardInfo.ttl }}</p>
           <!-- 아이콘 버튼 -->
           <span class="post-icons d-flex ttl-icon-area">
             <!-- 조회수 버튼 추가 -->
@@ -38,7 +38,7 @@
             >
               <i class="fa-solid fa-eye font-size-s"></i>
               <span class="me-2 ms-2 text-grey">조회수</span>
-              <span>{{ boardInfo.view_cnt }}</span>
+              <span>{{ boardInfo.viewCnt }}</span>
             </button>
             <!-- 추천 버튼 -->
             <button
@@ -46,12 +46,12 @@
             >
               <i class="fa-regular fa-thumbs-up font-size-s"></i>
               <span class="me-2 ms-2 text-grey">추천</span>
-              <span>{{ boardInfo.recommend_cnt }}</span>
+              <span>{{ boardInfo.recommendCnt }}</span>
             </button>
             <!-- 신고 버튼 -->
             <!-- [추가] 본인 인증 로직 -->
             <button
-              v-if="boardInfo.user_sq != viewUsersq"
+              v-if="boardInfo.userSq != viewUsersq"
               class="btn btn-light btn-rounded text-grey d-flex align-items-center me-2 font-size-xs"
               @click="clickRepostApplication"
             >
@@ -64,21 +64,22 @@
       <div class="post-meta">
         <span class="me-2"
           ><i class="far fa-user"></i> By
-          <a href="#">{{ boardInfo.user_nm }}</a>
+          <a href="#">{{ boardInfo.userNm }}</a>
         </span>
         <span
           ><i class="far fa-calendar-alt me-1"></i>
-          <a href="#"> {{ boardInfo.created_at }}</a></span
+          <a href="#"> {{ boardInfo.createdAt }}</a></span
         >
       </div>
     </div>
     <!-- 게시글 본문 -->
-    <p class="post-description mt-5 mb-5 text-5">
-      {{ boardInfo.board_description_edt }}
-    </p>
+    <div
+      class="post-description mt-5 mb-5 text-5"
+      v-html="boardInfo.description"
+    ></div>
     <!-- 첨부파일 섹션 -->
     <div
-      v-if="boardInfo.attachments.length > 0"
+      v-if="boardInfo.attachments?.length > 0"
       class="post-attachments mt-3 mb-4"
     >
       <h5 class="font-weight-bold text-grey">첨부파일</h5>
@@ -89,19 +90,22 @@
       </ul>
     </div>
     <!-- "태그" 제목 추가 -->
-    <div v-if="boardInfo.normal_tags.length > 0" class="post-tags mt-4">
+    <div
+      v-if="boardInfo.normalTags.length > 0 || boardInfo.skillTags?.length > 0"
+      class="post-tags mt-4"
+    >
       <h5 class="font-weight-bold text-grey">태그</h5>
       <!-- 태그 제목 추가 -->
 
       <a
-        v-for="skill_tag in boardInfo.skill_tags"
+        v-for="skill_tag in boardInfo.skillTags"
         :key="skill_tag"
         href="#"
         class="btn btn-rounded btn-primary me-2"
-        >{{ skill_tag }}</a
+        >{{ skill_tag.skillTagNm }}</a
       >
       <a
-        v-for="normal_tag in boardInfo.normal_tags"
+        v-for="normal_tag in boardInfo.normalTags"
         :key="normal_tag"
         href="#"
         class="btn btn-rounded btn-light me-2"
