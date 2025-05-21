@@ -17,11 +17,19 @@ public record ProjectCreateRequest(
 
 	    String projectImageUrl,
 
-	    @NotBlank(message = "상위 행정구역은 필수입니다.")
-	    String district,
+	    @NotBlank(message = "하위 행정구역 코드는 필수입니다.")
+	    Long subDistrictCode,
+	    
+	    @NotBlank(message = "하위 행정구역 이름은 필수입니다.")
+	    String subDistrictName,
+	    
 
-	    @NotBlank(message = "하위 행정구역은 필수입니다.")
-	    String subDistrict,
+	    @NotBlank(message = "하위 행정구역 위도는 필수입니다.")
+	    Double districtLat,
+	    
+	    @NotBlank(message = "하위 행정구역 경도는 필수입니다.")
+	    Double districtLon,
+	    
 
 	    @NotBlank(message = "개발자 등급은 필수입니다.")
 	    String devGrade,
