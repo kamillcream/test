@@ -1,10 +1,6 @@
 package com.example.demo.domain.community.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -22,26 +18,12 @@ public class Board {
     private Long userSq;
     private String boardTtl;
     private String boardDescriptionEdt;
-    private Integer boardViewCnt = 0;
-    private Integer boardCommentCnt = 0;
-    private Integer boardRecommendCnt = 0;
-    private Long boardAdoptStatusCd = 1501L;
-    private String boardIsDeletedYn = "N";
+    private Integer boardViewCnt;
+    private Integer boardCommentCnt;
+    private Integer boardRecommendCnt;
+    private Long boardAdoptStatusCd;
+    private String boardIsDeletedYn;
     private String boardTyp;
     private Long boardTypeCd;
-    private LocalDateTime boardCreatedAt = LocalDateTime.now();
-
-//    public Board(Long userSq, String boardTtl, String boardDescriptionEdt, String boardTyp, Long boardTypeCd){
-//        this.userSq = userSq;
-//        this.boardTtl = boardTtl;
-//        this.boardDescriptionEdt = boardDescriptionEdt;
-//        this.boardTyp = boardTyp;
-//        this.boardTypeCd = boardTypeCd;
-//        this.boardViewCnt = 0;
-//        this.boardCommentCnt = 0;
-//        this.boardRecommendCnt = 0;
-//        this.boardAdoptStatusCd = 84L;
-//        this.boardIsDeletedYn = "N";
-//        this.boardCreatedAt = LocalDateTime.now();
-//    }
+    private LocalDateTime boardCreatedAtDtm;
 }
