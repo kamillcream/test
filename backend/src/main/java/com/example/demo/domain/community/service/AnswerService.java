@@ -35,7 +35,7 @@ public class AnswerService {
             .filter(Objects::nonNull)
             .map(answer -> {
             	if(answer.getAnswerIsDeletedYn().equals("Y")) {
-            		return AnswerListResponse.builder().answerIsDeletedYn("Y").build(); 
+            		return AnswerListResponse.builder().isDeletedYn("Y").build(); 
             	} else {
             		return AnswerListResponse.fromEntity(answer);            		            		
             	}
@@ -69,17 +69,17 @@ public class AnswerService {
     @Transactional
     public void createAnswer(AnswerRequest answerRequest){
 //    	게시글 오류 처리
-    	if(answerRequest.getAnswerTtl() == null) {
+    	if(answerRequest.getTtl() == null) {
     		throw new IllegalArgumentException("제목을 입력해주세요.");
-    	} else if(answerRequest.getAnswerDescriptionEdt() == null) {
+    	} else if(answerRequest.getDescription() == null) {
     		throw new IllegalArgumentException("내용을 입력해주세요.");
     	}
     	
     	Answer answer = Answer.builder()
     			.userSq(answerRequest.getUserSq())
     			.boardSq(answerRequest.getBoardSq())
-        		.answerTtl(answerRequest.getAnswerTtl())
-        		.answerDescriptionEdt(answerRequest.getAnswerDescriptionEdt()).build();
+        		.answerTtl(answerRequest.getTtl())
+        		.answerDescriptionEdt(answerRequest.getDescription()).build();
         answerMapper.insert(answer);
         
         if (answer.getAnswerSq() == null) {
@@ -100,16 +100,16 @@ public class AnswerService {
     @Transactional
     public void updateAnswer(AnswerRequest answerRequest, Long answerSq) {
 //    	게시글 업데이트
-    	if(answerRequest.getAnswerTtl() == null) {
+    	if(answerRequest.getTtl() == null) {
     		throw new IllegalArgumentException("제목을 입력해주세요.");
-    	} else if(answerRequest.getAnswerDescriptionEdt() == null) {
+    	} else if(answerRequest.getDescription() == null) {
     		throw new IllegalArgumentException("내용을 입력해주세요.");
     	}
     	
         Answer answer = answerMapper.findById(answerSq);
 
-        answer.setAnswerTtl(answerRequest.getAnswerTtl());
-        answer.setAnswerDescriptionEdt(answerRequest.getAnswerDescriptionEdt());
+        answer.setAnswerTtl(answerRequest.getTtl());
+        answer.setAnswerDescriptionEdt(answerRequest.getDescription());
         
         answerMapper.update(answer);
         

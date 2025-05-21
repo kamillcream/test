@@ -126,7 +126,6 @@ const openSkillModal = () => {
 
 const onSkillsConfirmed = (skills) => {
   skillTags.value = [...skills.map((item) => item.name)]
-  console.log('부모에서 받은 skills:', skills)
 }
 
 const addNTag = (tag) => {

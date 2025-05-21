@@ -9,5 +9,5 @@ public class CommentRequest{
     private Long userSq;
     private Long boardSq;
     private Long answerSq;
-    private String commentDescriptionTxt;
+    private String description;
 }

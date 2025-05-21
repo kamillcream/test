@@ -11,18 +11,18 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AnswerListResponse{
-	private Long answerSq;
+	private Long sq;
     private Long userSq;
     private Long boardSq;
 //    private String userNm; // 사용자 이름
-    private String answerTtl;
-    private String answerDescriptionEdt;
-    private Integer answerViewCnt;
-    private Integer answerCommentCnt;
-    private Integer answerRecommendCnt;
-    private String answerIsAdoptedYn;
-    private String answerIsDeletedYn;
-    private LocalDateTime answerCreatedAtDtm;
+    private String ttl;
+    private String description;
+    private Integer viewCnt;
+    private Integer commentCnt;
+    private Integer recommendCnt;
+    private String isAdoptedYn;
+    private String isDeletedYn;
+    private LocalDateTime createdAtDtm;
 
     
     public static AnswerListResponse fromEntity(Answer answer) {

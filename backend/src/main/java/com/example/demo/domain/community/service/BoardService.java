@@ -28,19 +28,16 @@ public class BoardService {
     private final RecommendationMapper recommendationMapper;
 
     @Transactional
-    public List<BoardListResponse> getAllBoards(Long boardTypeCd, Long boardAdoptStatusCd, String searchType, String keyword, List<Long> searchSkillTags, String sortType, Long page, Long size) {
+    public BoardListResponse getAllBoards(Long boardTypeCd, Long boardAdoptStatusCd, String searchType, String keyword, List<Long> searchSkillTags, String sortType, Long page, Long size) {
     	if(page < 1) page = 1L;
     	Long offset = (page - 1L) * size;
     	if(sortType == null || sortType.isEmpty()) sortType = "latest";
     	
     	
     	List<Board> boards = boardMapper.findAll(boardTypeCd, boardAdoptStatusCd, searchType, keyword, searchSkillTags, sortType, size, offset);
-
-    	if(boards == null) {
-    		throw new IllegalArgumentException("게시글이 없습니다.");
-    	}
+    	Long totalElements = boardMapper.findAllCnt(boardTypeCd, boardAdoptStatusCd, searchType, keyword, searchSkillTags, sortType, size, offset);
     	
-    	List<BoardListResponse> responses = boards.stream()
+    	List<BoardListDTO> responses = boards.stream()
             .filter(Objects::nonNull)
             .map(board -> {
                 // 각 게시글의 일반 태그 조회
@@ -54,11 +51,11 @@ public class BoardService {
             	
                 
                 // BoardListResponse 생성 (태그 포함)
-                return BoardListResponse.fromEntity(board, boardAnswerCnt, normalTags, skillTags);
+                return BoardListDTO.fromEntity(board, boardAnswerCnt, normalTags, skillTags);
             })
             .collect(Collectors.toList());
 
-        return responses;
+        return BoardListResponse.builder().page(page).size(size).totalElements(totalElements).boards(responses).build();
     }
 
     @Transactional
@@ -79,7 +76,7 @@ public class BoardService {
             .filter(Objects::nonNull)
             .map(answer -> {
             	if(answer.getAnswerIsDeletedYn().equals("Y")) {
-            		return AnswerListResponse.builder().answerIsDeletedYn("Y").build(); 
+            		return AnswerListResponse.builder().isDeletedYn("Y").build(); 
             	} else {
             		return AnswerListResponse.fromEntity(answer);            		            		
             	}
@@ -96,16 +93,16 @@ public class BoardService {
     @Transactional
     public void createBoard(BoardRequest boardRequest, Long BoardTypeCd){
 //    	게시글 오류 처리
-    	if(boardRequest.getBoardTtl() == null) {
+    	if(boardRequest.getTtl() == null) {
     		throw new IllegalArgumentException("제목을 입력해주세요.");
-    	} else if(boardRequest.getBoardDescriptionEdt() == null) {
+    	} else if(boardRequest.getDescription() == null) {
     		throw new IllegalArgumentException("내용을 입력해주세요.");
     	}
     	
     	Board board = Board.builder()
     			.userSq(boardRequest.getUserSq())
-        		.boardTtl(boardRequest.getBoardTtl())
-        		.boardDescriptionEdt(boardRequest.getBoardDescriptionEdt())
+        		.boardTtl(boardRequest.getTtl())
+        		.boardDescriptionEdt(boardRequest.getDescription())
         		.boardTyp(BoardTypeCd == 1401L ? "normal" : "qna")
         		.boardTypeCd(BoardTypeCd).build();
         boardMapper.insert(board);
@@ -129,16 +126,16 @@ public class BoardService {
     @Transactional
     public void updateBoard(BoardRequest boardRequest, Long boardSq, Long boardTypeCd) {
 //    	게시글 업데이트
-    	if(boardRequest.getBoardTtl() == null) {
+    	if(boardRequest.getTtl() == null) {
     		throw new IllegalArgumentException("제목을 입력해주세요.");
-    	} else if(boardRequest.getBoardDescriptionEdt() == null) {
+    	} else if(boardRequest.getDescription() == null) {
     		throw new IllegalArgumentException("내용을 입력해주세요.");
     	}
     	
         Board board = boardMapper.findByIdBoard(boardSq, boardTypeCd);
 
-        board.setBoardTtl(boardRequest.getBoardTtl());
-        board.setBoardDescriptionEdt(boardRequest.getBoardDescriptionEdt());
+        board.setBoardTtl(boardRequest.getTtl());
+        board.setBoardDescriptionEdt(boardRequest.getDescription());
         
         boardMapper.update(board);
         

@@ -11,13 +11,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentResponse{
-	private Long commentSq;
+	private Long sq;
     private Long userSq;
     private String userProfileImgUrl;
     private String userNm;
-    private String commentDescriptionTxt;
-    private LocalDateTime commentCreatedAtDtm;
-    private Integer commentRecommendCnt;
+    private String description;
+    private LocalDateTime createdAt;
+    private Integer recommendCnt;
 
 //    추후 userMapper 연결 후 사용
 //    public static CommentResponse fromEntity(Comment comment, UserDTO userDto) {

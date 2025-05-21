@@ -10,7 +10,9 @@
       ref="tagRefs"
       class="btn btn-primary btn-rounded btn-3d py-0 px-2 tag-btn"
       :class="tagInfo.type == 'skill' ? ' btn-primary' : 'btn-light'"
-      >{{ tagInfo.tag_nm }}</span
+      >{{
+        tagInfo.type == 'skill' ? tagInfo.tag_nm.skillTagNm : tagInfo.tag_nm
+      }}</span
     >
     <span
       v-if="hiddenCount > 0"
@@ -44,11 +46,9 @@ const hiddenCount = ref(0)
 const calculateVisibleTags = async () => {
   await nextTick()
 
-  console.log(containerRef.value?.offsetWidth)
   const containerWidth = containerRef.value?.offsetWidth || 0
   let totalWidth = 0
   let count = 0
-  console.log(tagRefs)
 
   for (let i = 0; i < totalTags.value.length; i++) {
     const tagEl = tagRefs.value[i]
@@ -59,14 +59,11 @@ const calculateVisibleTags = async () => {
     count++
   }
 
-  console.log(count)
   visibleTags.value = totalTags.value.slice(0, count)
-  console.log('visibleTags', visibleTags.value)
   hiddenCount.value = totalTags.value.length - count
 }
 
 onMounted(() => {
-  console.log(props.skillTags, props.normalTags)
   props.skillTags.forEach((el) => {
     totalTags.value.push({ type: 'skill', tag_nm: el })
   })

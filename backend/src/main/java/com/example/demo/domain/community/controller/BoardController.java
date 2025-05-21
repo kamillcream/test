@@ -12,7 +12,6 @@ import com.example.demo.domain.community.dto.response.*;
 import lombok.RequiredArgsConstructor;
 
 import javax.lang.model.type.NullType;
-import java.util.*;
 
 
 
@@ -23,7 +22,7 @@ public class BoardController {
     private final BoardService boardService;
 //    전체 게시글 조회
     @GetMapping
-    public ResponseEntity<ApiResponse<List<BoardListResponse>>> getAllBoards(
+    public ResponseEntity<ApiResponse<BoardListResponse>> getAllBoards(
     		@RequestParam(value = "searchType", required = false) String searchType, 
     		@RequestParam(value = "keyword", required = false) String keyword,
     		@RequestParam(value = "sortType", defaultValue = "latest") String sortType,
