@@ -113,10 +113,7 @@ public class ProjectService {
 			 throw new RuntimeException("이미 삭제된 프로젝트 입니다.");
 		}
 		p.increaseViewCnt();
-		System.out.println("========================================");
-		System.out.println(p.getProjectViewCnt());
-		System.out.println("========================================");
-
+		
 		List<GroupSkillInfoResponse> reqSkills = groupingSkills(projectMapper.findReqSkillsByProjectSq(projectSq));
 		List<GroupSkillInfoResponse> preferSkills = groupingSkills(projectMapper.findPreferSkillsByProjectSq(projectSq));
 		String projectAddress = fetchAddressString(p.getAddressSq());
