@@ -172,7 +172,11 @@
                   <li>
                     <hr class="dropdown-divider" />
                   </li>
-                  <li><a class="dropdown-item" href="/logout">로그아웃</a></li>
+                  <li>
+                    <a class="dropdown-item" href="#" @click.prevent="logout"
+                      >로그아웃</a
+                    >
+                  </li>
                 </ul>
               </div>
             </div>
@@ -263,9 +267,34 @@
 <script setup>
 import { onMounted, onBeforeUnmount, computed } from 'vue'
 import { useUserStore } from '@/fo/stores/userStore'
+import { useAlertStore } from '@/fo/stores/alertStore'
+import router from '@/fo/router'
 
+const alertStore = useAlertStore()
 const userStore = useUserStore()
 const isLoggedIn = computed(() => userStore.isLoggedIn)
+
+const logout = () => {
+  // 1. 아이디 저장값(개인/기업 아이디, 로그인 타입)만 따로 저장해둠
+  const savedPersonalId = localStorage.getItem('savedPersonalId')
+  const savedCompanyId = localStorage.getItem('savedCompanyId')
+  const savedLoginType = localStorage.getItem('savedLoginType')
+
+  // 2. 로컬스토리지 전체 초기화
+  localStorage.clear()
+
+  // 3. 아이디 저장값 복원
+  if (savedPersonalId) localStorage.setItem('savedPersonalId', savedPersonalId)
+  if (savedCompanyId) localStorage.setItem('savedCompanyId', savedCompanyId)
+  if (savedLoginType) localStorage.setItem('savedLoginType', savedLoginType)
+
+  // 4. Pinia 상태 초기화
+  userStore.$reset() // userStore가 Pinia store라면 $reset() 으로 초기화 가능
+
+  alertStore.show('로그아웃되었습니다.', 'success')
+  // 5. 메인 페이지로 이동
+  router.push('/')
+}
 
 const handleScroll = () => {
   const header = document.querySelector('.header-body')
