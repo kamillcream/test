@@ -18,16 +18,17 @@
     WHERE PARENT_AREA_CODE_SQ = #{parentCodeSq}
 	</select>
 	
-	<select id="findDistrictByProject" parameterType="Long" resultType="com.example.demo.domain.project.dto.response.AreaInfoResponse">
-    SELECT area_code_sq, area_sigungu
-    FROM TBL_AREA_C
-    WHERE PARENT_AREA_CODE_SQ IS NULL
+	<select id="findParentDisctrictByCodeSq" parameterType="Long" resultType="com.example.demo.domain.project.dto.response.AreaInfoResponse">
+    SELECT parent.area_code_sq, parent.area_sigungu
+    FROM TBL_AREA_C child
+    JOIN TBL_AREA_C parent
+      ON child.parent_area_code_sq = parent.area_code_sq
+    WHERE child.area_code_sq = #{codeSq}
 	</select>
 	
-    <select id="findSubDistrictByProjectAndParent" parameterType="Long" resultType="com.example.demo.domain.project.dto.response.AreaInfoResponse">
+	<select id="findParentDisctrictSq" parameterType="Long" resultType="com.example.demo.domain.project.dto.response.AreaInfoResponse">
     SELECT area_code_sq, area_sigungu
     FROM TBL_AREA_C
     WHERE PARENT_AREA_CODE_SQ = #{parentCodeSq}
 	</select>
-
 </mapper>
