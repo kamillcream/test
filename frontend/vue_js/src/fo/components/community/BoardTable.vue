@@ -13,45 +13,45 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="board in boardList" :key="board.board_sq">
+        <tr v-for="board in boardList" :key="board.sq">
           <td class="text-start px-3">
-            <a :href="`/${isQna ? 'qna' : 'board'}/${board.board_sq}`"
-              >{{ board.board_ttl
+            <a :href="`/${isQna ? 'qna' : 'board'}/${board.sq}`"
+              >{{ board.ttl
               }}<span
                 class="text-grey ml-1 px-2"
-                v-show="isQna && board.answer_cnt > 0"
+                v-show="isQna && board.answerCnt > 0"
                 ><i class="fas fa-comment-dots me-1"></i>답변
-                {{ board.answer_cnt }}</span
+                {{ board.answerCnt }}</span
               ></a
             >
             <BoardTags
-              :skillTags="board.skill_tags"
-              :normalTags="board.normal_tags"
+              :skillTags="board.skillTags"
+              :normalTags="board.normalTags"
             />
           </td>
-          <td>{{ board.user_nm }}</td>
-          <td>{{ board.created_at }}</td>
-          <td>{{ board.view_cnt }}</td>
-          <td>{{ board.comment_cnt }}</td>
-          <td>{{ board.recommend_cnt }}</td>
+          <td>{{ board.userNm }}</td>
+          <td>{{ formatTime(board.createdAt) }}</td>
+          <td>{{ board.viewCnt }}</td>
+          <td>{{ board.commentCnt }}</td>
+          <td>{{ board.recommendCnt }}</td>
           <td v-if="isQna">
             <span
-              v-if="board.board_adopt_status_cd == 1"
-              class="badge bg-secondary"
-              >자체해결</span
-            >
-            <span
-              v-if="board.board_adopt_status_cd == 2"
+              v-if="board.boardAdoptStatusCd == 1501"
               class="badge bg-warning"
               >진행중</span
             >
             <span
-              v-if="board.board_adopt_status_cd == 3"
+              v-if="board.boardAdoptStatusCd == 1502"
               class="badge bg-success"
               >채택완료</span
             >
             <span
-              v-if="board.board_adopt_status_cd == 4"
+              v-if="board.boardAdoptStatusCd == 1503"
+              class="badge bg-secondary"
+              >자체해결</span
+            >
+            <span
+              v-if="board.boardAdoptStatusCd == 1504"
               class="badge bg-danger"
               >미해결</span
             >
@@ -69,6 +69,17 @@ const props = defineProps({ boardList: Array, isQna: Boolean })
 
 const boardList = computed(() => props.boardList)
 const isQna = computed(() => props.isQna)
+
+const formatTime = (createdAt) => {
+  const date = new Date(createdAt)
+  let year = date.getFullYear()
+  let month = date.getMonth() + 1
+  let day = date.getDate()
+  if (month < 10) month = '0' + month
+  if (day < 10) day = '0' + day
+
+  return `${year}-${month}-${day}`
+}
 </script>
 <style>
 .tag {

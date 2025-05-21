@@ -11,7 +11,7 @@
               <img
                 class="avatar"
                 alt=""
-                :src="`${comment.user_profile_img_url}`"
+                :src="`${comment.userProfileImgUrl}`"
               />
             </div>
             <div class="comment-block font-size-12">
@@ -21,7 +21,7 @@
                 class="d-flex justify-content-between align-items-center mb-2"
               >
                 <span class="comment-by text-primary font-size-13">
-                  <strong>{{ comment.user_nm }}</strong>
+                  <strong>{{ comment.userNm }}</strong>
                 </span>
                 <!-- 작성자 본인일 경우 -->
                 <!-- [추가] 본인 인증 로직 -->
@@ -41,7 +41,7 @@
                 <span v-else class="comment-icons d-flex">
                   <button class="text-danger me-2 font-size-10">
                     <span class="ms-2 text-primary"
-                      >추천 {{ comment.recommend_cnt }}</span
+                      >추천 {{ comment.recommendCnt }}</span
                     >
                   </button>
                   <button
@@ -54,11 +54,11 @@
               </div>
               <!-- 내용 -->
               <p class="font-size-12">
-                {{ comment.comment_description_edt }}
+                {{ comment.description }}
               </p>
               <!-- 날짜 + 수정/삭제 (홍길동과 동일하게 float-end 사용) -->
               <span class="date float-end font-size-11">
-                {{ comment.created_at }}
+                {{ comment.createdAt }}
               </span>
             </div>
           </div>

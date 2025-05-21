@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.example.demo.domain.user.dto.AddressDTO;
+import com.example.demo.domain.user.dto.CompanyProfileDTO;
 import com.example.demo.domain.user.dto.UserDTO;
 import com.example.demo.domain.user.dto.response.LoginResponseDTO;
 
@@ -21,6 +22,8 @@ public interface UserMapper {
     boolean existsByUserEmail(String userEmail);
 
     boolean existsByUserPhoneNum(String userPhoneNum);
+
+    int insertCompanyProfile(CompanyProfileDTO dto);
 
     UserDTO findByUserId(@Param("userId") String userId);
 

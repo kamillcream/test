@@ -204,7 +204,7 @@
 
                   <div class="row mb-2">
                     <div class="col-sm-12">
-                      <strong>TOOL:</strong>
+                      <strong style="margin-right: 8px;">TOOL:</strong>
                       <button
                         v-for="tool in project.tools"
                         :key="tool"
@@ -217,7 +217,7 @@
 
                   <div class="row mb-2">
                     <div class="col-sm-12">
-                      <strong>FW:</strong>
+                      <strong style="margin-right: 8px;">FW:</strong>
                       <button
                         v-for="fw in project.frameworks"
                         :key="fw"
@@ -237,7 +237,7 @@
 
                   <div class="row mb-3">
                     <div class="col-sm-12">
-                      <strong>기타:</strong>
+                      <strong style="margin-right: 8px;">기타:</strong>
                       <button
                         v-for="etc in project.etc"
                         :key="etc"

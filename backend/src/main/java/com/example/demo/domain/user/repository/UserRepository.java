@@ -3,6 +3,7 @@ package com.example.demo.domain.user.repository;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.domain.user.dto.AddressDTO;
+import com.example.demo.domain.user.dto.CompanyProfileDTO;
 import com.example.demo.domain.user.dto.UserDTO;
 import com.example.demo.domain.user.dto.response.LoginResponseDTO;
 import com.example.demo.domain.user.mapper.UserMapper;
@@ -37,6 +38,10 @@ public class UserRepository {
 
     public int insertUser(UserDTO dto) {
         return userMapper.insertUser(dto);
+    }
+
+    public int insertCompanyProfile(CompanyProfileDTO dto) {
+        return userMapper.insertCompanyProfile(dto);
     }
 
     public UserDTO findByUserId(String userId) {

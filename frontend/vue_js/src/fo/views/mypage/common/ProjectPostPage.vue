@@ -79,9 +79,13 @@
                   required=""
                 >
                   <option value="">선택</option>
-                  <option value="1">초급 (신입~5년)</option>
-                  <option value="2">중급 (5년~10년)</option>
-                  <option value="10">고급 (10년 이상)</option>
+                  <option
+                    v-for="grade in devGrades"
+                    :key="grade.id"
+                    :value="grade"
+                  >
+                    {{ grade }}
+                  </option>
                 </select>
               </div>
               <div class="form-group col-lg-6">
@@ -95,12 +99,13 @@
                   required=""
                 >
                   <option value="">선택</option>
-                  <option value="none">학력무관</option>
-                  <option value="highschool">고등학교 졸업</option>
-                  <option value="college">전문대 졸업</option>
-                  <option value="university">대학교 졸업</option>
-                  <option value="master">석사</option>
-                  <option value="phd">박사</option>
+                  <option
+                    v-for="education in educationLevels"
+                    :key="education.id"
+                    :value="education"
+                  >
+                    {{ education }}
+                  </option>
                 </select>
               </div>
             </div>
@@ -248,12 +253,25 @@
                 <label class="form-label mb-1 text-2" style="font-weight: bold"
                   >우대 사항</label
                 >
+
+                <!-- 태그 리스트 -->
+                <div class="mb-2">
+                  <span
+                    class="badge bg-secondary me-1"
+                    v-for="(item, index) in preferList"
+                    :key="index"
+                  >
+                    {{ item }}
+                  </span>
+                </div>
+
                 <input
                   type="text"
                   class="form-control text-3 h-auto py-2"
-                  name="qualification"
                   v-model="preferContent"
-                  required=""
+                  placeholder="쉼표(,)로 구분하여 입력"
+                  name="qualification"
+                  required
                 />
               </div>
             </div>
@@ -339,12 +357,39 @@ import ProjectJobButtonGroup from '@/fo/components/project/ProjectJobButtonGroup
 import ProjectSkillButtonGroup from '@/fo/components/project/ProjectSkillButtonGroup.vue'
 import ProjectInverviewTimeButtonGroupVue from '@/fo/components/project/ProjectInverviewTimeButtonGroup.vue'
 import { useModalStore } from '../../../stores/modalStore.js'
+import { useRoute } from 'vue-router'
 
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, reactive } from 'vue'
+
+import { api } from '@/axios.js'
+
+const route = useRoute()
+const projectSq = route.params.project_sq || null // 등록이면 NULL, 수정이면 숫자
+console.log(projectSq)
+
+const cities = ref([])
+const districts = ref([])
+const devGrades = ref([])
+const educationLevels = ref([])
+const recruitJobs = ref([])
+const workTypes = ref([])
+const skills = ref([])
 
 const projectTitle = ref('')
-const selectedCity = ref('')
-const selectedDistrict = ref('')
+const selectedCity = ref(null)
+const selectedDistrict = ref(null)
+const selectedCityName = computed(() => {
+  const raw =
+    cities.value.find((city) => city.code === selectedCity.value)?.name || ''
+  return raw.replace('전체', '') // '서울전체' → '서울'
+})
+
+const selectedDistrictName = computed(() => {
+  const raw =
+    districts.value.find((district) => district.code === selectedDistrict.value)
+      ?.name || ''
+  return raw.replace('전체', '') // 필요 시 동일하게 처리
+})
 const selectedDevGrade = ref('')
 const selectedEducation = ref('')
 const projectStartDt = ref('')
@@ -357,6 +402,12 @@ const selectedJobs = ref([])
 const selectedSkills = ref([])
 const selectedPreferSkills = ref([])
 const preferContent = ref('')
+const preferList = computed(() => {
+  return preferContent.value
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0)
+})
 const description = ref('')
 const notifyEnabled = ref(false)
 
@@ -366,6 +417,239 @@ const modalStore = useModalStore()
 const isOpen = computed(() => modalStore.isOpen)
 
 let prevScrollY = 0
+
+const form = reactive({
+  postcode: '',
+  address: '',
+  detailAddress: '',
+  sigungu: '',
+  latitude: null,
+  longitude: null,
+})
+
+const loadKakao = () => {
+  return new Promise((resolve, reject) => {
+    if (window.kakao?.maps?.services?.Geocoder) return resolve()
+
+    // 이미 로딩 중이면 기다림
+    if (!document.querySelector('script[src*="dapi.kakao.com"]')) {
+      const script = document.createElement('script')
+      script.src =
+        'https://dapi.kakao.com/v2/maps/sdk.js?appkey=90610faa13d02b09f83a700d0885a872&libraries=services'
+      script.async = false
+      document.head.appendChild(script)
+
+      script.onload = () => {
+        const start = Date.now()
+        const timer = setInterval(() => {
+          if (window.kakao?.maps?.services?.Geocoder) {
+            clearInterval(timer)
+            resolve()
+          } else if (Date.now() - start > 7000) {
+            clearInterval(timer)
+            reject('⏱ Geocoder 로딩 7초 초과 실패')
+          }
+        }, 100)
+      }
+
+      script.onerror = () => reject('❌ Kakao 지도 API 스크립트 로드 실패')
+    }
+  })
+}
+
+const loadDefaultFormData = async () => {
+  try {
+    const response = await api.$get('/projects/forms')
+    cities.value = response.output.cities
+      .sort((a, b) => {
+        if (a.areaName === '전국') return -1
+        if (b.areaName === '전국') return 1
+        return 0
+      })
+      .map((city) => ({
+        code: city.areaSq,
+        name: city.areaName,
+      }))
+    devGrades.value = response.output.devGrades
+    educationLevels.value = response.output.educationLevels
+    recruitJobs.value = response.output.recruitJobs
+    workTypes.value = response.output.workTypes
+    skills.value = response.output.skills
+  } catch (e) {
+    console.error('프로젝트 정보 불러오기 실패 (신규)', e)
+  }
+}
+
+const loadEditFormData = async (projectSq) => {
+  try {
+    const { output } = await api.$get(`/projects/forms`, {
+      params: { projectSq },
+    })
+    console.log(output)
+    cities.value = output.cities
+      .sort((a, b) => {
+        if (a.areaName === '전국') return -1
+        if (b.areaName === '전국') return 1
+        return 0
+      })
+      .map((city) => ({
+        code: city.areaSq,
+        name: city.areaName,
+      }))
+    devGrades.value = output.devGrades
+    educationLevels.value = output.educationLevels
+    recruitJobs.value = output.recruitJobs
+    workTypes.value = output.workTypes
+    skills.value = output.skills
+    const exist = output.existProjectVo
+    if (!exist) return
+
+    // 이후 프로젝트 상세값 덮어쓰기
+    projectTitle.value = exist.projectTtl
+    selectedCity.value = exist.parentDistrict.areaSq
+    await fetchDistricts(exist.parentDistrict.areaSq)
+    selectedDistrict.value = exist.subDistrict.areaSq
+    selectedDevGrade.value = exist.devGrade
+    selectedEducation.value = exist.educationLvl
+    projectStartDt.value = exist.projectStartDt
+    projectEndDt.value = exist.projectEndDt
+    recruitStartDt.value = exist.recruitStartDt
+    recruitEndDt.value = exist.recruitEndDt
+    selectedWorkTypes.value = [...exist.contract]
+    selectedJobs.value = [...exist.jobs]
+    selectedSkills.value = [...exist.reqSkills]
+    selectedPreferSkills.value = [...exist.preferSkills]
+    preferContent.value = exist.preferredEtc
+    description.value = exist.description
+    selectedInterviewTimes.value = Object.entries(exist.interviewTimes).map(
+      ([date, times]) => ({
+        date,
+        times,
+      }),
+    )
+    isInitialLoad.value = false
+  } catch (e) {
+    console.error('프로젝트 상세 조회 실패 (수정)', e)
+  }
+}
+
+onMounted(async () => {
+  if (!projectSq) {
+    await loadDefaultFormData() // 신규 등록용
+  } else {
+    await loadEditFormData(projectSq) // 수정용
+  }
+})
+
+const fetchDistricts = async (areaCodeSq) => {
+  if (!areaCodeSq) {
+    districts.value = []
+    selectedDistrict.value = ''
+    return
+  }
+
+  try {
+    const response = await api.$get(`/projects/${areaCodeSq}/districts`)
+    districts.value = response.output.map((area) => ({
+      code: area.areaSq,
+      name: area.areaName,
+    }))
+  } catch (err) {
+    console.error('구 정보 불러오기 실패', err)
+  }
+}
+
+watch([selectedCity, selectedDistrict], async () => {
+  const cityName = selectedCityName.value
+  const districtName = selectedDistrictName.value
+  if (!cityName || !districtName) return
+
+  try {
+    await loadKakao()
+    const geocoder = new window.kakao.maps.services.Geocoder()
+    const fullAddr = `${cityName} ${districtName}`
+    geocoder.addressSearch(fullAddr, (result, status) => {
+      if (status === window.kakao.maps.services.Status.OK) {
+        form.latitude = result[0].y
+        form.longitude = result[0].x
+        console.log('📍 좌표 변환 완료:', result[0])
+      } else {
+        console.warn('❌ 좌표 변환 실패:', fullAddr)
+      }
+    })
+  } catch (err) {
+    console.error('❌ Geocoder 초기화 실패:', err)
+  }
+})
+const isInitialLoad = ref(true)
+
+watch(selectedCity, async (newCityCode) => {
+  await fetchDistricts(newCityCode)
+
+  if (isInitialLoad.value) return // 최초 초기화일 때는 초기화하지 않음
+
+  // 기존 선택된 하위 지역이 목록에 없다면 초기화
+  const exists = districts.value.some(
+    (district) => district.code === selectedDistrict.value,
+  )
+
+  if (!exists) {
+    selectedDistrict.value = ''
+  }
+})
+const submitProject = async () => {
+  const requestBody = {
+    projectId: projectSq ?? null,
+    projectTitle: projectTitle.value,
+    projectImageUrl: '',
+
+    subDistrictCode: selectedDistrict.value,
+    subDistrictName: selectedDistrictName.value,
+
+    districtLat: form.latitude,
+    districtLon: form.longitude,
+
+    devGrade: selectedDevGrade.value,
+    educationLvl: selectedEducation.value,
+
+    projectStartDt: projectStartDt.value,
+    projectEndDt: projectEndDt.value,
+    recruitStartDt: recruitStartDt.value,
+    recruitEndDt: recruitEndDt.value,
+
+    workType: [...selectedWorkTypes.value],
+
+    recruitJob: [...selectedJobs.value],
+
+    preferSkills: selectedPreferSkills.value
+      .map((s) => (typeof s === 'string' ? s : s?.name))
+      .filter((name) => !!name),
+    usingSkills: selectedSkills.value
+      .map((s) => (typeof s === 'string' ? s : s?.name))
+      .filter((name) => !!name),
+
+    preference: preferContent.value,
+    description: description.value,
+
+    interviewTime: selectedInterviewTimes.value.flatMap((item) =>
+      item.times.map((time) => `${item.date}T${time}`),
+    ),
+
+    isNotification: notifyEnabled.value ? 'Y' : 'N',
+  }
+  console.log(requestBody)
+  try {
+    if (projectSq) {
+      await api.$patch('/projects', requestBody)
+      alert('수정 성공')
+    } else {
+      await api.$post('/projects', requestBody)
+      alert('등록 성공')
+    }
+  } catch (error) {
+    console.error('프로젝트 등록 실패: ', error)
+  }
+}
 
 watch(isOpen, (newVal) => {
   if (newVal) {
@@ -449,6 +733,7 @@ const onRecruitTimeConfirmed = ({ start, end }) => {
 
 const onInterviewTimeConfirmed = (times) => {
   selectedInterviewTimes.value = times
+  console.log(selectedInterviewTimes.value)
 }
 
 const onWorkTypeConfirmed = (workTypes) => {
@@ -480,9 +765,10 @@ const removeJob = (name) => {
 }
 
 const removeSkill = (name) => {
-  selectedSkills.value = selectedSkills.value.filter(
-    (skill) => skill.name !== name,
-  )
+  selectedSkills.value = selectedSkills.value.filter((skill) => {
+    const skillName = typeof skill === 'string' ? skill : skill.name
+    return skillName !== name
+  })
 }
 
 const removePreferSkill = (name) => {

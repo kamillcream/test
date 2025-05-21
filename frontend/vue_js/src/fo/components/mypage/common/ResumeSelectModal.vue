@@ -99,9 +99,10 @@
   </div>
 </template>
 <script setup>
-import { ref, defineEmits } from 'vue'
+import { ref, defineEmits, defineProps, onMounted } from 'vue'
 import { useModalStore } from '../../../stores/modalStore'
 import { useAlertStore } from '../../../stores/alertStore'
+import { api } from '@/axios.js'
 
 const resumes = ref([
   { id: 1, title: '이력서 제목 1', date: '2025.04.01' },
@@ -114,15 +115,32 @@ const modalStore = useModalStore()
 const selectedResume = ref(null)
 const alert = useAlertStore()
 
-const confirm = () => {
-  if (selectedResume.value.length === 0) {
+const props = defineProps({
+  projectSq: {
+    type: Number,
+    required: true,
+  },
+})
+
+const confirm = async () => {
+  if (!selectedResume.value) {
     alert.show('이력서를 선택해주세요.', 'danger')
     return
   }
 
-  alert.show('프로젝트 지원이 완료되었습니다.')
-  emit('confirm', selectedResume.value)
-  modalStore.closeModal()
+  try {
+    await api.$post(`/projects/${props.projectSq}/applications`, {
+      resumeSq: selectedResume.value.id,
+      projectApplicationTyp: 'PERSONAL',
+    })
+
+    alert.show('프로젝트 지원에 성공하였습니다.')
+    emit('confirm', selectedResume.value)
+    modalStore.closeModal()
+  } catch (error) {
+    console.error(error)
+    alert.show('프로젝트 지원에 실패했습니다.', 'danger')
+  }
 }
 
 const selectResume = (resume) => {

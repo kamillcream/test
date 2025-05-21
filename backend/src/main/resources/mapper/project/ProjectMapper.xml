@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.example.demo.domain.project.mapper.ProjectMapper">
+	
+<resultMap id="projectMap" type="com.example.demo.domain.project.entity.Project">
+    <id property="projectSq" column="project_sq"/>
+    <result property="companySq" column="company_sq"/>
+    <result property="addressSq" column="address_sq"/>
+    <result property="projectTtl" column="project_ttl"/>
+    <result property="projectImageUrl" column="project_image_url"/>
+    <result property="projectDeveloperGradeCd" column="project_developer_grade_cd"/>
+    <result property="projectRequiredEducationCd" column="project_required_education_cd"/>
+    <result property="projectSalary" column="project_salary"/>
+    <result property="projectStartDt" column="project_start_dt"/>
+    <result property="projectEndDt" column="project_end_dt"/>
+    <result property="projectRecruitStartDt" column="project_recruit_start_dt"/>
+    <result property="projectRecruitEndDt" column="project_recruit_end_dt"/>
+    <result property="projectPreferenceTxt" column="project_preference_txt"/>
+    <result property="projectDescriptionTxt" column="project_description_txt"/>
+    <result property="projectCreatedAtDtm" column="project_created_at_dtm"/>
+    <result property="projectModifiedAtDtm" column="project_modified_at_dtm"/>
+    <result property="projectCandidateCnt" column="project_candidate_cnt"/>
+    <result property="projectScrapCnt" column="project_scrap_cnt"/>
+    <result property="projectIsNotificationYn" column="project_is_notification_yn"/>
+    <result property="projectIsDeletedYn" column="project_is_deleted_yn"/>
+    <result property="projectViewCnt" column="project_view_cnt"/>
+</resultMap>
+    <select id="findProjectsBySearch"
+        parameterType="com.example.demo.domain.project.dto.request.ProjectSearchRequest"
+        resultMap="projectMap">
+
+    SELECT *
+    FROM TBL_PROJECT_M
+    WHERE project_is_deleted_yn = 'N'
+    
+    <if test="addressCodeSq != null">
+	    AND address_sq IN (
+	        SELECT address_sq
+	        FROM TBL_ADDRESS_S
+	        WHERE area_code_sq IN (
+	            SELECT area_code_sq
+	            FROM TBL_AREA_C
+	            WHERE parent_area_code_sq = #{addressCodeSq}
+	        )
+	    )
+	</if>
+
+    <if test="projectDeveloperGradeCd != null">
+        AND project_developer_grade_cd = #{projectDeveloperGradeCd}
+    </if>
+    
+    <if test="educationCd != null">
+        AND project_required_education_cd = #{educationCd}
+    </if>
+    
+    <if test="jobRoleCd != null">
+        AND EXISTS (
+		    SELECT 1
+		    FROM TBL_PROJECT_RECRUIT_JOB_ROLE_S JR
+		    WHERE JR.project_sq = project_sq
+		      AND JR.recruit_job_position_type_cd = #{jobRoleCd}
+		)
+    </if>
+
+    <if test="searchKeyword != null and searchKeyword != ''">
+	    <choose>
+	        <when test="searchType == '제목'">
+	            AND project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
+	        </when>
+	        <when test="searchType == '작성자명'">
+	            AND project_writer_name LIKE CONCAT('%', #{searchKeyword}, '%') 
+	            <!-- 테이블에 실제 작성자명 컬럼명에 맞게 수정 -->
+	        </when>
+	        <when test="searchType == '내용'">
+	            AND (
+	                project_preference_txt LIKE CONCAT('%', #{searchKeyword}, '%')
+	                OR project_description_txt LIKE CONCAT('%', #{searchKeyword}, '%')
+	            )
+	        </when>
+	        <otherwise>
+	            AND (
+	                project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
+	                OR project_description_txt LIKE CONCAT('%', #{searchKeyword}, '%')
+	                OR project_preference_txt LIKE CONCAT('%', #{searchKeyword}, '%')
+	            )
+	        </otherwise>
+	    </choose>
+	</if>
+
+    <choose>
+	    <when test="sortBy != null and sortOrder != null">
+	        <choose>
+	            <when test="sortBy == 'project_start_dt'">
+	                ORDER BY project_created_at_dtm ${sortOrder}
+	            </when>
+	            <when test="sortBy == 'view_count'">
+	                ORDER BY project_view_cnt ${sortOrder}
+	            </when>
+	            <when test="sortBy == 'applicant_count'">
+	                ORDER BY project_candidate_cnt ${sortOrder}
+	            </when>
+	            <otherwise>
+	                ORDER BY project_created_at_dtm DESC
+	            </otherwise>
+	        </choose>
+	    </when>
+	    <otherwise>
+	        ORDER BY project_created_at_dtm DESC
+	    </otherwise>
+	</choose>
+
+
+    <if test="size != null and offset != null">
+        LIMIT #{size} OFFSET #{offset}
+    </if>
+	</select>
+	
+	<select id="countProjectsBySearch"
+        parameterType="com.example.demo.domain.project.dto.request.ProjectSearchRequest"
+        resultType="Integer">
+
+    SELECT COUNT(*)
+    FROM TBL_PROJECT_M
+    WHERE project_is_deleted_yn = 'N'
+    
+    <if test="addressCodeSq != null">
+        AND address_sq = #{addressCodeSq}
+    </if>
+
+    <if test="projectDeveloperGradeCd != null">
+        AND project_developer_grade_cd = #{projectDeveloperGradeCd}
+    </if>
+
+    <if test="searchKeyword != null and searchKeyword != ''">
+        <choose>
+            <when test="searchType == '기술'">
+                AND project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
+            </when>
+            <when test="searchType == '프로젝트명'">
+                AND project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
+            </when>
+            <otherwise>
+                <!-- TODO: 성능 이슈 시 UNION 또는 FULLTEXT로 분리 고려 -->
+                AND (
+                    project_ttl LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR project_description_txt LIKE CONCAT('%', #{searchKeyword}, '%')
+                )
+            </otherwise>
+        </choose>
+    </if>
+
+    <choose>
+        <when test="sortBy != null and sortOrder != null">
+            <choose>
+                <when test="sortBy == 'project_start_dt'">
+                    ORDER BY project_start_dt ${sortOrder}
+                </when>
+                <when test="sortBy == 'project_salary'">
+                    ORDER BY project_salary ${sortOrder}
+                </when>
+                <otherwise>
+                    ORDER BY project_start_dt DESC <!-- 기본 정렬 -->
+                </otherwise>
+            </choose>
+        </when>
+        <otherwise>
+            ORDER BY project_start_dt DESC
+        </otherwise>
+    </choose>
+	</select>
+
+
+	<select id="findCompanySqFromProjectSq" parameterType="Long" resultType="Long">
+    SELECT company_sq
+    FROM TBL_PROJECT_M
+    WHERE project_sq = #{projectSq}	
+	</select>
+	
+	<select id="findBySq" parameterType="Long" resultType="com.example.demo.domain.project.entity.Project">
+    SELECT *
+    FROM TBL_PROJECT_M 
+    WHERE project_sq = #{projectSq} AND project_is_deleted_yn = 'N'
+	</select>
+	
+	<select id="findAddressSqByProjectSq" parameterType="Long" resultType="Long">
+	    SELECT address_sq
+	    FROM TBL_PROJECT_M
+	    WHERE project_sq = #{projectSq}	
+	</select>
+	
+	<insert id="insertScrap" parameterType="com.example.demo.domain.project.dto.request.ScrapInsertRequest">
+    INSERT INTO TBL_SCRAP_S (user_sq, company_sq, project_sq, scrap_type_cd)
+    VALUES (#{userSq}, #{companySq}, #{projectSq}, #{scrapTypeCd})
+	</insert>
+	
+	<insert id="insertContracts" parameterType="map">
+    INSERT INTO TBL_PROJECT_CONTRACT_TYPE_S (
+        project_sq,
+        contract_type_cd
+    )
+    VALUES
+    <foreach collection="contractTypes" item="type" separator=",">
+        (#{type.projectSq}, #{type.contractTypeCd})
+    </foreach>
+	</insert>
+
+	
+	<insert id="insertJobs" parameterType="map">
+    INSERT INTO TBL_PROJECT_RECRUIT_JOB_ROLE_S (
+        project_sq,
+        recruit_job_position_type_cd
+    )
+    VALUES 
+        <foreach collection="recruitJobs" item="type" separator=",">
+	        (#{type.projectSq}, #{type.recruitJobPosTypCd})
+	</foreach>
+	</insert>
+	
+	
+	<insert id="insertSkills" parameterType="map">
+    INSERT INTO TBL_PROJECT_REQUIRED_SKILL_TAG_S (
+        project_sq,
+        skill_tag_sq,
+        parent_skill_tag_sq,
+        skill_tag_lvl,
+        skill_tag_nm
+    )
+    VALUES
+    <foreach collection="skills" item="type" separator=",">
+        (#{projectSq}, #{type.skillTagSq}, #{type.parentSkillTagSq}, #{type.skillTagLvl}, #{type.skillTagNm})
+    </foreach>
+	</insert>
+	
+	<insert id="insertPreferSkills" parameterType="map">
+    INSERT INTO TBL_PROJECT_PREFERRED_SKILL_TAG_S (
+        project_sq,
+        skill_tag_sq,
+        parent_skill_tag_sq,
+        skill_tag_lvl,
+        skill_tag_nm
+    )
+    VALUES 
+        <foreach collection="preferSkills" item="type" separator=",">
+        	(#{projectSq}, #{type.skillTagSq}, #{type.parentSkillTagSq}, #{type.skillTagLvl}, #{type.skillTagNm})
+    	</foreach>
+	</insert>
+	
+	<insert id="insertInterviewTimes">
+	  INSERT INTO TBL_PROJECT_INTERVIEW_TIME_SLOT_S (project_sq, interview_available_dtm)
+	  VALUES
+	  <foreach collection="interviewTimes" item="time" separator=",">
+	    (#{projectSq}, #{time})
+	  </foreach>
+	</insert>
+	
+	<select id="findSkillInfoList" resultType="com.example.demo.domain.project.dto.response.SingleSkillInfoResponse">
+	    SELECT 
+	      p.skill_tag_nm AS parentSkillTagNm,
+	      c.skill_tag_nm AS childSkillTagNm
+	    FROM TBL_SKILL_TAG_C p
+	    JOIN TBL_SKILL_TAG_C c ON p.skill_tag_sq = c.parent_skill_tag_sq
+	    WHERE p.skill_tag_is_deleted_yn = 'N' AND c.skill_tag_is_deleted_yn = 'N'
+	    ORDER BY p.skill_tag_sq, c.skill_tag_sq
+  	</select>
+  	
+  	<select id="findReqSkillsByProjectSq" parameterType = "Long" resultType="com.example.demo.domain.project.dto.response.SingleSkillInfoResponse">
+	    SELECT DISTINCT
+        p.skill_tag_nm AS parentSkillTagNm,
+        c.skill_tag_nm AS childSkillTagNm
+	    FROM TBL_PROJECT_REQUIRED_SKILL_TAG_S r
+	    JOIN TBL_SKILL_TAG_C c ON r.skill_tag_sq = c.skill_tag_sq
+	    JOIN TBL_SKILL_TAG_C p ON c.parent_skill_tag_sq = p.skill_tag_sq
+	    WHERE c.skill_tag_is_deleted_yn = 'N'
+	      AND p.skill_tag_is_deleted_yn = 'N'
+	    ORDER BY p.skill_tag_nm, c.skill_tag_nm
+  	</select>
+  	
+  	<select id="findPreferSkillsByProjectSq" parameterType = "Long" resultType="com.example.demo.domain.project.dto.response.SingleSkillInfoResponse">
+	    SELECT DISTINCT
+        p.skill_tag_nm AS parentSkillTagNm,
+        c.skill_tag_nm AS childSkillTagNm
+	    FROM TBL_PROJECT_PREFERRED_SKILL_TAG_S r
+	    JOIN TBL_SKILL_TAG_C c ON r.skill_tag_sq = c.skill_tag_sq
+	    JOIN TBL_SKILL_TAG_C p ON c.parent_skill_tag_sq = p.skill_tag_sq
+	    WHERE c.skill_tag_is_deleted_yn = 'N'
+	      AND p.skill_tag_is_deleted_yn = 'N'
+	    ORDER BY p.skill_tag_nm, c.skill_tag_nm
+  	</select>
+  
+	
+	
+	<select id="findWorkTypesByProjectSq" resultType="String" parameterType="Long">
+	    SELECT c.common_code_nm
+		FROM TBL_PROJECT_CONTRACT_TYPE_S m
+		JOIN TBL_COMMON_CODE_C c
+		  ON m.contract_type_cd = c.common_code_sq
+		WHERE m.project_sq = #{projectSq}
+  	</select>
+  	
+  	<select id="findJobsByProjectSq" resultType="String" parameterType="Long">
+	    SELECT c.common_code_nm
+		FROM TBL_PROJECT_RECRUIT_JOB_ROLE_S m
+		JOIN TBL_COMMON_CODE_C c
+		  ON m.recruit_job_position_type_cd = c.common_code_sq
+		WHERE m.project_sq = #{projectSq}
+  	</select>
+  	
+  	<select id="findInterviewTimeMinMaxBySq" resultType="map" parameterType="Long">
+	    SELECT 
+	    MIN(interview_available_dtm) AS minTime,
+	    MAX(interview_available_dtm) AS maxTime
+	  FROM TBL_PROJECT_INTERVIEW_TIME_SLOT_S
+	  WHERE project_sq = #{projectSq}
+  	</select>
+  	
+  	<select id="findInterviewTimesByProjectSq" resultType="java.time.LocalDateTime" parameterType="Long">
+	    SELECT interview_available_dtm
+	  	FROM TBL_PROJECT_INTERVIEW_TIME_SLOT_S
+	  	WHERE project_sq = #{projectSq}
+  	</select>
+  	
+  	<delete id="deleteProjectScrap">
+	  DELETE FROM TBL_SCRAP_S
+	  WHERE project_sq = #{projectSq} AND user_sq = #{userSq}
+	</delete>
+	
+	<delete id="deleteProjectContracts">
+	  DELETE FROM TBL_PROJECT_CONTRACT_TYPE_S
+	  WHERE project_sq = #{projectSq} 
+	</delete>
+	
+	<delete id="deleteProjectJobRoles">
+	  DELETE FROM TBL_PROJECT_RECRUIT_JOB_ROLE_S
+	  WHERE project_sq = #{projectSq} 
+	</delete>
+	
+	<delete id="deleteProjectInterviewTimes">
+	  DELETE FROM TBL_PROJECT_INTERVIEW_TIME_SLOT_S
+	  WHERE project_sq = #{projectSq} 
+	</delete>
+	
+	<delete id="deleteProjectAddress">
+	  DELETE FROM TBL_ADDRESS_S
+	  WHERE address_sq = #{addressSq} 
+	</delete>
+	
+</mapper>
