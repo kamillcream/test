@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.common.ParentCodeEnum;
 import com.example.demo.common.mapper.CommonCodeMapper;
+import com.example.demo.domain.project.dto.AddressInsertDto;
 import com.example.demo.domain.project.dto.request.ContractInsertRequest;
 import com.example.demo.domain.project.dto.request.JobInsertRequest;
 import com.example.demo.domain.project.dto.request.ProjectApplyRequest;
@@ -29,6 +30,7 @@ import com.example.demo.domain.project.dto.response.ProjectSummary;
 import com.example.demo.domain.project.dto.response.SingleSkillInfoResponse;
 import com.example.demo.domain.project.entity.Project;
 import com.example.demo.domain.project.entity.ProjectApplicationEntity;
+import com.example.demo.domain.project.mapper.AddressMapper;
 import com.example.demo.domain.project.mapper.DistrictMapper;
 import com.example.demo.domain.project.mapper.ProjectMapper;
 import com.example.demo.domain.project.mapper.SkillMapper;
@@ -49,17 +51,24 @@ public class ProjectService {
 	private final DistrictMapper districtMapper;
 	private final ProjectUtil projectUtil;
 	private final SkillMapper skillMapper;
+	private final AddressMapper addressMapper;
 	
 	public void createProject(ProjectCreateRequest request) {
 		long devgradeCodeSq = commonCodeMapper.findCommonCodeSqByName(request.devGrade(), ParentCodeEnum.DEVELOPER_GRADE.getCode());
 		long educationLvlSq = commonCodeMapper.findCommonCodeSqByName(request.educationLvl(), ParentCodeEnum.EDUCATION.getCode());
-		Project project = Project.from(request, devgradeCodeSq, educationLvlSq);
+		Project project = Project.from(request, registerAddress(request), devgradeCodeSq, educationLvlSq);
 		projectRepository.save(project);
 		
 		registerSubEntities(project, request);
 	}
 	
-	private void registerSubEntities(Project project, ProjectCreateRequest request) {
+	public long registerAddress(ProjectCreateRequest request) {
+		AddressInsertDto addressInsertDto = AddressInsertDto.from(request);
+		addressMapper.createAddress(addressInsertDto);
+		return addressInsertDto.getAddressSq(); 
+	}
+	
+	public void registerSubEntities(Project project, ProjectCreateRequest request) {
 		createContracts(project.getProjectSq(), request.workType());
 		createJobRoles(project.getProjectSq(), request.recruitJob());
 		createReqSkills(project.getProjectSq(), request.usingSkills());
@@ -67,7 +76,21 @@ public class ProjectService {
 		createInterviewTimes(project.getProjectSq(), request.interviewTime());
 	}
 	
+	public AreaInfoResponse fetchSubDistrictInfoByProjectSq(Long addressSq) {
+		return addressMapper.findAreaInfoBySq(addressSq);
+	}
 	
+	public AreaInfoResponse fetchParentDistrictInfoByCd(Long areaCode) {
+		return districtMapper.findParentDisctrictByCodeSq(areaCode);
+	}
+	
+	public String fetchAddressString(Long addressSq) {
+	    AreaInfoResponse subDistrict = addressMapper.findAreaInfoBySq(addressSq);
+	    AreaInfoResponse parentDistrict = districtMapper.findParentDisctrictByCodeSq(subDistrict.getAreaSq());
+
+	    String parentName = parentDistrict.getAreaName().replace("전체", "").trim();
+	    return parentName + " " + subDistrict.getAreaName();
+	}
 	
 	public ProjectListResponse fetchAllProject(ProjectSearchRequest request){
 		List<Project> projects = projectMapper.findProjectsBySearch(request);
@@ -83,9 +106,21 @@ public class ProjectService {
 		return new ProjectListResponse(request.getOffset(), request.getSize(), totalCount, responses);	
 	}
 	
+	@Transactional
 	public ProjectDetailResponse fetchProject(Long projectSq){
 		Project p = projectRepository.findById(projectSq).orElseThrow();
-		return ProjectDetailResponse.from(p,projectUtil);
+		if (p.getProjectIsDeletedYn().equals("Y")) {
+			 throw new RuntimeException("이미 삭제된 프로젝트 입니다.");
+		}
+		p.increaseViewCnt();
+		System.out.println("========================================");
+		System.out.println(p.getProjectViewCnt());
+		System.out.println("========================================");
+
+		List<GroupSkillInfoResponse> reqSkills = groupingSkills(projectMapper.findReqSkillsByProjectSq(projectSq));
+		List<GroupSkillInfoResponse> preferSkills = groupingSkills(projectMapper.findPreferSkillsByProjectSq(projectSq));
+		String projectAddress = fetchAddressString(p.getAddressSq());
+		return ProjectDetailResponse.from(p,projectUtil, reqSkills, preferSkills, projectAddress);
 	}
 	
 	@Transactional
@@ -118,40 +153,57 @@ public class ProjectService {
 	}
 	
 	@Transactional
+	public long updateAddress(Project project, ProjectCreateRequest request) {
+		projectMapper.deleteProjectAddress(project.getAddressSq());
+		return registerAddress(request);
+	}
+	
+	@Transactional
 	public void updateProject(ProjectCreateRequest request) {
 		long devgradeCodeSq = commonCodeMapper.findCommonCodeSqByName(request.devGrade(), ParentCodeEnum.DEVELOPER_GRADE.getCode());
 		long educationLvlSq = commonCodeMapper.findCommonCodeSqByName(request.educationLvl(), ParentCodeEnum.EDUCATION.getCode());
 		
-		Project project = projectRepository.findById(request.projectId()).orElseThrow();
+		Project project = projectMapper.findBySq(request.projectId());
 		project.update(request, devgradeCodeSq, educationLvlSq);
+		updateSubEntities(project, request);
+	}
+	
+	@Transactional
+	public void updateSubEntities(Project project, ProjectCreateRequest request) {
 		updateSkills(project, request);
 		updateContracts(project, request);
 		updateJobRoles(project, request);
 		updateInterviewTimes(project, request);
+		project.updateAddress(updateAddress(project, request));
 	}
-	
 	@Transactional
 	public void softDeleteProject(long projectSq) {
-		Project project = projectRepository.findById(projectSq).orElseThrow();
+		Project project = projectMapper.findBySq(projectSq);
 		project.delete();
 	}
 	
-	public ProjectApplicationEntity createProjectApplication(long projectSq, ProjectApplyRequest request) {
+	@Transactional
+	public void createProjectApplication(long projectSq, ProjectApplyRequest request) {
+		Project project = projectRepository.findById(projectSq).orElseThrow();
 		ProjectApplicationEntity projectApplicationEntity = ProjectApplicationEntity.from(projectSq, projectMapper, request, commonCodeMapper);
-		return projectApplicationRepository.save(projectApplicationEntity);
+		projectApplicationRepository.save(projectApplicationEntity);
+		project.increaseApplication();
 	}
 	
 	@Transactional
 	public void toggleProjectScrap(long projectSq, ScrapRequest scrapRequest) {
 		long userSq = 1;
 		boolean hasScrapped = scrapRequest.isHasScrapped();
+		Project project = projectRepository.findById(projectSq).orElseThrow();
 		if(!hasScrapped) {
 			long companySq = projectMapper.findCompanySqFromProjectSq(projectSq);
 			long scrapTypeCd = 1;
 			ScrapInsertRequest scrapInsertRequest = new ScrapInsertRequest(userSq, companySq, projectSq, scrapTypeCd);
 			projectMapper.insertScrap(scrapInsertRequest);
+			project.increaseScrap();
 		}else if (hasScrapped) {
 			projectMapper.deleteProjectScrap(projectSq, userSq);
+			project.decreaseScrap();
 		}
 		
 	}
@@ -217,8 +269,14 @@ public class ProjectService {
 	public ProjectFormDataResponse fetchProjectFormDatas(long projectSq) {
 		List<GroupSkillInfoResponse> skills = groupingSkills(projectMapper.findSkillInfoList());
 		if (projectSq != 0L) {
-			Project project = projectRepository.findById(projectSq).orElseThrow();
-			ExistProjectVo existProjectVo = ExistProjectVo.from(project, projectUtil, skillMapper.findAllReqSkillsByProjectSq(projectSq), skillMapper.findAllPreferSkillsByProjectSq(projectSq));
+			Project project = projectMapper.findBySq(projectSq);
+			AreaInfoResponse areaInfoResponse = fetchSubDistrictInfoByProjectSq(project.getAddressSq());
+			ExistProjectVo existProjectVo = ExistProjectVo.from(project, 
+					projectUtil, 
+					skillMapper.findAllReqSkillsByProjectSq(projectSq), 
+					skillMapper.findAllPreferSkillsByProjectSq(projectSq).reversed(),
+					fetchParentDistrictInfoByCd(areaInfoResponse.getAreaSq()),
+					areaInfoResponse);
 			return ProjectFormDataResponse.from(commonCodeMapper, districtMapper, skills, existProjectVo);
 		}
 		return ProjectFormDataResponse.from(commonCodeMapper, districtMapper, skills);
