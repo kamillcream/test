@@ -27,7 +27,7 @@ public class CommentService {
     @Transactional
     public void createComment(CommentRequest commentRequest){
 //    	댓글 오류 처리
-    	if(commentRequest.getCommentDescriptionTxt() == null) {
+    	if(commentRequest.getDescription() == null) {
     		throw new IllegalArgumentException("내용을 입력해주세요.");
     	} else if(commentRequest.getBoardSq() == null && commentRequest.getAnswerSq() == null) {
     		throw new IllegalArgumentException("게시판 또는 답변 순번이 없습니다.");
@@ -37,7 +37,7 @@ public class CommentService {
     			.userSq(commentRequest.getUserSq())
         		.boardSq(commentRequest.getBoardSq())
         		.answerSq(commentRequest.getAnswerSq())
-        		.commentDescriptionTxt(commentRequest.getCommentDescriptionTxt())
+        		.commentDescriptionTxt(commentRequest.getDescription())
         		.commentTypeCd(commentRequest.getBoardSq() == null ? 1602L : 1601L).build();
         commentMapper.insert(comment);
         
@@ -54,13 +54,13 @@ public class CommentService {
     @Transactional
     public void updateComment(CommentRequest commentRequest, Long commentSq) {
 //    	댓글 업데이트
-    	if(commentRequest.getCommentDescriptionTxt() == null) {
+    	if(commentRequest.getDescription() == null) {
     		throw new IllegalArgumentException("내용을 입력해주세요.");
     	}
     	
         Comment comment = getComment(commentSq);
 
-        comment.setCommentDescriptionTxt(commentRequest.getCommentDescriptionTxt());
+        comment.setCommentDescriptionTxt(commentRequest.getDescription());
         
         commentMapper.update(comment);
         
@@ -80,7 +80,7 @@ public class CommentService {
     	Recommendation recommendation = recommendationMapper.findByCommentSq(commentSq);
     	
     	if(recommendation == null) {
-//        	추후 Authorization에서 userSq 가져올 예정
+//        	추후 Authorization 에서 userSq 가져올 예정
     		recommendation = Recommendation.builder().commentSq(commentSq).userSq(3L).recommendationTypeCd(1903L).build();
         	recommendationMapper.insert(recommendation);
         	

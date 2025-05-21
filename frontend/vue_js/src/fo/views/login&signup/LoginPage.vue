@@ -143,6 +143,7 @@
                   :key="provider.name"
                   class="btn btn-icon rounded-circle border"
                   :title="provider.title"
+                  @click="handleSocialLogin(provider.name)"
                 >
                   <img
                     :src="provider.img"
@@ -161,7 +162,13 @@
 
 <script setup>
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { api } from '@/axios'
+import { useUserStore } from '@/fo/stores/userStore'
+import router from '@/fo/router'
+import { useAlertStore } from '@/fo/stores/alertStore'
+
+const alertStore = useAlertStore()
 
 const loginType = ref('PERSONAL')
 const form = ref({
@@ -173,15 +180,113 @@ const form = ref({
   id_save: false,
 })
 
-const login = () => {
-  const type = loginType.value
-  const payload =
-    type === 'PERSONAL'
-      ? { login_tab: 'p', id: form.value.id, password: form.value.password }
-      : { login_tab: 'c', id: form.value.cid, password: form.value.cpassword }
+const userStore = useUserStore()
 
-  console.log('Login 요청', payload)
+const login = async () => {
+  const type = loginType.value
+  const userTypeCd = type === 'PERSONAL' ? 301 : 302
+
+  const id = type === 'PERSONAL' ? form.value.id : form.value.cid
+  const pw = type === 'PERSONAL' ? form.value.password : form.value.cpassword
+
+  const payload = {
+    userId: id,
+    userPw: pw,
+    userTypeCd,
+    autoLogin: form.value.autologin,
+  }
+  console.log('payload', payload)
+
+  try {
+    await api.$post('/login', payload)
+
+    await fetchUserInfo()
+
+    // 아이디 저장
+    if (form.value.id_save) {
+      if (type === 'PERSONAL') {
+        localStorage.setItem('savedPersonalId', form.value.id)
+      } else {
+        localStorage.setItem('savedCompanyId', form.value.cid)
+      }
+      localStorage.setItem('savedLoginType', loginType.value)
+    } else {
+      localStorage.removeItem('savedPersonalId')
+      localStorage.removeItem('savedCompanyId')
+      localStorage.removeItem('savedLoginType')
+    }
+
+    // **자동 로그인 저장 (여기 수정)**
+    if (form.value.autologin) {
+      localStorage.setItem('autoLogin', 'true')
+    } else {
+      localStorage.removeItem('autoLogin')
+    }
+
+    alertStore.show(userStore.userNm + '님 안녕하세요.', 'success')
+    router.push('/') // 메인 페이지로 이동
+  } catch (error) {
+    console.error(error)
+    alertStore.show(error.response?.data?.message || error.message, 'danger')
+  }
 }
+
+const fetchUserInfo = async () => {
+  try {
+    const res = await api.$post('/me')
+    const data = res.output
+    console.log('data', data)
+
+    // 로컬스토리지 저장
+    localStorage.setItem('userNm', data.userNm)
+    localStorage.setItem('userTypeCd', data.userTypeCd)
+
+    // Pinia 상태 저장
+    userStore.setUser({
+      userNm: data.userNm,
+      userTypeCd: data.userTypeCd,
+    })
+  } catch (error) {
+    console.error('유저 정보 불러오기 실패:', error)
+    alertStore.show(
+      '로그인 정보가 만료되었습니다. 다시 로그인 해주세요.',
+      'danger',
+    )
+    router.push('/login')
+  }
+}
+
+// 저장된 아이디를 form에 세팅하는 함수
+const loadSavedId = () => {
+  const savedType = localStorage.getItem('savedLoginType')
+  if (savedType) {
+    loginType.value = savedType
+  }
+  if (loginType.value === 'PERSONAL') {
+    form.value.id = localStorage.getItem('savedPersonalId') || ''
+    form.value.id_save = !!localStorage.getItem('savedPersonalId')
+  } else {
+    form.value.cid = localStorage.getItem('savedCompanyId') || ''
+    form.value.id_save = !!localStorage.getItem('savedCompanyId')
+  }
+
+  // 자동 로그인 여부도 로드해서 체크박스 초기화
+  form.value.autologin = localStorage.getItem('autoLogin') === 'true'
+}
+
+// 컴포넌트 마운트 시 실행
+onMounted(() => {
+  loadSavedId()
+})
+
+// loginType 변경 시 저장된 아이디 변경 반영
+watch(loginType, () => {
+  if (loginType.value === 'PERSONAL') {
+    form.value.id = localStorage.getItem('savedPersonalId') || ''
+  } else {
+    form.value.cid = localStorage.getItem('savedCompanyId') || ''
+  }
+})
 
 const socialProviders = [
   {
@@ -205,6 +310,10 @@ const socialProviders = [
     img: '/img/social/apple.png',
   },
 ]
+
+const handleSocialLogin = (provider) => {
+  alert(`${provider} 로그인은 준비 중입니다.`)
+}
 </script>
 
 <style scoped>

@@ -1,11 +1,11 @@
 package com.example.demo.domain.user.dto.response;
 
-import lombok.Data;
-
 import java.time.LocalDateTime;
 
+import lombok.Data;
+
 @Data
-public class UserJoinResponseDto {
+public class UserJoinResponseDTO {
     private Long userSq;
     private String userEmail;
     private String userNm;

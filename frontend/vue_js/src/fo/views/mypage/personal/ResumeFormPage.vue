@@ -63,30 +63,33 @@
                   >×</a
                 >
                 <img
+                  v-if="photoPreview"
                   :src="photoPreview"
                   alt="사진 미리보기"
                   class="img-fluid rounded mb-2"
                   style="max-height: 100%; max-width: 100%; object-fit: cover"
                 />
-                <label
-                  for="photoInput"
-                  class="photo-add-text"
-                  style="
-                    margin-top: 8px;
-                    color: #666;
-                    text-decoration: none;
-                    font-size: 14px;
-                    cursor: pointer;
-                  "
-                  >+ 사진 추가</label
-                >
-                <input
-                  type="file"
-                  id="photoInput"
-                  @change="handlePhotoUpload"
-                  accept="image/*"
-                  class="d-none"
-                />
+                <div class="v-else">
+                  <label
+                    for="photoInput"
+                    class="photo-add-text"
+                    style="
+                      margin-top: 8px;
+                      color: #666;
+                      text-decoration: none;
+                      font-size: 14px;
+                      cursor: pointer;
+                    "
+                    >+ 사진 추가</label
+                  >
+                  <input
+                    type="file"
+                    id="photoInput"
+                    @change="handlePhotoUpload"
+                    accept="image/*"
+                    class="d-none"
+                  />
+                </div>
               </div>
             </div>
 
@@ -265,28 +268,57 @@
                 >+ 추가하기</a
               >
             </label>
-            <div class="mb-2 d-flex gap-2 flex-wrap">
-              <div
-                v-for="(career, index) in resumeData.career"
-                :key="index"
-                class="btn btn-rounded btn-3d btn-light mb-2 position-relative"
-                style="padding-right: 24px"
+            <div class="mb-2">
+              <span
+                v-for="(item, idx) in resumeData.career"
+                :key="idx"
+                class="company-tag"
               >
-                {{ career.company }} {{ career.department }}
-                {{ career.position }} - {{ career.description }} ({{
-                  career.period
-                }})
+                {{ item.company }} / {{ item.department }} /
+                {{ item.position }} / {{ item.period }}
                 <span
-                  class="text-grey ms-2 position-absolute end-0 me-2"
-                  style="top: 50%; transform: translateY(-50%)"
+                  class="text-grey ms-2"
+                  style="cursor: pointer"
                   title="삭제"
-                  @click="removeCareer(index)"
+                  @click="removeCareer(idx)"
                   >×</span
                 >
-              </div>
+              </span>
             </div>
           </div>
+          <!-- 교육 이력 -->
+          <div class="form-group mb-3">
+            <label class="form-label mb-1 text-2" style="font-weight: bold">
+              교육 이력
+              <a
+                href="#"
+                class="text-grey text-decoration-none small ms-2"
+                @click.prevent="showTrainingForm"
+                >+ 추가하기</a
+              >
+            </label>
 
+            <div class="d-flex justify-content-end gap-3 mb-1">
+              <!-- 필요 시 정렬, 필터 버튼 등 위치 -->
+            </div>
+
+            <div class="mb-2">
+              <span
+                v-for="(item, idx) in resumeData.trainingHistories"
+                :key="idx"
+                class="training-tag"
+              >
+                {{ item.program }} / {{ item.institution }} / {{ item.period }}
+                <span
+                  class="text-grey ms-2"
+                  style="cursor: pointer"
+                  title="삭제"
+                  @click="removeTraining(idx)"
+                  >×</span
+                >
+              </span>
+            </div>
+          </div>
           <!-- 프로젝트 이력 -->
           <div class="form-group mb-3">
             <label class="form-label mb-1 text-2" style="font-weight: bold">
@@ -368,7 +400,7 @@
                   </div>
                   <div class="row mb-2">
                     <div class="col-sm-12">
-                      <strong>언어:</strong>
+                      <strong style="margin-right: 8px">언어:</strong>
                       <button
                         v-for="lang in project.languages"
                         :key="lang"
@@ -387,7 +419,7 @@
                   </div>
                   <div class="row mb-2">
                     <div class="col-sm-12">
-                      <strong>TOOL:</strong>
+                      <strong style="margin-right: 8px">TOOL:</strong>
                       <button
                         v-for="tool in project.tools"
                         :key="tool"
@@ -399,7 +431,7 @@
                   </div>
                   <div class="row mb-2">
                     <div class="col-sm-12">
-                      <strong>FW:</strong>
+                      <strong style="margin-right: 8px">FW:</strong>
                       <button
                         v-for="fw in project.frameworks"
                         :key="fw"
@@ -418,7 +450,7 @@
                   </div>
                   <div class="row mb-3">
                     <div class="col-sm-12">
-                      <strong>기타:</strong>
+                      <strong style="margin-right: 8px">기타:</strong>
                       <button
                         v-for="etc in project.etc"
                         :key="etc"
@@ -572,6 +604,11 @@ import { ref, reactive } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import ResumeModal from '@/fo/components/mypage/personal/ResumeModal.vue'
 import AddressSerchModal from '@/fo/components/mypage/personal/AddressSerchModal.vue'
+import EducationSearchModal from '@/fo/components/mypage/personal/EducationSearchModal.vue'
+import ResumeCompanyModal from '@/fo/components/mypage/personal/ResumeCompanyModal.vue'
+import TrainingModal from '@/fo/components/mypage/personal/TrainingModal.vue'
+import ShowProjectFormModal from '@/fo/components/mypage/personal/ShowProjectFormModal.vue'
+import LicenseModal from '@/fo/components/mypage/personal/LicenseModal.vue'
 
 const modalStore = useModalStore()
 
@@ -602,7 +639,7 @@ const openDetailModal = () => {
 const emailDomains = ['naver.com', 'gmail.com', 'daum.net', 'hanmail.net']
 
 // 사진 미리보기
-const photoPreview = ref('img/placeholders/user.png')
+const photoPreview = ref(null)
 
 // 이력서 데이터
 const resumeData = reactive({
@@ -616,6 +653,7 @@ const resumeData = reactive({
   address: '',
   education: [],
   career: [],
+  trainingHistories: [],
   projects: [],
   certificates: [],
   skills: [],
@@ -637,7 +675,7 @@ const handlePhotoUpload = (event) => {
 
 // 사진 삭제
 const deletePhoto = () => {
-  photoPreview.value = 'img/placeholders/user.png'
+  photoPreview.value = ''
 }
 
 // 파일 업로드 처리
@@ -648,25 +686,50 @@ const handleFileUpload = (event) => {
 }
 
 // 폼 표시 관련 메서드
+
+// 학력 입력 폼 표시 로직
 const showEducationForm = () => {
-  // 학력 입력 폼 표시 로직
+  modalStore.openModal(EducationSearchModal, {
+    onComplete: (edu) => {
+      resumeData.education.push(edu)
+    },
+  })
 }
 
+// 경력 입력 폼 표시 로직
 const showCareerForm = () => {
-  // 경력 입력 폼 표시 로직
+  modalStore.openModal(ResumeCompanyModal, {
+    onComplete: (career) => {
+      resumeData.career.push(career)
+    },
+  })
 }
-
+// 교육 입력 폼 표시 로직
+const showTrainingForm = () => {
+  modalStore.openModal(TrainingModal, {
+    onComplete: (training) => {
+      resumeData.trainingHistories.push(training)
+    },
+  })
+}
+// 프로젝트 입력 폼 표시 로직
 const showProjectForm = () => {
-  // 프로젝트 입력 폼 표시 로직
+  modalStore.openModal(ShowProjectFormModal, {
+    onComplete: (project) => {
+      resumeData.projects.push(project)
+    },
+  })
 }
-
+// 자격증 입력 폼 표시 로직
 const showCertificateForm = () => {
-  // 자격증 입력 폼 표시 로직
+  modalStore.openModal(LicenseModal, {
+    onComplete: (certificate) => {
+      resumeData.certificates.push(certificate)
+    },
+  })
 }
-
-const showSkillsForm = () => {
-  // 기술 입력 폼 표시 로직
-}
+// 기술 입력 폼 표시 로직
+const showSkillsForm = () => {}
 
 // 데이터 삭제 메서드
 const removeEducation = (index) => {
@@ -675,6 +738,10 @@ const removeEducation = (index) => {
 
 const removeCareer = (index) => {
   resumeData.career.splice(index, 1)
+}
+
+const removeTraining = (index) => {
+  resumeData.trainingHistories.splice(index, 1)
 }
 
 const removeProject = (index) => {
@@ -718,5 +785,29 @@ const submitResume = () => {
 
 .transition-transform {
   transition: transform 0.3s ease;
+}
+
+.company-tag {
+  display: inline-block;
+  background: #ffffff;
+  color: #333;
+  border-radius: 12px;
+  padding: 4px 12px;
+  margin: 4px 5px 4px 0;
+  font-size: 0.97em;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.training-tag {
+  display: inline-block;
+  background: #ffffff;
+  color: #333;
+  border-radius: 12px;
+  padding: 4px 12px;
+  margin: 4px 5px 4px 0;
+  font-size: 0.97em;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
 }
 </style>

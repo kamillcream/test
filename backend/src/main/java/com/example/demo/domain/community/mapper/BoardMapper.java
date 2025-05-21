@@ -18,6 +18,14 @@ public interface BoardMapper {
         @Param("sortType") String sortType,
         @Param("size") Long size,
         @Param("offset") Long offset);
+     Long findAllCnt(@Param("boardTypeCd") Long boardTypeCd,
+    	        @Param("boardAdoptStatusCd") Long boardAdoptStatusCd,
+    	        @Param("searchType") String searchType,
+    	        @Param("keyword") String keyword,
+    	        @Param("skillTags") List<Long> skillTags,
+    	        @Param("sortType") String sortType,
+    	        @Param("size") Long size,
+    	        @Param("offset") Long offset);
      void insert(Board board);
      void update(Board board);
      void delete(@Param("boardSq") Long boardSq);

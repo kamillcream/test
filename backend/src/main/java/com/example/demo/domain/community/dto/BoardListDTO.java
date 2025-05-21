@@ -1,7 +1,6 @@
-package com.example.demo.domain.community.dto.response;
+package com.example.demo.domain.community.dto;
 
-import com.example.demo.domain.community.dto.SkillTagDTO;
-import com.example.demo.domain.community.entity.Board;
+import com.example.demo.domain.community.entity.*;
 
 import lombok.*;
 import java.time.LocalDateTime;
@@ -11,39 +10,33 @@ import java.util.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BoardResponse{
+public class BoardListDTO{
 	private Long sq;
     private Long userSq;
 //    private String userNm; // 사용자 이름
     private String ttl;
-    private String description;
     private Integer viewCnt;
     private Integer commentCnt;
     private Integer recommendCnt;
+    private Integer answerCnt;
     private Long boardAdoptStatusCd;
     private LocalDateTime createdAt;
-//    private List<Attachment> attachments; // 첨부파일
     private List<String> normalTags;  // 일반 태그
     private List<SkillTagDTO> skillTags;
-    private List<AnswerListResponse> answers;
-    private List<CommentResponse> comments;
 
-    
-    public static BoardResponse fromEntity(Board board, List<String> normalTags, List<SkillTagDTO> skillTags, List<AnswerListResponse> answers, List<CommentResponse> comments) {
-        return new BoardResponse(
+    public static BoardListDTO fromEntity(Board board, Integer boardAnswerCnt, List<String> normalTags, List<SkillTagDTO> skillTags) {
+        return new BoardListDTO(
 			board.getBoardSq(),
 			board.getUserSq(),
 			board.getBoardTtl(),
-			board.getBoardDescriptionEdt(),
 			board.getBoardViewCnt(),
 			board.getBoardCommentCnt(),
 			board.getBoardRecommendCnt(),
+			boardAnswerCnt,
 			board.getBoardAdoptStatusCd(),
 			board.getBoardCreatedAtDtm(),
 			normalTags,
-			skillTags,
-			answers,
-			comments
+			skillTags
         );
     }
 	

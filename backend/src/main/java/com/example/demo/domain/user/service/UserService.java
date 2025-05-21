@@ -6,7 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.domain.user.dto.AddressDTO;
 import com.example.demo.domain.user.dto.CompanyProfileDTO;
 import com.example.demo.domain.user.dto.UserDTO;
-import com.example.demo.domain.user.dto.request.RequestSignUpDTO;
+import com.example.demo.domain.user.dto.request.SignUpRequestDTO;
+import com.example.demo.domain.user.dto.response.LoginResponseDTO;
 import com.example.demo.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -23,8 +24,9 @@ public class UserService {
     }
 
     @Transactional
-    public void signUp(RequestSignUpDTO requestDto) {
-        // 1. 중복 검사
+    public void signUp(SignUpRequestDTO requestDto) {
+
+        // 중복 검사
         if (userRepository.existsByUserId(requestDto.getUserId())) {
             throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
         }
@@ -77,6 +79,10 @@ public class UserService {
 
             userRepository.insertCompanyProfile(companyProfileDTO);
         }
+    }
+
+    public LoginResponseDTO getUserInfoByUserSq(Long userSq) {
+        return userRepository.getUserInfoByUserSq(userSq);
     }
 
 }

@@ -12,17 +12,17 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AnswerResponse{
-	private Long answerSq;
+	private Long sq;
     private Long userSq;
     private Long boardSq;
 //    private String userNm; // 사용자 이름
-    private String answerTtl;
-    private String answerDescriptionEdt;
-    private Integer answerViewCnt;
-    private Integer answerCommentCnt;
-    private Integer answerRecommendCnt;
-    private String answerIsAdoptedYn;
-    private LocalDateTime answerCreatedAtDtm;
+    private String ttl;
+    private String description;
+    private Integer viewCnt;
+    private Integer commentCnt;
+    private Integer recommendCnt;
+    private String isAdoptedYn;
+    private LocalDateTime createdAt;
 //    private List<Attachment> attachments; // 첨부파일
     private List<String> normalTags;
     private List<SkillTagDTO> skillTags;

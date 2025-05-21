@@ -105,7 +105,7 @@
   </div>
 </template>
 <script setup>
-import { ref, defineEmits, defineProps, onMounted } from 'vue'
+import { ref, defineEmits, defineProps } from 'vue'
 import { useModalStore } from '../../../stores/modalStore'
 import { useAlertStore } from '../../../stores/alertStore'
 import { api } from '@/axios.js'

@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import lombok.Data;
 
 @Data
-public class RequestSignUpDTO {
+public class SignUpRequestDTO {
     // 사용자 정보
     private String userId;
     private String userEmail;

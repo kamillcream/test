@@ -10,8 +10,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class BoardRequest{
     private Long userSq;
-    private String boardTtl;
-    private String boardDescriptionEdt;
+    private String ttl;
+    private String description;
     private Long boardAdoptStatusCd;
     private List<String> normalTags;
     private List<SkillTagDTO> skillTags;

@@ -12,8 +12,8 @@ import java.util.*;
 public class AnswerRequest{
     private Long userSq;
     private Long boardSq;
-    private String answerTtl;
-    private String answerDescriptionEdt;
+    private String ttl;
+    private String description;
     private List<String> normalTags;
     private List<SkillTagDTO> skillTags;
 	

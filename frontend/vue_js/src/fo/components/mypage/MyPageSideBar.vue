@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Company Sidebar -->
-    <aside v-if="authStore.isCompany" class="company sidebar">
+    <aside v-if="userStore.userType === 'COMPANY'" class="company sidebar">
       <h5 class="font-weight-semi-bold">마이 페이지</h5>
       <ul class="nav nav-list flex-column mb-5">
         <li class="nav-item">
@@ -132,11 +132,9 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '@/fo/stores/authStore'
+import { useUserStore } from '@/fo/stores/userStore'
 
-const authStore = useAuthStore()
-
-//추후 로그인 기능 완성 이후 수정필요
+const userStore = useUserStore()
 </script>
 
 <style scoped>

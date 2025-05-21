@@ -23,7 +23,7 @@ public class QnaController {
     private final BoardService boardService;
 //    전체 QnA 조회
     @GetMapping
-    public ResponseEntity<ApiResponse<List<BoardListResponse>>> getAllQnas(
+    public ResponseEntity<ApiResponse<BoardListResponse>> getAllQnas(
     		@RequestParam(value = "boardAdoptStatusCd", required = false) Long boardAdoptStatusCd, 
     		@RequestParam(value = "searchType", required = false) String searchType, 
     		@RequestParam(value = "keyword", required = false) String keyword,
@@ -31,7 +31,6 @@ public class QnaController {
     		@RequestParam(value = "sortType", defaultValue = "latest") String sortType,
     		@RequestParam(value = "page", defaultValue = "1") Long page,
     		@RequestParam(value = "size", defaultValue = "10") Long size){
-    	System.out.println("전체 조회 실행");
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "게시글 조회 성공", boardService.getAllBoards(1402L, boardAdoptStatusCd, searchType, keyword, skillTags, sortType, page, size)));
     }
     
@@ -58,7 +57,6 @@ public class QnaController {
 //    QnA 삭제
     @PatchMapping("/{boardSq}")
     public ResponseEntity<ApiResponse<NullType>> deleteQna(@PathVariable("boardSq") Long boardSq){
-    	System.out.println("게시글 삭제 실행");
     	boardService.deleteBoard(boardSq);
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "게시글 삭제가 완료되었습니다.", null));
     }
@@ -66,7 +64,6 @@ public class QnaController {
 //    QnA 조회수 증가
     @PatchMapping("/{boardSq}/increment-view")
     public ResponseEntity<ApiResponse<NullType>> addViewCntQna(@PathVariable("boardSq") Long boardSq){
-    	System.out.println("조회수 증가 실행");
     	boardService.addViewCntBoard(boardSq);
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "조회수 증가가 완료되었습니다.", null));
     }
