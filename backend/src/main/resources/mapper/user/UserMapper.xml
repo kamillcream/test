@@ -79,11 +79,12 @@
 
   <!-- 아이디 찾기 -->
 
-  <select id="findUserIdByNameAndEmail"
-    resultType="com.example.demo.domain.user.dto.response.FindUserIdResponseDTO"> SELECT user_id AS
-    userId, user_nm AS userNm, user_type_cd AS userTypeCd, USER_CREATED_AT_DTM AS userCreatedAtDtm
-    FROM TBL_USER_M WHERE USER_NM = #{name} AND USER_EMAIL = #{email} AND USER_WITHDRAW_YN = 'N'
-    LIMIT 1 </select>
+  <select id="findUserInfoByNameAndEmail" parameterType="map" resultType="map"> SELECT user_id AS
+    userId, user_nm AS userNm, user_type_cd AS userTypeCd, user_created_at_dtm AS userCreatedAtDtm
+    FROM TBL_USER_M WHERE user_nm = #{name} AND user_email = #{email} AND user_is_deleted_yn = 'N' </select>
 
+  <select id="findCommonCodeNameByCodeSq" parameterType="long" resultType="string"> SELECT
+    common_code_nm FROM TBL_COMMON_CODE_C WHERE common_code_sq = #{codeSq} AND
+    common_code_is_active_yn = 'Y' </select>
 
 </mapper>

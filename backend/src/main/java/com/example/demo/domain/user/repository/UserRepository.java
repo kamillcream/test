@@ -1,11 +1,14 @@
 package com.example.demo.domain.user.repository;
 
+import java.util.Map;
+
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.domain.user.dto.AddressDTO;
 import com.example.demo.domain.user.dto.CompanyProfileDTO;
 import com.example.demo.domain.user.dto.UserDTO;
 import com.example.demo.domain.user.dto.request.FindIdRequestDTO;
+import com.example.demo.domain.user.dto.response.FindIdResponseDTO;
 import com.example.demo.domain.user.dto.response.LoginResponseDTO;
 import com.example.demo.domain.user.mapper.UserMapper;
 
@@ -65,9 +68,12 @@ public class UserRepository {
         userMapper.deleteRefreshTokenByUserSq(userSq);
     }
 
-    public String findUserIdByNameAndEmail(FindIdRequestDTO dto) {
-        return userMapper.findUserIdByNameAndEmail(dto);
+    public Map<String, Object> findUserIdByNameAndEmail(String name, String email) {
+        return userMapper.findUserInfoByNameAndEmail(name, email);
+    }
 
+    public String findCommonCodeNameByCodeSq(Long commonCodeSq) {
+        return userMapper.findCommonCodeNameByCodeSq(commonCodeSq);
     }
 
 }

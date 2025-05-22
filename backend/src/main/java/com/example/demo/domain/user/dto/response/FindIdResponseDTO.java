@@ -5,9 +5,9 @@ import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
-public class FindUserIdResponseDTO {
+public class FindIdResponseDTO {
     private String userId;
     private String userNm;
-    private Long userTypeCd;
+    private String userType;
     private LocalDateTime userCreatedAtDtm;
 }

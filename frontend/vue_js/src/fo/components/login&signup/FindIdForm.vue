@@ -14,7 +14,6 @@
         type="text"
         class="form-control"
         id="findIdEmailName"
-        required
         @input="validateName"
       />
       <div v-if="nameError" class="invalid-feedback">{{ nameError }}</div>
@@ -35,7 +34,6 @@
           class="form-control form-control-sm"
           @input="validateEmail"
           placeholder="이메일 아이디"
-          required
         />
         <span class="input-group-text">@</span>
         <input
@@ -79,7 +77,6 @@
           type="text"
           class="form-control"
           @input="validateVerifycode"
-          required
         />
         <button type="button" class="btn btn-primary" @click="verifyCode">
           확인
@@ -99,6 +96,9 @@
 import { ref } from 'vue'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { api } from '@/axios'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const alertStore = useAlertStore()
 
@@ -161,6 +161,11 @@ const validateVerifycode = () => {
   verifycodeError.value = ''
   if (!verificationCode.value) {
     verifycodeError.value = '인증번호를 입력하세요.'
+    verifyCodeValid.value = false
+  } else if (!verifyCodeValid.value) {
+    verifycodeError.value = '인증을 진행해주세요.'
+  } else {
+    verifycodeError.value = ''
   }
 }
 
@@ -197,6 +202,7 @@ const verifyCode = async () => {
     await api.$post('/email/verify-code', { email, code })
     alertStore.show('이메일 인증에 성공하였습니다.', 'info')
     verifyCodeValid.value = true
+    validateVerifycode()
   } catch (error) {
     console.error('인증 코드 검증 실패:', error)
     verifycodeError.value = '인증번호가 일치하지 않습니다.'
@@ -204,14 +210,39 @@ const verifyCode = async () => {
   }
 }
 
-const handleFindId = () => {
+const handleFindId = async () => {
   validateName()
   validateEmail()
   validateVerifycode()
 
   if (nameValid.value && emailValid.value && verifyCodeValid.value) {
     console.log('✅ 유효성 통과. 아이디 찾기 실행')
-    // TODO: 실제 아이디 찾기 API 요청
+
+    const domain =
+      emailDomain.value === 'custom' ? customDomain.value : emailDomain.value
+    const email = `${emailId.value}@${domain}`
+
+    try {
+      const response = await api.$post('/find-id', {
+        name: name.value,
+        email: email,
+      })
+
+      if (response && response.output && response.output.userId) {
+        // console.log('response', response)
+        const outputStr = encodeURIComponent(JSON.stringify(response.output))
+        // 성공: 아이디 결과 페이지로 userData 넘기기
+        router.push({
+          name: 'FindIdResult',
+          query: { output: outputStr },
+        })
+      } else {
+        alertStore.show('일치하는 회원 정보를 찾을 수 없습니다.', 'warning')
+      }
+    } catch (error) {
+      console.error('아이디 찾기 API 요청 실패:', error)
+      alertStore.show('아이디 찾기에 실패했습니다.', 'danger')
+    }
   } else {
     console.warn('❌ 유효성 검사 실패. 아이디 찾기 요청 불가')
   }

@@ -1,13 +1,13 @@
 package com.example.demo.domain.user.mapper;
 
+import java.util.Map;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.example.demo.domain.user.dto.AddressDTO;
 import com.example.demo.domain.user.dto.CompanyProfileDTO;
 import com.example.demo.domain.user.dto.UserDTO;
-import com.example.demo.domain.user.dto.request.FindIdRequestDTO;
-import com.example.demo.domain.user.dto.response.FindUserIdResponseDTO;
 import com.example.demo.domain.user.dto.response.LoginResponseDTO;
 
 @Mapper
@@ -37,6 +37,8 @@ public interface UserMapper {
 
     void deleteRefreshTokenByUserSq(Long userSq);
 
-    FindUserIdResponseDTO findUserIdByNameAndEmail(@Param("name") String name, @Param("email") String email);
+    Map<String, Object> findUserInfoByNameAndEmail(@Param("name") String name, @Param("email") String email);
+
+    String findCommonCodeNameByCodeSq(@Param("codeSq") Long codeSq);
 
 }
