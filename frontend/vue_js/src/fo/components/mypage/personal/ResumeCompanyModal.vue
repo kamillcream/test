@@ -39,12 +39,23 @@
           </div>
           <div class="form-group period-group">
             <label class="modal-label">근무 기간</label>
-            <input
-              v-model="form.period"
-              type="text"
-              class="form-control"
-              placeholder="예: 2020/01~2023/03"
-            />
+            <div style="display: flex; gap: 8px;">
+              <input
+                v-model="form.startDate"
+                type="month"
+                class="form-control"
+                style="width: 48%;"
+                placeholder="입사년월"
+              />
+              <span style="align-self: center;">~</span>
+              <input
+                v-model="form.endDate"
+                type="month"
+                class="form-control"
+                style="width: 48%;"
+                placeholder="퇴사년월"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -72,10 +83,19 @@ const form = ref({
   company: '',
   department: '',
   position: '',
-  period: '',
+  startDate: '',
+  endDate: '',   
+  period: '',    
 })
 
 const submit = () => {
+  // YYYY-MM -> YYYY.MM 포맷으로 변환
+  const format = (date) => {
+    if (!date) return ''
+    const [y, m] = date.split('-')
+    return `${y}.${m}`
+  }
+  form.value.period = `${format(form.value.startDate)} ~ ${format(form.value.endDate)}`
   props.onComplete({ ...form.value }) // 부모에게 데이터 전달
   modalStore.closeModal()
 }
