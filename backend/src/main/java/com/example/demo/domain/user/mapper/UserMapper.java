@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Param;
 import com.example.demo.domain.user.dto.AddressDTO;
 import com.example.demo.domain.user.dto.CompanyProfileDTO;
 import com.example.demo.domain.user.dto.UserDTO;
+import com.example.demo.domain.user.dto.request.FindIdRequestDTO;
+import com.example.demo.domain.user.dto.response.FindUserIdResponseDTO;
 import com.example.demo.domain.user.dto.response.LoginResponseDTO;
 
 @Mapper
@@ -34,5 +36,7 @@ public interface UserMapper {
     LoginResponseDTO findUserInfoByUserSq(@Param("userSq") Long userSq);
 
     void deleteRefreshTokenByUserSq(Long userSq);
+
+    FindUserIdResponseDTO findUserIdByNameAndEmail(@Param("name") String name, @Param("email") String email);
 
 }

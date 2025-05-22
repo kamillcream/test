@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.domain.user.dto.AddressDTO;
 import com.example.demo.domain.user.dto.CompanyProfileDTO;
 import com.example.demo.domain.user.dto.UserDTO;
+import com.example.demo.domain.user.dto.request.FindIdRequestDTO;
 import com.example.demo.domain.user.dto.request.SignUpRequestDTO;
 import com.example.demo.domain.user.dto.response.LoginResponseDTO;
 import com.example.demo.domain.user.repository.UserRepository;
@@ -83,6 +84,10 @@ public class UserService {
 
     public LoginResponseDTO getUserInfoByUserSq(Long userSq) {
         return userRepository.getUserInfoByUserSq(userSq);
+    }
+
+    public String findUserId(FindIdRequestDTO dto) {
+        return userRepository.findUserIdByNameAndEmail(dto);
     }
 
 }
