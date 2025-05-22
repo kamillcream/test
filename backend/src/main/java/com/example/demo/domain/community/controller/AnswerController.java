@@ -30,6 +30,7 @@ public class AnswerController {
 //    답변 등록
     @PostMapping
     public ResponseEntity<ApiResponse<NullType>> createAnswer(@RequestBody AnswerRequest answerRequest){
+    	System.out.println("답변 등록");
     	answerService.createAnswer(answerRequest);
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.CREATED, "답변 등록이 완료되었습니다.", null));
     }

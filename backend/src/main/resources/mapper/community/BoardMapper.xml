@@ -144,7 +144,7 @@
 	    SET board_comment_cnt = (
 	        SELECT COUNT(*) 
 	        FROM TBL_BOARD_COMMENT_S 
-	        WHERE board_sq = #{boardSq} AND comment_is_deleted_yn = "N"
+	        WHERE board_sq = #{boardSq} AND comment_is_deleted_yn = 'N'
 	    )
 	    WHERE board_sq = #{boardSq}
 	</update>

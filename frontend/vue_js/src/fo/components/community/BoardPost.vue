@@ -2,7 +2,7 @@
   <div>
     <div class="post-header">
       <h1 class="font-weight-semi-bold mb-0 position-relative">
-        <div v-if="isQna" class="d-flex flex-wrap gap-2 mb-2">
+        <div v-if="boardType == 'qna'" class="d-flex flex-wrap gap-2 mb-2">
           <span
             v-if="boardInfo.boardAdoptStatusCd == 1501"
             class="badge bg-warning badge-xs font-size-l"
@@ -68,7 +68,7 @@
         </span>
         <span
           ><i class="far fa-calendar-alt me-1"></i>
-          <a href="#"> {{ boardInfo.createdAt }}</a></span
+          <a href="#"> {{ formatTime(boardInfo.createdAt) }}</a></span
         >
       </div>
     </div>
@@ -112,38 +112,40 @@
         >{{ normal_tag }}</a
       >
     </div>
-    <div
-      v-if="boardInfo.user_sq == viewUsersq"
-      class="post-admin mt-4 text-end"
-    >
+    <div class="post-admin mt-4 text-end">
+      <!-- [추가] 본인 게시글이 아닐 경우에만 보이게 -->
       <button
-        v-if="isQna"
+        v-if="boardType == 'qna' && boardInfo.userSq != viewUsersq"
         type="button"
         class="btn btn-primary me-2"
         @click="clickApplication"
       >
         답변 작성
       </button>
-      <button v-if="isQna" type="button" class="btn btn-primary me-2">
+      <!-- [추가] 아래 버튼 4개 본인 게시글인 경우에만 보이게 -->
+      <button
+        v-if="boardType == 'qna'"
+        type="button"
+        class="btn btn-primary me-2"
+      >
         자체 해결
       </button>
-      <button v-if="isQna" type="button" class="btn btn-primary me-2">
+      <button
+        v-if="boardType == 'qna'"
+        type="button"
+        class="btn btn-primary me-2"
+      >
         미해결
       </button>
-      <a
-        :href="`/${isQna ? 'qna' : 'board'}/register`"
-        class="btn btn-primary me-2"
-        >수정</a
-      >
+      <button class="btn btn-primary me-2" @click="editBoard">수정</button>
       <button type="button" class="btn btn-primary" @click="openConfirm">
         삭제
       </button>
-    </div>
-    <div
-      v-if="boardInfo.user_sq == Qusetion_user_sq"
-      class="post-admin mt-4 text-end"
-    >
-      <a href="#" class="btn btn-primary">답변 채택하기</a>
+
+      <!-- [추가] 답변글인 경우에만 && 원 QnA 게시글의 작성자 본인일 경우에만 -->
+      <a v-if="boardInfo.userSq == viewUsersq" href="#" class="btn btn-primary"
+        >답변 채택하기</a
+      >
     </div>
   </div>
 </template>
@@ -154,18 +156,45 @@ import AnswerRegisterModal from './AnswerRegisterModal.vue'
 import CommonConfirmModal from '../common/CommonConfirmModal.vue'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import RepostModal from './RepostModal.vue'
+import { useBoardStore } from '@/fo/stores/boardStore'
+import { useRouter } from 'vue-router'
 
 const alertStore = useAlertStore()
-
 const modalStore = useModalStore()
+const boardStore = useBoardStore()
 
-const props = defineProps({ boardInfo: Array, isQna: Boolean })
+const router = useRouter()
+
+const props = defineProps({ boardInfo: Array, boardType: String })
 
 const boardInfo = computed(() => props.boardInfo)
-const isQna = computed(() => props.isQna)
+const boardType = computed(() => props.boardType)
+
+const formatTime = (createdAt) => {
+  const date = new Date(createdAt)
+  let year = date.getFullYear()
+  let month = date.getMonth() + 1
+  let day = date.getDate()
+  if (month < 10) month = '0' + month
+  if (day < 10) day = '0' + day
+
+  return `${year}-${month}-${day}`
+}
 
 // 현재 사용자 시퀀스
 const viewUsersq = ref(1)
+
+// 게시글 수정 모달
+const editBoard = () => {
+  boardStore.setBoard(boardInfo.value)
+  boardStore.editSq = boardInfo.value.sq
+  console.log(boardType.value)
+  if (boardType.value == 'board' || boardType.value == 'qna') {
+    router.push(`/${boardType.value}/register`)
+  } else if (boardType.value == 'answer') {
+    modalStore.openModal(AnswerRegisterModal, { size: 'modal-lg' })
+  }
+}
 
 // 삭제 컨펌 모달
 const openConfirm = () => {

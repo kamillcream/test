@@ -58,7 +58,7 @@
               </p>
               <!-- 날짜 + 수정/삭제 (홍길동과 동일하게 float-end 사용) -->
               <span class="date float-end font-size-11">
-                {{ comment.createdAt }}
+                {{ formatTime(comment.createdAt) }}
               </span>
             </div>
           </div>
@@ -70,6 +70,7 @@
         class="contact-form p-4 rounded bg-color-grey"
         action="php/contact-form.php"
         method="POST"
+        @submit.prevent="openRegisterConfirm"
       >
         <div class="p-2">
           <div class="row">
@@ -78,6 +79,7 @@
             >
             <div class="form-group col-11">
               <input
+                v-model="description"
                 type="text"
                 maxlength="5000"
                 data-msg-required="댓글을 입력해주세요."
@@ -92,7 +94,6 @@
                 value="댓글 작성"
                 class="btn btn-primary text-3"
                 data-loading-text="로딩 중..."
-                @submit="openRegisterConfirm"
               />
             </div>
           </div>
@@ -105,15 +106,43 @@
 <script setup>
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { useModalStore } from '@/fo/stores/modalStore'
-import { defineProps } from 'vue'
+import { defineProps, ref } from 'vue'
 import CommonConfirmModal from '../common/CommonConfirmModal.vue'
 import RepostModal from './RepostModal.vue'
+import { api } from '@/axios'
+import { useRoute } from 'vue-router'
 
 const alertStore = useAlertStore()
 
 const modalStore = useModalStore()
+const route = useRoute()
+const boardSq = route.params.board_sq
 
-const props = defineProps({ comments: Array })
+const formatTime = (createdAt) => {
+  const date = new Date(createdAt)
+  let year = date.getFullYear()
+  let month = date.getMonth() + 1
+  let day = date.getDate()
+  let hour = date.getHours()
+  let minute = date.getMinutes()
+  let timePeriod = 'am'
+  if (hour > 12) {
+    hour += -12
+    timePeriod = 'pm'
+  }
+  if (minute < 10) minute = '0' + minute
+
+  return `${year}년 ${month}월 ${day}일 ${hour}:${minute} ${timePeriod}`
+}
+
+const props = defineProps({
+  comments: Array,
+  isAnswer: Boolean,
+  answerSq: Number,
+  getBoard: Function,
+})
+
+const description = ref('')
 
 // 삭제 컨펌 모달
 const openDeleteConfirm = () => {
@@ -132,14 +161,33 @@ const openDeleteConfirm = () => {
 
 // 댓글 등록 컨펌 모달
 const openRegisterConfirm = () => {
+  console.log(props.boardType)
   modalStore.openModal(CommonConfirmModal, {
     title: '댓글 등록',
     message: '댓글을 등록하시겠습니까?',
-    onConfirm: () => {
-      // 성공
-      alertStore.show('등록되었습니다.', 'success')
-      // 실패
-      // alertStore.show('등록에 실패하였습니다.', 'danger')
+    onConfirm: async () => {
+      try {
+        if (description.value == null || description.value.trim() == '') {
+          alertStore.show('내용을 입력해주세요.', 'danger')
+          return
+        }
+
+        const res = await api.$post(`/comment`, {
+          userSq: 4,
+          boardSq: props.isAnswer ? null : boardSq,
+          answerSq: props.isAnswer ? props.answerSq : null,
+          description: description.value,
+        })
+
+        if (res.status == 'CREATED') {
+          alertStore.show(res.message, 'success')
+          props.getBoard()
+        } else {
+          alertStore.show('댓글 등록에 실패하였습니다.', 'danger')
+        }
+      } catch (error) {
+        alertStore.show('댓글 등록에 실패하였습니다.', 'danger')
+      }
       modalStore.closeModal()
     },
   })
