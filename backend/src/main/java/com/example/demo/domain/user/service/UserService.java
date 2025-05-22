@@ -113,4 +113,8 @@ public class UserService {
         return dto;
     }
 
+    public UserDTO findUserByInfo(String userId, String userNm, String userEmail) {
+        return userRepository.findUserByInfo(userId, userNm, userEmail);
+    }
+
 }

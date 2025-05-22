@@ -41,4 +41,7 @@ public interface UserMapper {
 
     String findCommonCodeNameByCodeSq(@Param("codeSq") Long codeSq);
 
+    UserDTO findUserByInfo(@Param("userId") String userId, @Param("userNm") String userNm,
+            @Param("userEmail") String userEmail);
+
 }

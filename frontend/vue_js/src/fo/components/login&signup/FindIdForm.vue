@@ -200,7 +200,7 @@ const verifyCode = async () => {
 
   try {
     await api.$post('/email/verify-code', { email, code })
-    alertStore.show('이메일 인증에 성공하였습니다.', 'info')
+    alertStore.show('이메일 인증에 성공하였습니다.', 'sucess')
     verifyCodeValid.value = true
     validateVerifycode()
   } catch (error) {
@@ -237,14 +237,14 @@ const handleFindId = async () => {
           query: { output: outputStr },
         })
       } else {
-        alertStore.show('일치하는 회원 정보를 찾을 수 없습니다.', 'warning')
+        alertStore.show('일치하는 회원 정보를 찾을 수 없습니다.', 'danger')
       }
     } catch (error) {
       console.error('아이디 찾기 API 요청 실패:', error)
       alertStore.show('아이디 찾기에 실패했습니다.', 'danger')
     }
   } else {
-    console.warn('❌ 유효성 검사 실패. 아이디 찾기 요청 불가')
+    alertStore.show('입력 정보를 확인해주세요.', 'danger')
   }
 }
 </script>

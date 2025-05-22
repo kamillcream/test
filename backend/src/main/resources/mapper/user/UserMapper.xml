@@ -87,4 +87,8 @@
     common_code_nm FROM TBL_COMMON_CODE_C WHERE common_code_sq = #{codeSq} AND
     common_code_is_active_yn = 'Y' </select>
 
+
+  <select id="findUserByInfo" parameterType="map"
+    resultType="com.example.demo.domain.user.dto.UserDTO"> SELECT * FROM TBL_USER_M WHERE user_id =
+    #{userId} AND user_nm = #{userNm} AND user_email = #{userEmail} AND user_is_deleted_yn = 'N' </select>
 </mapper>

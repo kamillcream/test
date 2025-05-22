@@ -58,6 +58,19 @@ public class JwtProvider {
                 .compact();
     }
 
+    public String createResetToken(Long userSq) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + 5 * 60 * 1000); // 5분 유효
+
+        return Jwts.builder()
+                .setSubject(String.valueOf(userSq))
+                .claim("purpose", "reset-password")
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);

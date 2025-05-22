@@ -76,4 +76,7 @@ public class UserRepository {
         return userMapper.findCommonCodeNameByCodeSq(commonCodeSq);
     }
 
+    public UserDTO findUserByInfo(String userId, String userNm, String userEmail) {
+        return userMapper.findUserByInfo(userId, userNm, userEmail);
+    }
 }
