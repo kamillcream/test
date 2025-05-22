@@ -7,8 +7,12 @@
     />
     <div class="container py-5 mt-3">
       <div class="post-content ms-0">
-        <BoardPost :boardInfo="boardInfo" :isQna="false" />
-        <BoardComment :comments="boardInfo.comments" />
+        <BoardPost :boardInfo="boardInfo" boardType="board" />
+        <BoardComment
+          :comments="boardInfo.comments"
+          :isAnswer="false"
+          :getBoard="getBoard"
+        />
       </div>
     </div>
   </section>

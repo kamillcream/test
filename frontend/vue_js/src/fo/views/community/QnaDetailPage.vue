@@ -8,7 +8,7 @@
 
     <div class="container py-5 mt-3">
       <div class="post-content ms-0">
-        <BoardPost :boardInfo="boardInfo" :isQna="true" />
+        <BoardPost :boardInfo="boardInfo" boardType="qna" />
         <!-- 답변 영역 -->
         <div class="answers-section mt-5">
           <h4 class="mb-4" style="font-size: 1.5rem">
@@ -56,7 +56,11 @@
             </div>
           </div>
         </div>
-        <BoardComment :comments="boardInfo.comments" />
+        <BoardComment
+          :comments="boardInfo.comments"
+          :isAnswer="false"
+          :getBoard="getBoard"
+        />
       </div>
     </div>
   </section>

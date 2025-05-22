@@ -46,7 +46,7 @@
 	    SET answer_comment_cnt = (
 	        SELECT COUNT(*) 
 	        FROM TBL_BOARD_COMMENT_S 
-	        WHERE answer_sq = #{answerSq} AND comment_is_deleted_yn = "N"
+	        WHERE answer_sq = #{answerSq} AND comment_is_deleted_yn = 'N'
 	    )
 	    WHERE answer_sq = #{answerSq}
 	</update>
