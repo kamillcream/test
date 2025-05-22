@@ -119,10 +119,8 @@ public class LoginController {
 
         @PostMapping("/logout")
         public ResponseEntity<ApiResponse<Void>> logout(
-                        @AuthenticationPrincipal JwtAuthenticationToken authentication,
+                        @AuthenticationPrincipal Long userSq,
                         HttpServletResponse httpServletResponse) {
-
-                Long userSq = (Long) authentication.getPrincipal();
 
                 // DB에서 userSq에 해당하는 리프레시 토큰 삭제
                 loginService.deleteRefreshTokenByUserSq(userSq);
