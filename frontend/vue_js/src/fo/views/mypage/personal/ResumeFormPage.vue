@@ -274,8 +274,8 @@
                 :key="idx"
                 class="company-tag"
               >
-                {{ item.company }} / {{ item.department }} /
-                {{ item.position }} / {{ item.period }}
+                {{ item.company }}회사  {{ item.department }}부서 
+                {{ item.position }} ({{ item.period }})
                 <span
                   class="text-grey ms-2"
                   style="cursor: pointer"
@@ -600,7 +600,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import ResumeModal from '@/fo/components/mypage/personal/ResumeModal.vue'
 import AddressSerchModal from '@/fo/components/mypage/personal/AddressSerchModal.vue'
@@ -609,6 +609,7 @@ import ResumeCompanyModal from '@/fo/components/mypage/personal/ResumeCompanyMod
 import TrainingModal from '@/fo/components/mypage/personal/TrainingModal.vue'
 import ShowProjectFormModal from '@/fo/components/mypage/personal/ShowProjectFormModal.vue'
 import LicenseModal from '@/fo/components/mypage/personal/LicenseModal.vue'
+import SkillSelectModal from '@/fo/components/project/SkillSelectModal.vue'
 
 const modalStore = useModalStore()
 
@@ -720,6 +721,7 @@ const showProjectForm = () => {
     },
   })
 }
+
 // 자격증 입력 폼 표시 로직
 const showCertificateForm = () => {
   modalStore.openModal(LicenseModal, {
@@ -729,7 +731,13 @@ const showCertificateForm = () => {
   })
 }
 // 기술 입력 폼 표시 로직
-const showSkillsForm = () => {}
+const showSkillsForm = () => {
+  modalStore.openModal(SkillSelectModal, {
+    onComplete: (skills) => {
+      resumeData.skills = skills
+    },
+  })
+}
 
 // 데이터 삭제 메서드
 const removeEducation = (index) => {
@@ -775,6 +783,17 @@ const submitResume = () => {
   // 폼 제출 로직 구현
   console.log('이력서 데이터:', resumeData)
 }
+
+// 프로젝트가 추가/변경될 때 전체 펼침
+watch(
+  () => resumeData.projects.length,
+  () => {
+    resumeData.projects.forEach((project) => {
+      project.isExpanded = true
+    })
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>

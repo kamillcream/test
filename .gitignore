@@ -405,3 +405,4 @@ sketch
 dist/
 npm-debug.log
 yarn-error.log
+frontend/vue_js/src/fo/.prettierrc

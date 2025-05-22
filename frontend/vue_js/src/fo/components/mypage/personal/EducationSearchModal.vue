@@ -2,71 +2,93 @@
   <div class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
-        <span class="modal-title">학력 검색</span>
+        <span class="modal-title">{{ isDateSelection ? '학력 기간 입력' : '학력 검색' }}</span>
         <button class="modal-close" @click="close">×</button>
       </div>
-      <div class="modal-tabs">
-        <button
-          :class="{ active: tab === 'high' }"
-          @click="onTabChange('high')"
-        >
-          고등학교
-        </button>
-        <button
-          :class="{ active: tab === 'univ' }"
-          @click="onTabChange('univ')"
-        >
-          대학교
-        </button>
-      </div>
-      <div class="modal-search">
-        <input
-          v-model="search"
-          @keyup.enter="fetchSchools"
-          placeholder="학교명을 입력하세요"
-        />
-        <button class="modal-search-btn" @click="fetchSchools">
-          <svg width="18" height="18" fill="none" viewBox="0 0 18 18">
-            <circle cx="8" cy="8" r="7" stroke="#fff" stroke-width="2" />
-            <path
-              d="M13 13l3 3"
-              stroke="#fff"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
-        </button>
-      </div>
-      <div class="modal-list">
-        <div v-if="schools.length">
-          <div v-for="school in schools" :key="school.id" class="modal-item">
-            <div>
-              <div class="school-name">{{ school.name }}</div>
-              <div class="school-type">
-                {{ tab === 'high' ? '고등학교' : '대학교' }}
+      <div v-if="!isDateSelection">
+        <div class="modal-tabs">
+          <button
+            :class="{ active: tab === 'high' }"
+            @click="onTabChange('high')"
+          >
+            고등학교
+          </button>
+          <button
+            :class="{ active: tab === 'univ' }"
+            @click="onTabChange('univ')"
+          >
+            대학교
+          </button>
+        </div>
+        <div class="modal-search">
+          <input
+            v-model="search"
+            @keyup.enter="fetchSchools"
+            placeholder="학교명을 입력하세요"
+          />
+          <button class="modal-search-btn" @click="fetchSchools">
+            <svg width="18" height="18" fill="none" viewBox="0 0 18 18">
+              <circle cx="8" cy="8" r="7" stroke="#fff" stroke-width="2" />
+              <path
+                d="M13 13l3 3"
+                stroke="#fff"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-list">
+          <div v-if="schools.length">
+            <div v-for="school in schools" :key="school.id" class="modal-item">
+              <div>
+                <div class="school-name">{{ school.name }}</div>
+                <div class="school-address">{{ school.address }}</div>
               </div>
+              <button class="modal-add-btn" @click="selectSchool(school)">
+                선택
+              </button>
             </div>
-            <button class="modal-add-btn" @click="addSchool(school)">
-              추가
-            </button>
+          </div>
+          <div v-else class="modal-empty">검색 결과가 없습니다.</div>
+        </div>
+        <div class="modal-pagination">
+          <button :disabled="page === 1" @click="prevPage">&lt;</button>
+          <button
+            v-for="p in totalPages"
+            :key="p"
+            :class="{ active: page === p }"
+            @click="goPage(p)"
+          >
+            {{ p }}
+          </button>
+          <button :disabled="page === totalPages" @click="nextPage">&gt;</button>
+        </div>
+      </div>
+      <div v-else class="date-selection">
+        <div class="selected-school">
+          <div class="school-name">{{ selectedSchool.name }}</div>
+          <div class="school-address">{{ selectedSchool.address }}</div>
+        </div>
+        <div class="date-inputs">
+          <div class="date-input-group">
+            <label>입학년월</label>
+            <input type="month" v-model="startDate" />
+          </div>
+          <div class="date-input-group">
+            <label>졸업년월</label>
+            <input type="month" v-model="endDate" />
           </div>
         </div>
-        <div v-else class="modal-empty">검색 결과가 없습니다.</div>
-      </div>
-      <div class="modal-pagination">
-        <button :disabled="page === 1" @click="prevPage">&lt;</button>
-        <button
-          v-for="p in totalPages"
-          :key="p"
-          :class="{ active: page === p }"
-          @click="goPage(p)"
-        >
-          {{ p }}
-        </button>
-        <button :disabled="page === totalPages" @click="nextPage">&gt;</button>
       </div>
       <div class="modal-footer">
-        <button class="modal-footer-close" @click="close">닫기</button>
+        <button v-if="isDateSelection" class="modal-footer-back" @click="backToSearch">
+          이전
+        </button>
+        <button v-if="isDateSelection" class="modal-footer-complete" @click="completeSelection">
+          완료
+        </button>
+        <button v-else class="modal-footer-close" @click="close">닫기</button>
       </div>
     </div>
   </div>
@@ -85,8 +107,12 @@ const tab = ref('high')
 const search = ref('')
 const schools = ref([])
 const page = ref(1)
-const totalPages = ref(1) // 실제 API 연동시 변경
+const totalPages = ref(1)
 const perPage = 10
+const isDateSelection = ref(false)
+const selectedSchool = ref(null)
+const startDate = ref('')
+const endDate = ref('')
 
 let allContent = ref([])
 
@@ -109,30 +135,22 @@ const fetchSchools = async () => {
         },
       });
       console.log('axios 요청 성공:', res);
-    // content를 항상 배열로 변환
     let content = res.data?.dataSearch?.content
     if (!content) {
       content = []
     } else if (!Array.isArray(content)) {
-      content = [content] // 객체 하나만 온 경우도 배열로 감싸줌
+      content = [content]
     }
-    allContent.value = content; // 전체 결과 저장
-    page.value = 1 //검색할 때는 항상 1페이지로
+    allContent.value = content;
+    page.value = 1
 
-    // allContent.value에서 schoolName 기준으로 중복 제거
-    const uniqueSchools = [];
-    const seen = new Set();
-    for (const item of allContent.value) {
-      if (!seen.has(item.schoolName)) {
-        seen.add(item.schoolName);
-        uniqueSchools.push(item);
-      }
-    }
-    schools.value = uniqueSchools
+    schools.value = allContent.value
       .slice((page.value - 1) * perPage, page.value * perPage)
       .map((item, idx) => ({
         id: item.seq || idx,
         name: item.schoolName,
+        address: item.adres || item.addr || '',
+        type: tab.value === 'high' ? '고등학교' : '대학교'
       }))
     totalPages.value = Math.max(1, Math.ceil(allContent.value.length / perPage))
   } catch (error) {
@@ -144,26 +162,57 @@ const fetchSchools = async () => {
   }
 };
 
-
-//페이지 변경 시 schools.value 갱신
 watch(page, () => {
   schools.value = allContent.value
     .slice((page.value - 1) * perPage, page.value * perPage)
     .map((item, idx) => ({
       id: item.seq || idx,
       name: item.schoolName,
+      address: item.adres || item.addr || '',
+      type: tab.value === 'high' ? '고등학교' : '대학교'
     }))
 })
 
-const addSchool = (school) => {
+const selectSchool = (school) => {
+  selectedSchool.value = {
+    name: school.name,
+    type: school.type,
+    address: school.address
+  }
+  isDateSelection.value = true
+}
+
+const backToSearch = () => {
+  isDateSelection.value = false
+  selectedSchool.value = null
+  startDate.value = ''
+  endDate.value = ''
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const [year, month] = dateString.split('-')
+  return `${year}.${month}`
+}
+
+const completeSelection = () => {
+  if (!startDate.value || !endDate.value) {
+    alert('입학년월과 졸업년월을 모두 입력해주세요.')
+    return
+  }
+  
+  const period = `${formatDate(startDate.value)} ~ ${formatDate(endDate.value)}`
+  
   props.onComplete &&
     props.onComplete({
-      school: school.name,
-      status: tab.value === 'high' ? '고등학교' : '대학교',
-      period: '',
+      school: selectedSchool.value.name,
+      period: period,
+      startDate: startDate.value,
+      endDate: endDate.value
     })
   close()
 }
+
 const close = () => modalStore.closeModal()
 const prevPage = () => {
   if (page.value > 1) page.value--
@@ -201,7 +250,7 @@ const onTabChange = (newTab) => {
 .modal-content {
   background: #fff;
   border-radius: 12px;
-  width: 520px;
+  width: 550px;
   max-width: 98vw;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.15);
   padding: 0;
@@ -306,26 +355,26 @@ const onTabChange = (newTab) => {
   stroke: #fff;
 }
 .modal-list {
-  max-height: 260px;
+  max-height: 230px;
   overflow-y: auto;
-  padding: 0 36px;
+  padding: 0 30px;
 }
 .modal-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #f0f0f0;
-  padding: 18px 0;
+  padding: 15px 0;
 }
 .school-name {
   font-weight: 500;
   color: #222;
   font-size: 16px;
 }
-.school-type {
-  color: #888;
-  font-size: 14px;
-  margin-top: 2px;
+.school-address {
+  color: #666;
+  font-size: 0.9em;
+  margin-top: 4px;
 }
 .modal-add-btn {
   background: var(--primary);
@@ -334,6 +383,8 @@ const onTabChange = (newTab) => {
   border-radius: 4px;
   padding: 8px 18px;
   font-size: 15px;
+  flex-shrink: 0;
+  white-space: nowrap;
   cursor: pointer;
   transition: background 0.2s;
 }
@@ -378,7 +429,7 @@ const onTabChange = (newTab) => {
 .modal-footer {
   display: flex;
   justify-content: flex-end;
-  padding: 16px 36px 22px 36px;
+  padding: 10px 36px 10px 36px;
   border-top: 1px solid #eee;
 }
 .modal-footer-close {
@@ -395,5 +446,82 @@ const onTabChange = (newTab) => {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
+}
+
+.date-selection {
+  padding: 20px 36px;
+}
+
+.selected-school {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.selected-school .school-name {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.selected-school .school-address {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.date-inputs {
+  display: flex;
+  gap: 20px;
+}
+
+.date-input-group {
+  flex: 1;
+}
+
+.date-input-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.date-input-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.modal-footer-back {
+  background: #fff;
+  color: #333;
+  border: 1px solid #f5f5f5;
+  border-radius: 4px;
+  padding: 9px 26px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-right: 10px;
+}
+
+.modal-footer-back:hover {
+  background: #f5f5f5;
+}
+
+.modal-footer-complete {
+  background: var(--primary);
+  color: #fff;
+  border: 1px solid var(--primary);
+  border-radius: 4px;
+  padding: 9px 26px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-footer-complete:hover {
+  background: #0056b3;
 }
 </style>

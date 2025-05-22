@@ -3,7 +3,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="modal-title">프로젝트 이력 추가하기</h4>
-        <button class="close-btn" @click="modalStore.closeModal()">×</button>
+        <button class="close-btn" @click="closeModal">×</button>
       </div>
 
       <div class="modal-body">
@@ -72,6 +72,8 @@
                 type="text"
                 class="form-control"
                 placeholder="기종 (예: PC)"
+                readonly
+                @click="openSkillModal"
               />
             </div>
             <div class="form-group">
@@ -81,6 +83,8 @@
                 type="text"
                 class="form-control"
                 placeholder="OS (예: Linux)"
+                readonly
+                @click="openSkillModal"
               />
             </div>
             <div class="form-group">
@@ -90,6 +94,8 @@
                 type="text"
                 class="form-control"
                 placeholder="DBMS (예: MySQL)"
+                readonly
+                @click="openSkillModal"
               />
             </div>
           </div>
@@ -102,8 +108,7 @@
                 class="form-control"
                 placeholder="언어 (쉼표로 구분, 예: Java, Python)"
                 readonly
-                @focus="showSkillModal = true"
-                @click="showSkillModal = true"
+                @click="openSkillModal"
               />
             </div>
             <div class="form-group">
@@ -114,8 +119,7 @@
                 class="form-control"
                 placeholder="TOOL (쉼표로 구분, 예: Eclipse, VSCode)"
                 readonly
-                @focus="showSkillModal = true"
-                @click="showSkillModal = true"
+                @click="openSkillModal"
               />
             </div>
             <div class="form-group">
@@ -126,8 +130,7 @@
                 class="form-control"
                 placeholder="FW (쉼표로 구분, 예: Spring Boot, Vue.js)"
                 readonly
-                @focus="showSkillModal = true"
-                @click="showSkillModal = true"
+                @click="openSkillModal"
               />
             </div>
           </div>
@@ -147,16 +150,8 @@
 
       <div class="modal-footer">
         <button class="btn btn-primary" @click="submit">저장하기</button>
-        <button class="btn btn-light" @click="modalStore.closeModal()">
-          닫기
-        </button>
+        <button class="btn btn-light" @click="closeModal">닫기</button>
       </div>
-      <SkillSelectModal
-        v-if="showSkillModal"
-        :skills="selectedSkills"
-        @confirm="handleSkillConfirm"
-        @remove="showSkillModal = false"
-      />
     </div>
   </div>
 </template>
@@ -167,12 +162,13 @@ import { useModalStore } from '@/fo/stores/modalStore'
 import SkillSelectModal from '@/fo/components/project/SkillSelectModal.vue'
 
 const props = defineProps({
-  onComplete: Function, //부모에서 내려주는 콜백함수
+  onComplete: Function,
 })
+
 const modalStore = useModalStore()
 
 const form = ref({
-  name: '', // 프로젝트명
+  name: '',
   period: '',
   client: '',
   workUnit: '',
@@ -186,17 +182,43 @@ const form = ref({
   etc: '',
 })
 
-const showSkillModal = ref(false)
 const selectedSkills = ref([])
 
 const languageList = [
-  'Java', 'Python', 'JavaScript', 'PHP', 'TypeScript', 'C', 'C#', 'C++', 'Go'
+  'Java',
+  'Python',
+  'JavaScript',
+  'PHP',
+  'TypeScript',
+  'C',
+  'C#',
+  'C++',
+  'Go',
 ]
 const frameworkList = [
-  'Spring Boot', 'Spring', 'React.js', 'Vue.js', 'Angular.js', 'Express.js', 'Django', 'Bootstrap', 'Ember', 'BackboneJS', '전자정부 프레임워크', 'myBatis'
+  'Spring Boot',
+  'Spring',
+  'React.js',
+  'Vue.js',
+  'Angular.js',
+  'Express.js',
+  'Django',
+  'Bootstrap',
+  'Ember',
+  'BackboneJS',
+  '전자정부 프레임워크',
+  'myBatis',
 ]
 const toolList = [
-  'VSCode', 'IntelliJ', 'Vim', 'Android Studio', 'Eclipse', 'Visual Studio', 'Notepad++', 'PyCharm', 'Sublime Text'
+  'VSCode',
+  'IntelliJ',
+  'Vim',
+  'Android Studio',
+  'Eclipse',
+  'Visual Studio',
+  'Notepad++',
+  'PyCharm',
+  'Sublime Text',
 ]
 
 function parseArray(str) {
@@ -205,6 +227,45 @@ function parseArray(str) {
     .split(/[,\n;]/)
     .map((s) => s.trim())
     .filter(Boolean)
+}
+
+const updateSelectedSkills = () => {
+  const languages = parseArray(form.value.languages).map((name) => ({
+    name,
+    type: 'language',
+  }))
+  const tools = parseArray(form.value.tools).map((name) => ({
+    name,
+    type: 'tool',
+  }))
+  const frameworks = parseArray(form.value.frameworks).map((name) => ({
+    name,
+    type: 'framework',
+  }))
+  selectedSkills.value = [...languages, ...tools, ...frameworks]
+}
+
+const openSkillModal = () => {
+  updateSelectedSkills()
+  modalStore.openModal(SkillSelectModal, {
+    skills: selectedSkills.value,
+    onConfirm: handleSkillConfirm,
+  })
+}
+
+const handleSkillConfirm = (selected) => {
+  form.value.languages = selected
+    .filter((s) => languageList.includes(s.name))
+    .map((s) => s.name)
+    .join(', ')
+  form.value.tools = selected
+    .filter((s) => toolList.includes(s.name))
+    .map((s) => s.name)
+    .join(', ')
+  form.value.frameworks = selected
+    .filter((s) => frameworkList.includes(s.name))
+    .map((s) => s.name)
+    .join(', ')
 }
 
 const submit = () => {
@@ -222,24 +283,12 @@ const submit = () => {
     frameworks: parseArray(form.value.frameworks).map((name) => ({ name })),
     etc: parseArray(form.value.etc).map((name) => ({ name })),
   }
-  props.onComplete(project) // 부모에게 데이터 전달
-  modalStore.closeModal()
+  props.onComplete(project)
+  closeModal()
 }
 
-const handleSkillConfirm = (selected) => {
-  form.value.languages = selected
-    .filter(s => languageList.includes(s.name))
-    .map(s => s.name)
-    .join(', ')
-  form.value.tools = selected
-    .filter(s => toolList.includes(s.name))
-    .map(s => s.name)
-    .join(', ')
-  form.value.frameworks = selected
-    .filter(s => frameworkList.includes(s.name))
-    .map(s => s.name)
-    .join(', ')
-  showSkillModal.value = false
+const closeModal = () => {
+  modalStore.closeModal()
 }
 </script>
 
@@ -290,7 +339,8 @@ const handleSkillConfirm = (selected) => {
   margin-bottom: 0;
 }
 .close-btn {
-  background: transparent;border: none;
+  background: transparent;
+  border: none;
   font-size: 1.8rem;
   cursor: pointer;
   display: block;
