@@ -4,7 +4,7 @@
     strongText="프로젝트 상세 정보"
     :breadcrumbs="[{ text: 'Home', link: '/' }, { text: '프로젝트' }]"
   />
-  <div class="container py-5">
+  <div class="container py-5 detail-list">
     <div class="row pt-4 mt-2 mb-5">
       <!-- 좌측: 지원 자격 (스크롤 없애기) -->
       <div
@@ -23,8 +23,7 @@
 
         <ul>
           <li>
-            <i class="fas fa-caret-right left-10"></i
-            ><strong class="text-color-primary">필수 기술 </strong>
+            <strong class="text-color-primary">필수 기술 </strong>
             <ul class="ps-4 mb-2">
               <li
                 v-for="skillGroup in project.projectRequiredSkills"
@@ -33,12 +32,12 @@
                 <strong class="text-dark">{{
                   skillGroup.parentSkillTagNm
                 }}</strong>
-                <div
-                  v-for="skill in skillGroup.childSkillTagNms"
-                  :key="skill"
-                  class="d-flex align-items-center gap-2 mt-1"
-                >
-                  <div class="d-flex align-items-center me-3">
+                <ul class="child-skill-list mt-1 ps-3">
+                  <li
+                    v-for="skill in skillGroup.childSkillTagNms"
+                    :key="skill"
+                    class="d-flex align-items-center gap-2 mb-1"
+                  >
                     <img
                       :src="getSkillIconUrl(skill)"
                       :alt="skill"
@@ -47,29 +46,29 @@
                       class="me-1"
                     />
                     <span>{{ skill }}</span>
-                  </div>
-                </div>
+                  </li>
+                </ul>
               </li>
             </ul>
           </li>
 
           <li>
-            <i class="fas fa-caret-right left-10"></i
-            ><strong class="text-color-primary">우대 기술 </strong>
+            <strong class="text-color-primary">우대 기술</strong>
             <ul class="ps-4 mb-2">
               <li
                 v-for="skillGroup in project.projectPreferredSkills"
                 :key="skillGroup.parentSkillTagNm"
+                class="mb-2"
               >
                 <strong class="text-dark">{{
                   skillGroup.parentSkillTagNm
                 }}</strong>
-                <div
-                  v-for="skill in skillGroup.childSkillTagNms"
-                  :key="skill"
-                  class="d-flex align-items-center gap-2 mt-1"
-                >
-                  <div class="d-flex align-items-center me-3">
+                <ul class="child-skill-list mt-1 ps-3">
+                  <li
+                    v-for="skill in skillGroup.childSkillTagNms"
+                    :key="skill"
+                    class="d-flex align-items-center gap-2 mb-1"
+                  >
                     <img
                       :src="getSkillIconUrl(skill)"
                       :alt="skill"
@@ -78,33 +77,29 @@
                       class="me-1"
                     />
                     <span>{{ skill }}</span>
-                  </div>
-                </div>
+                  </li>
+                </ul>
               </li>
             </ul>
           </li>
 
           <!-- 우대 사항 -->
           <li>
-            <i class="fas fa-caret-right left-10"></i
-            ><strong class="text-color-primary">우대 사항 :</strong>
+            <strong class="text-color-primary">우대 사항 :</strong>
             {{ project.projectPreferredEtc }}
           </li>
 
           <!-- 근무 조건 -->
           <li>
-            <i class="fas fa-caret-right left-10"></i>
             <strong class="text-color-primary">근무 형태 :</strong>
             <span>{{ project.projectWorkType?.join(' / ') }}</span>
           </li>
           <li>
-            <i class="fas fa-caret-right left-10"></i
-            ><strong class="text-color-primary">근무 지역 :</strong>
+            <strong class="text-color-primary">근무 지역 :</strong>
             {{ project.projectAddress }}
           </li>
           <li>
-            <i class="fas fa-caret-right left-10"></i
-            ><strong class="text-color-primary">단가 :</strong>
+            <strong class="text-color-primary">단가 :</strong>
             {{ project.projectSalary }}
           </li>
         </ul>
@@ -136,19 +131,16 @@
             <div class="card-footer bg-white border-top-0 pt-4">
               <div class="text-start text-2">
                 <p class="mb-1 text-color-primary">
-                  <i class="fas fa-caret-right me-2"></i
-                  ><strong class="text-color-primary">모집 기간 :</strong>
+                  <strong class="text-color-primary">모집 기간 :</strong>
                   {{ project.projectRecruitStartDt }} ~
                   {{ project.projectRecruitEndDt }}
                 </p>
                 <p class="mb-1 text-color-primary">
-                  <i class="fas fa-caret-right me-2"></i
-                  ><strong class="text-color-primary">인터뷰 기간 :</strong>
+                  <strong class="text-color-primary">인터뷰 기간 :</strong>
                   {{ project.interviewStartDt }} ~ {{ project.interviewEndDt }}
                 </p>
                 <p class="mb-0 text-color-primary">
-                  <i class="fas fa-caret-right me-2"></i
-                  ><strong class="text-color-primary">수행 기간 :</strong>
+                  <strong class="text-color-primary">수행 기간 :</strong>
                   {{ project.projectStartDt }} ~ {{ project.projectEndDt }}
                 </p>
               </div>
@@ -224,19 +216,34 @@ onMounted(async () => {
 
     const projectSq = route.params.project_sq
 
-    const response = await api.$get(`/projects/${projectSq}/details`)
+    const token = getAccessTokenFromCookie()
+
+    const config = {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    }
+
+    const response = await api.$get(`/projects/${projectSq}/details`, config)
     project.value = response.output
     console.log(project.value)
   } catch (e) {
+    console.error('❌ [catch 블록 진입]', e)
+
     console.error('프로젝트 상세 정보 불러오기 실패', e)
-    const rawMessage =
-      e?.response?.data?.message ||
-      '프로젝트 정보를 불러오는 중 오류가 발생했습니다.'
-    const message = rawMessage.replace(/^Unexpected Error:\s*/, '')
+
+    // message fallback 처리
+    let message = '프로젝트 정보를 불러오는 중 오류가 발생했습니다.'
+
     alert(message)
     router.push({ name: 'ProjectListPage' })
   }
 })
+
+function getAccessTokenFromCookie() {
+  const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]*)/)
+  return match ? decodeURIComponent(match[1]) : null
+}
 
 const openMemberModal = () => {
   modalStore.openModal(AffiliationMemberModal, {
@@ -305,4 +312,17 @@ const getSkillIconUrl = (skill) => {
 
 // TODO: 스크랩 토글
 </script>
-<style lang=""></style>
+<style scoped>
+.child-skill-list {
+  list-style: none;
+  padding-left: 1rem;
+  margin: 0;
+}
+.child-skill-list li {
+  margin-left: 0.5rem; /* 더 명확한 들여쓰기 */
+}
+.detail-list li {
+  margin-bottom: 12px; /* 또는 16px */
+  line-height: 1.6; /* 줄 간 여유 */
+}
+</style>
