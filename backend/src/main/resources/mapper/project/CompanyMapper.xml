@@ -3,12 +3,18 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.example.demo.domain.project.mapper.CompanyMapper">
+<mapper namespace="com.example.demo.domain.company.mapper.CompanyMapper">
 
     <select id="findCompanyNmByCompanySq" parameterType="Long" resultType="String">
         SELECT company_nm
         FROM TBL_COMPANY_S
         WHERE company_sq = #{companySq}
+    </select>
+    
+    <select id="findCompanySqByUserSq" parameterType="Long" resultType="Long">
+        SELECT company_sq
+        FROM TBL_COMPANY_MEMBER_R
+        WHERE user_sq = #{userSq}
     </select>
 
 
