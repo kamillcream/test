@@ -184,6 +184,15 @@
               </div>
             </div>
             <div class="form-group mb-3">
+              <label class="form-label fw-bold">단가</label>
+              <input
+                type="text"
+                class="form-control"
+                v-model="projectSalary"
+                placeholder="예: 1500000"
+              />
+            </div>
+            <div class="form-group mb-3">
               <label class="form-label mb-1 text-2" style="font-weight: bold">
                 모집 직군
                 <a
@@ -263,11 +272,18 @@
                 <!-- 태그 리스트 -->
                 <div class="mb-2">
                   <span
-                    class="badge bg-secondary me-1"
+                    class="badge me-1"
+                    :style="{
+                      backgroundColor: '#0088CC',
+                      color: 'white',
+                      cursor: 'pointer',
+                    }"
                     v-for="(item, index) in preferList"
                     :key="index"
+                    @click="preferList.splice(index, 1)"
+                    title="클릭하여 삭제"
                   >
-                    {{ item }}
+                    {{ item }} &times;
                   </span>
                 </div>
 
@@ -277,7 +293,6 @@
                   v-model="preferContent"
                   placeholder="쉼표(,)로 구분하여 입력"
                   name="qualification"
-                  required
                 />
               </div>
             </div>
@@ -363,13 +378,14 @@ import ProjectJobButtonGroup from '@/fo/components/project/ProjectJobButtonGroup
 import ProjectSkillButtonGroup from '@/fo/components/project/ProjectSkillButtonGroup.vue'
 import ProjectInverviewTimeButtonGroupVue from '@/fo/components/project/ProjectInverviewTimeButtonGroup.vue'
 import { useModalStore } from '../../../stores/modalStore.js'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import { ref, computed, watch, onMounted, reactive } from 'vue'
 
 import { api } from '@/axios.js'
 
 const route = useRoute()
+const router = useRouter()
 const projectSq = route.params.project_sq || null // 등록이면 NULL, 수정이면 숫자
 console.log(projectSq)
 
@@ -382,6 +398,7 @@ const workTypes = ref([])
 const skills = ref([])
 
 const projectTitle = ref('')
+const projectSalary = ref('')
 const selectedCity = ref(null)
 const selectedDistrict = ref(null)
 const selectedCityName = computed(() => {
@@ -408,12 +425,7 @@ const selectedJobs = ref([])
 const selectedSkills = ref([])
 const selectedPreferSkills = ref([])
 const preferContent = ref('')
-const preferList = computed(() => {
-  return preferContent.value
-    .split(',')
-    .map((item) => item.trim())
-    .filter((item) => item.length > 0)
-})
+const preferList = ref([])
 const description = ref('')
 const notifyEnabled = ref(false)
 
@@ -512,6 +524,7 @@ const loadEditFormData = async (projectSq) => {
 
     // 이후 프로젝트 상세값 덮어쓰기
     projectTitle.value = exist.projectTtl
+    projectSalary.value = exist.projectSalary
     selectedCity.value = exist.parentDistrict.areaSq
     await fetchDistricts(exist.parentDistrict.areaSq)
     selectedDistrict.value = exist.subDistrict.areaSq
@@ -525,7 +538,13 @@ const loadEditFormData = async (projectSq) => {
     selectedJobs.value = [...exist.jobs]
     selectedSkills.value = [...exist.reqSkills]
     selectedPreferSkills.value = [...exist.preferSkills]
-    preferContent.value = exist.preferredEtc
+    preferList.value = exist.preferredEtc
+      ? exist.preferredEtc
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : []
+    preferContent.value = ''
     description.value = exist.description
     selectedInterviewTimes.value = Object.entries(exist.interviewTimes).map(
       ([date, times]) => ({
@@ -536,6 +555,11 @@ const loadEditFormData = async (projectSq) => {
     isInitialLoad.value = false
   } catch (e) {
     console.error('프로젝트 상세 조회 실패 (수정)', e)
+
+    let message = '프로젝트 정보를 불러오는 중 오류가 발생했습니다.'
+
+    alert(message)
+    router.push({ name: 'ProjectListPage' })
   }
 }
 
@@ -604,9 +628,14 @@ watch(selectedCity, async (newCityCode) => {
   }
 })
 const submitProject = async () => {
+  if (preferList.value.length === 0 && preferContent.value.trim() === '') {
+    alert('우대 사항을 한 개 이상 입력해주세요.')
+    return
+  }
   const requestBody = {
     projectId: projectSq ?? null,
     projectTitle: projectTitle.value,
+    projectSalary: projectSalary.value,
     projectImageUrl: '',
 
     subDistrictCode: selectedDistrict.value,
@@ -634,7 +663,11 @@ const submitProject = async () => {
       .map((s) => (typeof s === 'string' ? s : s?.name))
       .filter((name) => !!name),
 
-    preference: preferContent.value,
+    preference: [...preferList.value, ...preferContent.value.split(',')]
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .join(','),
+
     description: description.value,
 
     interviewTime: selectedInterviewTimes.value.flatMap((item) =>
@@ -645,17 +678,41 @@ const submitProject = async () => {
   }
   console.log(requestBody)
   try {
+    const token = getAccessTokenFromCookie()
+
+    const config = {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    }
     if (projectSq) {
-      await api.$patch('/projects', requestBody)
+      await api.$patch('/projects', requestBody, config)
       alert('수정 성공')
     } else {
-      await api.$post('/projects', requestBody)
+      await api.$post('/projects', requestBody, config)
       alert('등록 성공')
     }
   } catch (error) {
     console.error('프로젝트 등록 실패: ', error)
   }
 }
+
+function getAccessTokenFromCookie() {
+  const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]*)/)
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+watch(preferContent, (newVal) => {
+  if (newVal.endsWith(',')) {
+    const tags = newVal
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0 && !preferList.value.includes(tag))
+
+    preferList.value.push(...tags)
+    preferContent.value = ''
+  }
+})
 
 watch(isOpen, (newVal) => {
   if (newVal) {
@@ -677,12 +734,14 @@ const openSkillModal = () => {
   modalStore.openModal(SkillSelectModal, {
     onConfirm: onSkillsConfirmed,
     skills: skills.value,
+    selectedSkills: selectedSkills.value,
   })
 }
 const openPreferSkillModal = () => {
   modalStore.openModal(SkillSelectModal, {
     onConfirm: onPreferSkillsConfirmed,
     skills: skills.value,
+    selectedSkills: selectedPreferSkills.value,
   })
 }
 
