@@ -160,7 +160,7 @@
           placeholder="주소를 검색하세요"
           readonly
           @click="openPostcode"
-          @input="validateAdress"
+          @input="validateAddress"
         />
         <div v-if="addressError" class="invalid-feedback">
           {{ addressError }}
@@ -322,7 +322,7 @@ const validateAll = async () => {
   validateConfirmPassword()
   validateName()
   validatePhone()
-  validateAdress()
+  validateAddress()
   validateEmail()
   validateVerifycode()
   validateTerms()
@@ -341,7 +341,6 @@ const validateAll = async () => {
 
   if (isFormValid) {
     emit('submit', { ...form })
-    companyProfileStore.resetProfile() // ✅ 스토어 초기화
   } else {
     console.warn('❌ 유효성 검사 실패. 폼 제출 불가.')
   }
@@ -556,30 +555,27 @@ const validatePhone = () => {
   }
 }
 
-watch(
-  () => companyProfileStore.termsAgreed,
-  (newVal) => {
-    companyValid.value = newVal
-  },
-  { immediate: true, deep: true }, // 컴포넌트 진입 시 즉시 반영 + 객체 내부까지 감시
-)
-
 // 기업명&사업자번호 유효성 검사
 const validateCompany = () => {
   companyError.value = ''
   companyValid.value = false
   if (!form.companyName) {
     companyError.value = '기업 인증을 진행해주세요.'
+  } else {
+    companyValid.value = true
   }
 }
 
 // 기업 API 모달을 열기 위한 함수
 function openCompanyModal() {
+  companyProfileStore.resetProfile()
+  companyValid.value = false
   modalStore.openModal(CompanyVerificationModal, {
     title: '기업 인증',
-    onConfirm: (companyData) => {
-      console.log('companyData', companyData)
+    onConfirm: () => {
       modalStore.closeModal()
+      companyValid.value = true
+      console.log('companyValid', companyValid)
     },
   })
 }
@@ -660,7 +656,7 @@ onMounted(() => {
 })
 
 // 주소 유효성 검사
-const validateAdress = () => {
+const validateAddress = () => {
   addressError.value = ''
   addressValid.value = false
   if (!form.address) {

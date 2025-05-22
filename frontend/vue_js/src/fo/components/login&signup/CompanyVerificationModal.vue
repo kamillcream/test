@@ -135,7 +135,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, defineProps } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { useCompanyProfileStore } from '@/fo/stores/companyProfileStore'
@@ -143,6 +143,9 @@ import TermsAgreementModal from './TermsAgreementModal.vue'
 import { companyAgreementText } from '@/assets/terms'
 import { api } from '@/axios'
 
+const props = defineProps({
+  onConfirm: Function,
+})
 const modalStore = useModalStore()
 const alertStore = useAlertStore()
 const companyPorfileStore = useCompanyProfileStore()
@@ -314,6 +317,7 @@ function handleConfirm() {
     termsAgreed: true,
   })
 
+  props.onConfirm()
   alertStore.show('기업 인증 완료되었습니다.', 'success')
   closeModal()
 }
