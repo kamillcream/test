@@ -16,6 +16,9 @@ public record ProjectCreateRequest(
 	    String projectTitle,
 
 	    String projectImageUrl,
+	    
+	    @NotNull(message = "단가 필수입니다.")
+	    Long projectSalary,
 
 	    @NotBlank(message = "하위 행정구역 코드는 필수입니다.")
 	    Long subDistrictCode,
