@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.StructuredTaskScope.Subtask;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.common.ParentCodeEnum;
 import com.example.demo.common.mapper.CommonCodeMapper;
+import com.example.demo.domain.company.service.CompanyService;
 import com.example.demo.domain.project.dto.AddressInsertDto;
 import com.example.demo.domain.project.dto.request.ContractInsertRequest;
 import com.example.demo.domain.project.dto.request.JobInsertRequest;
@@ -33,8 +35,10 @@ import com.example.demo.domain.project.entity.ProjectApplicationEntity;
 import com.example.demo.domain.project.mapper.AddressMapper;
 import com.example.demo.domain.project.mapper.DistrictMapper;
 import com.example.demo.domain.project.mapper.ProjectMapper;
+import com.example.demo.domain.project.mapper.ScrapMapper;
 import com.example.demo.domain.project.mapper.SkillMapper;
 import com.example.demo.domain.project.util.ProjectUtil;
+import com.example.demo.domain.user.util.JwtAuthenticationToken;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.None;
 
 import lombok.RequiredArgsConstructor;
@@ -48,12 +52,22 @@ public class ProjectService {
 	private final ProjectUtil projectUtil;
 	private final SkillMapper skillMapper;
 	private final AddressMapper addressMapper;
+	private final ScrapMapper scrapMapper;
+	private final CompanyService companyService;
 	
-	public void createProject(ProjectCreateRequest request) {
+	public void createProject(ProjectCreateRequest request, JwtAuthenticationToken token) {
+		
+		
 		long devgradeCodeSq = commonCodeMapper.findCommonCodeSqByName(request.devGrade(), ParentCodeEnum.DEVELOPER_GRADE.getCode());
 		long educationLvlSq = commonCodeMapper.findCommonCodeSqByName(request.educationLvl(), ParentCodeEnum.EDUCATION.getCode());
-		Project project = Project.from(request, registerAddress(request), devgradeCodeSq, educationLvlSq);
+		
+		long userSq = token.getUserSq();
+		long userTypeCd = token.getUserTypeCd();
+		
+		long companySq = companyService.fetchCompanySq(userSq, userTypeCd);
+		Project project = Project.from(request, companySq, registerAddress(request), devgradeCodeSq, educationLvlSq);
 		projectMapper.insertProject(project);
+		
 		
 		registerSubEntities(project, request);
 	}
@@ -95,14 +109,15 @@ public class ProjectService {
 		
 		projects.forEach(
 			p->{
-				responses.add(ProjectSummary.from(p, projectUtil));
+				String address = fetchAddressString(p.getAddressSq());
+				responses.add(ProjectSummary.from(p, projectUtil, address));
 			}
 		);
 		
 		return new ProjectListResponse(request.getOffset(), request.getSize(), totalCount, responses);	
 	}
 
-	public ProjectDetailResponse fetchProject(Long projectSq){
+	public ProjectDetailResponse fetchProject(Long projectSq, Long userSq){
 		Project p = projectMapper.findBySq(projectSq);
 		if (p.getProjectIsDeletedYn().equals("Y")) {
 			 throw new RuntimeException("이미 삭제된 프로젝트 입니다.");
@@ -113,7 +128,14 @@ public class ProjectService {
 		List<GroupSkillInfoResponse> reqSkills = groupingSkills(projectMapper.findReqSkillsByProjectSq(projectSq));
 		List<GroupSkillInfoResponse> preferSkills = groupingSkills(projectMapper.findPreferSkillsByProjectSq(projectSq));
 		String projectAddress = fetchAddressString(p.getAddressSq());
-		return ProjectDetailResponse.from(p,projectUtil, reqSkills, preferSkills, projectAddress);
+		
+		Long scrapSq = scrapMapper.findScrapSqByUserSq(userSq);
+		int hasScrapped = (scrapSq != null) ? 1 : 0;
+		
+		// TODO: mapper로 지원 여부 확인
+		int hasApplied = 1; 
+		
+		return ProjectDetailResponse.from(p,projectUtil, reqSkills, preferSkills, projectAddress, hasScrapped, hasApplied);
 	}
 	
 	@Transactional
@@ -153,6 +175,12 @@ public class ProjectService {
 	
 	@Transactional
 	public void updateProject(ProjectCreateRequest request) {
+		
+		Project p = projectMapper.findBySq(request.projectId());
+		if (p.getProjectIsDeletedYn().equals("Y")) {
+			 throw new RuntimeException("이미 삭제된 프로젝트 입니다.");
+		}
+		
 		long devGradeCodeSq = commonCodeMapper.findCommonCodeSqByName(request.devGrade(), ParentCodeEnum.DEVELOPER_GRADE.getCode());
 		long educationLvlSq = commonCodeMapper.findCommonCodeSqByName(request.educationLvl(), ParentCodeEnum.EDUCATION.getCode());
 		
@@ -184,10 +212,9 @@ public class ProjectService {
 	}
 	
 	@Transactional
-	public void toggleProjectScrap(long projectSq, ScrapRequest scrapRequest) {
-		long userSq = 1;
+	public void toggleProjectScrap(long projectSq, ScrapRequest scrapRequest, Long userSq) {
 		boolean hasScrapped = scrapRequest.isHasScrapped();
-		if(!hasScrapped) {
+		if(!hasScrapped) { 
 			long companySq = projectMapper.findCompanySqFromProjectSq(projectSq);
 			long scrapTypeCd = 1;
 			ScrapInsertRequest scrapInsertRequest = new ScrapInsertRequest(userSq, companySq, projectSq, scrapTypeCd);
@@ -235,7 +262,7 @@ public class ProjectService {
 	public List<SkillInsertRequest> fillSkillInsertRequest(List<String> skills) {
 	    List<SkillInsertRequest> requests = new ArrayList<>();
 	    skills.forEach(skillName -> {
-	        SkillInsertRequest request = commonCodeMapper.findSkillTagInfoByName(skillName);
+	        SkillInsertRequest request = skillMapper.findSkillTagInfoByName(skillName);
 	        requests.add(request);
 	    });
 	    return requests;
