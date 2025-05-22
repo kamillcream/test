@@ -289,8 +289,7 @@ const logout = () => {
   if (savedLoginType) localStorage.setItem('savedLoginType', savedLoginType)
 
   // 4. Pinia 상태 초기화
-  userStore.$reset() // userStore가 Pinia store라면 $reset() 으로 초기화 가능
-
+  userStore.$reset() // userStore가 Pinia store라면 $reset() 으로 초기화 가
   alertStore.show('로그아웃되었습니다.', 'success')
   // 5. 메인 페이지로 이동
   router.push('/')
