@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.example.demo.domain.project.mapper.ProjectApplicationMapper">
+	
+	<select id="findInterviewTimeBySq" resultType="java.time.LocalDateTime">
+	    SELECT interview_available_dtm
+	    FROM TBL_PROJECT_INTERVIEW_TIME_SLOT_S
+	    WHERE interview_sq = #{interviewSq}
+	</select>
+	
+	<select id="findApplicationSummariesByUserSq"
+        resultType="com.example.demo.domain.project.vo.ApplicationSummary">
+	  SELECT
+	    p.project_ttl               AS projectTitle,
+	    c.company_nm                AS companyTitle,
+	    a.project_application_created_at_dtm AS appliedDt,
+	    r.resume_sq                 AS resumeSq,
+	    r.resume_ttl                AS resumeTitle,
+	    p.project_candidate_cnt     AS applicantCnt,
+	    a.read_application_dtm      AS readApplicationDt,
+	    cc.common_code_nm           AS applicantType
+	  FROM TBL_RESUME_M r
+	  JOIN TBL_PROJECT_APPLICATION_H a ON r.resume_sq = a.resume_sq
+	  JOIN TBL_PROJECT_M p ON a.project_sq = p.project_sq
+	  JOIN TBL_COMPANY_S c ON p.company_sq = c.company_sq
+	  JOIN TBL_COMMON_CODE_C cc ON a.project_application_status_cd = cc.common_code_sq
+	  WHERE r.user_sq = #{userSq}
+	  ORDER BY a.project_application_created_at_dtm DESC
+	</select>
+
+	
+	<select id="findProjectBySq" resultType="Long">
+	    SELECT project_sq
+	    FROM TBL_PROJECT_APPLICATION_H
+	    WHERE project_application_sq = #{appSq}
+	</select>
+	
+	
+	<update id="updateApplicationStatus" >
+		UPDATE TBL_PROJECT_APPLICATION_H
+		SET project_application_status_cd = #{newStatusCd}
+		WHERE project_application_sq = #{applicationSq}
+	</update>
+	
+	<update id="updateInterviewTimeSelected" >
+		UPDATE TBL_PROJECT_INTERVIEW_TIME_SLOT_S
+		SET interview_is_selected_yn = 'Y'
+		WHERE interview_sq = #{interviewSq}
+	</update>
+	
+	<update id="updateApplicationInterviewTime" >
+		UPDATE TBL_PROJECT_APPLICATION_H
+		SET selected_interview_dtm = #{interviewTime}
+		WHERE project_application_sq = #{applicationSq}
+	</update>
+
+</mapper>
