@@ -8,7 +8,10 @@
     <div class="card bg-color-grey mb-4">
       <div class="card-body">
         <form class="post-form" method="POST" enctype="multipart/form-data">
-          <BoardPostRegisterContent :skillActive="props.isQna" />
+          <BoardPostRegisterContent
+            ref="registerRef"
+            :skillActive="props.isQna"
+          />
 
           <!-- 버튼 영역 -->
           <div class="d-flex justify-content-end gap-2">
@@ -29,26 +32,69 @@
   </div>
 </template>
 <script setup>
-import { defineProps } from 'vue'
+import { defineProps, ref } from 'vue'
 import BoardPostRegisterContent from './BoardPostRegisterContent.vue'
 import { api } from '@/axios'
 import { useAlertStore } from '@/fo/stores/alertStore'
+import { useRouter } from 'vue-router'
+import { useBoardStore } from '@/fo/stores/boardStore'
 
 const alertStore = useAlertStore()
+const boardStore = useBoardStore()
+
+const router = useRouter()
 
 const props = defineProps({
   title: String,
   isQna: Boolean,
 })
 
+// 전달 데이터
+const registerRef = ref(null)
+
+// html 공백 파악
+const isHtmlEmpty = (htmlString) => {
+  // 1. 태그 제거 (텍스트만 추출)
+  const textOnly = htmlString
+    .replace(/<[^>]*>/g, '') // 모든 HTML 태그 제거
+    .replace(/&nbsp;/gi, '') // 공백 문자 제거 (html 공백)
+    .trim() // 앞뒤 공백 제거
+
+  return textOnly === ''
+}
+
 // [추가] 등록 함수
 const insertBoard = async () => {
+  console.log(registerRef.value.sendData())
   try {
-    const res = await api.$post(`/${props.isQna ? 'qna' : 'board'}`, {
-      // title: title.value,
-      // description: description.value,
-    })
-    console.log(res)
+    const reqData = registerRef.value.sendData()
+    console.log(reqData.ttl.trim())
+    if (reqData.ttl == null || reqData.ttl.trim() == '') {
+      alertStore.show('제목을 입력해주세요.', 'danger')
+      return
+    } else if (isHtmlEmpty(reqData.description)) {
+      alertStore.show('내용을 입력해주세요.', 'danger')
+      return
+    }
+
+    if (boardStore.editSq != 0) {
+      reqData.boardSq = boardStore.editSq
+      const res = await api.$patch(`/${props.isQna ? 'qna' : 'board'}`, reqData)
+      if (res.status == 'OK') {
+        alertStore.show(res.message, 'success')
+        router.push(`/${props.isQna ? 'qna' : 'board'}`)
+      } else {
+        alertStore.show('게시글 수정에 실패하였습니다.', 'danger')
+      }
+    } else {
+      const res = await api.$post(`/${props.isQna ? 'qna' : 'board'}`, reqData)
+      if (res.status == 'CREATED') {
+        alertStore.show(res.message, 'success')
+        router.push(`/${props.isQna ? 'qna' : 'board'}`)
+      } else {
+        alertStore.show('게시글 등록에 실패하였습니다.', 'danger')
+      }
+    }
   } catch (error) {
     alertStore.show('게시글 등록에 실패하였습니다.', 'danger')
   }

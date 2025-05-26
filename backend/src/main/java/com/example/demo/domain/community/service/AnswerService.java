@@ -87,10 +87,14 @@ public class AnswerService {
         }
         
 //        일반 태그 추가
-    	cmntTagMapper.insertNT(normalTagConverter.convertStringsToNormalTags(null, answer.getAnswerSq(), answerRequest.getNormalTags()));
+        if(answerRequest.getNormalTags().size() > 0) {
+        	cmntTagMapper.insertNT(normalTagConverter.convertStringsToNormalTags(null, answer.getAnswerSq(), answerRequest.getNormalTags()));        	
+        }
     	
 //    	스킬태그 추가
-		cmntTagMapper.insertST(skillTagConverter.convertStringsToSkillTags(null, answer.getAnswerSq(), answerRequest.getSkillTags()));
+        if(answerRequest.getSkillTags().size() > 0) {
+        	cmntTagMapper.insertST(skillTagConverter.convertStringsToSkillTags(null, answer.getAnswerSq(), answerRequest.getSkillTags()));        	
+        }
         
         
 		return;

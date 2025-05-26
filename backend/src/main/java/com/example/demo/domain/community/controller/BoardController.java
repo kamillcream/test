@@ -40,6 +40,7 @@ public class BoardController {
 //    게시글 등록
     @PostMapping
     public ResponseEntity<ApiResponse<NullType>> createBoard(@RequestBody BoardRequest boardRequest){
+    	System.out.println("일반 게시글 등록");
     	boardService.createBoard(boardRequest, 1401L);
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.CREATED, "게시글 등록이 완료되었습니다.", null));
     }
