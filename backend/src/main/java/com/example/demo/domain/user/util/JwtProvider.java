@@ -58,12 +58,44 @@ public class JwtProvider {
                 .compact();
     }
 
+    public String createResetToken(Long userSq) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + 5 * 60 * 1000); // 5분 유효
+
+        return Jwts.builder()
+                .setSubject(String.valueOf(userSq))
+                .claim("purpose", "reset-password")
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
+        }
+    }
+
+    public Long validateAndGetUserSq(String token, String requiredPurpose) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            String purpose = claims.get("purpose", String.class);
+            if (!requiredPurpose.equals(purpose)) {
+                throw new JwtException("토큰 목적 불일치");
+            }
+
+            return Long.valueOf(claims.getSubject());
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new JwtException("유효하지 않은 토큰입니다.", e);
         }
     }
 

@@ -1,5 +1,8 @@
 package com.example.demo.domain.user.service;
 
+import java.time.LocalDateTime;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -7,6 +10,7 @@ import com.example.demo.domain.user.dto.AddressDTO;
 import com.example.demo.domain.user.dto.CompanyProfileDTO;
 import com.example.demo.domain.user.dto.UserDTO;
 import com.example.demo.domain.user.dto.request.SignUpRequestDTO;
+import com.example.demo.domain.user.dto.response.FindIdResponseDTO;
 import com.example.demo.domain.user.dto.response.LoginResponseDTO;
 import com.example.demo.domain.user.repository.UserRepository;
 
@@ -83,6 +87,43 @@ public class UserService {
 
     public LoginResponseDTO getUserInfoByUserSq(Long userSq) {
         return userRepository.getUserInfoByUserSq(userSq);
+    }
+
+    public FindIdResponseDTO findUserIdByNameAndEmail(String name, String email) {
+        Map<String, Object> userInfo = userRepository.findUserIdByNameAndEmail(name, email);
+
+        if (userInfo == null || userInfo.isEmpty()) {
+            return null;
+        }
+
+        Long userTypeCd = (userInfo.get("userTypeCd") instanceof Number)
+                ? ((Number) userInfo.get("userTypeCd")).longValue()
+                : null;
+        String userTypeName = null;
+        if (userTypeCd != null) {
+            userTypeName = userRepository.findCommonCodeNameByCodeSq(userTypeCd);
+        }
+
+        FindIdResponseDTO dto = new FindIdResponseDTO();
+        dto.setUserId((String) userInfo.get("userId"));
+        dto.setUserNm((String) userInfo.get("userNm"));
+        dto.setUserCreatedAtDtm((LocalDateTime) userInfo.get("userCreatedAtDtm"));
+        dto.setUserType(userTypeName);
+
+        return dto;
+    }
+
+    public UserDTO findUserByInfo(String userId, String userNm, String userEmail) {
+        return userRepository.findUserByInfo(userId, userNm, userEmail);
+    }
+
+    public String findCurrentPassword(Long userSq) {
+        return userRepository.findPasswordByUserSq(userSq);
+    }
+
+    public boolean updatePassword(Long userSq, String newPassword) {
+        int updatedRows = userRepository.updatePassword(userSq, newPassword);
+        return updatedRows > 0;
     }
 
 }

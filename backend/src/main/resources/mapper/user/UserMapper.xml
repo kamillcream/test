@@ -76,4 +76,26 @@
   <update id="deleteRefreshTokenByUserSq" parameterType="long"> UPDATE TBL_USER_M SET
     user_refresh_token = NULL WHERE user_sq = #{userSq} </update>
 
+
+  <!-- 아이디 찾기 -->
+
+  <select id="findUserInfoByNameAndEmail" parameterType="map" resultType="map"> SELECT user_id AS
+    userId, user_nm AS userNm, user_type_cd AS userTypeCd, user_created_at_dtm AS userCreatedAtDtm
+    FROM TBL_USER_M WHERE user_nm = #{name} AND user_email = #{email} AND user_is_deleted_yn = 'N' </select>
+
+  <select id="findCommonCodeNameByCodeSq" parameterType="long" resultType="string"> SELECT
+    common_code_nm FROM TBL_COMMON_CODE_C WHERE common_code_sq = #{codeSq} AND
+    common_code_is_active_yn = 'Y' </select>
+
+
+  <select id="findUserByInfo" parameterType="map"
+    resultType="com.example.demo.domain.user.dto.UserDTO"> SELECT * FROM TBL_USER_M WHERE user_id =
+    #{userId} AND user_nm = #{userNm} AND user_email = #{userEmail} AND user_is_deleted_yn = 'N' </select>
+
+
+  <select id="findPasswordByUserSq" resultType="string"> SELECT user_pw FROM TBL_USER_M WHERE
+    user_sq = #{userSq} </select>
+
+  <update id="updatePasswordByUserSq"> UPDATE TBL_USER_M SET user_pw = #{newPassword} WHERE user_sq
+    = #{userSq} </update>
 </mapper>
