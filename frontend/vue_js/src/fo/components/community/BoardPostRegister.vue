@@ -32,7 +32,7 @@
   </div>
 </template>
 <script setup>
-import { defineProps, ref } from 'vue'
+import { defineProps, onUnmounted, ref } from 'vue'
 import BoardPostRegisterContent from './BoardPostRegisterContent.vue'
 import { api } from '@/axios'
 import { useAlertStore } from '@/fo/stores/alertStore'
@@ -44,9 +44,17 @@ const boardStore = useBoardStore()
 
 const router = useRouter()
 
+const boardSq = ref(Number(boardStore.editSq))
+
 const props = defineProps({
-  title: String,
-  isQna: Boolean,
+  title: {
+    type: String,
+    default: '',
+  },
+  isQna: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 // 전달 데이터
@@ -63,12 +71,10 @@ const isHtmlEmpty = (htmlString) => {
   return textOnly === ''
 }
 
-// [추가] 등록 함수
+// 등록 함수
 const insertBoard = async () => {
-  console.log(registerRef.value.sendData())
   try {
     const reqData = registerRef.value.sendData()
-    console.log(reqData.ttl.trim())
     if (reqData.ttl == null || reqData.ttl.trim() == '') {
       alertStore.show('제목을 입력해주세요.', 'danger')
       return
@@ -77,9 +83,11 @@ const insertBoard = async () => {
       return
     }
 
-    if (boardStore.editSq != 0) {
-      reqData.boardSq = boardStore.editSq
-      const res = await api.$patch(`/${props.isQna ? 'qna' : 'board'}`, reqData)
+    if (boardSq.value != 0) {
+      const res = await api.$put(
+        `/${props.isQna ? 'qna' : 'board'}/${boardSq.value}`,
+        reqData,
+      )
       if (res.status == 'OK') {
         alertStore.show(res.message, 'success')
         router.push(`/${props.isQna ? 'qna' : 'board'}`)
@@ -99,5 +107,9 @@ const insertBoard = async () => {
     alertStore.show('게시글 등록에 실패하였습니다.', 'danger')
   }
 }
+
+onUnmounted(() => {
+  boardStore.resetBoard()
+})
 </script>
 <style></style>

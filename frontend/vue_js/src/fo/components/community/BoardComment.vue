@@ -19,14 +19,19 @@
               <!-- 이름 + 신고/하트 -->
               <div
                 class="d-flex justify-content-between align-items-center mb-2"
+                v-show="editSq != comment.sq"
               >
                 <span class="comment-by text-primary font-size-13">
                   <strong>{{ comment.userNm }}</strong>
                 </span>
                 <!-- 작성자 본인일 경우 -->
                 <!-- [추가] 본인 인증 로직 -->
-                <span v-if="comment.user_sq == 3" class="comment-icons d-flex">
-                  <button href="#" class="text-danger me-2 font-size-10">
+                <span v-if="comment.userSq == 3" class="comment-icons d-flex">
+                  <button
+                    href="#"
+                    class="text-danger me-2 font-size-10"
+                    @click="clickEdit(comment.sq, comment.description)"
+                  >
                     <span class="ms-2 text-primary">수정</span>
                   </button>
                   <button
@@ -39,25 +44,65 @@
                 </span>
                 <!-- 작성자 아닌 경우 -->
                 <span v-else class="comment-icons d-flex">
-                  <button class="text-danger me-2 font-size-10">
+                  <button
+                    href="#"
+                    class="text-danger me-2 font-size-10"
+                    @click="clickEdit(comment.sq, comment.description)"
+                  >
+                    <span class="ms-2 text-primary">수정</span>
+                  </button>
+                  <button
+                    href="#"
+                    class="text-danger font-size-10"
+                    @click="openDeleteConfirm(comment.sq)"
+                  >
+                    <span class="ms-2 text-primary">삭제</span>
+                  </button>
+                  <button
+                    class="text-danger me-2 font-size-10"
+                    @click="rcmndComment(comment.sq)"
+                  >
                     <span class="ms-2 text-primary"
                       >추천 {{ comment.recommendCnt }}</span
                     >
                   </button>
                   <button
                     class="text-danger font-size-10"
-                    @click="clickRepostApplication"
+                    @click="clickReportApplication(comment.sq)"
                   >
                     <span class="ms-2 text-primary">신고</span>
                   </button>
                 </span>
               </div>
               <!-- 내용 -->
-              <p class="font-size-12">
+              <p class="font-size-12" v-show="editSq != comment.sq">
                 {{ comment.description }}
               </p>
+              <form @submit.prevent="editRegisterConfirm(comment.sq)">
+                <div class="input-group" v-if="editSq == comment.sq">
+                  <input
+                    v-model="editdescription"
+                    type="text"
+                    maxlength="5000"
+                    class="form-control"
+                    name="message"
+                    placeholder="댓글을 입력해주세요"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    data-loading-text="로딩 중..."
+                  >
+                    댓글 작성
+                  </button>
+                </div>
+              </form>
               <!-- 날짜 + 수정/삭제 (홍길동과 동일하게 float-end 사용) -->
-              <span class="date float-end font-size-11">
+              <span
+                class="date float-end font-size-11"
+                v-show="editSq != comment.sq"
+              >
                 {{ formatTime(comment.createdAt) }}
               </span>
             </div>
@@ -68,8 +113,6 @@
     <div class="post-block mt-5 post-leave-comment">
       <form
         class="contact-form p-4 rounded bg-color-grey"
-        action="php/contact-form.php"
-        method="POST"
         @submit.prevent="openRegisterConfirm"
       >
         <div class="p-2">
@@ -77,27 +120,25 @@
             <label class="form-label font-weight-bold text-dark text-5 mb-3"
               >댓글 남기기</label
             >
-            <div class="form-group col-11">
+            <div class="input-group">
               <input
                 v-model="description"
                 type="text"
                 maxlength="5000"
-                data-msg-required="댓글을 입력해주세요."
                 class="form-control"
                 name="message"
-                required=""
+                placeholder="댓글을 입력해주세요"
+                required
               />
-            </div>
-            <div class="form-group col-1">
-              <input
+              <button
                 type="submit"
-                value="댓글 작성"
-                class="btn btn-primary text-3"
+                class="btn btn-primary"
                 data-loading-text="로딩 중..."
-              />
+              >
+                댓글 작성
+              </button>
             </div>
           </div>
-          <div class="row"></div>
         </div>
       </form>
     </div>
@@ -108,15 +149,16 @@ import { useAlertStore } from '@/fo/stores/alertStore'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { defineProps, ref } from 'vue'
 import CommonConfirmModal from '../common/CommonConfirmModal.vue'
-import RepostModal from './RepostModal.vue'
 import { api } from '@/axios'
 import { useRoute } from 'vue-router'
+import ReportModal from './ReportModal.vue'
 
 const alertStore = useAlertStore()
 
 const modalStore = useModalStore()
 const route = useRoute()
 const boardSq = route.params.board_sq
+const editSq = ref(null)
 
 const formatTime = (createdAt) => {
   const date = new Date(createdAt)
@@ -136,24 +178,96 @@ const formatTime = (createdAt) => {
 }
 
 const props = defineProps({
-  comments: Array,
-  isAnswer: Boolean,
-  answerSq: Number,
-  getBoard: Function,
+  comments: {
+    type: Array,
+    default: () => [],
+  },
+  isAnswer: {
+    type: Boolean,
+    default: false,
+  },
+  answerSq: {
+    type: Number,
+    default: 0,
+  },
+  getBoard: {
+    type: Function,
+    default: () => {},
+  },
 })
 
 const description = ref('')
+const editdescription = ref('')
+
+// 추천
+const rcmndComment = async (sq) => {
+  const res = await api.$post(`/comment/${sq}/recommend`)
+
+  if (res.status == 'OK') {
+    alertStore.show(res.message, 'success')
+    props.getBoard()
+  } else {
+    alertStore.show('추천 반영에 실패하였습니다.', 'danger')
+  }
+}
+
+// [추가] 신고
 
 // 삭제 컨펌 모달
-const openDeleteConfirm = () => {
+const openDeleteConfirm = (sq) => {
   modalStore.openModal(CommonConfirmModal, {
-    title: '게시글 삭제',
+    title: '댓글 삭제',
     message: '정말 삭제하시겠습니까?',
-    onConfirm: () => {
-      // 성공
-      alertStore.show('삭제하였습니다.', 'success')
-      // 실패
-      // alertStore.show('삭제에 실패하였습니다.', 'danger')
+    onConfirm: async () => {
+      try {
+        const res = await api.$patch(`/comment/${sq}`)
+
+        if (res.status == 'OK') {
+          alertStore.show(res.message, 'success')
+          editSq.value = null
+          editdescription.value = ''
+          props.getBoard()
+        } else {
+          alertStore.show('댓글 삭제에 실패하였습니다.', 'danger')
+        }
+      } catch (error) {
+        alertStore.show('댓글 삭제에 실패하였습니다.', 'danger')
+      }
+      modalStore.closeModal()
+    },
+  })
+}
+
+// 수정
+const clickEdit = (idx, description) => {
+  editSq.value = idx
+  editdescription.value = description
+}
+const editRegisterConfirm = (sq) => {
+  if (editdescription.value == null || editdescription.value.trim() == '') {
+    alertStore.show('내용을 입력해주세요.', 'danger')
+    return
+  }
+  modalStore.openModal(CommonConfirmModal, {
+    title: '댓글 수정',
+    message: '댓글을 수정하시겠습니까?',
+    onConfirm: async () => {
+      try {
+        const res = await api.$put(`/comment/${sq}`, {
+          description: editdescription.value,
+        })
+
+        if (res.status == 'OK') {
+          alertStore.show(res.message, 'success')
+          editSq.value = null
+          editdescription.value = ''
+          props.getBoard()
+        } else {
+          alertStore.show('댓글 수정에 실패하였습니다.', 'danger')
+        }
+      } catch (error) {
+        alertStore.show('댓글 수정에 실패하였습니다.', 'danger')
+      }
       modalStore.closeModal()
     },
   })
@@ -161,17 +275,15 @@ const openDeleteConfirm = () => {
 
 // 댓글 등록 컨펌 모달
 const openRegisterConfirm = () => {
-  console.log(props.boardType)
+  if (description.value == null || description.value.trim() == '') {
+    alertStore.show('내용을 입력해주세요.', 'danger')
+    return
+  }
   modalStore.openModal(CommonConfirmModal, {
     title: '댓글 등록',
     message: '댓글을 등록하시겠습니까?',
     onConfirm: async () => {
       try {
-        if (description.value == null || description.value.trim() == '') {
-          alertStore.show('내용을 입력해주세요.', 'danger')
-          return
-        }
-
         const res = await api.$post(`/comment`, {
           userSq: 4,
           boardSq: props.isAnswer ? null : boardSq,
@@ -194,8 +306,8 @@ const openRegisterConfirm = () => {
 }
 
 // 신고 모달
-const clickRepostApplication = () => {
-  modalStore.openModal(RepostModal, {})
+const clickReportApplication = (sq) => {
+  modalStore.openModal(ReportModal, { reportTypeCd: 2003, sq })
 }
 </script>
 <style>

@@ -9,6 +9,10 @@ import java.util.*;
 
 @Mapper
 public interface CmntTagMapper {
+//	전체 태그
+	List <CommonSkillTag> findParentSkillTags(); 
+    List <CommonSkillTag> findAll(@Param("skillTags") List<CommonSkillTag> skillTags);
+	
 //	일반 태그
     List <NormalTag> findNT(@Param("boardSq") Long boardSq, @Param("answerSq") Long answerSq);
     void insertNT(@Param("normalTags") List<NormalTag> normalTags);

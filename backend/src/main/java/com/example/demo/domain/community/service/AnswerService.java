@@ -121,9 +121,14 @@ public class AnswerService {
         cmntTagMapper.deleteNT(null, answer.getAnswerSq());
         cmntTagMapper.deleteST(null, answer.getAnswerSq());
         
-//      태그 새로 추가
-    	cmntTagMapper.insertNT(normalTagConverter.convertStringsToNormalTags(null, answer.getAnswerSq(), answerRequest.getNormalTags()));
-		cmntTagMapper.insertST(skillTagConverter.convertStringsToSkillTags(null, answer.getAnswerSq(), answerRequest.getSkillTags()));
+//      일반 태그 추가
+      if(answerRequest.getNormalTags().size() > 0) {
+      	cmntTagMapper.insertNT(normalTagConverter.convertStringsToNormalTags(null, answer.getAnswerSq(), answerRequest.getNormalTags()));        	
+      }
+//  	스킬태그 추가
+      if(answerRequest.getSkillTags().size() > 0) {
+      	cmntTagMapper.insertST(skillTagConverter.convertStringsToSkillTags(null, answer.getAnswerSq(), answerRequest.getSkillTags()));        	
+      }
         
 
         return;

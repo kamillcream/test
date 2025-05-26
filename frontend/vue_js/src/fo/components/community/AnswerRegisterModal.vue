@@ -60,9 +60,10 @@ const boardStore = useBoardStore()
 
 const route = useRoute()
 const boardSq = route.params.board_sq
-
+const answerSq = ref(Number(boardStore.editSq))
 const closeModal = () => {
   modalStore.closeModal()
+  boardStore.resetBoard()
 }
 
 // 전달 데이터
@@ -85,8 +86,6 @@ const registerFunc = async () => {
     const reqData = registerRef.value.sendData()
     reqData.boardSq = Number(boardSq)
 
-    console.log(reqData)
-
     if (reqData.ttl == null || reqData.ttl.trim() == '') {
       alertStore.show('제목을 입력해주세요.', 'danger')
       return
@@ -95,9 +94,8 @@ const registerFunc = async () => {
       return
     }
 
-    if (boardStore.editSq != 0) {
-      reqData.answerSq = boardStore.editSq
-      const res = await api.$patch(`/answer`, reqData)
+    if (answerSq.value != 0) {
+      const res = await api.$put(`/answer/${answerSq.value}`, reqData)
       if (res.status == 'OK') {
         alertStore.show(res.message, 'success')
         modalStore.closeModal()

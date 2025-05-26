@@ -12,7 +12,7 @@
           <th v-if="isQna" class="th-wl">상태</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody v-if="boardList.length > 0">
         <tr v-for="board in boardList" :key="board.sq">
           <td class="text-start px-3">
             <a :href="`/${isQna ? 'qna' : 'board'}/${board.sq}`"
@@ -58,6 +58,13 @@
           </td>
         </tr>
       </tbody>
+      <tbody v-else>
+        <tr>
+          <td class="text-start px-3 text-center" :colspan="isQna ? 7 : 6">
+            게시글이 없습니다.
+          </td>
+        </tr>
+      </tbody>
     </table>
   </div>
 </template>
@@ -65,7 +72,10 @@
 import { computed, defineProps } from 'vue'
 import BoardTags from './BoardTags.vue'
 
-const props = defineProps({ boardList: Array, isQna: Boolean })
+const props = defineProps({
+  boardList: { type: Array, default: () => [] },
+  isQna: { type: Boolean, default: false },
+})
 
 const boardList = computed(() => props.boardList)
 const isQna = computed(() => props.isQna)

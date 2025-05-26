@@ -23,7 +23,7 @@
     <update id="update" parameterType="com.example.demo.domain.community.entity.Comment">
         UPDATE TBL_BOARD_COMMENT_S
         SET comment_description_txt = #{commentDescriptionTxt}
-        WHERE board_sq = #{boardSq}
+        WHERE comment_sq = #{commentSq}
     </update>
 
     <update id="delete" parameterType="com.example.demo.domain.community.entity.Comment">

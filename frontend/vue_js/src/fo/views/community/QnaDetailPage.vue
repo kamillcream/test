@@ -8,46 +8,42 @@
 
     <div class="container py-5 mt-3">
       <div class="post-content ms-0">
-        <BoardPost :boardInfo="boardInfo" boardType="qna" />
+        <BoardPost
+          :boardInfo="boardInfo"
+          boardType="qna"
+          :getBoard="getBoard"
+        />
         <!-- 답변 영역 -->
         <div class="answers-section mt-5">
-          <h4 class="mb-4" style="font-size: 1.5rem">
-            답변 ({{ boardInfo.answers.length }})
-          </h4>
+          <h4 class="mb-4 f-s-15">답변 ({{ boardInfo.answers.length }})</h4>
           <div
             v-for="answer in boardInfo.answers"
             :key="answer"
-            class="card p-4 mb-3 border-0"
-            style="
-              background-color: #f4f4f4;
-              border-radius: 10px;
-              display: flex;
-              flex-direction: column;
-            "
+            class="answer-box card p-4 mb-3 border-0"
+            :class="{ 'disable-box': answer.sq === null }"
             @click="clickApplication(answer.sq)"
           >
             <div
               class="d-flex justif y-content-between align-items-center mb-2"
             >
-              <h5 class="mb-0 text-dark" style="font-size: 1.3rem">
+              <h5 class="mb-0 text-dark f-s-13">
                 {{ answer.ttl || '삭제된 답변입니다.' }}
               </h5>
               <span
                 v-if="answer.isAdoptedYn == 'Y'"
-                class="badge bg-primary"
-                style="font-size: 1.1rem"
+                class="badge bg-primary f-s-11"
                 >채택 답변</span
               >
             </div>
             <div
-              class="d-flex justify-content-between text-muted"
-              style="font-size: 1.1rem"
+              class="d-flex justify-content-between text-muted f-s-11"
               v-if="answer.isDeletedYn == 'N'"
             >
               <div>
                 <i class="far fa-user"></i> By
                 <span>{{ answer.userNm }}</span> &nbsp;&nbsp;
-                <i class="far fa-calendar-alt"></i>{{ answer.createdAt }}
+                <i class="far fa-calendar-alt"></i
+                >{{ formatTime(answer.createdAt) }}
               </div>
               <div>
                 조회 {{ answer.viewCnt }} · 댓글 {{ answer.commentCnt }} · 추천
@@ -92,6 +88,9 @@ const boardInfo = ref({
 
 // 답변 모달
 const clickApplication = (sq) => {
+  if (sq == null) {
+    return
+  }
   modalStore.openModal(AnswerDetailModal, { size: 'modal-lg', answerSq: sq })
 }
 
@@ -99,10 +98,8 @@ const clickApplication = (sq) => {
 const getBoard = async () => {
   try {
     const res = await api.$get(`/qna/${props.board_sq}`)
-    console.log(res)
     if (res) {
       boardInfo.value = res.output
-      console.log(boardInfo.value)
     }
   } catch (error) {
     alertStore.show('게시글을 불러올 수 없습니다.', 'danger')
@@ -111,14 +108,21 @@ const getBoard = async () => {
 
 const addViewCnt = async () => {
   try {
-    const res = await api.$patch(`/board/${props.board_sq}/increment-view`)
-    console.log('조회수 증가 실행')
-    if (res) {
-      console.log(res)
-    }
+    await api.$patch(`/board/${props.board_sq}/increment-view`)
   } catch (error) {
     console.error
   }
+}
+
+const formatTime = (createdAt) => {
+  const date = new Date(createdAt)
+  let year = date.getFullYear()
+  let month = date.getMonth() + 1
+  let day = date.getDate()
+  if (month < 10) month = '0' + month
+  if (day < 10) day = '0' + day
+
+  return `${year}-${month}-${day}`
 }
 
 onMounted(() => {
@@ -126,4 +130,24 @@ onMounted(() => {
   getBoard()
 })
 </script>
-<style></style>
+<style>
+.answer-box {
+  background-color: #f4f4f4;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+.f-s-11 {
+  font-size: 1.1rem;
+}
+.f-s-13 {
+  font-size: 1.3rem;
+}
+.f-s-15 {
+  font-size: 1.5rem;
+}
+.answer-box.disable-box {
+  cursor: default;
+}
+</style>

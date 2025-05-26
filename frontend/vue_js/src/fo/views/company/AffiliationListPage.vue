@@ -5,6 +5,12 @@
       strongText="소속 모집 공고"
       :breadcrumbs="[{ text: 'Home', link: '/' }, { text: '소속' }]"
     />
+    <AffiliationFilter
+      :localFilters="['서울', '부산', '대구']"
+      :careerFilters="['신입', '경력']"
+      :jobTypeFilters="['백엔드', '프론트엔드', 'PM', '디자이너']"
+      @update="updateFilters"
+    />
     <div class="container py-4">
       <div class="row">
         <div class="col">
@@ -13,8 +19,8 @@
               <!-- 카드 -->
               <div
                 v-for="afltn in afltnList.slice(
-                  (currentPage - 1) * viewBoxCnt,
-                  currentPage * viewBoxCnt,
+                  (currentPage - 1) * size,
+                  currentPage * size,
                 )"
                 :key="afltn"
                 class="col-md-4 col-lg-3"
@@ -115,6 +121,7 @@
 <script setup>
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 import CommonPagination from '@/fo/components/common/CommonPagination.vue'
+import AffiliationFilter from '@/fo/components/company/AffiliationFilter.vue'
 import AffiliationRecuit from '@/fo/components/company/AffiliationRecruit.vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { ref } from 'vue'
@@ -592,6 +599,25 @@ const afltnList = [
   },
 ]
 
+const filters = ref({
+  addressCodeSq: null,
+  projectDeveloperGradeCd: null,
+  educationCd: null,
+  jobRoleCd: null,
+  sortBy: '',
+  sortOrder: 'desc',
+  searchKeyword: '',
+  searchType: '프로젝트명',
+  size: 5,
+})
+
+const updateFilters = (updated) => {
+  filters.value = { ...filters.value, ...updated }
+  console.log(filters)
+  currentPage.value = 1 // 필터 바꾸면 1페이지부터
+  // fetchProjects()
+}
+
 const formatNum = (num) => {
   if (num < 1000) {
     return num.toString()
@@ -603,12 +629,12 @@ const formatNum = (num) => {
 }
 
 // 한 화면에 보일 박스 숫자 설정
-const viewBoxCnt = 12
+const size = 12
 
 const currentPage = ref(1)
 
 // [수정] 추후 데이터에 맞게 수정
-const totalPages = Math.ceil(afltnList.length / viewBoxCnt)
+const totalPages = Math.ceil(afltnList.length / size)
 
 // 소속 신청하기 모달
 const clickApplication = (afltnInfo) => {
