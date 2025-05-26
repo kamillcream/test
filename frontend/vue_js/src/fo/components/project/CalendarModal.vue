@@ -34,7 +34,7 @@
                     v-for="(day, colIndex) in week"
                     :key="'left-' + colIndex + '-' + rowIndex"
                     :class="dayClass(day.date, leftMonth.month)"
-                    @click="selectDate(day.date)"
+                    @click="!isPastDate(day.date) && selectDate(day.date)"
                   >
                     {{ day.label }}
                   </td>
@@ -76,7 +76,7 @@
                     v-for="(day, colIndex) in week"
                     :key="'right-' + colIndex + '-' + rowIndex"
                     :class="dayClass(day.date, rightMonth.month)"
-                    @click="selectDate(day.date)"
+                    @click="!isPastDate(day.date) && selectDate(day.date)"
                   >
                     {{ day.label }}
                   </td>
@@ -206,6 +206,14 @@ function selectDate(date) {
   }
 }
 
+function isPastDate(d) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const target = new Date(d)
+  target.setHours(0, 0, 0, 0)
+  return target < today
+}
+
 function clearRange() {
   selectedRange.value = [null, null]
   modalStore.closeModal()
@@ -228,8 +236,10 @@ function isSelected(d) {
 
 function dayClass(d, currentMonth) {
   const isSameMonth = d.getMonth() === currentMonth
+  const isPast = isPastDate(d)
+
   return {
-    available: true,
+    available: !isPast,
     'start-date':
       selectedRange.value[0] &&
       formatDate(d) === formatDate(selectedRange.value[0]) &&
@@ -240,6 +250,7 @@ function dayClass(d, currentMonth) {
       isSameMonth,
     'in-range': isInRange(d) && isSameMonth,
     selected: isSelected(d) && isSameMonth,
+    'past-date': isPast && isSameMonth,
   }
 }
 
@@ -319,17 +330,26 @@ const convertDate = (date) => {
 
 .calendar-table td.start-date,
 .calendar-table td.end-date {
-  background-color: #00acc1;
+  background-color: #0088cc;
   color: white;
   font-weight: bold;
 }
 
 .calendar-table td.in-range {
-  background-color: #b2ebf2;
+  background-color: #0088cc;
+  color: white;
+  font-weight: bold;
 }
 
 .calendar-table td.selected {
-  border: 2px solid #00acc1;
+  background-color: #0088cc;
+  font-weight: bold;
+}
+
+.calendar-table td.past-date {
+  background-color: #f0f0f0; /* 회색 배경 */
+  color: #aaa; /* 흐린 글씨 */
+  cursor: not-allowed;
 }
 
 .drp-buttons {
