@@ -1,5 +1,6 @@
 package com.example.demo.domain.user.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ public class LoginService {
 
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public LoginResultDTO login(String userId, String userPw, Long userTypeCd) {
@@ -30,7 +32,8 @@ public class LoginService {
             throw new IllegalArgumentException("회원 유형이 일치하지 않습니다.");
         }
 
-        if (!userPw.equals(user.getUserPw())) {
+        // 암호화된 비밀번호 비교
+        if (!passwordEncoder.matches(userPw, user.getUserPw())) {
             throw new IllegalArgumentException("비밀번호가 올바르지 않습니다.");
         }
 
