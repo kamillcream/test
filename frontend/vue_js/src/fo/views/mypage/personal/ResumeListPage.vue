@@ -15,21 +15,20 @@
     <div class="row">
       <div class="col">
         <ul class="simple-post-list m-0 position-relative">
-          <li v-for="resume in resumes" :key="resume.id">
-            {{ resume.title }}
+          <li v-for="resume in resumeList" :key="resume.resumeSq">
             <!-- 닫기(X) 버튼 -->
             <button
               class="btn btn-light btn-lg position-absolute"
               style="top: 0; right: 0; color: #aaa; border: none"
-              @click="removeResume(resume.id)"
+              @click="removeResume(resume.resumeSq)"
             >
               &times;
             </button>
             <div class="post-info position-relative">
               <!-- 제목 + 뱃지 -->
               <div class="d-flex align-items-center gap-2">
-                <a href="#" class="text-6 m-0">{{ resume.title }}</a>
-                <span v-if="resume.isMain" class="btn btn-primary btn-sm"
+                <a href="#" class="text-6 m-0">{{ resume.resumeTtl }}</a>
+                <span v-if="resume.resumeIsRepresentativeYn === 'Y'" class="btn btn-primary btn-sm"
                   >대표 이력서</span
                 >
               </div>
@@ -41,26 +40,27 @@
                   <span class="text-dark text-uppercase font-weight-semibold"
                     >등록일자</span
                   >
-                  | {{ resume.date }}
+                  |{{ resume.resumeCreatedAtDtm?.substring(0, 10).replaceAll('-', '.') ?? resume.resumeCreatedAtDtm }}
+
                 </div>
                 <div class="d-flex gap-2">
                   <a
-                    v-if="!resume.isMain"
+                    v-if="resume.resumeIsRepresentativeYn !== 'Y'"
                     href="#"
                     class="btn btn-outline btn-primary btn-sm"
-                    @click.prevent="setMainResume(resume.id)"
+                    @click.prevent="setMainResume(resume.resumeSq)"
                     >대표이력서 설정</a
                   >
                   <a
                     href="#"
                     class="btn btn-outline btn-primary btn-sm"
-                    @click.prevent="editResume(resume.id)"
+                    @click.prevent="editResume(resume.resumeSq)"
                     >수정하기</a
                   >
                   <a
                     href="#"
                     class="btn btn-outline btn-primary btn-sm"
-                    @click.prevent="copyResume(resume.id)"
+                    @click.prevent="copyResume(resume.resumeSq)"
                     >복사하기</a
                   >
                 </div>
@@ -103,24 +103,26 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { api } from '@/axios.js'
 
-const resumes = ref([
-  { id: 1, title: '이력서 제목', date: '2025.04.30', isMain: true },
-  { id: 2, title: '이력서 제목 - 복사본', date: '2025.04.30', isMain: false },
-  { id: 3, title: '이력서 제목', date: '2025.04.30', isMain: false },
-  { id: 4, title: '이력서 제목', date: '2025.04.30', isMain: false },
-  { id: 5, title: '이력서 제목', date: '2025.04.30', isMain: false },
-])
+const resumeList = ref([])
+
+onMounted(async () => {
+  const res = await api.$get('/mypage/resume/list')
+  // res가 배열인지 확인
+  console.log('이력서 목록:', res)
+  resumeList.value = res // 반드시 배열이어야 함!
+})
 
 function removeResume(id) {
-  resumes.value = resumes.value.filter((r) => r.id !== id)
+  resumeList.value = resumeList.value.filter((r) => r.resumeSq !== id)
 }
 
 function setMainResume(id) {
-  resumes.value.forEach((r) => (r.isMain = false))
-  const main = resumes.value.find((r) => r.id === id)
-  if (main) main.isMain = true
+  resumeList.value.forEach((r) => (r.resumeIsRepresentativeYn = 'N'))
+  const main = resumeList.value.find((r) => r.resumeSq === id)
+  if (main) main.resumeIsRepresentativeYn = 'Y'
 }
 
 function editResume(/*id*/) {
