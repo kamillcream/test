@@ -13,6 +13,7 @@ import com.example.demo.common.ApiResponse;
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
 import com.example.demo.domain.mypage.dto.request.PasswordCheckRequestDTO;
+import com.example.demo.domain.mypage.dto.response.CompanyUserInfoResponseDTO;
 import com.example.demo.domain.mypage.dto.response.PersonalUserInfoResponseDTO;
 import com.example.demo.domain.mypage.service.InformationEditService;
 
@@ -71,8 +72,29 @@ public class InformationEditController {
 
             return ApiResponse.of(HttpStatus.OK, "개인정보 조회 완료", response);
         } else if (user.getUserTypeCd().equals(302L)) {
-            // 기업 회원용 로직 추후 추가 예정
-            return ApiResponse.of(HttpStatus.OK, "기업 정보 추후 예정", null);
+            AddressDTO address = user.getAddressSq() != null
+                    ? informationEditService.getAddress(user.getAddressSq())
+                    : null;
+
+            String genderName = user.getUserGenderCd() != null
+                    ? informationEditService.getGenderName(user.getUserGenderCd())
+                    : null;
+
+            String companyName = informationEditService.getCompanyName(userSq);
+
+            CompanyUserInfoResponseDTO response = CompanyUserInfoResponseDTO.builder()
+                    .userId(user.getUserId())
+                    .userEmail(user.getUserEmail())
+                    .userNm(user.getUserNm())
+                    .userBirthDt(user.getUserBirthDt())
+                    .userGenderNm(genderName != null ? genderName : null)
+                    .userPhoneNum(user.getUserPhoneNum())
+                    .address(address != null ? address.getAddress() : null)
+                    .detailAddress(address != null ? address.getDetailAddress() : null)
+                    .companyNm(companyName)
+                    .build();
+
+            return ApiResponse.of(HttpStatus.OK, "기업회원 정보 조회 완료", response);
         } else {
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "유효하지 않은 회원입니다.");
         }

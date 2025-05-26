@@ -14,11 +14,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InformationEditService {
 
-    private final InformationEditRepository repository;
+    private final InformationEditRepository informationEditRepository;
     private final PasswordEncoder passwordEncoder;
 
     public boolean checkPassword(Long userSq, String rawPassword) {
-        String encodedPw = repository.getEncodedPasswordByUserSq(userSq);
+        String encodedPw = informationEditRepository.getEncodedPasswordByUserSq(userSq);
         if (encodedPw == null) {
             throw new RuntimeException("User not found");
         }
@@ -26,14 +26,18 @@ public class InformationEditService {
     }
 
     public UserInfoDTO getUserInfo(Long userSq) {
-        return repository.findUser(userSq); // 분기는 안 함
+        return informationEditRepository.findUser(userSq); // 분기는 안 함
     }
 
     public AddressDTO getAddress(Long addressSq) {
-        return repository.findAddress(addressSq);
+        return informationEditRepository.findAddress(addressSq);
     }
 
     public String getGenderName(Long genderCd) {
-        return repository.findCommonCodeName(genderCd);
+        return informationEditRepository.findCommonCodeName(genderCd);
+    }
+
+    public String getCompanyName(Long userSq) {
+        return informationEditRepository.getCompanyNameByUserSq(userSq);
     }
 }

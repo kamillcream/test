@@ -12,21 +12,25 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InformationEditRepository {
 
-    private final InformationEditMapper mapper;
+    private final InformationEditMapper informationEditMapper;
 
     public String getEncodedPasswordByUserSq(Long userSq) {
-        return mapper.selectPasswordByUserSq(userSq);
+        return informationEditMapper.selectPasswordByUserSq(userSq);
     }
 
     public UserInfoDTO findUser(Long userSq) {
-        return mapper.findUserInfoByUserSq(userSq);
+        return informationEditMapper.findUserInfoByUserSq(userSq);
     }
 
     public AddressDTO findAddress(Long addressSq) {
-        return mapper.findAddressByAddressSq(addressSq);
+        return informationEditMapper.findAddressByAddressSq(addressSq);
     }
 
     public String findCommonCodeName(Long codeSq) {
-        return mapper.findCommonCodeNameByGenderCd(codeSq);
+        return informationEditMapper.findCommonCodeNameByGenderCd(codeSq);
+    }
+
+    public String getCompanyNameByUserSq(Long userSq) {
+        return informationEditMapper.selectCompanyNameByUserSq(userSq);
     }
 }

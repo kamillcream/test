@@ -16,4 +16,6 @@ public interface InformationEditMapper {
     AddressDTO findAddressByAddressSq(@Param("addressSq") Long addressSq);
 
     String findCommonCodeNameByGenderCd(@Param("codeSq") Long codeSq);
+
+    String selectCompanyNameByUserSq(@Param("userSq") Long userSq);
 }

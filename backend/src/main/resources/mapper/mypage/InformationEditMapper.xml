@@ -19,4 +19,7 @@
 
     <select id="findCommonCodeNameByGenderCd" resultType="String"> SELECT common_code_nm FROM
         TBL_COMMON_CODE_C WHERE common_code_sq = #{codeSq} </select>
+
+    <select id="selectCompanyNameByUserSq" resultType="string"> SELECT company_nm FROM TBL_COMPANY_S
+        WHERE user_sq = #{userSq} </select>
 </mapper>
