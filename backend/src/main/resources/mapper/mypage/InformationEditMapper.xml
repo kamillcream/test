@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.domain.mypage.mapper.InformationEditMapper">
+
+    <select id="selectPasswordByUserSq" parameterType="long" resultType="string"> SELECT user_pw
+        FROM TBL_USER_M WHERE user_sq = #{userSq} AND user_is_deleted_yn = 'N' </select>
+
+</mapper>
