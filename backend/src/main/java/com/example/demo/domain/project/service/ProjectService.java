@@ -12,8 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.common.ParentCodeEnum;
 import com.example.demo.common.mapper.CommonCodeMapper;
+import com.example.demo.domain.company.mapper.CompanyMapper;
 import com.example.demo.domain.company.service.CompanyService;
 import com.example.demo.domain.project.dto.AddressInsertDto;
+
+import com.example.demo.domain.project.dto.UserRole;
 import com.example.demo.domain.project.dto.request.ContractInsertRequest;
 import com.example.demo.domain.project.dto.request.JobInsertRequest;
 import com.example.demo.domain.project.dto.request.ProjectApplyRequest;
@@ -39,7 +42,6 @@ import com.example.demo.domain.project.mapper.ScrapMapper;
 import com.example.demo.domain.project.mapper.SkillMapper;
 import com.example.demo.domain.project.util.ProjectUtil;
 import com.example.demo.domain.user.util.JwtAuthenticationToken;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.None;
 
 import lombok.RequiredArgsConstructor;
 
@@ -117,8 +119,9 @@ public class ProjectService {
 		return new ProjectListResponse(request.getOffset(), request.getSize(), totalCount, responses);	
 	}
 
-	public ProjectDetailResponse fetchProject(Long projectSq, Long userSq){
+	public ProjectDetailResponse fetchProject(Long projectSq, JwtAuthenticationToken token){
 		Project p = projectMapper.findBySq(projectSq);
+		Long userSq = token.getUserSq();
 		if (p.getProjectIsDeletedYn().equals("Y")) {
 			 throw new RuntimeException("이미 삭제된 프로젝트 입니다.");
 		}
@@ -135,7 +138,9 @@ public class ProjectService {
 		// TODO: mapper로 지원 여부 확인
 		int hasApplied = 1; 
 		
-		return ProjectDetailResponse.from(p,projectUtil, reqSkills, preferSkills, projectAddress, hasScrapped, hasApplied);
+		UserRole userRole = findUserRole(token, p);
+		
+		return ProjectDetailResponse.from(p,projectUtil, reqSkills, preferSkills, projectAddress, hasScrapped, hasApplied, userRole);
 	}
 	
 	@Transactional
@@ -329,5 +334,27 @@ public class ProjectService {
 		default:
 			throw new IllegalArgumentException("Unexpected value: " + type);
 		}
+	}
+	
+	public UserRole findUserRole(JwtAuthenticationToken token, Project project) {
+		Long userSq = token.getUserSq();
+		Long userTypeCd = token.getUserTypeCd();
+		Long companySq = project.getCompanySq();
+		String ownedCompanyBizNum = companyService.fetchCompanyBizNumByCompany(companySq);
+		
+		if(userTypeCd.equals(commonCodeMapper.findCommonCodeSqByEngName("PERSONAL", ParentCodeEnum.MEMBER_TYPE.getCode()))) {
+			return UserRole.PERSONAL;
+		} 
+		else if(userTypeCd.equals(commonCodeMapper.findCommonCodeSqByEngName("COMPANY", ParentCodeEnum.MEMBER_TYPE.getCode()))
+				&& userSq.equals(companyService.fetchUserSq(companySq))
+				&& ownedCompanyBizNum.equals(companyService.fetchCompanyBizNumByUser(userSq))) {
+			return UserRole.COMPANY_AUTHOR;
+		} 
+		else if(userTypeCd.equals(commonCodeMapper.findCommonCodeSqByEngName("COMPANY", ParentCodeEnum.MEMBER_TYPE.getCode()))
+				&& !userSq.equals(companyService.fetchUserSq(companySq))
+				&& ownedCompanyBizNum.equals(companyService.fetchCompanyBizNumByUser(userSq))) {
+			return UserRole.COMPANY_MEMBER;
+		}
+		return UserRole.COMPANY_EXTERNAL;
 	}
 }

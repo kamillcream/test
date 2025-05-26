@@ -86,8 +86,9 @@ public class ProjectController {
 	
 	@GetMapping("/{projectSq}/details")
 	public ResponseEntity<ApiResponse<ProjectDetailResponse>> getProjectDetails(
-			@PathVariable("projectSq") Long projectSq, @AuthenticationPrincipal Long userSq){
-		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 상세 내역 반환 성공", projectService.fetchProject(projectSq, userSq)));
+			@PathVariable("projectSq") Long projectSq, Authentication authentication){
+		JwtAuthenticationToken token = (JwtAuthenticationToken) authentication;
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 상세 내역 반환 성공", projectService.fetchProject(projectSq, token)));
 	}
 	
 	@GetMapping("/forms")
