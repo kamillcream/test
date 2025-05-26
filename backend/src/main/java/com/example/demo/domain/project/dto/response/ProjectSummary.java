@@ -27,15 +27,15 @@ public class ProjectSummary {
 	private Long salary;
 	private List<String> reqSkills;
 	
-	public static ProjectSummary from(Project project, ProjectUtil util) {
+	public static ProjectSummary from(Project project, ProjectUtil util, String address) {
 		return ProjectSummary.builder()
 				.projectSq(project.getProjectSq())
+				.address(address)
 				.projectTtl(project.getProjectTtl())
 				.imageUrl(project.getProjectImageUrl())
 				.viewCnt(project.getProjectViewCnt())
 				.salary(project.getProjectSalary())
 				.companyNm(util.convertCompanySqToName(project.getCompanySq()))
-				.address(util.convertAddressSqToName(project.getAddressSq()))
 				.remainingDay(project.calcaulateRemainingDay(project.getProjectRecruitEndDt()))
 				.reqSkills(util.fetchReqSkillsByProjectSq(project.getProjectSq()))
 				.devGradeNm(util.convertCommonCodeSqToNm(project.getProjectDeveloperGradeCd()))

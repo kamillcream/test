@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.example.demo.domain.project.dto.UserRole;
 import com.example.demo.domain.project.entity.Project;
 import com.example.demo.domain.project.util.DateUtil;
 import com.example.demo.domain.project.util.ProjectUtil;
@@ -43,11 +44,13 @@ public class ProjectDetailResponse {
     private List<String> projectJobRole;          
     private List<String> projectWorkType;         
 
-    private String isScrap;                        
-    private Long userSq;      
+    private int isScrap;    
+    private int isApplied;
+
+    private UserRole userRole;
     
     public static ProjectDetailResponse from(Project p, ProjectUtil util, List<GroupSkillInfoResponse> req, List<GroupSkillInfoResponse> prefer
-    		, String address) {
+    		, String address, int hasScrapped, int hasApplied, UserRole userRole) {
     	Long projectSq = p.getProjectSq();
     	Map<String, LocalDateTime> interviewTimes = util.fetchInterviewTimeMinMaxBySq(projectSq);
     	return ProjectDetailResponse.builder()
@@ -76,8 +79,9 @@ public class ProjectDetailResponse {
                 .projectJobRole(util.fetchJobsByProjectSq(projectSq))
                 .projectWorkType(util.fetchWorkTypesByProjectSq(projectSq))
 
-                .isScrap("N")
-                .userSq(1L)
+                .isScrap(hasScrapped)
+                .isApplied(hasApplied)
+                .userRole(userRole)
                 .build();
     }
 }

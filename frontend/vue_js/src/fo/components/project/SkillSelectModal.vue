@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import { ref, defineEmits, defineProps, computed } from 'vue'
+import { ref, defineEmits, defineProps, computed, onMounted } from 'vue'
 import { useModalStore } from '../../stores/modalStore.js'
 
 const emit = defineEmits(['confirm', 'remove'])
@@ -61,9 +61,16 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  selectedSkills: {
+    type: Array,
+    default: () => [],
+  },
 })
 
-const selectedSkills = ref([])
+const selected = ref([])
+onMounted(() => {
+  selected.value = [...props.selectedSkills]
+})
 
 const groupedSkills = computed(() => {
   const map = {}
@@ -74,14 +81,14 @@ const groupedSkills = computed(() => {
 })
 
 const toggleSkill = (skillName) => {
-  const index = selectedSkills.value.findIndex((s) => s.name === skillName)
+  const index = selected.value.findIndex((s) => s.name === skillName)
   if (index === -1) {
-    selectedSkills.value.push({
+    selected.value.push({
       name: skillName,
       imageUrl: generateIconUrl(skillName),
     })
   } else {
-    selectedSkills.value.splice(index, 1)
+    selected.value.splice(index, 1)
   }
 }
 
@@ -104,12 +111,12 @@ const generateIconUrl = (name) => {
 }
 
 const isSelected = (skillName) =>
-  selectedSkills.value.some((s) => s.name === skillName || s === skillName)
+  selected.value.some((s) => s.name === skillName || s === skillName)
 
 const confirmSelection = () => {
-  emit('confirm', selectedSkills.value)
-  // const modalStore = useModalStore()
-  // modalStore.closeModal()
+  emit('confirm', selected.value)
+  const modalStore = useModalStore()
+  modalStore.closeModal()
 }
 </script>
 
@@ -131,7 +138,7 @@ const confirmSelection = () => {
   border-radius: 12px;
   padding: 24px;
   width: 720px;
-  max-height: 90vh;
+  max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
@@ -162,7 +169,7 @@ const confirmSelection = () => {
 }
 
 .tech-card.selected {
-  background-color: #d9d9d9 !important;
+  background-color: #0088cc !important;
   border-color: #0d6efd;
   box-shadow: 0 0 0 2px #0d6efd33;
 }

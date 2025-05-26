@@ -1,86 +1,150 @@
 <template>
-  <div>
-    <ProjectFilterBar
-      :localFilters="['서울', '부산', '대구']"
-      :careerFilters="['신입', '경력']"
-      :jobTypeFilters="['백엔드', '프론트엔드', 'PM', '디자이너']"
-      @update="updateFilters"
-    />
-    <div class="container py-4">
-      <div class="d-flex justify-content-end mb-3">
-        <button class="btn btn-rounded btn-primary me-2" @click="fetchProjects">
-          검색
-        </button>
-        <a href="#" class="btn btn-rounded btn-light">등록하기</a>
-      </div>
-      <ProjectCardGroup :projects="projects" />
-      <div v-if="projects.length === 0" class="text-center text-muted py-5">
-        조건에 맞는 프로젝트가 없습니다.
-      </div>
-      <div>
-        <CommonPagination
-          :currentPage="currentPage"
-          :totalPages="totalPages"
-          @update:currentPage="currentPage = $event"
-        />
+  <Teleport to="body">
+    <div class="modal-backdrop">
+      <div class="modal-wrapper">
+        <h5 class="modal-title">모집 직군 선택</h5>
+
+        <div class="grid-button-group">
+          <button
+            v-for="job in props.jobs"
+            :key="job"
+            :class="['job-button', { selected: isSelected(job) }]"
+            @click="toggleJob(job)"
+          >
+            {{ job }}
+          </button>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-cancel" @click="closeModal">닫기</button>
+          <button class="btn btn-confirm" @click="confirmSelection">
+            선택 완료
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  </Teleport>
 </template>
+
 <script setup>
-import ProjectFilterBar from '@/fo/components/common/ProjectFilterBar.vue'
-import ProjectCardGroup from '@/fo/components/project/ProjectCardGroup.vue'
-import CommonPagination from '@/fo/components/common/CommonPagination.vue'
-import { ref, watch, onMounted, computed } from 'vue'
+import { ref, defineEmits, defineProps } from 'vue'
+import { useModalStore } from '../../stores/modalStore.js'
 
-import { api } from '@/axios.js'
-const filters = ref({
-  addressCodeSq: null,
-  projectDeveloperGradeCd: null,
-  educationCd: null,
-  jobRoleCd: null,
-  sortBy: '',
-  sortOrder: 'desc',
-  searchKeyword: '',
-  searchType: '프로젝트명',
-  size: 5,
+const emit = defineEmits(['confirm'])
+const props = defineProps({
+  onConfirm: Function,
+  jobs: {
+    type: Array,
+    default: () => [],
+  },
 })
 
-const currentPage = ref(1)
-const totalPages = ref('')
-const offset = computed(() => {
-  const page = parseInt(currentPage.value) || 1
-  return (page - 1) * filters.value.size
-})
+const modalStore = useModalStore()
 
-const projects = ref([])
+const selectedJobs = ref([])
 
-onMounted(async () => {
-  fetchProjects()
-})
-
-watch(currentPage, (newPage) => {
-  filters.value.offset = newPage
-  fetchProjects()
-})
-
-const fetchProjects = async () => {
-  try {
-    const params = { ...filters.value, offset: offset.value }
-    const response = await api.$get('/projects', { params })
-    projects.value = response.output.projects
-
-    const totalCount = response.output.totalCount ?? 0 // totalCount가 반드시 있어야 함
-    totalPages.value = Math.max(1, Math.ceil(totalCount / filters.value.size))
-  } catch (e) {
-    console.error('프로젝트 정보 불러오기 실패', e)
-  }
+const toggleJob = (job) => {
+  const i = selectedJobs.value.indexOf(job)
+  i === -1 ? selectedJobs.value.push(job) : selectedJobs.value.splice(i, 1)
 }
-const updateFilters = (updated) => {
-  filters.value = { ...filters.value, ...updated }
-  console.log(filters)
-  currentPage.value = 1 // 필터 바꾸면 1페이지부터
-  fetchProjects()
+
+const isSelected = (job) => selectedJobs.value.includes(job)
+
+const confirmSelection = () => {
+  emit('confirm', selectedJobs.value)
+  modalStore.closeModal()
+}
+
+const closeModal = () => {
+  modalStore.closeModal()
 }
 </script>
-<style lang=""></style>
+
+<style scoped>
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-wrapper {
+  background: #fff;
+  padding: 32px;
+  border-radius: 12px;
+  width: 600px;
+  max-height: 60vh; /* 최대 높이 설정 */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.grid-button-group {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+  overflow-y: auto;
+  max-height: 300px; /* 스크롤이 생길 수 있도록 높이 제한 */
+  padding-right: 4px; /* 스크롤바 공간 확보 */
+}
+
+.grid-button-group::-webkit-scrollbar {
+  width: 6px;
+}
+.grid-button-group::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+.grid-button-group::-webkit-scrollbar-track {
+  background: transparent;
+}
+.job-button {
+  padding: 12px 10px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  background: white;
+  font-weight: 500;
+  transition: 0.2s;
+  cursor: pointer;
+}
+
+.job-button.selected {
+  background-color: #0088cc;
+  color: white;
+  border-color: #0088cc;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-cancel {
+  background: #f1f3f5;
+  color: #333;
+}
+
+.btn-confirm {
+  background: #0088cc;
+  color: white;
+}
+</style>

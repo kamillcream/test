@@ -60,7 +60,7 @@
             >
               <div>
                 {{ project.address }} / {{ project.devGradeNm }} /
-                {{ project.requiredEduLvl }} / {{ project.salary }}
+                {{ project.requiredEduLvl }} / {{ project.salary }}원
               </div>
             </div>
             <div class="d-flex flex-wrap gap-2 mt-2">

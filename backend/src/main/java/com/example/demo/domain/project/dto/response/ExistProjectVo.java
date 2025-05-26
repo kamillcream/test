@@ -23,6 +23,7 @@ public class ExistProjectVo {
 	private AreaInfoResponse subDistrict;
 	private String devGrade;
 	private String educationLvl;
+	private Long projectSalary;
 	private List<String> contract;
 	private List<String> jobs;
 	private List<String> reqSkills;
@@ -43,6 +44,7 @@ public class ExistProjectVo {
                 .projectTtl(p.getProjectTtl())
                 .parentDistrict(parent)
                 .subDistrict(sub)
+                .projectSalary(p.getProjectSalary())
                 .description(p.getProjectDescriptionTxt())
                 .recruitStartDt(p.getProjectRecruitStartDt().toString())
                 .recruitEndDt(p.getProjectRecruitEndDt().toString())
