@@ -28,10 +28,10 @@ import com.example.demo.domain.project.dto.response.GroupSkillInfoResponse;
 import com.example.demo.domain.project.dto.response.ProjectDetailResponse;
 import com.example.demo.domain.project.dto.response.ProjectFormDataResponse;
 import com.example.demo.domain.project.dto.response.ProjectListResponse;
-import com.example.demo.domain.project.dto.response.ProjectSummary;
 import com.example.demo.domain.project.entity.Project;
 import com.example.demo.domain.project.entity.ProjectApplicationEntity;
 import com.example.demo.domain.project.service.ProjectService;
+import com.example.demo.domain.project.vo.ProjectSummary;
 import com.example.demo.domain.user.util.JwtAuthenticationToken;
 
 import jakarta.validation.Valid;
