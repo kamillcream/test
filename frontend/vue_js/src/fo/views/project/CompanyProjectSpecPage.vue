@@ -150,7 +150,7 @@
 
             <div class="d-flex justify-content-center align-items-center gap-3">
               <a
-                v-if="companyId === 'test1'"
+                v-if="project.userRole === 'COMPANY_EXTERNAL'"
                 @click="openMemberModal"
                 href="#"
                 class="btn btn-lg btn-rounded btn-primary btn-lg"
@@ -158,13 +158,14 @@
                 지원하기
               </a>
               <a
-                v-if="companyId === 'test1'"
+                v-if="project.userRole === 'COMPANY_EXTERNAL'"
                 href="#"
                 class="btn btn-lg btn-rounded btn-light btn-lg"
               >
                 스크랩
               </a>
               <a
+                v-if="project.userRole === 'COMPANY_AUTHOR'"
                 @click="goToProjectPost"
                 href="#"
                 class="btn btn-lg btn-rounded btn-primary btn-lg"
@@ -172,6 +173,7 @@
                 수정하기
               </a>
               <a
+                v-if="project.userRole === 'COMPANY_AUTHOR'"
                 @click="deleteProject"
                 href="#"
                 class="btn btn-lg btn-rounded btn-light btn-lg"

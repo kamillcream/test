@@ -1,5 +1,6 @@
 package com.example.demo.domain.company.service;
 
+import org.springframework.security.web.webauthn.api.PublicKeyCose;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.common.ParentCodeEnum;
@@ -20,5 +21,17 @@ public class CompanyService {
 		} else {
 		    throw new RuntimeException("접근 권한이 없습니다.");
 		}
+	}
+	
+	public Long fetchUserSq(Long companySq) {
+		return companyMapper.findUserSqByCompanySq(companySq);
+	}
+	
+	public String fetchCompanyBizNumByUser(Long userSq) {
+		return companyMapper.findBizNumByUserSq(userSq);
+	}
+	
+	public String fetchCompanyBizNumByCompany(Long companySq) {
+		return companyMapper.findBizNumByCompanySq(companySq);
 	}
 }

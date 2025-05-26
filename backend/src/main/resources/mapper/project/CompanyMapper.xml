@@ -16,6 +16,24 @@
         FROM TBL_COMPANY_MEMBER_R
         WHERE user_sq = #{userSq}
     </select>
-
-
+    
+    <select id="findUserSqByCompanySq" parameterType="Long" resultType="Long">
+        SELECT user_sq
+        FROM TBL_COMPANY_MEMBER_R
+        WHERE company_sq = #{companySq}
+    </select>
+    
+    <select id="findBizNumByUserSq" parameterType="Long" resultType="String">
+        SELECT company_biz_num
+        FROM TBL_COMPANY_S
+        WHERE user_sq = #{userSq}
+    </select>
+    
+    <select id="findBizNumByCompanySq" parameterType="Long" resultType="String">
+        SELECT company_biz_num
+        FROM TBL_COMPANY_S
+        WHERE company_sq = #{companySq}
+    </select>
+    
+    
 </mapper>
