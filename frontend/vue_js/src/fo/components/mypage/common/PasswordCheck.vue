@@ -60,7 +60,7 @@ const handleCheck = async () => {
     }
 
     // 실제 API 호출
-    const response = await api.$post('/mypage/check-password', requestBody)
+    const response = await api.$post('/mypage/edit/check-password', requestBody)
 
     if (response.status === 'OK' && response.output === true) {
       // 비밀번호 일치

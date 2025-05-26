@@ -3,6 +3,9 @@ package com.example.demo.domain.mypage.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.domain.mypage.dto.AddressDTO;
+import com.example.demo.domain.mypage.dto.UserInfoDTO;
+import com.example.demo.domain.mypage.dto.response.PersonalUserInfoResponseDTO;
 import com.example.demo.domain.mypage.repository.InformationEditRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -20,5 +23,17 @@ public class InformationEditService {
             throw new RuntimeException("User not found");
         }
         return passwordEncoder.matches(rawPassword, encodedPw);
+    }
+
+    public UserInfoDTO getUserInfo(Long userSq) {
+        return repository.findUser(userSq); // 분기는 안 함
+    }
+
+    public AddressDTO getAddress(Long addressSq) {
+        return repository.findAddress(addressSq);
+    }
+
+    public String getGenderName(Long genderCd) {
+        return repository.findCommonCodeName(genderCd);
     }
 }

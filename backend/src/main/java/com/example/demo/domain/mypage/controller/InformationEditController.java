@@ -3,17 +3,21 @@ package com.example.demo.domain.mypage.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.ApiResponse;
+import com.example.demo.domain.mypage.dto.AddressDTO;
+import com.example.demo.domain.mypage.dto.UserInfoDTO;
 import com.example.demo.domain.mypage.dto.request.PasswordCheckRequestDTO;
+import com.example.demo.domain.mypage.dto.response.PersonalUserInfoResponseDTO;
 import com.example.demo.domain.mypage.service.InformationEditService;
 
 @RestController
-@RequestMapping("/mypage")
+@RequestMapping("/mypage/edit")
 public class InformationEditController {
 
     private final InformationEditService informationEditService;
@@ -33,6 +37,44 @@ public class InformationEditController {
             return ApiResponse.of(HttpStatus.OK, "비밀번호 일치", true);
         } else {
             return ApiResponse.error(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+        }
+    }
+
+    @GetMapping("/info")
+    public ApiResponse<?> getUserInfo(@AuthenticationPrincipal Long userSq) {
+        UserInfoDTO user = informationEditService.getUserInfo(userSq);
+        if (user == null) {
+            return ApiResponse.error(HttpStatus.NOT_FOUND, "회원 정보를 찾을 수 없습니다.");
+        }
+
+        if (user.getUserTypeCd().equals(301L)) {
+            // 개인 회원
+            AddressDTO address = user.getAddressSq() != null
+                    ? informationEditService.getAddress(user.getAddressSq())
+                    : null;
+
+            String genderName = user.getUserGenderCd() != null
+                    ? informationEditService.getGenderName(user.getUserGenderCd())
+                    : null;
+
+            PersonalUserInfoResponseDTO response = PersonalUserInfoResponseDTO.builder()
+                    .userId(user.getUserId())
+                    .userEmail(user.getUserEmail())
+                    .userNm(user.getUserNm())
+                    .userBirthDt(user.getUserBirthDt())
+                    .userGenderNm(genderName != null ? genderName : null)
+                    .userPhoneNum(user.getUserPhoneNum())
+                    .userProfileImageUrl(user.getUserProfileImageUrl())
+                    .address(address != null ? address.getAddress() : null)
+                    .detailAddress(address != null ? address.getDetailAddress() : null)
+                    .build();
+
+            return ApiResponse.of(HttpStatus.OK, "개인정보 조회 완료", response);
+        } else if (user.getUserTypeCd().equals(302L)) {
+            // 기업 회원용 로직 추후 추가 예정
+            return ApiResponse.of(HttpStatus.OK, "기업 정보 추후 예정", null);
+        } else {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "유효하지 않은 회원입니다.");
         }
     }
 }

@@ -6,4 +6,17 @@
     <select id="selectPasswordByUserSq" parameterType="long" resultType="string"> SELECT user_pw
         FROM TBL_USER_M WHERE user_sq = #{userSq} AND user_is_deleted_yn = 'N' </select>
 
+
+    <select id="findUserInfoByUserSq" parameterType="long"
+        resultType="com.example.demo.domain.mypage.dto.UserInfoDTO"> SELECT user_sq, user_id,
+        user_email, user_nm, user_birth_dt, user_gender_cd, user_phone_num, user_type_cd,
+        user_profile_image_url, address_sq FROM TBL_USER_M WHERE user_sq = #{userSq} AND
+        user_is_deleted_yn = 'N' </select>
+
+    <select id="findAddressByAddressSq" parameterType="long"
+        resultType="com.example.demo.domain.mypage.dto.AddressDTO"> SELECT address, detail_address
+        FROM TBL_ADDRESS_S WHERE address_sq = #{addressSq} </select>
+
+    <select id="findCommonCodeNameByGenderCd" resultType="String"> SELECT common_code_nm FROM
+        TBL_COMMON_CODE_C WHERE common_code_sq = #{codeSq} </select>
 </mapper>
