@@ -112,10 +112,12 @@ public class BoardService {
         }
         
 //        일반 태그 추가
-    	cmntTagMapper.insertNT(normalTagConverter.convertStringsToNormalTags(board.getBoardSq(), null, boardRequest.getNormalTags()));
+        if(boardRequest.getNormalTags().size() > 0) {
+        	cmntTagMapper.insertNT(normalTagConverter.convertStringsToNormalTags(board.getBoardSq(), null, boardRequest.getNormalTags()));
+        }
     	
 //    	스킬태그 추가
-    	if(board.getBoardTypeCd() == 1402) {
+    	if(board.getBoardTypeCd() == 1402 && boardRequest.getSkillTags().size() > 0) {
     		cmntTagMapper.insertST(skillTagConverter.convertStringsToSkillTags(board.getBoardSq(), null, boardRequest.getSkillTags()));
     	}
         

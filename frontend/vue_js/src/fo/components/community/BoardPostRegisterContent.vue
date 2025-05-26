@@ -4,6 +4,7 @@
     <div class="form-group mb-3">
       <label class="form-label mb-1 text-2">제목</label>
       <input
+        v-model="ttl"
         type="text"
         name="title"
         class="form-control text-3 h-auto py-2"
@@ -14,25 +15,13 @@
     <!-- 내용 -->
     <div class="form-group mb-4">
       <label class="form-label mb-1 text-2">내용</label>
-      <!-- <div
-        class="border rounded p-3 edt-area"
-        id="editor"
-        contenteditable="true"
-      >
-        <p class="text-muted m-0">
-          에디터 영역입니다. 여기에 내용을 입력하세요.
-        </p>
-
-        <div class="output ql-snow">
-          <div v-html="content"></div>
-        </div>
-      </div> -->
       <QuillEditor
+        v-model:content="description"
+        content-type="html"
         class="editor text-muted border rounded p-3 edt-area"
         id="editor"
         ref="editorRef"
         :options="options"
-        @editor-change="content = editorRef.getHTML()"
       />
     </div>
 
@@ -97,20 +86,24 @@
 </template>
 <script setup>
 import { useModalStore } from '@/fo/stores/modalStore'
-import { defineProps, ref } from 'vue'
+import { defineProps, defineExpose, ref, watch, onMounted } from 'vue'
 import SkillSelectModal from '../project/SkillSelectModal.vue'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import '@vueup/vue-quill/dist/vue-quill.bubble.css'
+import { useBoardStore } from '@/fo/stores/boardStore'
 
 defineProps({ skillActive: Boolean })
 
 const modalStore = useModalStore()
+const boardStore = useBoardStore()
 
-const normalTags = ref(['프론트엔드', '포트폴리오', '감사합니다'])
-const skillTags = ref([])
-const editorRef = ref()
-const content = ref()
+const ttl = ref(boardStore.boardData.ttl)
+const normalTags = ref(boardStore.boardData.normalTags)
+const skillTags = ref(boardStore.boardData.skillTags)
+const editorRef = ref(null)
+const description = ref(boardStore.boardData.description)
+const attachments = ref(boardStore.boardData.attachments)
 
 const options = {
   placeholder: '내용을 입력해주세요.',
@@ -141,6 +134,27 @@ const removeSTag = (tag) => {
   let filtered = skillTags.value.filter((el) => el != tag)
   skillTags.value = filtered
 }
+
+const sendData = () => {
+  return {
+    userSq: 10,
+    ttl: ttl.value,
+    description: description.value,
+    normalTags: [...normalTags.value],
+    skillTags: [...skillTags.value],
+    attachments: [...attachments.value],
+  }
+}
+
+defineExpose({ sendData })
+
+watch(attachments, () => {
+  console.log(attachments.value)
+})
+
+onMounted(() => {
+  boardStore.resetBoard()
+})
 </script>
 <style>
 .edt-area {

@@ -14,18 +14,20 @@
     </div>
     <div class="modal-body">
       <div class="post-content ms-0">
-        <BoardPost :isAnswer="true" :boardInfo="boardInfo" />
+        <BoardPost boardType="answer" :boardInfo="boardInfo" />
 
-        <BoardComment :comments="boardInfo.comments" />
+        <BoardComment
+          :comments="boardInfo.comments"
+          :answerSq="Number(props.answerSq)"
+          :isAnswer="true"
+          :getBoard="getBoard"
+        />
       </div>
     </div>
     <div class="modal-footer">
-      <a
-        href="resume-list.html"
-        class="btn btn-outline-secondary"
-        @click="closeModal"
-        >닫기</a
-      >
+      <button class="btn btn-outline-secondary" @click="closeModal">
+        닫기
+      </button>
     </div>
   </div>
 </template>

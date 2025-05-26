@@ -43,6 +43,7 @@ public class QnaController {
 //    QnA 등록
     @PostMapping
     public ResponseEntity<ApiResponse<NullType>> createQna(@RequestBody BoardRequest boardRequest){
+    	System.out.println("QnA 게시글 등록");
     	boardService.createBoard(boardRequest, 1402L);
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.CREATED, "게시글 등록이 완료되었습니다.", null));
     }

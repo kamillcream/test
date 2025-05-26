@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class CommentService {
     private final CommentMapper commentMapper;
     private final BoardMapper boardMapper;
+    private final AnswerMapper answerMapper;
     private final RecommendationMapper recommendationMapper;
 
     @Transactional
@@ -44,8 +45,15 @@ public class CommentService {
         if (comment.getCommentSq() == null) {
             throw new IllegalStateException("댓글 등록 실패: Primary Key가 생성되지 않았습니다.");
         }
+        
+//        댓글수 카운트        
+        if(comment.getBoardSq() != null) {
+        	boardMapper.updateCommentCnt(comment.getBoardSq());
+        }
+        if(comment.getAnswerSq() != null) {
+        	answerMapper.updateCommentCnt(comment.getAnswerSq());
+        }
 
-        boardMapper.updateCommentCnt(comment.getBoardSq());
         
         
 		return;
@@ -71,7 +79,14 @@ public class CommentService {
     public void deleteComment(Long commentSq) {
     	Comment comment = getComment(commentSq);
         commentMapper.delete(commentSq);
-        boardMapper.updateCommentCnt(comment.getBoardSq());
+        
+//      댓글수 카운트        
+      if(comment.getBoardSq() != null) {
+      	boardMapper.updateCommentCnt(comment.getBoardSq());
+      }
+      if(comment.getAnswerSq() != null) {
+      	answerMapper.updateCommentCnt(comment.getAnswerSq());
+      }
     }
 
     @Transactional
