@@ -46,6 +46,9 @@ public class ProjectApplicationEntity {
     @Column(name = "selected_interview_dtm")
     private LocalDateTime selectedInterviewDtm;
     
+    @Column(name = "read_application_dtm")
+    private LocalDateTime readApplicationDtm;
+    
     @PrePersist
     public void prePersist() {
     	this.projectApplicationCreatedAtDtm = LocalDateTime.now();
