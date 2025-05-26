@@ -91,4 +91,8 @@ input:focus {
 .btn-modern {
   font-weight: 500;
 }
+
+.btn.btn-light.btn-outline {
+  border-color: #d9d9d9;
+}
 </style>
