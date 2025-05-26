@@ -3,25 +3,23 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.demo.domain.community.mapper.CmntTagMapper">
-     
-     <resultMap id="NTResultMap" type="com.example.demo.domain.community.entity.NormalTag">
-        <result column="normal_tag_sq" property="normalTagSq"/>
-	    <result column="board_sq" property="boardSq"/>
-        <result column="answer_sq" property="answerSq"/>
-        <result column="normal_tag_nm" property="normalTagNm"/>
-        <result column="normal_tag_type_cd" property="normalTagTypeCd"/>
-	  </resultMap>
-     
-     <resultMap id="STResultMap" type="com.example.demo.domain.community.entity.SkillTag">
-        <result column="board_skill_tag_sq" property="boardSkillTagSq"/>
-	    <result column="board_sq" property="boardSq"/>
-        <result column="answer_sq" property="answerSq"/>
-        <result column="skill_tag_sq" property="skillTagSq"/>
-        <result column="skill_tag_nm" property="skillTagNm"/>
-        <result column="skill_tag_type_cd" property="skillTagTypeCd"/>
-	  </resultMap>
 
-    <select id="findNT" resultMap="NTResultMap">
+    <select id="findParentSkillTags" resultType="com.example.demo.domain.community.entity.CommonSkillTag">
+        SELECT * FROM TBL_SKILL_TAG_C
+        WHERE skill_tag_nm IN ('언어', '프레임워크', '툴')
+	    
+    </select>
+
+    <select id="findAll" resultType="com.example.demo.domain.community.entity.CommonSkillTag">
+        SELECT * FROM TBL_SKILL_TAG_C
+        WHERE parent_skill_tag_sq IN
+		<foreach collection="skillTags" item="tag" separator="," open="(" close=")">
+			#{tag.skillTagSq}
+		</foreach>
+	    
+    </select>
+
+    <select id="findNT" resultType="com.example.demo.domain.community.entity.NormalTag">
         SELECT * FROM TBL_BOARD_NORMAL_TAG_S
         
         <if test="boardSq != null">
@@ -41,7 +39,7 @@
         </foreach> 
     </insert>
 
-    <delete id="deleteNT" parameterType="com.example.demo.domain.community.entity.NormalTag">
+    <delete id="deleteNT" parameterType="com.example.demo.domain.community.entity.SkillTag">
         DELETE FROM TBL_BOARD_NORMAL_TAG_S
         
         <if test="boardSq != null">
@@ -52,7 +50,7 @@
 	    </if>
     </delete>
     
-    <select id="findST" resultMap="STResultMap">
+    <select id="findST" resultType="com.example.demo.domain.community.entity.SkillTag">
         SELECT * FROM TBL_BOARD_SKILL_TAG_S
         
         <if test="boardSq != null">

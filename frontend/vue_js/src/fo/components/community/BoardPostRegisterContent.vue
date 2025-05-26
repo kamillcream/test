@@ -57,7 +57,7 @@
           href="#"
           class="btn btn-rounded btn-3d btn-primary btn-sm d-flex align-items-center px-3 py-2"
         >
-          {{ tag }}
+          {{ tag.skillTagNm }}
           <i class="fas fa-times ms-2" @click.prevent="removeSTag(tag)"></i>
         </a>
         <a
@@ -86,14 +86,14 @@
 </template>
 <script setup>
 import { useModalStore } from '@/fo/stores/modalStore'
-import { defineProps, defineExpose, ref, watch, onMounted } from 'vue'
-import SkillSelectModal from '../project/SkillSelectModal.vue'
+import { defineProps, defineExpose, ref, watchEffect } from 'vue'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import '@vueup/vue-quill/dist/vue-quill.bubble.css'
 import { useBoardStore } from '@/fo/stores/boardStore'
+import SkillTagModal from './SkillTagModal.vue'
 
-defineProps({ skillActive: Boolean })
+defineProps({ skillActive: { type: Boolean, default: false } })
 
 const modalStore = useModalStore()
 const boardStore = useBoardStore()
@@ -111,14 +111,16 @@ const options = {
   contentType: 'html',
 }
 
-const openSkillModal = () => {
-  modalStore.openModal(SkillSelectModal, {
+const openSkillModal = async () => {
+  modalStore.openModal(SkillTagModal, {
+    skillTags: [...skillTags.value],
     onConfirm: onSkillsConfirmed,
   })
 }
 
 const onSkillsConfirmed = (skills) => {
-  skillTags.value = [...skills.map((item) => item.name)]
+  boardStore.boardData.skillTags = skills
+  skillTags.value = [...skills]
 }
 
 const addNTag = (tag) => {
@@ -135,6 +137,7 @@ const removeSTag = (tag) => {
   skillTags.value = filtered
 }
 
+// 전달 데이터
 const sendData = () => {
   return {
     userSq: 10,
@@ -148,12 +151,12 @@ const sendData = () => {
 
 defineExpose({ sendData })
 
-watch(attachments, () => {
-  console.log(attachments.value)
-})
-
-onMounted(() => {
-  boardStore.resetBoard()
+watchEffect(() => {
+  boardStore.boardData.ttl = ttl.value
+  boardStore.boardData.description = description.value
+  boardStore.boardData.normalTags = normalTags.value
+  boardStore.boardData.skillTags = skillTags.value
+  boardStore.boardData.attachments = attachments.value
 })
 </script>
 <style>

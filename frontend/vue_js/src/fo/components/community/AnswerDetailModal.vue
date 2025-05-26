@@ -14,11 +14,15 @@
     </div>
     <div class="modal-body">
       <div class="post-content ms-0">
-        <BoardPost boardType="answer" :boardInfo="boardInfo" />
+        <BoardPost
+          boardType="answer"
+          :boardInfo="boardInfo"
+          :getBoard="getBoard"
+        />
 
         <BoardComment
           :comments="boardInfo.comments"
-          :answerSq="Number(props.answerSq)"
+          :answerSq="props.answerSq"
           :isAnswer="true"
           :getBoard="getBoard"
         />
@@ -44,7 +48,12 @@ const alertStore = useAlertStore()
 
 const modalStore = useModalStore()
 
-const props = defineProps({ answerSq: String })
+const props = defineProps({
+  answerSq: {
+    type: Number,
+    default: 0,
+  },
+})
 
 const closeModal = () => {
   modalStore.closeModal()
@@ -70,10 +79,8 @@ const boardInfo = ref({
 const getBoard = async () => {
   try {
     const res = await api.$get(`/answer/${props.answerSq}`)
-    console.log(res)
     if (res) {
       boardInfo.value = res.output
-      console.log(boardInfo.value)
     }
   } catch (error) {
     alertStore.show('게시글을 불러올 수 없습니다.', 'danger')
@@ -82,11 +89,7 @@ const getBoard = async () => {
 
 const addViewCnt = async () => {
   try {
-    const res = await api.$patch(`/answer/${props.answerSq}/increment-view`)
-    console.log('조회수 증가 실행')
-    if (res) {
-      console.log(res)
-    }
+    await api.$patch(`/answer/${props.answerSq}/increment-view`)
   } catch (error) {
     console.error
   }

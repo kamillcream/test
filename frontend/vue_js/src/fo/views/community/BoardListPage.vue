@@ -24,7 +24,7 @@
               placeholder="검색어 입력"
               @keyup.enter="submit"
             />
-            <button class="btn btn-primary px-3" type="button">검색</button>
+            <button class="btn btn-primary px-3" type="submit">검색</button>
           </form>
         </div>
         <div class="col-md-6 text-end">
@@ -73,7 +73,7 @@ const alertStore = useAlertStore()
 const boardList = ref([])
 
 // 한 화면에 보일 박스 숫자 설정
-const size = 2
+const size = 10
 
 const currentPage = ref(1)
 
@@ -94,7 +94,6 @@ const getBoardList = async () => {
     const res = await api.$get(
       `/board?page=${currentPage.value}&size=${size}&sortType=${sortType.value}${searchFilter}`,
     )
-    console.log(res)
     if (res) {
       totalPages.value = (res.output.totalElements + size - 1) / size
       boardList.value = res.output.boards

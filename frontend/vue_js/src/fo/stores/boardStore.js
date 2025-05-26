@@ -17,7 +17,7 @@ export const useBoardStore = defineStore('board', {
   }),
   actions: {
     resetBoard() {
-      this.answerData = {
+      this.boardData = {
         ttl: '',
         description: '',
         normalTags: [],
@@ -46,8 +46,6 @@ export const useBoardStore = defineStore('board', {
         attachments: [],
       }
       this.editSq = payload.sq
-      console.log(this.boardData)
-      console.log(payload)
     },
   },
 })
