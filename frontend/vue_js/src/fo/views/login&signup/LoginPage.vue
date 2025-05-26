@@ -195,7 +195,7 @@ const login = async () => {
     userTypeCd,
     autoLogin: form.value.autologin,
   }
-  console.log('payload', payload)
+  // console.log('payload', payload)
 
   try {
     await api.$post('/login', payload)
