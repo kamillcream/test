@@ -89,11 +89,13 @@
     </div>
     <div class="time-picker-wrapper">
       <h6 class="time-picker-title">시간 선택 (30분 단위)</h6>
+      <p v-if="!selectedDate" class="time-warning">날짜를 먼저 선택해주세요.</p>
       <div class="time-grid">
         <button
           v-for="time in timeOptions"
           :key="time"
           :class="['time-slot', { selected: isSelectedTime(time) }]"
+          :disabled="!selectedDate"
           @click="toggleTime(time)"
         >
           {{ time }}
@@ -354,7 +356,7 @@ const confirmSelection = () => {
 }
 
 td.selected {
-  background-color: #0d6efd;
+  background-color: #0088cc;
   color: white;
   font-weight: bold;
   border-radius: 0;
@@ -394,8 +396,22 @@ td.has-times:not(.selected) {
 }
 
 .time-slot.selected {
-  background-color: #0d6efd;
+  background-color: #0088cc;
   color: white;
-  border-color: #0d6efd;
+  border-color: #0088cc;
+}
+
+.time-slot:disabled {
+  background-color: #f5f5f5;
+  color: #bbb;
+  border-color: #ddd;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.time-warning {
+  color: #d9534f;
+  font-size: 13px;
+  margin-bottom: 10px;
 }
 </style>
