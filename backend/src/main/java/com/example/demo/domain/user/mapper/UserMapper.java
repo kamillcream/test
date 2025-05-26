@@ -44,4 +44,8 @@ public interface UserMapper {
     UserDTO findUserByInfo(@Param("userId") String userId, @Param("userNm") String userNm,
             @Param("userEmail") String userEmail);
 
+    String findPasswordByUserSq(@Param("userSq") Long userSq);
+
+    int updatePasswordByUserSq(@Param("userSq") Long userSq, @Param("newPassword") String newPassword);
+
 }

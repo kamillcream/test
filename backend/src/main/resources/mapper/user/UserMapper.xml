@@ -91,4 +91,11 @@
   <select id="findUserByInfo" parameterType="map"
     resultType="com.example.demo.domain.user.dto.UserDTO"> SELECT * FROM TBL_USER_M WHERE user_id =
     #{userId} AND user_nm = #{userNm} AND user_email = #{userEmail} AND user_is_deleted_yn = 'N' </select>
+
+
+  <select id="findPasswordByUserSq" resultType="string"> SELECT user_pw FROM TBL_USER_M WHERE
+    user_sq = #{userSq} </select>
+
+  <update id="updatePasswordByUserSq"> UPDATE TBL_USER_M SET user_pw = #{newPassword} WHERE user_sq
+    = #{userSq} </update>
 </mapper>

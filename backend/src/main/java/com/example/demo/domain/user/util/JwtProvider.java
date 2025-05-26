@@ -80,6 +80,25 @@ public class JwtProvider {
         }
     }
 
+    public Long validateAndGetUserSq(String token, String requiredPurpose) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            String purpose = claims.get("purpose", String.class);
+            if (!requiredPurpose.equals(purpose)) {
+                throw new JwtException("토큰 목적 불일치");
+            }
+
+            return Long.valueOf(claims.getSubject());
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new JwtException("유효하지 않은 토큰입니다.", e);
+        }
+    }
+
     public Long getUserSqFromToken(String token) {
         Claims claims = parseClaims(token);
         return Long.valueOf(claims.getSubject());

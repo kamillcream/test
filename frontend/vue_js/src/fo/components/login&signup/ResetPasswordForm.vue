@@ -282,16 +282,10 @@ const handleSubmit = async () => {
 
     // 표준화된 응답 구조 사용
     if (response.status === 'OK') {
-      alertStore.show(
-        response.message || '비밀번호 재설정 페이지로 이동합니다.',
-        'success',
-      )
+      alertStore.show('비밀번호 재설정 페이지로 이동합니다.', 'success')
       router.push({ name: 'ResetPassword' })
     } else {
-      alertStore.show(
-        response.message || '일치하는 회원 정보를 찾을 수 없습니다.',
-        'danger',
-      )
+      alertStore.show('일치하는 회원 정보를 찾을 수 없습니다.', 'danger')
     }
   } catch (error) {
     console.error(error)

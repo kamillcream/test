@@ -79,4 +79,12 @@ public class UserRepository {
     public UserDTO findUserByInfo(String userId, String userNm, String userEmail) {
         return userMapper.findUserByInfo(userId, userNm, userEmail);
     }
+
+    public String findPasswordByUserSq(Long userSq) {
+        return userMapper.findPasswordByUserSq(userSq);
+    }
+
+    public int updatePassword(Long userSq, String newPassword) {
+        return userMapper.updatePasswordByUserSq(userSq, newPassword);
+    }
 }

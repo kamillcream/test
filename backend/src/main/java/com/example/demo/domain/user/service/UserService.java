@@ -117,4 +117,13 @@ public class UserService {
         return userRepository.findUserByInfo(userId, userNm, userEmail);
     }
 
+    public String findCurrentPassword(Long userSq) {
+        return userRepository.findPasswordByUserSq(userSq);
+    }
+
+    public boolean updatePassword(Long userSq, String newPassword) {
+        int updatedRows = userRepository.updatePassword(userSq, newPassword);
+        return updatedRows > 0;
+    }
+
 }
