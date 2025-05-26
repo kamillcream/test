@@ -86,15 +86,15 @@ public class Project {
     @Column(name = "project_view_cnt")
     private Integer projectViewCnt;
 
-    public static Project from(ProjectCreateRequest request, long addressSq, long devgradeCodeSq, long educationLvlSq) {
+    public static Project from(ProjectCreateRequest request,  Long companySq, long addressSq, long devgradeCodeSq, long educationLvlSq) {
     	return Project.builder()
-    			.companySq(1L)
+    			.companySq(companySq)
 				.addressSq(addressSq)
 				.projectTtl(request.projectTitle())
 				.projectImageUrl(request.projectImageUrl())
 				.projectDeveloperGradeCd(devgradeCodeSq)
 				.projectRequiredEducationCd(educationLvlSq)
-				.projectSalary(10000L)
+				.projectSalary(request.projectSalary())
 				.projectStartDt(request.projectStartDt())
 				.projectEndDt(request.projectEndDt())
 				.projectRecruitStartDt(request.recruitStartDt())
@@ -125,6 +125,7 @@ public class Project {
     	this.projectTtl = request.projectTitle();
     	this.projectImageUrl = request.projectImageUrl();
     	this.projectDeveloperGradeCd = devGradeCode;
+    	this.projectSalary = request.projectSalary();
     	this.projectRequiredEducationCd = educationLvlCode;
     	this.projectStartDt = request.projectStartDt();
     	this.projectEndDt = request.projectEndDt();

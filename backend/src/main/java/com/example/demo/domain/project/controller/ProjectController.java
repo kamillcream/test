@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +32,7 @@ import com.example.demo.domain.project.dto.response.ProjectSummary;
 import com.example.demo.domain.project.entity.Project;
 import com.example.demo.domain.project.entity.ProjectApplicationEntity;
 import com.example.demo.domain.project.service.ProjectService;
+import com.example.demo.domain.user.util.JwtAuthenticationToken;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,8 +45,10 @@ public class ProjectController {
 	private final ProjectService projectService;
 	
 	@PostMapping
-	public ResponseEntity<ApiResponse<Void>> postProject(@Valid @RequestBody ProjectCreateRequest request){
-		projectService.createProject(request);
+	public ResponseEntity<ApiResponse<Void>> postProject(@Valid @RequestBody ProjectCreateRequest request,
+			Authentication authentication){
+		JwtAuthenticationToken token = (JwtAuthenticationToken) authentication;
+		projectService.createProject(request, token);
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 생성 성공", null));
 	}
 	
@@ -72,14 +77,18 @@ public class ProjectController {
 	}
 	
 	@PostMapping("/{projectSq}/scraps")
-	public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectSq") Long projectSq, @RequestBody ScrapRequest scrapRequest){
-		projectService.toggleProjectScrap(projectSq, scrapRequest);
-		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 스크랩 성공", null));
+	public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectSq") Long projectSq
+			, @RequestBody ScrapRequest scrapRequest
+			, @AuthenticationPrincipal Long userSq){
+		projectService.toggleProjectScrap(projectSq, scrapRequest, userSq);
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 스크랩 토글 성공", null));
 	}
 	
 	@GetMapping("/{projectSq}/details")
-	public ResponseEntity<ApiResponse<ProjectDetailResponse>> getProjectDetails(@PathVariable("projectSq") Long projectSq){
-		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 상세 내역 반환 성공", projectService.fetchProject(projectSq)));
+	public ResponseEntity<ApiResponse<ProjectDetailResponse>> getProjectDetails(
+			@PathVariable("projectSq") Long projectSq, Authentication authentication){
+		JwtAuthenticationToken token = (JwtAuthenticationToken) authentication;
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 상세 내역 반환 성공", projectService.fetchProject(projectSq, token)));
 	}
 	
 	@GetMapping("/forms")
