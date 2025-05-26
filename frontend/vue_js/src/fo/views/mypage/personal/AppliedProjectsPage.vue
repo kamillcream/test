@@ -80,7 +80,10 @@
                 </div>
                 <div class="d-flex gap-2" v-else-if="item.status === '합격'">
                   <span class="btn btn-light btn-sm">합격</span>
-                  <a href="#" class="btn btn-outline btn-primary btn-sm"
+                  <a
+                    @click.prevent="openInterviewTimeModal"
+                    href="#"
+                    class="btn btn-outline btn-primary btn-sm"
                     >인터뷰 일정 선택</a
                   >
                 </div>
@@ -189,12 +192,18 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useModalStore } from '../../../stores/modalStore.js'
+import InterviewTimeModal from '@/fo/components/project/InterviewTimeModal.vue'
 
 const searchType = ref('all')
 const searchKeyword = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 4
 const currentToggle = ref('all')
+
+const selectedInterviewTimes = ref([])
+
+const modalStore = useModalStore()
 
 const projects = ref([
   {
@@ -304,6 +313,11 @@ function removeProject(id) {
 function changePage(page) {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
+}
+const openInterviewTimeModal = () => {
+  modalStore.openModal(InterviewTimeModal, {
+    interviewTimes: selectedInterviewTimes.value,
+  })
 }
 </script>
 
