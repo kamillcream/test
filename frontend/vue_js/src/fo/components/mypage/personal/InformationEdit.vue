@@ -260,13 +260,27 @@
         <div class="form-group row align-items-center">
           <label class="col-lg-2 col-form-label text-2">휴대폰번호</label>
           <div class="col-lg-7">
-            <input
-              class="form-control text-3 h-auto py-2 border-0"
-              type="text"
-              name="phone"
-              :readonly="!editing.phone"
-              v-model="form.userPhoneNum"
-            />
+            <template v-if="!editing.phone">
+              <input
+                class="form-control text-3 h-auto py-2"
+                type="text"
+                name="phone"
+                readonly
+                :value="formatPhoneNumber(form.userPhoneNum)"
+              />
+            </template>
+            <template v-else>
+              <input
+                class="form-control text-3 h-auto py-2"
+                type="text"
+                name="phone"
+                v-model="form.userPhoneNum"
+                @input="validatePhone"
+              />
+              <div v-if="phoneError" class="invalid-feedback">
+                {{ phoneError }}
+              </div>
+            </template>
           </div>
           <div class="col-lg-3 text-end">
             <template v-if="!editing.phone">
@@ -578,6 +592,34 @@ const verifyCode = async () => {
   }
 }
 
+function formatPhoneNumber(number) {
+  const clean = number.replace(/\D/g, '')
+  if (clean.length === 11) {
+    return clean.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')
+  } else if (clean.length === 10) {
+    return clean.replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3')
+  } else {
+    return number // 길이가 다르면 그냥 원본 반환
+  }
+}
+
+const phoneError = ref('')
+const phoneValid = ref(false)
+
+// 휴대폰 번호 유효성 검사
+const validatePhone = () => {
+  phoneError.value = ''
+  phoneValid.value = false
+  if (!form.userPhoneNum) {
+    phoneError.value = '휴대폰 번호를 입력해주세요.'
+  } else if (!/^\d{10,11}$/.test(form.userPhoneNum)) {
+    phoneError.value = '올바른 휴대폰 번호 형식이 아닙니다. (하이픈 제외)'
+  } else {
+    phoneError.value = ''
+    phoneValid.value = true
+  }
+}
+
 // 편집 모드 토글
 function toggleEdit(field) {
   editing[field] = true
@@ -586,6 +628,7 @@ function toggleEdit(field) {
 function saveField(field) {
   if (field === 'password' && !passwordValid.value) return
   if (field === 'email' && !isVerified.value) return
+  if (field === 'phone' && !phoneValid.value) return
 
   if (field === 'email') {
     form.userEmail = `${editEmail.emailId}@${editEmail.emailDomain}`
