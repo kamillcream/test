@@ -11,7 +11,9 @@ public interface ResumeMapper {
 	void insertResume(ResumeRegisterRequest request);
 	ResumeRegisterRequest selectResumeById(Long resumeSq);
 	//전체이력서 조회
-	List<ResumeListResponse> selectAllResumesByUserSq(Long userSq);
+	List<ResumeListResponse> selectAllResumes();
+	//이력서 삭제
+	void updateDeletedYn(Long resumeSq);
 
 
 }

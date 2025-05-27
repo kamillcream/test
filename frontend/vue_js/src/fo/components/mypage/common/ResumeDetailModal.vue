@@ -42,7 +42,7 @@
                 "
               >
                 <img
-                  :src="resumeInfo.photo || 'img/placeholders/user.png'"
+                  :src="resumeInfo.photo || '/img/logo-big.png'"
                   alt="사진"
                   class="img-fluid rounded"
                   style="max-height: 100%; object-fit: cover"
@@ -307,103 +307,22 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useModalStore } from '@/fo/stores/modalStore'
+import { ref, watch, defineProps, defineEmits } from 'vue'
 
-const modalStore = useModalStore()
 
-// 이력서 정보 데이터
-const resumeInfo = ref({
-  title: '백엔드 개발자 이력서',
-  name: '홍길동',
-  birthDate: '1990-01-01',
-  phone: '010-1234-5678',
-  email: 'example@naver.com',
-  address: '서울특별시 강남구 역삼동',
-  photo: 'img/placeholders/user.png',
-  education: [
-    { school: '00고등학교', major: '', period: '2011.03 ~ 2014.02' },
-    { school: '00대학교', major: '000과', period: '2014.03 ~ 2018.02' },
-  ],
-  career: [
-    {
-      company: '00회사',
-      department: '000부서',
-      position: '프로그램 개발 및 운영',
-      period: '2025.04 ~ 2025.10',
-    },
-  ],
-  training: [
-    {
-      name: 'Public Cloud 활용 자바 웹 애플리케이션 개발자 양성 과정',
-      institution: '중앙에이치티에이㈜',
-      period: '2011.03 ~ 2014.02',
-    },
-  ],
-  projects: [
-    {
-      name: '자사 쇼핑몰 구축',
-      period: '2023.07 ~ 2024.02',
-      client: '코코마랑',
-      workType: '사용자 단 화면 개발',
-      role: '개발',
-      platform: 'Win',
-      os: 'Java',
-      dbms: 'MySQL',
-      languages: [
-        {
-          name: 'Java',
-          icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-        },
-        {
-          name: 'JavaScript',
-          icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
-        },
-      ],
-      tools: ['Eclipse', 'VScode', 'WorkBench'],
-      frameworks: [
-        {
-          name: 'SpringBoot',
-          icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
-        },
-        {
-          name: 'MyBatis',
-          icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mybatis/mybatis-original.svg',
-        },
-        {
-          name: 'Vue.js',
-          icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg',
-        },
-      ],
-      etc: ['Git'],
-      isExpanded: false,
-    },
-  ],
-  certificates: ['정보처리기사', 'SQL 전문가'],
-  skills: [
-    {
-      name: 'Java',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-    },
-    {
-      name: 'Python',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-    },
-    {
-      name: 'Spring Boot',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
-    },
-  ],
-  introduction:
-    '책임감 있게 업무를 수행하며 팀워크를 중요시합니다. 성장하는 개발자가 되기 위해 끊임없이 배우고 있습니다.',
-  attachments: [
-    { name: '홍길동_포트폴리오.pdf', url: 'uploads/홍길동_포트폴리오.pdf' },
-    {
-      name: '홍길동_개인 이력 카드.docx',
-      url: 'uploads/홍길동_개인 이력 카드.docx',
-    },
-  ],
+const props = defineProps({
+  resume: Object
 })
+
+// resume가 바뀔 때마다 내부 데이터 세팅
+const resumeInfo = ref({})
+watch(
+  () => props.resume,
+  (newVal) => {
+    if (newVal) resumeInfo.value = { ...newVal }
+  },
+  { immediate: true }
+)
 
 // 프로젝트 토글 함수
 const toggleProject = (index) => {
@@ -426,8 +345,9 @@ const collapseAllProjects = () => {
 }
 
 // 모달 닫기
-const closeModal = () => {
-  modalStore.closeModal()
+const emit = defineEmits(['close'])
+function closeModal() {
+  emit('close')
 }
 
 // 이력서 선택

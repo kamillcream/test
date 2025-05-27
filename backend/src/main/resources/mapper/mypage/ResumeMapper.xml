@@ -6,17 +6,45 @@
 
   <!-- 이력서 등록 -->
   <insert id="insertResume" parameterType="com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest">
-    ...
+    INSERT INTO TBL_RESUME_M (
+	    user_sq,
+	    address_sq
+	    resume_ttl,
+	    resume_nm,
+	    resume_email,
+	    resume_greeting_txt,
+	    resume_is_representative_yn,
+	    resume_created_at_dtm
+	  ) VALUES (
+	    #{userSq},
+	    #{addressSq},
+	    #{resumeTtl},
+	    #{resumeNm},
+	    #{resumeEmail},
+	    #{resumeGreetingTxt},
+	    #{resumeIsRepresentativeYn},
+	    NOW()
+	  )
   </insert>
 
   <!-- 이력서 상세 조회 -->
   <select id="selectResumeById" parameterType="long"
           resultType="com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest">
-    ...
+    SELECT
+      resume_sq AS resumeSq,
+      resume_ttl AS resumeTtl,
+      resume_nm AS resumeNm,
+      resume_email AS resumeEmail,
+      resume_greeting_txt AS resumeGreetingTxt,
+      resume_is_representative_yn AS resumeIsRepresentativeYn,
+      resume_created_at_dtm AS resumeCreatedAtDtm
+    FROM TBL_RESUME_M
+    WHERE user_sq = #{userSq}
+    ORDER BY resume_sq DESC
   </select>
 
   <!-- 이력서 전체 조회 (userSq 기준) -->
-  <select id="selectAllResumesByUserSq" parameterType="long"
+  <select id="selectAllResumes"
           resultType="com.example.demo.domain.mypage.dto.response.ResumeListResponse">
     SELECT
       resume_sq AS resumeSq,
@@ -24,11 +52,18 @@
       resume_nm AS resumeNm,
       resume_email AS resumeEmail,
       resume_greeting_txt AS resumeGreetingTxt,
-      resume_is_representative_yn AS resumeIsRepresentativeYn
+      resume_is_representative_yn AS resumeIsRepresentativeYn,
       resume_created_at_dtm AS resumeCreatedAtDtm
     FROM TBL_RESUME_M
-    WHERE user_sq = #{userSq}
     ORDER BY resume_sq DESC
   </select>
+  
+	<!--이력서 삭제(softDelete)-->
+	<update id="updateDeleteYn" parameterType="long">
+		UPDATE TBL_RESUME_M
+		SET resume_is_deleted_yn = 'Y'
+		WHERE resume_sq = #{resumeSq}
+	</update>
 
+	<!--이력서 -->
 </mapper>
