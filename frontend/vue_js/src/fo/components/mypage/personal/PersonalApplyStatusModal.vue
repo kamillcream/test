@@ -255,7 +255,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
-
+import ApplyStatusModal from '@/fo/components/mypage/company/ApplyStatusModal.vue'
 const modalStore = useModalStore()
 
 // 필터 상태
@@ -367,6 +367,12 @@ const applicants = ref([
   },
 ])
 
+const openCompanyApplyModal = () => {
+  modalStore.openModal(ApplyStatusModal, {
+    size: 'modal-xl',
+  })
+}
+
 // 필터 변경
 const setFilter = (type) => {
   currentFilter.value = type
@@ -376,7 +382,11 @@ const setFilter = (type) => {
 // 지원자 타입 변경
 const setApplicantType = (type) => {
   applicantType.value = type
-  // TODO: 지원자 타입에 따른 데이터 필터링
+
+  if (type === 'company') {
+    modalStore.closeModal() // 현재 모달 닫기
+    openCompanyApplyModal()
+  }
 }
 
 // 검색

@@ -106,7 +106,7 @@
                   type="button"
                   data-bs-toggle="collapse"
                   :data-bs-target="'#collapse-company-' + index"
-                  aria-expanded="false"
+                  aria-expanded="true"
                   :aria-controls="'collapse-company-' + index"
                   style="font-size: 1.5rem; border-color: black"
                 >
@@ -117,7 +117,10 @@
                 </button>
 
                 <!-- 토글로 열고 닫을 지원자 정보 영역 -->
-                <div class="collapse mt-2" :id="'collapse-company-' + index">
+                <div
+                  class="collapse show mt-2"
+                  :id="'collapse-company-' + index"
+                >
                   <!-- 지원자 목록 -->
                   <ul class="simple-post-list m-0 position-relative">
                     <li
@@ -304,6 +307,8 @@
 import { ref } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 
+import PersonalApplyStatusModal from '@/fo/components/mypage/personal/PersonalApplyStatusModal.vue'
+
 const modalStore = useModalStore()
 
 // 필터 상태
@@ -425,6 +430,12 @@ const companies = ref([
   },
 ])
 
+const openPersonalApplyModal = () => {
+  modalStore.openModal(PersonalApplyStatusModal, {
+    size: 'modal-xl',
+  })
+}
+
 // 필터 변경
 const setFilter = (type) => {
   currentFilter.value = type
@@ -434,7 +445,11 @@ const setFilter = (type) => {
 // 지원자 타입 변경
 const setApplicantType = (type) => {
   applicantType.value = type
-  // TODO: 지원자 타입에 따른 데이터 필터링
+
+  if (type === 'personal') {
+    modalStore.closeModal() // 현재 모달 닫기
+    openPersonalApplyModal()
+  }
 }
 
 // 검색
