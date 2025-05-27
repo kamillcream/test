@@ -513,16 +513,30 @@
                 >+ 추가하기</a
               >
             </label>
-            <!-- 선택된 기술 미리보기 -->
-            <div
-              id="selectedSkillsPreview"
-              class="mb-2 d-flex gap-2 flex-wrap"
-            >
-              <ProjectSkillButtonGroup
-                v-if="selectedSkillNames.length > 0"
-                :selectedSkills="selectedSkillNames"
-                @remove="removeSkill"
-              />
+            <div class="mb-2 d-flex gap-2 flex-wrap">
+              <div
+                v-for="(skill, index) in resumeData.skills"
+                :key="index"
+                class="btn btn-rounded btn-light d-flex align-items-center gap-2 mb-2 btn-3d position-relative"
+                style="padding-right: 24px"
+              >
+                <img
+                  v-if="skill.icon"
+                  :src="skill.icon"
+                  :alt="skill.name"
+                  width="20"
+                  height="20"
+                />
+                <span>{{ skill.name }}</span>
+                <a
+                  href="#"
+                  class="position-absolute end-0 me-2 text-grey text-decoration-none"
+                  style="top: 50%; transform: translateY(-50%)"
+                  title="삭제"
+                  @click.prevent="removeSkill(index)"
+                  >×</a
+                >
+              </div>
             </div>
           </div>
 
@@ -586,7 +600,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, computed, onMounted } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import ResumeModal from '@/fo/components/mypage/personal/ResumeModal.vue'
 import AddressSerchModal from '@/fo/components/mypage/personal/AddressSerchModal.vue'
@@ -596,8 +610,6 @@ import TrainingModal from '@/fo/components/mypage/personal/TrainingModal.vue'
 import ShowProjectFormModal from '@/fo/components/mypage/personal/ShowProjectFormModal.vue'
 import LicenseModal from '@/fo/components/mypage/personal/LicenseModal.vue'
 import SkillSelectModal from '@/fo/components/project/SkillSelectModal.vue'
-import ProjectSkillButtonGroup from '@/fo/components/project/ProjectSkillButtonGroup.vue'
-import { api } from '@/axios.js'
 
 const modalStore = useModalStore()
 
@@ -610,24 +622,20 @@ const openAddressSearchModal = () => {
   })
 }
 
-const submitResume = async () => {
-  try {
-    const requestBody = buildResumeRequest();
-    console.log('보내는 데이터:', requestBody);
-    await api.$post('/mypage/resume/register', requestBody)
-    alert('등록 완료!')
-  } catch (e) {
-    alert('이력서 등록 실패!')
-    console.error('이력서 등록 실패:', e)
-  }
-}
-
 const openDetailModal = () => {
   modalStore.openModal(ResumeModal, {
-    onConfirm: submitResume, // 등록 버튼 누르면 submitResume 실행
+    // TODO: 나중에 submitResume 함수로 대체 예정
+    onConfirm: () => {
+      console.log('지금은 API 없음. 대신 모달만 닫음')
+    },
   })
 }
-
+// TODO 교체 예시:
+// onConfirm: submitResume
+// const submitResume = async () => {
+//   await axios.post('/api/resume', resumeData)
+//   alert('등록 완료!')
+// }
 // 이메일 도메인 목록
 const emailDomains = ['naver.com', 'gmail.com', 'daum.net', 'hanmail.net']
 
@@ -722,38 +730,14 @@ const showCertificateForm = () => {
     },
   })
 }
-
 // 기술 입력 폼 표시 로직
-
-const allSkills = ref([])
-
-onMounted(async () => {
-  try {
-    const res = await api.$get('/projects/forms')
-    console.log('전체응답:', res)
-    allSkills.value = res.output.skills
-    console.log('DB에서 받아온 기술 목록:', allSkills.value)
-  } catch (e) {
-    console.error('기술 목록 불러오기 실패:', e)
-  }
-})
-
-
 const showSkillsForm = () => {
-  console.log('모달에 넘기는 skills:', allSkills.value)
   modalStore.openModal(SkillSelectModal, {
-    onConfirm: (skills) => {
-      console.log('선택된 기술:', skills)
-      resumeData.skills = skills.map((s) => s.name || s)  // 문자열로 변환
+    onComplete: (skills) => {
+      resumeData.skills = skills
     },
-    skills: allSkills.value,
   })
 }
-
-// name만 뽑아서 버튼에 표시하도록 
-const selectedSkillNames = computed(() =>
-  resumeData.skills.map((s) => (typeof s === 'string' ? s : s.name))
-)
 
 // 데이터 삭제 메서드
 const removeEducation = (index) => {
@@ -776,11 +760,8 @@ const removeCertificate = (index) => {
   resumeData.certificates.splice(index, 1)
 }
 
-const removeSkill = (name) => {
-  resumeData.skills = resumeData.skills.filter((skill) => {
-    const skillName = typeof skill === 'string' ? skill : skill.name
-    return skillName !== name
-  })
+const removeSkill = (index) => {
+  resumeData.skills.splice(index, 1)
 }
 
 // 프로젝트 토글
@@ -797,6 +778,12 @@ const collapseAllProjects = () => {
   resumeData.projects.forEach((project) => (project.isExpanded = false))
 }
 
+// 폼 제출
+const submitResume = () => {
+  // 폼 제출 로직 구현
+  console.log('이력서 데이터:', resumeData)
+}
+
 // 프로젝트가 추가/변경될 때 전체 펼침
 watch(
   () => resumeData.projects.length,
@@ -807,24 +794,6 @@ watch(
   },
   { immediate: true }
 )
-
-function buildResumeRequest() {
-  return {
-    userSq: 1, // 실제 로그인 사용자 ID로 대체
-    addressSq: 1, // 실제 주소 ID로 대체
-    resumeTtl: resumeData.title,
-    resumePhotoUrl: '', // 필요시 사진 URL
-    resumeNm: resumeData.name,
-    resumeBirthDt: resumeData.dob,
-    resumePhoneNum: resumeData.phone,
-    resumeEmail: resumeData.emailId + '@' +
-      (resumeData.emailDomain === 'custom' ? resumeData.customDomain : resumeData.emailDomain),
-    resumeGreetingTxt: resumeData.about,
-    resumeIsNotificationYn: resumeData.agree ? 'Y' : 'N',
-    resumeIsRepresentativeYn: 'N',
-  }
-}
-
 </script>
 
 <style scoped>

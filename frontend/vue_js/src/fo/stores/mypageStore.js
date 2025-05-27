@@ -60,15 +60,6 @@ export const useMypageStore = defineStore('mypage', () => {
     isOpen.value = true
   }
 
-  const openResumeModal = (component, props = {}) => {
-    modalStack.value.push({
-      component,
-      props,
-      type: 'resume'
-    })
-    isOpen.value = true
-  }
-
   // 모달 닫기
   const closeModal = () => {
     modalStack.value.pop()
@@ -94,8 +85,7 @@ export const useMypageStore = defineStore('mypage', () => {
     openTrainingModal,
     openCertificateModal,
     closeModal,
-    getCurrentModal,
-    openResumeModal,
+    getCurrentModal
   }
 })
 //학력 검색 시 주소 유지하도록 전역 상태 저장
