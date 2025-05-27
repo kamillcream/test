@@ -268,7 +268,6 @@ input:focus {
 /* 수정 버튼 */
 .btn-light.btn-outline {
   font-size: 14px;
-  border-radius: 20px;
 }
 
 /* 하단 버튼 */

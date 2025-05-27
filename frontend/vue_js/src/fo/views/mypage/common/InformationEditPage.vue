@@ -40,7 +40,7 @@ input:focus {
   border-color: inherit; /* 또는 원래의 border 색 */
 }
 
-.btn.btn-light.btn-sm.position-absolute {
+.add {
   cursor: pointer;
   z-index: 10;
   border-radius: 50%;
@@ -84,7 +84,6 @@ input:focus {
 /* 수정 버튼 */
 .btn-light.btn-outline {
   font-size: 14px;
-  border-radius: 20px;
 }
 
 /* 하단 버튼 */
@@ -94,5 +93,10 @@ input:focus {
 
 .btn.btn-light.btn-outline {
   border-color: #d9d9d9;
+}
+
+.invalid-feedback {
+  color: #007bff;
+  display: block;
 }
 </style>

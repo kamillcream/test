@@ -17,7 +17,7 @@
           <!-- 사진 변경 버튼 (카메라 아이콘이 이미지의 우측 하단 밖으로 걸쳐짐) -->
           <label
             for="profileImage"
-            class="btn btn-light btn-sm position-absolute"
+            class="btn btn-light btn-sm position-absolute add"
           >
             <i class="fas fa-camera text-muted"></i>
           </label>
