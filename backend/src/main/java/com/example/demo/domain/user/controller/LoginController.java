@@ -19,7 +19,6 @@ import com.example.demo.domain.user.dto.request.LoginRequestDTO;
 import com.example.demo.domain.user.dto.response.LoginResponseDTO;
 import com.example.demo.domain.user.service.LoginService;
 import com.example.demo.domain.user.service.LoginService.LoginResultDTO;
-import com.example.demo.domain.user.util.JwtAuthenticationToken;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -142,10 +141,11 @@ public class LoginController {
                                 .maxAge(0)
                                 .build();
 
-                httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, deleteAccessToken.toString());
-                httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, deleteRefreshToken.toString());
+                httpServletResponse.addHeader(HttpHeaders.SET_COOKIE,
+                                deleteAccessToken.toString());
+                httpServletResponse.addHeader(HttpHeaders.SET_COOKIE,
+                                deleteRefreshToken.toString());
 
                 return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "로그아웃 성공", null));
         }
-
 }

@@ -69,7 +69,7 @@ const api = {
       throw err
     }
   },
-  async $post(url, data, config = undefined) {
+  async $post(url, data = undefined, config = undefined) {
     try {
       const response = await apiInstance.post(url, data, config)
       return response.data

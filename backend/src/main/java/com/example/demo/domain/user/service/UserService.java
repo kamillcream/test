@@ -3,6 +3,7 @@ package com.example.demo.domain.user.service;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public boolean isUserIdExists(String userId) {
@@ -60,7 +62,7 @@ public class UserService {
         userDTO.setAddressSq(addressDTO.getAddressSq());
         userDTO.setUserId(requestDto.getUserId());
         userDTO.setUserEmail(requestDto.getUserEmail());
-        userDTO.setUserPw(requestDto.getUserPw());
+        userDTO.setUserPw(passwordEncoder.encode(requestDto.getUserPw())); // 암호화된 비밀번호
         userDTO.setUserNm(requestDto.getUserNm());
         userDTO.setUserGenderCd(requestDto.getUserGenderCd());
         userDTO.setUserPhoneNum(requestDto.getUserPhoneNum());
@@ -122,7 +124,8 @@ public class UserService {
     }
 
     public boolean updatePassword(Long userSq, String newPassword) {
-        int updatedRows = userRepository.updatePassword(userSq, newPassword);
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        int updatedRows = userRepository.updatePassword(userSq, encodedPassword);
         return updatedRows > 0;
     }
 

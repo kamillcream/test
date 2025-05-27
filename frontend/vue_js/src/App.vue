@@ -35,7 +35,12 @@ const fetchUserInfo = async () => {
     })
   } catch (error) {
     console.error('자동 로그인 실패:', error)
-    clearLoginState()
+
+    // 오토로그인이 아닌 경우에만 로그인 상태를 제거
+    const autoLogin = localStorage.getItem('autoLogin') === 'true'
+    if (!autoLogin) {
+      clearLoginState()
+    }
   }
 }
 
@@ -44,16 +49,11 @@ const clearLoginState = () => {
   localStorage.removeItem('userTypeCd')
   localStorage.removeItem('autoLogin')
 
-  userStore.clearUser() // 이건 Pinia의 clearUser() 메서드를 너가 만들어야 해
+  userStore.clearUser()
 }
 
 onMounted(() => {
-  const autoLogin = localStorage.getItem('autoLogin') === 'true'
-  if (autoLogin) {
-    fetchUserInfo()
-  } else {
-    clearLoginState()
-  }
+  fetchUserInfo()
 })
 </script>
 

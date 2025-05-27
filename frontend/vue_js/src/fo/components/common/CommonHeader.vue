@@ -269,12 +269,15 @@ import { onMounted, onBeforeUnmount, computed } from 'vue'
 import { useUserStore } from '@/fo/stores/userStore'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import router from '@/fo/router'
+import { api } from '@/axios'
 
 const alertStore = useAlertStore()
 const userStore = useUserStore()
 const isLoggedIn = computed(() => userStore.isLoggedIn)
 
-const logout = () => {
+const logout = async () => {
+  await api.$post('/logout', {}) // 서버 로그아웃 API 호출
+
   // 1. 아이디 저장값(개인/기업 아이디, 로그인 타입)만 따로 저장해둠
   const savedPersonalId = localStorage.getItem('savedPersonalId')
   const savedCompanyId = localStorage.getItem('savedCompanyId')
