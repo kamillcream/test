@@ -74,8 +74,10 @@
                       'btn-sm',
                       { 'btn-light': applicant.status !== '합격' },
                     ]"
-                    >합격</span
+                    @click="updateStatus(applicant.id, '합격')"
                   >
+                    합격
+                  </span>
                   <a
                     href="#"
                     :class="[
@@ -85,8 +87,10 @@
                       'btn-sm',
                       { 'btn-light': applicant.status !== '불합격' },
                     ]"
-                    >불합격</a
+                    @click.prevent="updateStatus(applicant.id, '불합격')"
                   >
+                    불합격
+                  </a>
                 </div>
               </div>
               <!-- 경력/열람일자 -->
@@ -176,6 +180,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { api } from '@/axios.js'
 
 const currentFilter = ref('all')
 const searchType = ref('all')
@@ -250,6 +255,34 @@ const changePage = (page) => {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
   // 페이지 변경 로직 구현
+}
+
+function getAccessTokenFromCookie() {
+  const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]*)/)
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+const updateStatus = async (applicationSq, status) => {
+  try {
+    const token = getAccessTokenFromCookie()
+    const response = await api.$patch(
+      `/projects/applications/${applicationSq}`,
+      { status },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      },
+    )
+    console.log(`✅ ${applicationSq} 지원 상태 변경 성공`, response)
+
+    // 로컬 상태 업데이트
+    const target = applicants.value.find((a) => a.id === applicationSq)
+    if (target) target.status = status
+  } catch (e) {
+    console.error('❌ 지원 상태 변경 실패', e)
+  }
 }
 </script>
 
