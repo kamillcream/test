@@ -16,6 +16,7 @@
       <div class="col">
         <ul class="simple-post-list m-0 position-relative">
           <li v-for="resume in resumeList" :key="resume.resumeSq">
+            
             <!-- 닫기(X) 버튼 -->
             <button
               class="btn btn-light btn-lg position-absolute"
@@ -27,7 +28,9 @@
             <div class="post-info position-relative">
               <!-- 제목 + 뱃지 -->
               <div class="d-flex align-items-center gap-2">
-                <a href="#" class="text-6 m-0">{{ resume.resumeTtl }}</a>
+                <a href="#" class="text-6 m-0" @click.prevent="openResumeDetail(resume)">
+                  {{ resume.resumeTtl }}
+                </a>
                 <span v-if="resume.resumeIsRepresentativeYn === 'Y'" class="btn btn-primary btn-sm"
                   >대표 이력서</span
                 >
@@ -68,6 +71,12 @@
             </div>
           </li>
         </ul>
+        <!-- 이력서 상세 모달 -->
+        <ResumeDetailModal
+          v-if="showDetailModal"
+          :resume="selectedResume"
+          @close="closeResumeDetail"
+        />  
         <!-- 이력서 등록하기 버튼 -->
         <div class="d-flex justify-content-end mt-4 mb-5">
           <a
@@ -105,14 +114,26 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { api } from '@/axios.js'
+import { useMypageStore } from '@/fo/stores/mypageStore'
+import ResumeDetailModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
 
 const resumeList = ref([])
+const showDetailModal = ref(false)
+const selectedResume = ref(null)
+const mypageStore = useMypageStore()
 
 onMounted(async () => {
-  const res = await api.$get('/mypage/resume/list')
-  // res가 배열인지 확인
-  console.log('이력서 목록:', res)
-  resumeList.value = res // 반드시 배열이어야 함!
+  try {
+    const res = await api.$get('/mypage/resume/list')
+    console.log('이력서 목록 응답:', res)
+    if (Array.isArray(res)) {
+      resumeList.value = res
+    } else {
+      console.error('이력서 목록이 배열이 아닙니다:', res)
+    }
+  } catch (error) {
+    console.error('이력서 목록 조회 실패:', error)
+  }
 })
 
 function removeResume(id) {
@@ -123,6 +144,20 @@ function setMainResume(id) {
   resumeList.value.forEach((r) => (r.resumeIsRepresentativeYn = 'N'))
   const main = resumeList.value.find((r) => r.resumeSq === id)
   if (main) main.resumeIsRepresentativeYn = 'Y'
+}
+
+function openResumeDetail(resume) {
+  mypageStore.modalStack.push({
+    component: ResumeDetailModal,
+    props: { resume },
+    type: 'resumeDetail'
+  })
+  mypageStore.isOpen = true
+}
+
+function closeResumeDetail() {
+  selectedResume.value = null
+  showDetailModal.value = false
 }
 
 function editResume(/*id*/) {
