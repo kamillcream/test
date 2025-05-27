@@ -8,10 +8,13 @@ import com.example.demo.common.ApiResponse;
 import com.example.demo.domain.community.dto.request.*;
 import com.example.demo.domain.community.service.BoardService;
 import com.example.demo.domain.community.dto.response.*;
+import com.example.demo.domain.community.entity.*;
 
 import lombok.RequiredArgsConstructor;
 
 import javax.lang.model.type.NullType;
+
+import java.util.*;
 
 
 
@@ -71,6 +74,12 @@ public class BoardController {
 	public ResponseEntity<ApiResponse<NullType>> updateRecommendBoard(@PathVariable("boardSq") Long boardSq){
 		boardService.updateBoardRecommend(boardSq);
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "추천 반영이 완료되었습니다.", null));
+	}
+	
+//	전체 스킬 태그 리스트 조회
+	@GetMapping("/skill-tags")
+	public ResponseEntity<ApiResponse<List<CommonSkillTag>>> getAllSkills() {
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "기술 태그 리스트 조회 완료", boardService.getAllSkillTags()));
 	}
 
 }

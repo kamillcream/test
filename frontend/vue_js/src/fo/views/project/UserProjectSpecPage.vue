@@ -4,7 +4,7 @@
     strongText="프로젝트 상세 정보"
     :breadcrumbs="[{ text: 'Home', link: '/' }, { text: '프로젝트' }]"
   />
-  <div class="container py-5">
+  <div class="container py-5 detail-list">
     <div class="row pt-4 mt-2 mb-5">
       <!-- 좌측: 지원 자격 (스크롤 없애기) -->
       <div
@@ -23,8 +23,7 @@
 
         <ul>
           <li>
-            <i class="fas fa-caret-right left-10"></i
-            ><strong class="text-color-primary">필수 기술 </strong>
+            <strong class="text-color-primary">필수 기술 </strong>
             <ul class="ps-4 mb-2">
               <li
                 v-for="skillGroup in project.projectRequiredSkills"
@@ -33,12 +32,12 @@
                 <strong class="text-dark">{{
                   skillGroup.parentSkillTagNm
                 }}</strong>
-                <div
-                  v-for="skill in skillGroup.childSkillTagNms"
-                  :key="skill"
-                  class="d-flex align-items-center gap-2 mt-1"
-                >
-                  <div class="d-flex align-items-center me-3">
+                <ul class="child-skill-list mt-1 ps-3">
+                  <li
+                    v-for="skill in skillGroup.childSkillTagNms"
+                    :key="skill"
+                    class="d-flex align-items-center gap-2 mb-1"
+                  >
                     <img
                       :src="getSkillIconUrl(skill)"
                       :alt="skill"
@@ -47,29 +46,29 @@
                       class="me-1"
                     />
                     <span>{{ skill }}</span>
-                  </div>
-                </div>
+                  </li>
+                </ul>
               </li>
             </ul>
           </li>
 
           <li>
-            <i class="fas fa-caret-right left-10"></i
-            ><strong class="text-color-primary">우대 기술 </strong>
+            <strong class="text-color-primary">우대 기술</strong>
             <ul class="ps-4 mb-2">
               <li
                 v-for="skillGroup in project.projectPreferredSkills"
                 :key="skillGroup.parentSkillTagNm"
+                class="mb-2"
               >
                 <strong class="text-dark">{{
                   skillGroup.parentSkillTagNm
                 }}</strong>
-                <div
-                  v-for="skill in skillGroup.childSkillTagNms"
-                  :key="skill"
-                  class="d-flex align-items-center gap-2 mt-1"
-                >
-                  <div class="d-flex align-items-center me-3">
+                <ul class="child-skill-list mt-1 ps-3">
+                  <li
+                    v-for="skill in skillGroup.childSkillTagNms"
+                    :key="skill"
+                    class="d-flex align-items-center gap-2 mb-1"
+                  >
                     <img
                       :src="getSkillIconUrl(skill)"
                       :alt="skill"
@@ -78,32 +77,28 @@
                       class="me-1"
                     />
                     <span>{{ skill }}</span>
-                  </div>
-                </div>
+                  </li>
+                </ul>
               </li>
             </ul>
           </li>
           <!-- 우대 사항 -->
           <li>
-            <i class="fas fa-caret-right left-10"></i
-            ><strong class="text-color-primary">우대 사항 :</strong>
+            <strong class="text-color-primary">우대 사항 :</strong>
             {{ project.projectPreferredEtc }}
           </li>
 
           <!-- 근무 조건 -->
           <li>
-            <i class="fas fa-caret-right left-10"></i>
             <strong class="text-color-primary">근무 형태 :</strong>
             <span>{{ project.projectWorkType?.join(' / ') }}</span>
           </li>
           <li>
-            <i class="fas fa-caret-right left-10"></i
-            ><strong class="text-color-primary">근무 지역 :</strong>
+            <strong class="text-color-primary">근무 지역 :</strong>
             {{ project.projectAddress }}
           </li>
           <li>
-            <i class="fas fa-caret-right left-10"></i
-            ><strong class="text-color-primary">단가 :</strong>
+            <strong class="text-color-primary">단가 :</strong>
             {{ project.projectSalary }}
           </li>
         </ul>
@@ -168,7 +163,7 @@
                 href="#"
                 class="btn btn-lg btn-rounded btn-light btn-lg"
               >
-                스크랩
+                {{ project.isScrap === 1 ? '스크랩 해제' : '스크랩' }}
               </a>
             </div>
           </div>
@@ -202,7 +197,6 @@ const projectSq = route.params.project_sq
 const project = ref([])
 
 const hasApplied = ref(false) // 추후 api 불러와 받은 값으로 변경
-const hasScrapped = ref(false)
 
 onMounted(async () => {
   try {
@@ -213,12 +207,15 @@ onMounted(async () => {
 
     const response = await api.$get(`/projects/${projectSq}/details`)
     project.value = response.output
+    console.log(project.value)
   } catch (e) {
+    console.error('❌ [catch 블록 진입]', e)
+
     console.error('프로젝트 상세 정보 불러오기 실패', e)
-    const rawMessage =
-      e?.response?.data?.message ||
-      '프로젝트 정보를 불러오는 중 오류가 발생했습니다.'
-    const message = rawMessage.replace(/^Unexpected Error:\s*/, '')
+
+    // message fallback 처리
+    let message = '프로젝트 정보를 불러오는 중 오류가 발생했습니다.'
+
     alert(message)
     router.push({ name: 'ProjectListPage' })
   }
@@ -242,10 +239,19 @@ const applyCheck = () => {
 
 const clickScrap = async () => {
   try {
+    const hasScrapped = project.value.isScrap === 1
     await api.$post(`/projects/${projectSq}/scraps`, {
-      hasScrapped: hasScrapped.value,
+      hasScrapped,
     })
-    alertStore.show('스크랩에 성공하였습니다.')
+
+    if (hasScrapped) {
+      alertStore.show('스크랩 해제에 성공하였습니다.')
+    } else {
+      alertStore.show('스크랩에 성공하였습니다.')
+    }
+
+    // 상태를 바꿔줘야 버튼 표시도 바뀜
+    project.value.isScrap = hasScrapped ? 0 : 1
   } catch (error) {
     console.error(error)
     alertStore.show('스크랩에 실패했습니다.', 'danger')
@@ -280,4 +286,17 @@ const getSkillIconUrl = (skill) => {
 
 // TODO: 스크랩 토글
 </script>
-<style lang=""></style>
+<style scoped>
+.child-skill-list {
+  list-style: none;
+  padding-left: 1rem;
+  margin: 0;
+}
+.child-skill-list li {
+  margin-left: 0.5rem; /* 더 명확한 들여쓰기 */
+}
+.detail-list li {
+  margin-bottom: 12px; /* 또는 16px */
+  line-height: 1.6; /* 줄 간 여유 */
+}
+</style>

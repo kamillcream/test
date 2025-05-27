@@ -8,21 +8,28 @@
         <div class="modal-body">
           <form id="techForm">
             <div
-              v-for="(skills, category) in groupedSkills"
-              :key="category"
+              v-for="group in groupedSkillTags"
+              :key="group.skillTagSq"
               class="mb-3"
             >
-              <h6 class="section-title">{{ category }}</h6>
+              <h6 class="section-title">{{ group.skillTagNm }}</h6>
               <div class="row row-cols-3 card-grid">
-                <div class="col" v-for="skill in skills" :key="skill">
+                <div
+                  class="col"
+                  v-for="skill in group.children"
+                  :key="skill.skillTagNm"
+                >
                   <button
                     type="button"
                     class="tech-card"
                     :class="{ selected: isSelected(skill) }"
                     @click="toggleSkill(skill)"
                   >
-                    <img :src="generateIconUrl(skill)" :alt="skill" />
-                    <span>{{ skill }}</span>
+                    <img
+                      :src="generateIconUrl(skill.skillTagNm)"
+                      :alt="skill"
+                    />
+                    <span>{{ skill.skillTagNm }}</span>
                   </button>
                 </div>
               </div>
@@ -36,7 +43,7 @@
                 선택 완료
               </button>
               <button
-                @click="useModalStore().closeModal()"
+                @click="closeModal"
                 type="button"
                 class="btn btn-secondary ms-2"
               >
@@ -51,44 +58,69 @@
 </template>
 
 <script setup>
-import { ref, defineEmits, defineProps, computed, onMounted } from 'vue'
-import { useModalStore } from '../../stores/modalStore.js'
+import { api } from '@/axios'
+import { useAlertStore } from '@/fo/stores/alertStore'
+import { useModalStore } from '@/fo/stores/modalStore'
+import { ref, defineProps, onMounted } from 'vue'
 
-const emit = defineEmits(['confirm', 'remove'])
+const alertStore = useAlertStore()
+const modalStore = useModalStore()
+
 const props = defineProps({
   onConfirm: Function,
-  skills: {
-    type: Array,
-    default: () => [],
-  },
-  selectedSkills: {
+  skillTags: {
     type: Array,
     default: () => [],
   },
 })
 
-const selected = ref([])
-onMounted(() => {
-  selected.value = [...props.selectedSkills]
-})
+const selectedSkills = ref([])
+const skillList = ref([])
+const groupedSkillTags = ref([])
 
-const groupedSkills = computed(() => {
-  const map = {}
-  props.skills.forEach((group) => {
-    map[group.parentSkillTagNm] = group.childSkillTagNms
-  })
-  return map
-})
+const syncSelectedSkills = () => {
+  if (!skillList.value.length || !props.skillTags.length) return
 
-const toggleSkill = (skillName) => {
-  const index = selected.value.findIndex((s) => s.name === skillName)
+  const selectedSqSet = new Set(props.skillTags.map((tag) => tag.skillTagSq))
+  selectedSkills.value = skillList.value.filter((tag) =>
+    selectedSqSet.has(tag.skillTagSq),
+  )
+}
+
+const getSkills = async () => {
+  try {
+    const res = await api.$get(`/board/skill-tags`)
+    if (res.status == 'OK') {
+      skillList.value = [...res.output]
+
+      groupedSkillTags.value = skillList.value
+        .filter((tag) => tag.skillTagLvl === 1)
+        .map((parent) => {
+          const children = skillList.value.filter(
+            (tag) => tag.parentSkillTagSq === parent.skillTagSq,
+          )
+          return {
+            ...parent,
+            children,
+          }
+        })
+
+      syncSelectedSkills()
+    }
+  } catch (error) {
+    alertStore.show('기술 태그 리스트를 불러올 수 없습니다.', 'danger')
+  }
+}
+
+const toggleSkill = (skill) => {
+  const index = selectedSkills.value.findIndex(
+    (s) => s.skillTagSq === skill.skillTagSq,
+  )
+
   if (index === -1) {
-    selected.value.push({
-      name: skillName,
-      imageUrl: generateIconUrl(skillName),
-    })
+    selectedSkills.value.push(skill) // 선택되지 않았으면 추가
   } else {
-    selected.value.splice(index, 1)
+    selectedSkills.value.splice(index, 1) // 이미 선택되어 있으면 제거
   }
 }
 
@@ -110,14 +142,25 @@ const generateIconUrl = (name) => {
   return `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${processed}/${processed}-original.svg`
 }
 
-const isSelected = (skillName) =>
-  selected.value.some((s) => s.name === skillName || s === skillName)
+const isSelected = (skill) =>
+  selectedSkills.value.some((s) => s.skillTagSq === skill.skillTagSq)
 
 const confirmSelection = () => {
-  emit('confirm', selected.value)
-  const modalStore = useModalStore()
+  const returnSkill = selectedSkills.value.map((skill) => ({
+    skillTagSq: skill.skillTagSq,
+    skillTagNm: skill.skillTagNm,
+  }))
+  props.onConfirm(returnSkill)
   modalStore.closeModal()
 }
+
+const closeModal = () => {
+  modalStore.closeModal()
+}
+
+onMounted(() => {
+  getSkills()
+})
 </script>
 
 <style scoped>
@@ -138,7 +181,7 @@ const confirmSelection = () => {
   border-radius: 12px;
   padding: 24px;
   width: 720px;
-  max-height: 80vh;
+  max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
@@ -169,7 +212,7 @@ const confirmSelection = () => {
 }
 
 .tech-card.selected {
-  background-color: #0088cc !important;
+  background-color: #d9d9d9 !important;
   border-color: #0d6efd;
   box-shadow: 0 0 0 2px #0d6efd33;
 }

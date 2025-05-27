@@ -1,7 +1,7 @@
 <template>
   <div
     class="filter-bar border rounded p-3 d-flex align-items-center gap-3 flex-wrap"
-    style="max-width: 880px; margin: 0 auto"
+    style="max-width: 1140px; margin: 0 auto"
   >
     <div class="dropdown">
       <button
@@ -9,7 +9,7 @@
         type="button"
         data-bs-toggle="dropdown"
       >
-        {{ selectedRegionName }}
+        지역
       </button>
       <ul class="dropdown-menu">
         <li v-for="local in localOptions" :key="local.areaSq">
@@ -30,7 +30,7 @@
         type="button"
         data-bs-toggle="dropdown"
       >
-        {{ selectedCareerName }}
+        경력
       </button>
       <ul class="dropdown-menu">
         <li v-for="career in careerOptions" :key="career.common_code_sq">
@@ -47,11 +47,11 @@
 
     <div class="dropdown">
       <button
-        class="btn btn-outline btn-primary dropdown-toggle"
+        class="btn btn-outline-primary dropdown-toggle"
         type="button"
         data-bs-toggle="dropdown"
       >
-        {{ selectedEducationName }}
+        학력
       </button>
       <ul class="dropdown-menu">
         <li
@@ -71,11 +71,11 @@
 
     <div class="dropdown">
       <button
-        class="btn btn-outline btn-primary dropdown-toggle"
+        class="btn btn-outline-primary dropdown-toggle"
         type="button"
         data-bs-toggle="dropdown"
       >
-        {{ selectedJobTypeName }}
+        직종
       </button>
       <ul class="dropdown-menu">
         <li v-for="job in jobTypeOptions" :key="job.common_code_sq">
@@ -95,18 +95,17 @@
         type="text"
         class="form-control"
         placeholder="검색어를 입력하세요..."
-        style="max-width: 400px"
         @input="updateKeyword"
       />
     </div>
 
     <div class="dropdown">
       <button
-        class="btn btn-outline btn-primary dropdown-toggle"
+        class="btn btn-outline-primary dropdown-toggle"
         type="button"
         data-bs-toggle="dropdown"
       >
-        {{ selectedTargetField }}
+        제목
       </button>
       <ul class="dropdown-menu">
         <li>
@@ -139,11 +138,11 @@
     <!-- 정렬 -->
     <div class="dropdown">
       <button
-        class="btn btn-outline btn-primary dropdown-toggle"
+        class="btn btn-outline-primary dropdown-toggle"
         type="button"
         data-bs-toggle="dropdown"
       >
-        {{ selectedSort }}
+        정렬
       </button>
       <ul class="dropdown-menu">
         <li>
@@ -177,86 +176,26 @@
 <script setup>
 import { ref, defineEmits, onMounted } from 'vue'
 import { api } from '@/axios.js'
-import { useRoute } from 'vue-router'
 
 const localOptions = ref([])
 const careerOptions = ref([])
 const educationOptions = ref([])
 const jobTypeOptions = ref([])
 
-const selectedRegionName = ref('지역')
-const selectedCareerName = ref('경력')
-const selectedEducationName = ref('학력')
-const selectedJobTypeName = ref('직종')
-const selectedTargetField = ref('제목')
-const selectedSort = ref('정렬')
-
-const route = useRoute()
-
-const basePath = route.path.includes('/affiliation')
-  ? '/affiliations'
-  : '/projects'
-
-const updateRegion = (value) => {
-  const selected = localOptions.value.find((item) => item.areaSq === value)
-  selectedRegionName.value = selected?.areaName || '지역'
-  emit('update', { addressCodeSq: value })
-}
-
-const updateCareer = (value) => {
-  const selected = careerOptions.value.find(
-    (item) => item.common_code_sq === value,
-  )
-  selectedCareerName.value = selected?.common_code_nm || '경력'
-  emit('update', { projectDeveloperGradeCd: value })
-}
-
-const updateEducation = (value) => {
-  const selected = educationOptions.value.find(
-    (item) => item.common_code_sq === value,
-  )
-  selectedEducationName.value = selected?.common_code_nm || '학력'
-  emit('update', { educationCd: value })
-}
-
-const updateJobType = (value) => {
-  const selected = jobTypeOptions.value.find(
-    (item) => item.common_code_sq === value,
-  )
-  selectedJobTypeName.value = selected?.common_code_nm || '직종'
-  emit('update', { jobRoleCd: value })
-}
-
-const updateTargetField = (value) => {
-  selectedTargetField.value = value
-  emit('update', { searchType: value })
-}
-
-const updateSort = (value) => {
-  selectedSort.value = value
-  if (value === '최신순') {
-    emit('update', { sortBy: 'project_start_dt', sortOrder: 'desc' })
-  } else if (value === '조회순') {
-    emit('update', { sortBy: 'view_count', sortOrder: 'desc' })
-  } else if (value === '지원자순') {
-    emit('update', { sortBy: 'applicant_count', sortOrder: 'desc' })
-  }
-}
-
 const emit = defineEmits(['update'])
 
 const fetchFilterOptions = async () => {
   try {
-    const 지역 = await api.$get(`${basePath}/filters`, {
+    const 지역 = await api.$get('/projects/filters', {
       params: { type: '지역' },
     })
-    const 경력 = await api.$get(`${basePath}/filters`, {
+    const 경력 = await api.$get('/projects/filters', {
       params: { type: '경력' },
     })
-    const 학력 = await api.$get(`${basePath}/filters`, {
+    const 학력 = await api.$get('/projects/filters', {
       params: { type: '학력' },
     })
-    const 직종 = await api.$get(`${basePath}/filters`, {
+    const 직종 = await api.$get('/projects/filters', {
       params: { type: '직종' },
     })
 
@@ -273,6 +212,36 @@ const fetchFilterOptions = async () => {
 onMounted(() => {
   fetchFilterOptions()
 })
+
+const updateRegion = (value) => {
+  emit('update', { addressCodeSq: value })
+}
+
+const updateCareer = (value) => {
+  emit('update', { projectDeveloperGradeCd: value })
+}
+
+const updateEducation = (value) => {
+  emit('update', { educationCd: value })
+}
+
+const updateJobType = (value) => {
+  emit('update', { jobRoleCd: value })
+}
+
+const updateTargetField = (value) => {
+  emit('update', { searchType: value })
+}
+
+const updateSort = (value) => {
+  if (value === '최신순') {
+    emit('update', { sortBy: 'project_start_dt', sortOrder: 'desc' })
+  } else if (value === '조회순') {
+    emit('update', { sortBy: 'view_count', sortOrder: 'desc' })
+  } else if (value === '지원자순') {
+    emit('update', { sortBy: 'applicant_count', sortOrder: 'desc' })
+  }
+}
 
 const updateKeyword = (event) => {
   emit('update', { searchKeyword: event.target.value })

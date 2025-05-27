@@ -22,7 +22,7 @@ public class AnswerListResponse{
     private Integer recommendCnt;
     private String isAdoptedYn;
     private String isDeletedYn;
-    private LocalDateTime createdAtDtm;
+    private LocalDateTime createdAt;
 
     
     public static AnswerListResponse fromEntity(Answer answer) {

@@ -11,7 +11,7 @@
         class="row align-items-center justify-content-between py-3 border-bottom mb-3"
       >
         <div class="col-md-6">
-          <form class="d-flex" @submit.prevent="getBoardList">
+          <form class="d-flex" @submit.prevent="changeFilter">
             <select v-model="searchType" class="form-select w-auto me-2">
               <option selected value="all">전체</option>
               <option value="title">제목</option>
@@ -30,7 +30,7 @@
         <div class="col text-end">
           <select
             v-model="boardAdoptStatusCd"
-            @change="getBoardList"
+            @change="changeFilter"
             class="form-select w-auto d-inline-block me-2"
           >
             <option selected value="all">상태</option>
@@ -109,12 +109,9 @@ const getBoardList = async () => {
         ? ''
         : `&boardAdoptStatusCd=${boardAdoptStatusCd.value}`
 
-    console.log(adoptFilter)
-
     const res = await api.$get(
       `/qna?page=${currentPage.value}&size=${size}&sortType=${sortType.value}${searchFilter}${adoptFilter}`,
     )
-    console.log(res)
     if (res) {
       totalPages.value = (res.output.totalElements + size - 1) / size
       boardList.value = res.output.boards
@@ -123,11 +120,14 @@ const getBoardList = async () => {
     alertStore.show('게시글을 불러올 수 없습니다.', 'danger')
   }
 }
+
+// 검색 또는 채택 상태 변경 시 전체 페이지 수가 변경되므로 현재 페이지를 1페이지로 초기화 후 리스트 갱신
+const changeFilter = () => {
+  currentPage.value = 1
+  getBoardList()
+}
 watch(currentPage, () => {
   getBoardList()
-})
-watch(boardAdoptStatusCd, () => {
-  console.log(boardAdoptStatusCd.value)
 })
 
 onMounted(() => {

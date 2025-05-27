@@ -139,16 +139,26 @@ public class BoardService {
         board.setBoardTtl(boardRequest.getTtl());
         board.setBoardDescriptionEdt(boardRequest.getDescription());
         
+        if(boardRequest.getBoardAdoptStatusCd() != null) {
+        	board.setBoardAdoptStatusCd(boardRequest.getBoardAdoptStatusCd());
+        }
+        
         boardMapper.update(board);
         
 //      기존 태그 삭제
         cmntTagMapper.deleteNT(board.getBoardSq(), null);
         cmntTagMapper.deleteST(board.getBoardSq(), null);
         
-//      태그 새로 추가
-    	cmntTagMapper.insertNT(normalTagConverter.convertStringsToNormalTags(board.getBoardSq(), null, boardRequest.getNormalTags()));
-		cmntTagMapper.insertST(skillTagConverter.convertStringsToSkillTags(board.getBoardSq(), null, boardRequest.getSkillTags()));
-        
+//      일반 태그 추가
+	  	if(boardRequest.getNormalTags().size() > 0) {
+	  		cmntTagMapper.insertNT(normalTagConverter.convertStringsToNormalTags(board.getBoardSq(), null, boardRequest.getNormalTags()));
+		}
+  	
+//  	스킬태그 추가
+	  	if(board.getBoardTypeCd() == 1402 && boardRequest.getSkillTags().size() > 0) {
+	  		cmntTagMapper.insertST(skillTagConverter.convertStringsToSkillTags(board.getBoardSq(), null, boardRequest.getSkillTags()));
+	  	}
+	        
 
         return;
     }
@@ -184,6 +194,19 @@ public class BoardService {
         return;
         
         
+    }
+    
+//    전체 스킬 태그 리스트 조회
+    @Transactional
+    public List<CommonSkillTag> getAllSkillTags() {
+    	List<CommonSkillTag> parentTags = cmntTagMapper.findParentSkillTags();
+    	List<CommonSkillTag> childrenTags = cmntTagMapper.findAll(parentTags);
+    	List<CommonSkillTag> allTags = new ArrayList<>();
+    	allTags.addAll(parentTags);
+    	allTags.addAll(childrenTags);
+    	
+    	return allTags;
+    	
     }
 
 

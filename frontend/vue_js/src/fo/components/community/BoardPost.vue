@@ -34,6 +34,7 @@
           <span class="post-icons d-flex ttl-icon-area">
             <!-- 조회수 버튼 추가 -->
             <button
+              type="button"
               class="btn btn-light btn-rounded text-grey d-flex align-items-center me-2 font-size-xs"
             >
               <i class="fa-solid fa-eye font-size-s"></i>
@@ -42,7 +43,9 @@
             </button>
             <!-- 추천 버튼 -->
             <button
+              type="button"
               class="btn btn-light btn-rounded text-grey d-flex align-items-center me-2 font-size-xs"
+              @click="rcmndBoard"
             >
               <i class="fa-regular fa-thumbs-up font-size-s"></i>
               <span class="me-2 ms-2 text-grey">추천</span>
@@ -52,8 +55,9 @@
             <!-- [추가] 본인 인증 로직 -->
             <button
               v-if="boardInfo.userSq != viewUsersq"
+              type="button"
               class="btn btn-light btn-rounded text-grey d-flex align-items-center me-2 font-size-xs"
-              @click="clickRepostApplication"
+              @click="clickReportApplication"
             >
               <i class="fa-solid fa-land-mine-on font-size-s"></i>
               <span class="me-2 ms-2 text-grey">신고</span>
@@ -127,6 +131,7 @@
         v-if="boardType == 'qna'"
         type="button"
         class="btn btn-primary me-2"
+        @click="updateStatus(1503)"
       >
         자체 해결
       </button>
@@ -134,6 +139,7 @@
         v-if="boardType == 'qna'"
         type="button"
         class="btn btn-primary me-2"
+        @click="updateStatus(1504)"
       >
         미해결
       </button>
@@ -155,9 +161,10 @@ import { computed, defineProps, ref } from 'vue'
 import AnswerRegisterModal from './AnswerRegisterModal.vue'
 import CommonConfirmModal from '../common/CommonConfirmModal.vue'
 import { useAlertStore } from '@/fo/stores/alertStore'
-import RepostModal from './RepostModal.vue'
+import ReportModal from './ReportModal.vue'
 import { useBoardStore } from '@/fo/stores/boardStore'
 import { useRouter } from 'vue-router'
+import { api } from '@/axios'
 
 const alertStore = useAlertStore()
 const modalStore = useModalStore()
@@ -165,7 +172,27 @@ const boardStore = useBoardStore()
 
 const router = useRouter()
 
-const props = defineProps({ boardInfo: Array, boardType: String })
+const props = defineProps({
+  boardInfo: {
+    type: Object,
+    default: () => ({
+      sq: 0,
+      ttl: '',
+      userSq: 0,
+      userNm: '',
+      createdAt: new Date(),
+      viewCnt: 0,
+      recommendCnt: 0,
+      description: '',
+      attachments: [],
+      normalTags: [],
+      skillTags: [],
+      comments: [],
+    }),
+  },
+  boardType: { type: String, default: '' },
+  getBoard: { type: Function, default: () => {} },
+})
 
 const boardInfo = computed(() => props.boardInfo)
 const boardType = computed(() => props.boardType)
@@ -184,11 +211,53 @@ const formatTime = (createdAt) => {
 // 현재 사용자 시퀀스
 const viewUsersq = ref(1)
 
+// 상태 변경
+const updateStatus = (cd) => {
+  modalStore.openModal(CommonConfirmModal, {
+    title: '채택 상태 변경',
+    message: `${cd == 1503 ? '자체해결' : '미해결'} 상태로 변경하시겠습니까?`,
+    onConfirm: async () => {
+      const res = await api.$put(`/${boardType.value}/${boardInfo.value.sq}`, {
+        ttl: boardInfo.value.ttl,
+        description: boardInfo.value.description,
+        skillTags: [...boardInfo.value.skillTags],
+        normalTags: [...boardInfo.value.normalTags],
+        // attachments: [...boardInfo.value.attachments]
+        boardAdoptStatusCd: cd,
+      })
+      if (res.status == 'OK') {
+        alertStore.show(
+          `${cd == 1503 ? '자체해결' : '미해결'} 상태로 변경되었습니다.`,
+          'success',
+        )
+        router.push(`/${boardType.value}/${boardInfo.value.sq}`)
+      } else {
+        alertStore.show('채택 상태 변경에 실패하였습니다.', 'danger')
+      }
+      modalStore.closeModal()
+    },
+  })
+}
+
+// 추천
+const rcmndBoard = async () => {
+  const res = await api.$post(
+    `/${boardType.value}/${boardInfo.value.sq}/recommend`,
+  )
+  if (res.status == 'OK') {
+    alertStore.show(res.message, 'success')
+    props.getBoard()
+  } else {
+    alertStore.show('추천 반영에 실패하였습니다.', 'danger')
+  }
+}
+
+// [추가] 신고
+
 // 게시글 수정 모달
 const editBoard = () => {
   boardStore.setBoard(boardInfo.value)
-  boardStore.editSq = boardInfo.value.sq
-  console.log(boardType.value)
+  boardStore.editSq = Number(boardInfo.value.sq)
   if (boardType.value == 'board' || boardType.value == 'qna') {
     router.push(`/${boardType.value}/register`)
   } else if (boardType.value == 'answer') {
@@ -201,7 +270,19 @@ const openConfirm = () => {
   modalStore.openModal(CommonConfirmModal, {
     title: '게시글 삭제',
     message: '정말 삭제하시겠습니까?',
-    onConfirm: () => {
+    onConfirm: async () => {
+      const res = await api.$patch(`/${boardType.value}/${boardInfo.value.sq}`)
+      if (res.status == 'OK') {
+        alertStore.show(res.message, 'success')
+        if (boardType.value == 'answer') {
+          window.location.reload()
+        } else {
+          router.push(`/${boardType.value}`)
+        }
+      } else {
+        alertStore.show('채택 상태 변경에 실패하였습니다.', 'danger')
+      }
+      modalStore.closeModal()
       // 성공
       alertStore.show('삭제하였습니다.', 'success')
       // 실패
@@ -217,8 +298,11 @@ const clickApplication = () => {
 }
 
 // 신고 모달
-const clickRepostApplication = () => {
-  modalStore.openModal(RepostModal, {})
+const clickReportApplication = () => {
+  modalStore.openModal(ReportModal, {
+    reportTypeCd: boardType.value == 'answer' ? 2002 : 2001,
+    sq: boardInfo.value.sq,
+  })
 }
 </script>
 <style>

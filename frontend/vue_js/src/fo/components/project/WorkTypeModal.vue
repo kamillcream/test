@@ -120,9 +120,9 @@ const closeModal = () => {
 }
 
 .option-button.selected {
-  background: #0d6efd;
+  background: #0088cc;
   color: white;
-  border-color: #0d6efd;
+  border-color: #0088cc;
 }
 
 .modal-footer {
@@ -145,7 +145,7 @@ const closeModal = () => {
 }
 
 .btn-confirm {
-  background: #000;
+  background: #0088cc;
   color: white;
   border: none;
 }

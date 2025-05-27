@@ -24,23 +24,6 @@
 	WHERE COMMON_CEDE_ENGLISH_NM = #{engName} AND PARENT_COMMON_CODE_SQ = #{parentCodeSq}
 	</select>
 	
-	<select id="findSkillTagSqByName" parameterType="String" resultType="Long">
-	SELECT skill_tag_sq
-	FROM TBL_SKILL_TAG_C
-	WHERE SKILL_TAG_NM = #{name}
-	</select>
-	
-	<select id="findSkillTagInfoByName" parameterType="String" resultType="com.example.demo.domain.project.dto.request.SkillInsertRequest">
-    SELECT
-        skill_tag_sq AS skillTagSq,
-        parent_skill_tag_sq AS parentSkillTagSq,
-        skill_tag_lvl AS skillTagLvl,
-        skill_tag_nm AS skillTagNm
-    FROM TBL_SKILL_TAG_C
-    WHERE skill_tag_nm = #{name}
-	</select>
-	
-	
 	<select id="findByParentCode" parameterType="Long" resultType="String">
 	SELECT common_code_nm
 	FROM TBL_COMMON_CODE_C
