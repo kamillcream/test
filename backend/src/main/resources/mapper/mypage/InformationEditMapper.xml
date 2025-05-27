@@ -14,8 +14,9 @@
         user_is_deleted_yn = 'N' </select>
 
     <select id="findAddressByAddressSq" parameterType="long"
-        resultType="com.example.demo.domain.mypage.dto.AddressDTO"> SELECT address, detail_address
-        FROM TBL_ADDRESS_S WHERE address_sq = #{addressSq} </select>
+        resultType="com.example.demo.domain.mypage.dto.AddressDTO"> SELECT zonecode, address,
+        detail_address, sigungu, latitude, longitude FROM TBL_ADDRESS_S WHERE address_sq =
+        #{addressSq} </select>
 
     <select id="findCommonCodeNameByGenderCd" resultType="String"> SELECT common_code_nm FROM
         TBL_COMMON_CODE_C WHERE common_code_sq = #{codeSq} </select>

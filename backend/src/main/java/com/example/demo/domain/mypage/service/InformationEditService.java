@@ -26,7 +26,7 @@ public class InformationEditService {
     }
 
     public UserInfoDTO getUserInfo(Long userSq) {
-        return informationEditRepository.findUser(userSq); // 분기는 안 함
+        return informationEditRepository.findUser(userSq);
     }
 
     public AddressDTO getAddress(Long addressSq) {

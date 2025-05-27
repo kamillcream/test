@@ -66,8 +66,12 @@ public class InformationEditController {
                     .userGenderNm(genderName != null ? genderName : null)
                     .userPhoneNum(user.getUserPhoneNum())
                     .userProfileImageUrl(user.getUserProfileImageUrl())
+                    .zonecode(address != null ? address.getZonecode() : null)
                     .address(address != null ? address.getAddress() : null)
                     .detailAddress(address != null ? address.getDetailAddress() : null)
+                    .sigungu(address != null ? address.getSigungu() : null)
+                    .latitude(address != null ? address.getLatitude() : null)
+                    .longitude(address != null ? address.getLongitude() : null)
                     .build();
 
             return ApiResponse.of(HttpStatus.OK, "개인정보 조회 완료", response);
@@ -89,8 +93,12 @@ public class InformationEditController {
                     .userBirthDt(user.getUserBirthDt())
                     .userGenderNm(genderName != null ? genderName : null)
                     .userPhoneNum(user.getUserPhoneNum())
+                    .zonecode(address != null ? address.getZonecode() : null)
                     .address(address != null ? address.getAddress() : null)
                     .detailAddress(address != null ? address.getDetailAddress() : null)
+                    .sigungu(address != null ? address.getSigungu() : null)
+                    .latitude(address != null ? address.getLatitude() : null)
+                    .longitude(address != null ? address.getLongitude() : null)
                     .companyNm(companyName)
                     .build();
 
