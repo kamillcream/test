@@ -27,6 +27,7 @@ import com.example.demo.domain.project.dto.request.ScrapRequest;
 import com.example.demo.domain.project.dto.request.SkillInsertRequest;
 import com.example.demo.domain.project.dto.response.AreaInfoResponse;
 import com.example.demo.domain.project.dto.response.GroupSkillInfoResponse;
+import com.example.demo.domain.project.dto.response.InterviewTimeInfoResponse;
 import com.example.demo.domain.project.dto.response.ProjectDetailResponse;
 import com.example.demo.domain.project.dto.response.ProjectFormDataResponse;
 import com.example.demo.domain.project.dto.response.ProjectListResponse;
@@ -292,7 +293,7 @@ public class ProjectService {
 	}
 	
 	public ProjectFormDataResponse fetchProjectFormDatas(long projectSq) {
-		List<GroupSkillInfoResponse> skills = groupingSkills(projectMapper.findSkillInfoList());
+		List<GroupSkillInfoResponse> skills = groupingSkills(projectMapper.findSkillFormList());
 		if (projectSq != 0L) {
 			Project project = projectMapper.findBySq(projectSq);
 			AreaInfoResponse areaInfoResponse = fetchSubDistrictInfoByProjectSq(project.getAddressSq());
@@ -334,6 +335,10 @@ public class ProjectService {
 		default:
 			throw new IllegalArgumentException("Unexpected value: " + type);
 		}
+	}
+	
+	public List<InterviewTimeInfoResponse> fetchProjectAvailableTimes(Long projectSq){
+		return projectMapper.findInterviewSqTmByProjectSq(projectSq);
 	}
 	
 	public UserRole findUserRole(JwtAuthenticationToken token, Project project) {
