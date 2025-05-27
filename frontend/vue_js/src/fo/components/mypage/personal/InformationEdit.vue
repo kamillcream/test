@@ -1,8 +1,7 @@
 <template>
   <section>
-    <!-- <PasswordCheck v-if="!isConfirmed" @confirmed="isConfirmed = true" />
-    <div v-else> -->
-    <div>
+    <PasswordCheck v-if="!isConfirmed" @confirmed="isConfirmed = true" />
+    <div v-else>
       <div class="overflow-hidden mb-3">
         <h2 class="font-weight-normal text-7 mb-0">회원 정보 수정</h2>
       </div>
@@ -240,6 +239,13 @@
           <div class="col-lg-5"></div>
           <div class="form-group col-lg-4">
             <div class="input-group text-end">
+              <label class="form-label d-flex align-items-center">
+                <i
+                  v-if="isVerified"
+                  class="bi bi-check-circle-fill me-1"
+                  style="color: #007bff"
+                ></i
+              ></label>
               <input
                 type="text"
                 v-model="editEmail.verificationCode"
@@ -402,7 +408,7 @@
 </template>
 
 <script setup>
-// import PasswordCheck from '../common/PasswordCheck.vue'
+import PasswordCheck from '../common/PasswordCheck.vue'
 import { onMounted, reactive, ref } from 'vue'
 import { api } from '@/axios'
 import { debounce } from 'lodash'
@@ -410,7 +416,7 @@ import { useAlertStore } from '@/fo/stores/alertStore'
 
 const alertStore = useAlertStore()
 
-// const isConfirmed = ref(false)
+const isConfirmed = ref(false)
 // 상태 변수들
 const error = ref(null)
 
@@ -667,12 +673,55 @@ function resetForm() {
   })
 }
 
-// API 호출로 초기 데이터 불러오기
-onMounted(async () => {
+function isFormChanged() {
+  return (
+    form.userPw !== '' ||
+    form.userEmail !== originalData.userEmail ||
+    form.userPhoneNum !== originalData.userPhoneNum ||
+    form.zonecode !== originalData.zonecode ||
+    form.address !== originalData.address ||
+    form.detailAddress !== originalData.detailAddress ||
+    form.sigungu !== originalData.sigungu ||
+    form.latitude !== originalData.latitude ||
+    form.longitude !== originalData.longitude
+  )
+}
+
+const saveAll = async () => {
+  if (!isFormChanged()) {
+    alertStore.show('변경된 정보가 없습니다.', 'danger')
+    return
+  }
+
+  const requestBody = {
+    userPw: form.userPw || undefined, // 비밀번호는 입력된 경우에만 보냄
+    userEmail: form.userEmail,
+    userPhoneNum: form.userPhoneNum,
+    zonecode: form.zonecode,
+    address: form.address,
+    detailAddress: form.detailAddress,
+    sigungu: form.sigungu,
+    latitude: form.latitude,
+    longitude: form.longitude,
+  }
+
+  try {
+    await api.$post('/mypage/edit/update', requestBody)
+    alertStore.show('회원 정보가 성공적으로 수정되었습니다.', 'success')
+    await fetchUserInfo() // 저장 후 다시 원본 데이터 받아오기
+    resetForm() // 폼도 초기화
+  } catch (err) {
+    // 서버에서 온 에러 메시지
+    const errorMessage =
+      err.response?.data?.message || '회원가입에 실패하였습니다'
+    alertStore.show(errorMessage, 'danger')
+  }
+}
+
+async function fetchUserInfo() {
   try {
     const response = await api.$get('/mypage/edit/info', null)
     const data = response.output
-    console.log('불러온 값', data)
 
     Object.assign(originalData, {
       userId: data.userId,
@@ -695,6 +744,11 @@ onMounted(async () => {
     console.error('정보 조회 실패', err)
     error.value = err.message
   }
+}
+
+// API 호출로 초기 데이터 불러오기
+onMounted(() => {
+  fetchUserInfo()
 })
 </script>
 

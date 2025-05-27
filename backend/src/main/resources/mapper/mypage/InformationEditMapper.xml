@@ -23,4 +23,35 @@
 
     <select id="selectCompanyNameByUserSq" resultType="string"> SELECT company_nm FROM TBL_COMPANY_S
         WHERE user_sq = #{userSq} </select>
+
+    <update id="updateUserInfo"> UPDATE TBL_USER_M <set>
+            <if test="userPw != null and userPw != ''"> user_pw = #{userPw}, </if>
+    <if
+                test="userEmail != null"> user_email = #{userEmail}, </if>
+    <if
+                test="userPhoneNum != null"> user_phone_num = #{userPhoneNum}, </if>
+        user_modified_at_dtm = NOW() </set> WHERE user_sq = #{userSq} </update>
+
+    <update id="updateUserInfoWithoutPw"> UPDATE TBL_USER_M <set>
+            <if test="userEmail != null"> user_email = #{userEmail}, </if>
+    <if
+                test="userPhoneNum != null"> user_phone_num = #{userPhoneNum}, </if>
+        user_modified_at_dtm = NOW() </set> WHERE user_sq = #{userSq} </update>
+
+    <update id="updateAddress"> UPDATE TBL_ADDRESS_S SET zonecode = #{zonecode}, address =
+        #{address}, detail_address = #{detailAddress}, sigungu = #{sigungu}, latitude = #{latitude},
+        longitude = #{longitude}, address_modified_at_dtm = NOW() WHERE address_sq = (SELECT
+        address_sq FROM TBL_USER_M WHERE user_sq = #{userSq}) </update>
+
+    <select id="existsByEmail" resultType="boolean"> SELECT EXISTS( SELECT 1 FROM TBL_USER_M WHERE
+        user_email = #{userEmail} ) </select>
+
+    <select id="existsByPhone" resultType="boolean"> SELECT EXISTS( SELECT 1 FROM TBL_USER_M WHERE
+        user_phone_num = #{userPhoneNum} ) </select>
+
+    <select id="findUserSqByEmail" resultType="java.lang.Long"> SELECT user_sq FROM TBL_USER_M WHERE
+        user_email = #{userEmail} </select>
+
+    <select id="findUserSqByPhone" resultType="java.lang.Long"> SELECT user_sq FROM TBL_USER_M WHERE
+        user_phone_num = #{userPhoneNum} </select>
 </mapper>
