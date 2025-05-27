@@ -60,7 +60,7 @@ public class ProjectApplicationEntity {
 				.projectSq(projectSq)
 				.companySq(projectMapper.findCompanySqFromProjectSq(projectSq))
 				.resumeSq(request.getResumeSq())
-				.projectApplicationStatusCd(commonCodeMapper.findCommonCodeSqByEngName(ProjectApplicationStatus.APPLIED.getCode(), ParentCodeEnum.APPLICATION.getCode()))
+				.projectApplicationStatusCd(commonCodeMapper.findCommonCodeSqByEngName(ProjectApplicationStatus.APPLIED.getCode(), ParentCodeEnum.PRO_APPLICATION.getCode()))
 				.projectApplicationMemberTypeCd(commonCodeMapper.findCommonCodeSqByEngName(request.getProjectApplicationTyp(), ParentCodeEnum.MEMBER_TYPE.getCode()))
 				.build();
     }
