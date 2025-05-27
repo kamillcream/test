@@ -6,6 +6,8 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.example.demo.domain.project.entity.ProjectApplicationEntity;
+import com.example.demo.domain.project.vo.ApplicationStatusVo;
 import com.example.demo.domain.project.vo.ApplicationSummary;
 
 @Mapper
@@ -14,6 +16,10 @@ public interface ProjectApplicationMapper {
 	public LocalDateTime findInterviewTimeBySq(@Param("interviewSq") Long interviewSq);
 	public List<ApplicationSummary> findApplicationSummariesByUserSq(Long userSq);
 	public Long findProjectBySq(Long appSq);
+	public Long findResumeBySq(Long appSq);
+	public ApplicationStatusVo findStatusVoByCompanySq(Long applicationSq);
+	public List<Long> findAllSqByCompanySq(Long companySq);
+	public String findMmTypStrBySq(Long applicationSq);
 	
 	public void updateApplicationStatus(
 			@Param("newStatusCd") Long newStatusCd,

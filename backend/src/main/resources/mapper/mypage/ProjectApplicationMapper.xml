@@ -15,6 +15,8 @@
 	<select id="findApplicationSummariesByUserSq"
         resultType="com.example.demo.domain.project.vo.ApplicationSummary">
 	  SELECT
+	  	a.project_application_sq	AS applicationSq,
+	  	p.project_sq               AS projectSq,
 	    p.project_ttl               AS projectTitle,
 	    c.company_nm                AS companyTitle,
 	    a.project_application_created_at_dtm AS appliedDt,
@@ -22,7 +24,11 @@
 	    r.resume_ttl                AS resumeTitle,
 	    p.project_candidate_cnt     AS applicantCnt,
 	    a.read_application_dtm      AS readApplicationDt,
-	    cc.common_code_nm           AS applicantType
+	    cc.common_code_nm           AS applicantType,
+		CASE
+		  WHEN p.project_recruit_end_dt &lt; CURDATE() THEN TRUE
+		  ELSE FALSE
+		END AS isRecruitEnded
 	  FROM TBL_RESUME_M r
 	  JOIN TBL_PROJECT_APPLICATION_H a ON r.resume_sq = a.resume_sq
 	  JOIN TBL_PROJECT_M p ON a.project_sq = p.project_sq
@@ -31,10 +37,46 @@
 	  WHERE r.user_sq = #{userSq}
 	  ORDER BY a.project_application_created_at_dtm DESC
 	</select>
-
 	
 	<select id="findProjectBySq" resultType="Long">
 	    SELECT project_sq
+	    FROM TBL_PROJECT_APPLICATION_H
+	    WHERE project_application_sq = #{appSq}
+	</select>
+	
+	<select id="findResumeBySq" resultType="Long">
+	    SELECT resume_sq
+	    FROM TBL_PROJECT_APPLICATION_H
+	    WHERE project_application_sq = #{appSq}
+	</select>
+	
+	<select id="findMmTypStrBySq" resultType="String">
+	    SELECT 
+	    CASE project_application_member_type_cd
+	        WHEN 301 THEN '개인'
+	        WHEN 302 THEN '기업'
+	        ELSE 'UNKNOWN'
+	    END
+	    FROM TBL_PROJECT_APPLICATION_H
+	    WHERE project_application_sq = #{applicationSq}
+	</select>
+	
+	
+	<select id="findAllSqByCompanySq" resultType="Long">
+	    SELECT project_application_sq
+	    FROM TBL_PROJECT_APPLICATION_H
+	    WHERE project_application_sq = #{applicationSq}
+	</select>
+	
+	<select id="findStatusVoByCompanySq" resultType="com.example.demo.domain.project.vo.ApplicationStatusVo">
+	    SELECT read_application_dtm AS readResumeDt, 
+	    project_application_created_at_dtm AS appDt, 
+	    CASE project_application_status_cd
+	        WHEN 801 THEN '지원중'
+	        WHEN 802 THEN '합격'
+	        WHEN 803 THEN '불합격'
+	        ELSE 'UNKNOWN'
+	      END AS status
 	    FROM TBL_PROJECT_APPLICATION_H
 	    WHERE project_application_sq = #{appSq}
 	</select>
