@@ -41,13 +41,13 @@
       >
         <!-- 아이디 (변경 불가) -->
         <div class="form-group row align-items-center">
-          <label class="col-lg-3 col-form-label text-2">아이디</label>
-          <div class="col-lg-9">
+          <label class="col-lg-2 col-form-label text-2">아이디</label>
+          <div class="col-lg-10">
             <input
               class="form-control text-3 h-auto py-2 border-0"
               type="text"
               name="username"
-              value="user123"
+              :value="form.userId"
               readonly
             />
           </div>
@@ -55,8 +55,8 @@
 
         <!-- 비밀번호 + 수정 버튼 -->
         <div class="form-group row align-items-center">
-          <label class="col-lg-3 col-form-label text-2">비밀번호</label>
-          <div class="col-lg-6">
+          <label class="col-lg-2 col-form-label text-2">비밀번호</label>
+          <div class="col-lg-7">
             <template v-if="!editing.password">
               <input
                 class="form-control text-3 h-auto py-2"
@@ -111,8 +111,8 @@
 
         <!-- 이름 (변경 불가) -->
         <div class="form-group row align-items-center">
-          <label class="col-lg-3 col-form-label text-2">이름</label>
-          <div class="col-lg-9">
+          <label class="col-lg-2 col-form-label text-2">이름</label>
+          <div class="col-lg-10">
             <input
               class="form-control text-3 h-auto py-2 border-0"
               type="text"
@@ -123,51 +123,24 @@
           </div>
         </div>
 
-        <!-- 생년월일 + 수정 버튼 -->
+        <!-- 생년월일 + 수정 버튼 (변경 불가) -->
         <div class="form-group row align-items-center">
-          <label class="col-lg-3 col-form-label text-2">생년월일</label>
-          <div class="col-lg-6">
+          <label class="col-lg-2 col-form-label text-2">생년월일</label>
+          <div class="col-lg-7">
             <input
               class="form-control text-3 h-auto py-2 border-0"
               type="date"
               name="dob"
-              :readonly="!editing.dob"
+              readonly
               v-model="form.userBirthDt"
             />
-          </div>
-          <div class="col-lg-3 text-end">
-            <template v-if="!editing.dob">
-              <button
-                type="button"
-                class="btn btn-light btn-outline"
-                @click="toggleEdit('dob')"
-              >
-                수정
-              </button>
-            </template>
-            <template v-else>
-              <button
-                type="button"
-                class="btn btn-primary btn-outline me-2"
-                @click="saveField('dob')"
-              >
-                확인
-              </button>
-              <button
-                type="button"
-                class="btn btn-light btn-outline"
-                @click="cancelEdit('dob')"
-              >
-                취소
-              </button>
-            </template>
           </div>
         </div>
 
         <!-- 성별 + 수정 버튼 -->
         <div class="form-group row align-items-center">
-          <label class="col-lg-3 col-form-label text-2">성별</label>
-          <div class="col-lg-6">
+          <label class="col-lg-2 col-form-label text-2">성별</label>
+          <div class="col-lg-7">
             <input
               class="form-control text-3 h-auto py-2 border-0"
               name="gender"
@@ -180,16 +153,58 @@
 
         <!-- 이메일 + 수정 버튼 -->
         <div class="form-group row align-items-center">
-          <label class="col-lg-3 col-form-label text-2">이메일</label>
-          <div class="col-lg-6">
+          <label class="col-lg-2 col-form-label text-2">이메일</label>
+
+          <!-- 수정 모드 아닐 때 -->
+          <div class="col-lg-7" v-if="!editing.email">
             <input
               class="form-control text-3 h-auto py-2 border-0"
               type="email"
               name="email"
-              :readonly="!editing.email"
+              :readonly="true"
               v-model="form.userEmail"
             />
           </div>
+
+          <!-- 수정 모드일 때 -->
+          <div class="col-lg-7" v-else>
+            <div class="input-group">
+              <input
+                type="text"
+                v-model="editEmail.emailId"
+                class="form-control"
+                placeholder="이메일 아이디"
+              />
+              <span class="input-group-text">@</span>
+              <input
+                type="text"
+                v-model="editEmail.emailDomain"
+                list="domain-list"
+                class="form-control"
+                placeholder="도메인 입력 또는 선택"
+              />
+
+              <datalist id="domain-list">
+                <option value="naver.com"></option>
+                <option value="gmail.com"></option>
+                <option value="daum.net"></option>
+                <option value="nate.com"></option>
+                <option value="hotmail.com"></option>
+              </datalist>
+              <button
+                type="button"
+                class="btn btn-primary"
+                @click="sendVerification"
+              >
+                인증 요청
+              </button>
+            </div>
+            <div v-if="emailError" class="invalid-feedback d-block">
+              {{ emailError }}
+            </div>
+          </div>
+
+          <!-- 오른쪽 버튼 영역 -->
           <div class="col-lg-3 text-end">
             <template v-if="!editing.email">
               <button
@@ -205,6 +220,7 @@
                 type="button"
                 class="btn btn-primary btn-outline me-2"
                 @click="saveField('email')"
+                :disabled="!isVerified"
               >
                 확인
               </button>
@@ -219,10 +235,31 @@
           </div>
         </div>
 
+        <!-- 인증번호 입력 영역 (수정 모드일 때만 표시) -->
+        <div v-if="editing.email" class="row mt-2">
+          <div class="col-lg-5"></div>
+          <div class="form-group col-lg-4">
+            <div class="input-group text-end">
+              <input
+                type="text"
+                v-model="editEmail.verificationCode"
+                class="form-control"
+                placeholder="인증번호 입력"
+              />
+              <div v-if="verifycodeError" class="invalid-feedback d-block">
+                {{ verifycodeError }}
+              </div>
+              <button type="button" class="btn btn-primary" @click="verifyCode">
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- 휴대폰번호 + 수정 버튼 -->
         <div class="form-group row align-items-center">
-          <label class="col-lg-3 col-form-label text-2">휴대폰번호</label>
-          <div class="col-lg-6">
+          <label class="col-lg-2 col-form-label text-2">휴대폰번호</label>
+          <div class="col-lg-7">
             <input
               class="form-control text-3 h-auto py-2 border-0"
               type="text"
@@ -262,9 +299,9 @@
 
         <!-- 주소 + 수정 버튼 -->
         <div class="form-group row align-items-center">
-          <label class="col-lg-3 col-form-label text-2">주소</label>
+          <label class="col-lg-2 col-form-label text-2">주소</label>
 
-          <div class="col-lg-6">
+          <div class="col-lg-7">
             <template v-if="!editing.address">
               <input
                 class="form-control text-3 h-auto py-2"
@@ -334,14 +371,12 @@
             <button
               type="submit"
               class="btn btn-primary btn-modern d-inline-block me-2"
-              :disabled="isSaving"
             >
               저장
             </button>
             <button
               class="btn btn-light btn-modern d-inline-block"
               @click="resetForm"
-              :disabled="isSaving"
             >
               초기화
             </button>
@@ -357,6 +392,9 @@
 import { onMounted, reactive, ref } from 'vue'
 import { api } from '@/axios'
 import { debounce } from 'lodash'
+import { useAlertStore } from '@/fo/stores/alertStore'
+
+const alertStore = useAlertStore()
 
 // const isConfirmed = ref(false)
 // 상태 변수들
@@ -373,7 +411,7 @@ const originalData = reactive({
   userPhoneNum: '',
   address: '',
   detailAddress: '',
-  postcode: '',
+  zonecode: '',
   sigungu: '',
   latitude: null,
   longitude: null,
@@ -381,6 +419,12 @@ const originalData = reactive({
 
 // 양방향 바인딩용 폼 객체
 const form = reactive({ ...originalData })
+
+const editEmail = reactive({
+  emailId: '',
+  emailDomain: '',
+  verificationCode: '',
+})
 
 // 편집 상태를 관리할 객체
 const editing = reactive({
@@ -393,6 +437,9 @@ const editing = reactive({
 
 const passwordError = ref('')
 const passwordValid = ref(false)
+const emailError = ref('')
+const verifycodeError = ref('')
+const isVerified = ref(false)
 
 // 유효성 검사 + 중복 확인 핵심 함수
 const validatePasswordCore = async (pw) => {
@@ -414,7 +461,7 @@ const validatePasswordCore = async (pw) => {
       currentPassword: form.userPw, // 입력한 비밀번호
     }
     const response = await api.$post(`/mypage/edit/check-password`, requestBody)
-    console.log('res', response)
+    // console.log('res', response)
     if (response.status === 'OK' && response.output === true) {
       passwordError.value = '기존 비밀번호와 동일합니다.'
     } else {
@@ -444,7 +491,7 @@ function openPostcode() {
       let addr =
         data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress
 
-      form.postcode = data.zonecode
+      form.zonecode = data.zonecode
       form.address = addr
       form.detailAddress = ''
       form.sigungu = data.sigungu
@@ -463,6 +510,74 @@ function openPostcode() {
   }).open()
 }
 
+// 이메일 유효성 검사
+const validateEmail = () => {
+  emailError.value = ''
+  const email = editEmail.emailId + '@' + editEmail.emailDomain
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!editEmail.emailId || !editEmail.emailDomain) {
+    emailError.value = '이메일을 모두 입력하세요.'
+    return false
+  }
+  if (!emailRegex.test(email)) {
+    emailError.value = '유효한 이메일 형식이 아닙니다.'
+    return false
+  }
+  return true
+}
+// 인증번호 유효성 검사
+const validateVerifycode = () => {
+  verifycodeError.value = ''
+  if (!editEmail.verificationCode) {
+    verifycodeError.value = '인증번호를 입력하세요.'
+    return false
+  }
+  return true
+}
+
+// 인증 요청 함수
+const sendVerification = async () => {
+  if (!validateEmail()) return
+
+  error.value = ''
+  try {
+    const email = editEmail.emailId + '@' + editEmail.emailDomain
+    const response = await api.$post('/email/send-code', { email })
+
+    console.log('인증 이메일 전송 완료', response)
+    alertStore.show(
+      '인증 코드를 전송했습니다. 인증 코드 : ' + response.code,
+      'success',
+    )
+    isVerified.value = false
+  } catch (error) {
+    console.error('이메일 인증 요청 실패:', error)
+    alertStore.show('이메일 인증 요청에 실패했습니다.', 'danger')
+  }
+}
+
+// 인증번호 확인 함수
+const verifyCode = async () => {
+  if (!validateVerifycode()) return
+
+  error.value = ''
+  try {
+    const email = editEmail.emailId + '@' + editEmail.emailDomain
+    const response = await api.$post('/email/verify-code', {
+      email,
+      code: editEmail.verificationCode,
+    })
+    console.log('인증 성공', response)
+    alertStore.show('이메일 인증에 성공하였습니다.', 'info')
+    isVerified.value = true
+  } catch (error) {
+    console.error('인증 코드 검증 실패:', error)
+    verifycodeError.value = '인증번호가 일치하지 않습니다.'
+    alertStore.show('이메일 인증에 실패하였습니다.', 'danger')
+    isVerified.value = false
+  }
+}
+
 // 편집 모드 토글
 function toggleEdit(field) {
   editing[field] = true
@@ -470,20 +585,31 @@ function toggleEdit(field) {
 
 function saveField(field) {
   if (field === 'password' && !passwordValid.value) return
+  if (field === 'email' && !isVerified.value) return
+
+  if (field === 'email') {
+    form.userEmail = `${editEmail.emailId}@${editEmail.emailDomain}`
+  }
+
   editing[field] = false
+  console.log('form', form)
 }
 
 function cancelEdit(field) {
   editing[field] = false
 
   if (field === 'address') {
-    // 주소 관련 모든 값 복원
     form.address = originalData.address
     form.detailAddress = originalData.detailAddress
-    form.postcode = originalData.postcode
+    form.zonecode = originalData.zonecode
     form.sigungu = originalData.sigungu
     form.latitude = originalData.latitude
     form.longitude = originalData.longitude
+  } else if (field === 'email') {
+    form.userEmail = originalData.userEmail
+    editEmail.emailId = ''
+    editEmail.emailDomain = ''
+    editEmail.verificationCode = ''
   } else {
     form[field] = originalData[field]
   }
@@ -515,10 +641,10 @@ onMounted(async () => {
       userPhoneNum: data.userPhoneNum,
       address: data.address,
       detailAddress: data.detailAddress || '',
-      postcode: '',
-      sigungu: '',
-      latitude: null,
-      longitude: null,
+      zonecode: data.zonecode,
+      sigungu: data.sigungu,
+      latitude: data.latitude,
+      longitude: data.longitude,
     })
 
     Object.assign(form, originalData)

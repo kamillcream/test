@@ -401,12 +401,11 @@ const sendVerification = async () => {
     console.log('인증 이메일 전송 완료', response)
     alertStore.show(
       '인증 코드를 전송했습니다. 인증 코드 : ' + response.code,
-      'info',
+      'success',
     )
   } catch (error) {
     console.error('이메일 인증 요청 실패:', error)
     alertStore.show('이메일 인증 요청에 실패했습니다.', 'danger')
-    verifycodeError.value = '인증번호가 일치하지않습니다.'
   }
 }
 
