@@ -17,15 +17,14 @@ import com.example.demo.domain.mypage.dto.response.CompanyUserInfoResponseDTO;
 import com.example.demo.domain.mypage.dto.response.PersonalUserInfoResponseDTO;
 import com.example.demo.domain.mypage.service.InformationEditService;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/mypage/edit")
+@RequiredArgsConstructor
 public class InformationEditController {
 
     private final InformationEditService informationEditService;
-
-    public InformationEditController(InformationEditService informationEditService) {
-        this.informationEditService = informationEditService;
-    }
 
     @PostMapping("/check-password")
     public ApiResponse<Boolean> checkPassword(
@@ -80,18 +79,12 @@ public class InformationEditController {
                     ? informationEditService.getAddress(user.getAddressSq())
                     : null;
 
-            String genderName = user.getUserGenderCd() != null
-                    ? informationEditService.getGenderName(user.getUserGenderCd())
-                    : null;
-
             String companyName = informationEditService.getCompanyName(userSq);
 
             CompanyUserInfoResponseDTO response = CompanyUserInfoResponseDTO.builder()
                     .userId(user.getUserId())
                     .userEmail(user.getUserEmail())
                     .userNm(user.getUserNm())
-                    .userBirthDt(user.getUserBirthDt())
-                    .userGenderNm(genderName != null ? genderName : null)
                     .userPhoneNum(user.getUserPhoneNum())
                     .zonecode(address != null ? address.getZonecode() : null)
                     .address(address != null ? address.getAddress() : null)

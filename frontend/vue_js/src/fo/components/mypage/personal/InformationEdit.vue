@@ -136,7 +136,7 @@
           </div>
         </div>
 
-        <!-- 성별 + 수정 버튼 -->
+        <!-- 성별 -->
         <div class="form-group row align-items-center">
           <label class="col-lg-2 col-form-label text-2">성별</label>
           <div class="col-lg-7">
@@ -409,7 +409,7 @@
 
 <script setup>
 import PasswordCheck from '../common/PasswordCheck.vue'
-import { onMounted, reactive, ref } from 'vue'
+import { watchEffect, reactive, ref } from 'vue'
 import { api } from '@/axios'
 import { debounce } from 'lodash'
 import { useAlertStore } from '@/fo/stores/alertStore'
@@ -448,7 +448,7 @@ const editEmail = reactive({
 
 // 편집 상태를 관리할 객체
 const editing = reactive({
-  dob: false,
+  name: false,
   email: false,
   phone: false,
   address: false,
@@ -461,7 +461,7 @@ const emailError = ref('')
 const verifycodeError = ref('')
 const isVerified = ref(false)
 
-// 유효성 검사 + 중복 확인 핵심 함수
+// 비밀번호 유효성 검사 + 중복 확인
 const validatePasswordCore = async (pw) => {
   passwordError.value = ''
   passwordValid.value = false
@@ -722,6 +722,7 @@ async function fetchUserInfo() {
   try {
     const response = await api.$get('/mypage/edit/info', null)
     const data = response.output
+    // console.log('data', data)
 
     Object.assign(originalData, {
       userId: data.userId,
@@ -746,9 +747,10 @@ async function fetchUserInfo() {
   }
 }
 
-// API 호출로 초기 데이터 불러오기
-onMounted(() => {
-  fetchUserInfo()
+watchEffect(() => {
+  if (isConfirmed.value) {
+    fetchUserInfo()
+  }
 })
 </script>
 

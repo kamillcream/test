@@ -12,8 +12,6 @@ public class CompanyUserInfoResponseDTO {
     private String userId;
     private String userEmail;
     private String userNm;
-    private Date userBirthDt;
-    private String userGenderNm;
     private String userPhoneNum;
     private String zonecode;
     private String address;
