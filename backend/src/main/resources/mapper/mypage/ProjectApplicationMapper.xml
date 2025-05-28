@@ -84,6 +84,7 @@
 	        WHEN 803 THEN '합격'
 	        WHEN 804 THEN '인터뷰 요청 중'
 	        WHEN 805 THEN '인터뷰 확정'
+	        WHEN 806 THEN '지원 취소'
 	        ELSE 'UNKNOWN'
 	      END AS appStatus
 	    FROM TBL_PROJECT_APPLICATION_H
