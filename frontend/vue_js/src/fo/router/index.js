@@ -138,6 +138,12 @@ const routes = [
   },
 
   {
+    path: '/projectListPage',
+    name: 'ProjectListPage',
+    component: ProjectListPage,
+  },
+
+  {
     path: '/myPage',
     component: MyPageLayout,
     children: [
@@ -211,12 +217,6 @@ const routes = [
         name: 'AffiliationProjectList',
         component: AffiliationProjectListPage,
       },
-      {
-        path: 'projectListPage',
-        name: 'ProjectListPage',
-        component: ProjectListPage,
-      },
-
       {
         path: 'projectPostPage/:project_sq',
         name: 'ProjectPostPageWithId',
