@@ -1,13 +1,11 @@
-package com.example.demo.domain.project.dto.response;
+package com.example.demo.domain.project.vo;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Map;
 
+import com.example.demo.domain.project.dto.response.AreaInfoResponse;
 import com.example.demo.domain.project.entity.Project;
-import com.example.demo.domain.project.util.DateUtil;
 import com.example.demo.domain.project.util.ProjectUtil;
 
 import lombok.AllArgsConstructor;

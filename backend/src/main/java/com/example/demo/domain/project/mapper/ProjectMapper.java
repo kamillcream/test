@@ -13,6 +13,7 @@ import com.example.demo.domain.project.dto.request.JobInsertRequest;
 import com.example.demo.domain.project.dto.request.ProjectSearchRequest;
 import com.example.demo.domain.project.dto.request.ScrapInsertRequest;
 import com.example.demo.domain.project.dto.request.SkillInsertRequest;
+import com.example.demo.domain.project.dto.response.InterviewTimeInfoResponse;
 import com.example.demo.domain.project.dto.response.ProjectFormDataResponse;
 import com.example.demo.domain.project.dto.response.SingleSkillInfoResponse;
 import com.example.demo.domain.project.entity.Project;
@@ -22,6 +23,8 @@ public interface ProjectMapper {
 	List<Project> findProjectsBySearch(ProjectSearchRequest request);
 	SkillInsertRequest findSkillTagInfoByName(@Param("name") String name);
 	long findCompanySqFromProjectSq(long projectSq);
+
+	List<SingleSkillInfoResponse> findSkillFormList();
 	List<SingleSkillInfoResponse> findSkillInfoList();
 	List<SingleSkillInfoResponse> findReqSkillsByProjectSq(@Param("projectSq") Long projectSq);
 	List<SingleSkillInfoResponse> findPreferSkillsByProjectSq(@Param("projectSq") Long projectSq);
@@ -30,8 +33,9 @@ public interface ProjectMapper {
 	Map<String, LocalDateTime> findInterviewTimeMinMaxBySq(@Param("projectSq") Long projectSq);
 	int countProjectsBySearch(ProjectSearchRequest request);
 	List<LocalDateTime> findInterviewTimesByProjectSq(@Param("projectSq") Long projectSq);
+	List<InterviewTimeInfoResponse> findInterviewSqTmByProjectSq (Long projectSq);
 	Project findBySq(@Param("projectSq") Long projectSq);
-	Long findAddressSqByProjectSq(@Param("projectSq") Long projecSq);
+	Long findAddressSqByProjectSq(@Param("projectSq") Long projectSq);
 
 
 	void insertProject(Project project);

@@ -1,4 +1,4 @@
-package com.example.demo.domain.project.dto.response;
+package com.example.demo.domain.project.vo;
 
 
 import java.util.List;

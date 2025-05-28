@@ -28,10 +28,10 @@ import com.example.demo.domain.project.dto.response.GroupSkillInfoResponse;
 import com.example.demo.domain.project.dto.response.ProjectDetailResponse;
 import com.example.demo.domain.project.dto.response.ProjectFormDataResponse;
 import com.example.demo.domain.project.dto.response.ProjectListResponse;
-import com.example.demo.domain.project.dto.response.ProjectSummary;
 import com.example.demo.domain.project.entity.Project;
 import com.example.demo.domain.project.entity.ProjectApplicationEntity;
 import com.example.demo.domain.project.service.ProjectService;
+import com.example.demo.domain.project.vo.ProjectSummary;
 import com.example.demo.domain.user.util.JwtAuthenticationToken;
 
 import jakarta.validation.Valid;
@@ -71,8 +71,10 @@ public class ProjectController {
 	}
 	
 	@PostMapping("/{projectSq}/applications")
-	public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectSq") Long projectSq, @RequestBody ProjectApplyRequest applyRequest){
-		projectService.createProjectApplication(projectSq, applyRequest);
+	public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectSq") Long projectSq
+			, @RequestBody ProjectApplyRequest applyRequest
+			, @AuthenticationPrincipal Long userSq){
+		projectService.createProjectApplication(projectSq, applyRequest, userSq);
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 지원 성공", null));
 	}
 	
