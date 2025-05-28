@@ -71,8 +71,10 @@ public class ProjectController {
 	}
 	
 	@PostMapping("/{projectSq}/applications")
-	public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectSq") Long projectSq, @RequestBody ProjectApplyRequest applyRequest){
-		projectService.createProjectApplication(projectSq, applyRequest);
+	public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectSq") Long projectSq
+			, @RequestBody ProjectApplyRequest applyRequest
+			, @AuthenticationPrincipal Long userSq){
+		projectService.createProjectApplication(projectSq, applyRequest, userSq);
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 지원 성공", null));
 	}
 	
