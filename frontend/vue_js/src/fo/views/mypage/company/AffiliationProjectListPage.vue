@@ -143,7 +143,9 @@
 
         <!-- 프로젝트 등록하기 버튼 -->
         <div class="d-flex justify-content-end mt-4 mb-5">
-          <a href="#" class="btn btn-primary px-4 py-2">프로젝트 등록하기</a>
+          <a href="/mypage/projectPostPage" class="btn btn-primary px-4 py-2"
+            >프로젝트 등록하기</a
+          >
         </div>
 
         <!-- 페이징 -->
