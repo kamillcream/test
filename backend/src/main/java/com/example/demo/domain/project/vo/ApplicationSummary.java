@@ -24,5 +24,6 @@ public class ApplicationSummary {
 	private Integer applicantCnt;
 	private LocalDateTime appliedDt;
 	private LocalDateTime readApplicationDt;
+	private LocalDateTime interviewDt;
 	private boolean isRecruitEnded;
 }
