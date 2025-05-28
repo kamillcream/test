@@ -45,6 +45,11 @@ public class ProjectApplicationController {
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "인터뷰 가능 시간 조회 성공", projectService.fetchProjectAvailableTimes(projectSq)));
 	}
 	
+	@GetMapping("/{projectSq}")
+	public ResponseEntity<ApiResponse<List<ApplicationStatusList>>> getProjectApplicationsByCompanies(@PathVariable("projectSq") Long projectSq){
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 공고 지원자 목록 반환 성공", projectApplicationService.fetchProjectApplicationsByProject(projectSq)));
+	}
+	
 	@PatchMapping("/{applicationSq}")
 	public ResponseEntity<ApiResponse<Void>> patchApplicationStatus(@PathVariable("applicationSq")Long applicationSq, @RequestBody ApplicationStatusRequest request){
 		projectApplicationService.updateApplicantResult(request, applicationSq);
@@ -57,8 +62,5 @@ public class ProjectApplicationController {
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "인터뷰 시간 선택 성공", null));
 	}
 	
-	@GetMapping("/{companySq}/companies")
-	public ResponseEntity<ApiResponse<List<ApplicationStatusResponse>>> getProjectApplicationsByCompanies(@PathVariable("companySq") Long companySq){
-		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 공고 지원자 목록 반환 성공", projectApplicationService.fetchProjectApplicationsByCompany(companySq)));
-	}
+	
 }
