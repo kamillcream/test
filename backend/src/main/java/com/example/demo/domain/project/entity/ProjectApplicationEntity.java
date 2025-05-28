@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import com.example.demo.common.ParentCodeEnum;
 import com.example.demo.common.mapper.CommonCodeMapper;
@@ -31,7 +32,7 @@ public class ProjectApplicationEntity {
     @Column(name = "resume_sq", nullable = false)
     private Long resumeSq;
 
-    @Column(name = "company_sq", nullable = false)
+    @Column(name = "company_sq", nullable = true)
     private Long companySq;
 
     @Column(name = "project_application_status_cd", nullable = false)
@@ -55,10 +56,10 @@ public class ProjectApplicationEntity {
     }
     
     public static ProjectApplicationEntity from(long projectSq, ProjectMapper projectMapper,
-    		ProjectApplyRequest request, CommonCodeMapper commonCodeMapper) {
+    		ProjectApplyRequest request, CommonCodeMapper commonCodeMapper, Optional<Long> companySq) {
     	return ProjectApplicationEntity.builder()
 				.projectSq(projectSq)
-				.companySq(projectMapper.findCompanySqFromProjectSq(projectSq))
+				.companySq(companySq.orElse(null))
 				.resumeSq(request.getResumeSq())
 				.projectApplicationStatusCd(commonCodeMapper.findCommonCodeSqByEngName(ProjectApplicationStatus.APPLIED.getCode(), ParentCodeEnum.PRO_APPLICATION.getCode()))
 				.projectApplicationMemberTypeCd(commonCodeMapper.findCommonCodeSqByEngName(request.getProjectApplicationTyp(), ParentCodeEnum.MEMBER_TYPE.getCode()))

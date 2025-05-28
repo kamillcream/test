@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.StructuredTaskScope.Subtask;
 import java.util.stream.Collectors;
 
@@ -210,9 +211,10 @@ public class ProjectService {
 		projectMapper.softDeleteProject(projectSq);
 	}
 
-	public void createProjectApplication(long projectSq, ProjectApplyRequest request) {
-		Project project = projectMapper.findBySq(projectSq);
-		ProjectApplicationEntity projectApplicationEntity = ProjectApplicationEntity.from(projectSq, projectMapper, request, commonCodeMapper);
+	public void createProjectApplication(long projectSq, ProjectApplyRequest request, Long userSq) {
+		Optional<Long> userCompanySq = Optional.ofNullable(companyService.fetchCompanySq(userSq));
+		
+		ProjectApplicationEntity projectApplicationEntity = ProjectApplicationEntity.from(projectSq, projectMapper, request, commonCodeMapper, userCompanySq);
 		projectMapper.insertProjectApplication(projectApplicationEntity);
 		projectMapper.increaseApplication(projectSq);
 	}
