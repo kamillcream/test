@@ -42,6 +42,14 @@ public class InformationEditRepository {
         informationEditMapper.updateUserInfoWithoutPw(userSq, userEmail, userPhoneNum);
     }
 
+    public void updateCompany(Long userSq, String userPw, String userEmail, String userPhoneNum, String userNm) {
+        informationEditMapper.updateCompanyInfo(userSq, userPw, userEmail, userPhoneNum, userNm);
+    }
+
+    public void updateCompanyWithoutPw(Long userSq, String userEmail, String userPhoneNum, String userNm) {
+        informationEditMapper.updateCompanyInfoWithoutPw(userSq, userEmail, userPhoneNum, userNm);
+    }
+
     public void updateAddress(Long userSq, String zonecode, String address, String detailAddress, String sigungu,
             Double lat, Double lon) {
         informationEditMapper.updateAddress(userSq, zonecode, address, detailAddress, sigungu, lat, lon);

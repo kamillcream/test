@@ -1,7 +1,6 @@
 package com.example.demo.domain.mypage.dto.response;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 
 import lombok.Builder;
 import lombok.Data;

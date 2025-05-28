@@ -688,21 +688,28 @@ function isFormChanged() {
 }
 
 const saveAll = async () => {
+  const isAnyEditing = Object.values(editing).some((v) => v === true)
+  if (isAnyEditing) {
+    alertStore.show('수정 중인 항목을 먼저 저장하거나 취소해주세요.', 'danger')
+    return
+  }
   if (!isFormChanged()) {
     alertStore.show('변경된 정보가 없습니다.', 'danger')
     return
   }
 
   const requestBody = {
-    userPw: form.userPw || undefined, // 비밀번호는 입력된 경우에만 보냄
-    userEmail: form.userEmail,
-    userPhoneNum: form.userPhoneNum,
-    zonecode: form.zonecode,
-    address: form.address,
-    detailAddress: form.detailAddress,
-    sigungu: form.sigungu,
-    latitude: form.latitude,
-    longitude: form.longitude,
+    personal: {
+      userPw: form.userPw || undefined, // 비밀번호는 입력된 경우에만 보냄
+      userEmail: form.userEmail,
+      userPhoneNum: form.userPhoneNum,
+      zonecode: form.zonecode,
+      address: form.address,
+      detailAddress: form.detailAddress,
+      sigungu: form.sigungu,
+      latitude: form.latitude,
+      longitude: form.longitude,
+    },
   }
 
   try {
@@ -713,7 +720,7 @@ const saveAll = async () => {
   } catch (err) {
     // 서버에서 온 에러 메시지
     const errorMessage =
-      err.response?.data?.message || '회원가입에 실패하였습니다'
+      err.response?.data?.message || '회원 정보 수정에 실패하였습니다.'
     alertStore.show(errorMessage, 'danger')
   }
 }

@@ -38,6 +38,25 @@
                 test="userPhoneNum != null"> user_phone_num = #{userPhoneNum}, </if>
         user_modified_at_dtm = NOW() </set> WHERE user_sq = #{userSq} </update>
 
+    <update id="updateCompanyInfo"> UPDATE TBL_USER_M <set>
+            <if test="userPw != null and userPw != ''"> user_pw = #{userPw}, </if>
+                <if
+                test="userNm != null"> user_nm = #{userNm}, </if>
+    <if
+                test="userEmail != null"> user_email = #{userEmail}, </if>
+    <if
+                test="userPhoneNum != null"> user_phone_num = #{userPhoneNum}, </if>
+        user_modified_at_dtm = NOW() </set> WHERE user_sq = #{userSq} </update>
+
+    <update id="updateCompanyInfoWithoutPw"> UPDATE TBL_USER_M <set>
+            <if
+                test="userNm != null"> user_nm = #{userNm}, </if>
+            <if test="userEmail != null">
+        user_email = #{userEmail}, </if>
+    <if
+                test="userPhoneNum != null"> user_phone_num = #{userPhoneNum}, </if>
+        user_modified_at_dtm = NOW() </set> WHERE user_sq = #{userSq} </update>
+
     <update id="updateAddress"> UPDATE TBL_ADDRESS_S SET zonecode = #{zonecode}, address =
         #{address}, detail_address = #{detailAddress}, sigungu = #{sigungu}, latitude = #{latitude},
         longitude = #{longitude}, address_modified_at_dtm = NOW() WHERE address_sq = (SELECT

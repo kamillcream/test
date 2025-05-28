@@ -9,38 +9,49 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface InformationEditMapper {
-    String selectPasswordByUserSq(Long userSq);
+        String selectPasswordByUserSq(Long userSq);
 
-    UserInfoDTO findUserInfoByUserSq(@Param("userSq") Long userSq);
+        UserInfoDTO findUserInfoByUserSq(@Param("userSq") Long userSq);
 
-    AddressDTO findAddressByAddressSq(@Param("addressSq") Long addressSq);
+        AddressDTO findAddressByAddressSq(@Param("addressSq") Long addressSq);
 
-    String findCommonCodeNameByGenderCd(@Param("codeSq") Long codeSq);
+        String findCommonCodeNameByGenderCd(@Param("codeSq") Long codeSq);
 
-    String selectCompanyNameByUserSq(@Param("userSq") Long userSq);
+        String selectCompanyNameByUserSq(@Param("userSq") Long userSq);
 
-    int updateUserInfo(@Param("userSq") Long userSq,
-            @Param("userPw") String userPw,
-            @Param("userEmail") String userEmail,
-            @Param("userPhoneNum") String userPhoneNum);
+        int updateUserInfo(@Param("userSq") Long userSq,
+                        @Param("userPw") String userPw,
+                        @Param("userEmail") String userEmail,
+                        @Param("userPhoneNum") String userPhoneNum);
 
-    int updateUserInfoWithoutPw(@Param("userSq") Long userSq,
-            @Param("userEmail") String userEmail,
-            @Param("userPhoneNum") String userPhoneNum);
+        int updateUserInfoWithoutPw(@Param("userSq") Long userSq,
+                        @Param("userEmail") String userEmail,
+                        @Param("userPhoneNum") String userPhoneNum);
 
-    int updateAddress(@Param("userSq") Long userSq,
-            @Param("zonecode") String zonecode,
-            @Param("address") String address,
-            @Param("detailAddress") String detailAddress,
-            @Param("sigungu") String sigungu,
-            @Param("latitude") Double latitude,
-            @Param("longitude") Double longitude);
+        int updateCompanyInfo(@Param("userSq") Long userSq,
+                        @Param("userPw") String userPw,
+                        @Param("userEmail") String userEmail,
+                        @Param("userPhoneNum") String userPhoneNum,
+                        @Param("userNm") String userNm);
 
-    boolean existsByEmail(@Param("userEmail") String userEmail);
+        int updateCompanyInfoWithoutPw(@Param("userSq") Long userSq,
+                        @Param("userEmail") String userEmail,
+                        @Param("userPhoneNum") String userPhoneNum,
+                        @Param("userNm") String userNm);
 
-    boolean existsByPhone(@Param("userPhoneNum") String userPhoneNum);
+        int updateAddress(@Param("userSq") Long userSq,
+                        @Param("zonecode") String zonecode,
+                        @Param("address") String address,
+                        @Param("detailAddress") String detailAddress,
+                        @Param("sigungu") String sigungu,
+                        @Param("latitude") Double latitude,
+                        @Param("longitude") Double longitude);
 
-    Long findUserSqByEmail(@Param("userEmail") String userEmail);
+        boolean existsByEmail(@Param("userEmail") String userEmail);
 
-    Long findUserSqByPhone(@Param("userPhoneNum") String userPhoneNum);
+        boolean existsByPhone(@Param("userPhoneNum") String userPhoneNum);
+
+        Long findUserSqByEmail(@Param("userEmail") String userEmail);
+
+        Long findUserSqByPhone(@Param("userPhoneNum") String userPhoneNum);
 }

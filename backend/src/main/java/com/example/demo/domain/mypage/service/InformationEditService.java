@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
+import com.example.demo.domain.mypage.dto.request.CompanyUserInfoUpdateRequestDTO;
 import com.example.demo.domain.mypage.dto.request.PersonalUserInfoUpdateRequestDTO;
 import com.example.demo.domain.mypage.repository.InformationEditRepository;
 
@@ -63,6 +64,41 @@ public class InformationEditService {
             informationEditRepository.updateUser(userSq, encryptedPw, emailToUpdate, phoneToUpdate);
         } else {
             informationEditRepository.updateUserWithoutPw(userSq, emailToUpdate, phoneToUpdate);
+        }
+
+        informationEditRepository.updateAddress(
+                userSq,
+                dto.getZonecode(),
+                dto.getAddress(),
+                dto.getDetailAddress(),
+                dto.getSigungu(),
+                dto.getLatitude(),
+                dto.getLongitude());
+    }
+
+    public void updateCompanyInfo(Long userSq, CompanyUserInfoUpdateRequestDTO dto) {
+        // 이메일 중복 검사
+        Long emailOwner = informationEditRepository.findUserSqByEmail(dto.getUserEmail());
+        if (emailOwner != null && !emailOwner.equals(userSq)) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+
+        // 휴대폰 중복 검사
+        Long phoneOwner = informationEditRepository.findUserSqByPhone(dto.getUserPhoneNum());
+        if (phoneOwner != null && !phoneOwner.equals(userSq)) {
+            throw new IllegalArgumentException("이미 사용 중인 휴대폰 번호입니다.");
+        }
+
+        // null일 경우 기존 값과 동일하므로 업데이트에서 제외할 수도 있음
+        String emailToUpdate = dto.getUserEmail();
+        String phoneToUpdate = dto.getUserPhoneNum();
+        String nameToUpdate = dto.getUserNm();
+
+        if (dto.getUserPw() != null && !dto.getUserPw().isBlank()) {
+            String encryptedPw = passwordEncoder.encode(dto.getUserPw());
+            informationEditRepository.updateCompany(userSq, encryptedPw, emailToUpdate, phoneToUpdate, nameToUpdate);
+        } else {
+            informationEditRepository.updateCompanyWithoutPw(userSq, emailToUpdate, phoneToUpdate, nameToUpdate);
         }
 
         informationEditRepository.updateAddress(
