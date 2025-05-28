@@ -295,7 +295,7 @@ const updateAppStatus = async (status, applicationSq) => {
 
 const goToProjectSpec = (project) => {
   router.push({
-    name: 'CompanyProjectSpec',
+    name: 'UserProjectSpec',
     params: {
       project_sq: project.projectSq,
     },
