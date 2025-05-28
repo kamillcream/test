@@ -21,8 +21,9 @@ public class ApplicationStatusResponse {
 	private List<String> skillNames;
 	private ApplicationStatusVo appStatusVo;
 	private String memberType;
+	private String companyNm;
 	
-	public static ApplicationStatusResponse from(Long appSq, ResumeNmTtlVo resumeNmTtlVo, int careerYear, List<String> skills,
+	public static ApplicationStatusResponse personal(Long appSq, ResumeNmTtlVo resumeNmTtlVo, int careerYear, List<String> skills,
 			ApplicationStatusVo statusVo, String memberType) {
 		return ApplicationStatusResponse.builder()
 				.applicationSq(appSq)
@@ -31,6 +32,19 @@ public class ApplicationStatusResponse {
 				.skillNames(skills)
 				.appStatusVo(statusVo)
 				.memberType(memberType)
+				.build();
+	}
+	
+	public static ApplicationStatusResponse company(Long appSq, ResumeNmTtlVo resumeNmTtlVo, int careerYear, List<String> skills,
+			ApplicationStatusVo statusVo, String memberType, String companyNm) {
+		return ApplicationStatusResponse.builder()
+				.applicationSq(appSq)
+				.nameTitleVo(resumeNmTtlVo)
+				.careerYear(careerYear)
+				.skillNames(skills)
+				.appStatusVo(statusVo)
+				.memberType(memberType)
+				.companyNm(companyNm)
 				.build();
 	}
 }
