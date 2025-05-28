@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 
-//import lombok.RequiredArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/mypage/resume")
@@ -37,22 +37,30 @@ public class ResumeController {
     //이력서 등록
 	@PostMapping("/register")
 	public ResponseEntity<ResumeRegisterResponse> register(@RequestBody ResumeRegisterRequest request) {
-		System.out.println("받은 이력서 등록 요청: " + request);
-		request.setUserSq(1L);//로그인 연동 시 바꾸기
-		resumeService.registerResume(request);
-		 ResumeRegisterResponse response = new ResumeRegisterResponse();
-		    response.setResumeSq(resumeSq);
-		    response.setResumeTtl(request.getResumeTtl());
-		    response.setRepresentative(isRepresentative);
-		    return ResponseEntity.ok(response);
+	    System.out.println("받은 이력서 등록 요청: " + request);
+	    request.setUserSq(18L); // 로그인 연동 시 바꾸기
+	    // resumeService.registerResume()가 등록된 이력서의 정보를 반환하도록 수정 필요
+	    ResumeRegisterResponse response = resumeService.registerResume(request);
+	    
+	    return ResponseEntity.ok(response);
+	}
+	
+	//대표 이력서 설정
+	@PatchMapping("/representative/{resumeSq}")
+	public ResponseEntity<String> setMainResume(@PathVariable("resumeSq") Long resumeSq) {
+		Long userSq = 18L;
+		resumeService.setMainResume(resumeSq, userSq);
+	    return ResponseEntity.ok("대표 이력서 설정 완료");
 	}
 	
 	//이력서 조회
 	@GetMapping("/list")
 	public ResponseEntity<List<ResumeListResponse>> getAllResumes() {
-	    List<ResumeListResponse> resumes = resumeService.getAllResumes();
+		Long userSq = 18L;
+	    List<ResumeListResponse> resumes = resumeService.getAllResumes(userSq);
 	    return ResponseEntity.ok(resumes);
 	}
+	
 	//이력서 상세조회
 	@GetMapping("/detail/{resumeSq}")
 	 public ResponseEntity<ResumeRegisterRequest> getResumeById(@PathVariable("resumeSq") Long resumeSq) {
@@ -60,8 +68,8 @@ public class ResumeController {
         return ResponseEntity.ok(resume);
 	}
 	//이력서 삭제
-	@PatchMapping("/resumes/{resumeSq}/delete")
-	public ResponseEntity<String> deleteResume(@PathVariable Long resumeSq){
+	@PatchMapping("/{resumeSq}/delete")
+	public ResponseEntity<String> deleteResume(@PathVariable("resumeSq") Long resumeSq){
 		resumeService.softDeleteResume(resumeSq);
 		return ResponseEntity.ok("이력서 삭제 완료");
 	}

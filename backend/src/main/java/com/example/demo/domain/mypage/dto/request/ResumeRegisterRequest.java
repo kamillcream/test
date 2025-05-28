@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class ResumeRegisterRequest {
 	private Long userSq;
+	private Long resumeSq;
     private String resumeTtl;
     private String resumePhotoUrl;
     private String resumeNm;

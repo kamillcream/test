@@ -12,6 +12,6 @@ import lombok.Setter;
 
 public class ResumeSkillDataResponse {
     private String parentSkillTagNm;
-    private List<String> childSkills;
+    private List<String> childSkills;//
 
 }

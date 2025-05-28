@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-/* global daum */ //주소 전역 변수 선언
+/* global daum */ // 주소 전역 변수 선언
 
 import { onMounted, defineProps } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'

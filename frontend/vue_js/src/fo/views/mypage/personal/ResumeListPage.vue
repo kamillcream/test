@@ -15,12 +15,28 @@
     <div class="row">
       <div class="col">
         <ul class="simple-post-list m-0 position-relative">
-          <li v-for="resume in resumeList" :key="resume.resumeSq">
-            
-            <!-- 닫기(X) 버튼 -->
+          <li
+            v-for="resume in resumeList"
+            :key="resume.resumeSq"
+            class="position-relative"
+          >
+            <!-- X(닫기) 버튼 -->
             <button
               class="btn btn-light btn-lg position-absolute"
-              style="top: 0; right: 0; color: #aaa; border: none"
+              style="
+                top: -6px;
+                right: 0;
+                color: #aaa;
+                border: none;
+                font-size: 24px;
+                margin: 0.5rem 1rem;
+                z-index: 1000;
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
               @click="removeResume(resume.resumeSq)"
             >
               &times;
@@ -28,10 +44,16 @@
             <div class="post-info position-relative">
               <!-- 제목 + 뱃지 -->
               <div class="d-flex align-items-center gap-2">
-                <a href="#" class="text-6 m-0" @click.prevent="openResumeDetail(resume)">
+                <a
+                  href="#"
+                  class="text-6 m-0"
+                  @click.prevent="openResumeDetail(resume)"
+                >
                   {{ resume.resumeTtl }}
                 </a>
-                <span v-if="resume.resumeIsRepresentativeYn === 'Y'" class="btn btn-primary btn-sm"
+                <span
+                  v-if="resume.resumeIsRepresentativeYn === 'Y'"
+                  class="btn btn-primary btn-sm"
                   >대표 이력서</span
                 >
               </div>
@@ -43,8 +65,11 @@
                   <span class="text-dark text-uppercase font-weight-semibold"
                     >등록일자</span
                   >
-                  |{{ resume.resumeCreatedAtDtm?.substring(0, 10).replaceAll('-', '.') ?? resume.resumeCreatedAtDtm }}
-
+                  |{{
+                    resume.resumeCreatedAtDtm
+                      ?.substring(0, 10)
+                      .replaceAll('-', '.') ?? resume.resumeCreatedAtDtm
+                  }}
                 </div>
                 <div class="d-flex gap-2">
                   <a
@@ -76,7 +101,7 @@
           v-if="showDetailModal"
           :resume="selectedResume"
           @close="closeResumeDetail"
-        />  
+        />
         <!-- 이력서 등록하기 버튼 -->
         <div class="d-flex justify-content-end mt-4 mb-5">
           <a
@@ -116,11 +141,14 @@ import { ref, onMounted } from 'vue'
 import { api } from '@/axios.js'
 import { useMypageStore } from '@/fo/stores/mypageStore'
 import ResumeDetailModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
+//import { useRouter } from 'vue-router'
 
 const resumeList = ref([])
 const showDetailModal = ref(false)
 const selectedResume = ref(null)
 const mypageStore = useMypageStore()
+const isDeleting = ref(false) // 삭제 중 상태 추가
+//const router = useRouter()
 
 onMounted(async () => {
   try {
@@ -136,21 +164,61 @@ onMounted(async () => {
   }
 })
 
-function removeResume(id) {
-  resumeList.value = resumeList.value.filter((r) => r.resumeSq !== id)
+function removeResume(resumeSq) {
+  if (!confirm('정말 삭제하시겠습니까?')) return
+  api
+    .$patch(`/mypage/resume/${resumeSq}/delete`)
+    .then(() => {
+      // 삭제 후 목록에서 제거
+      resumeList.value = resumeList.value.filter((r) => r.resumeSq !== resumeSq)
+    })
+    .catch((err) => {
+      alert('삭제 실패: ' + (err?.response?.data?.message || err.message))
+    })
+    .finally(() => {
+      isDeleting.value = false
+    })
 }
 
-function setMainResume(id) {
-  resumeList.value.forEach((r) => (r.resumeIsRepresentativeYn = 'N'))
-  const main = resumeList.value.find((r) => r.resumeSq === id)
-  if (main) main.resumeIsRepresentativeYn = 'Y'
+function setMainResume(resumeSq) {
+  // 버튼 여러 번 클릭 방지용: 중복 클릭 막기(선택)
+  if (setMainResume.loading) return
+  setMainResume.loading = true
+
+  api
+    .$patch(`/mypage/resume/representative/${resumeSq}`)
+    .then(() => {
+      // 반드시 목록 새로고침으로만 대표 상태를 반영!
+      fetchResumeList()
+    })
+    .catch((err) => {
+      alert(
+        '대표 이력서 설정 실패: ' +
+          (err?.response?.data?.message || err.message),
+      )
+    })
+    .finally(() => {
+      setMainResume.loading = false
+    })
+}
+
+// 목록 새로고침 함수
+async function fetchResumeList() {
+  try {
+    const res = await api.$get('/mypage/resume/list')
+    if (Array.isArray(res)) {
+      resumeList.value = res
+    }
+  } catch (error) {
+    console.error('이력서 목록 조회 실패:', error)
+  }
 }
 
 function openResumeDetail(resume) {
   mypageStore.modalStack.push({
     component: ResumeDetailModal,
     props: { resume },
-    type: 'resumeDetail'
+    type: 'resumeDetail',
   })
   mypageStore.isOpen = true
 }
@@ -169,6 +237,8 @@ function copyResume(/*id*/) {
 }
 
 function registerResume() {
-  // 등록 페이지 이동
+  // router.push('/mypage/resumeform').then(() => {
+  //   window.scrollTo({ top: 0, behavior: 'auto' })
+  // })
 }
 </script>

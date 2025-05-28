@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class ResumeSkillPairResponse {
 	private String parentSkillTagNm;
-    private String childSkillTagNm;
+    private String childSkillTagNm;//
 }

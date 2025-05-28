@@ -11,7 +11,7 @@ public class ResumeCareerResponse {
     private String companyNm;        // 회사명
     private String departmentNm;     // 부서
     private String positionNm;       // 직급
-    private LocalDate startDt;          // 입사일자 
+    private LocalDate startDt;       // 입사일자 
     private String endDt;   
 
 }

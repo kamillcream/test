@@ -249,7 +249,7 @@ const openSkillModal = () => {
 }
 const handleSkillConfirm = (skills) => {
   selectedSkills.value = skills
-  // 각 타입별로 form에 값 반영
+  //  각 타입별로 form에 값 반영
   form.value.device = selectedDeviceText.value
   form.value.os = selectedOsText.value
   form.value.dbms = selectedDbmsText.value

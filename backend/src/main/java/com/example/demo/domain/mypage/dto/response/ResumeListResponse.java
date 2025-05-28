@@ -12,7 +12,7 @@ public class ResumeListResponse {
     private String resumeEmail;            // 이메일
     private String resumeGreetingTxt;      // 인사말 (한 줄 소개)
     private String resumeIsRepresentativeYn; // 대표 여부 (Y or N)
-    private LocalDateTime resumeCreatedAtDtm; // 등록일자
+    private LocalDateTime resumeCreatedAtDtm; // 등록일자.
 
 }
 

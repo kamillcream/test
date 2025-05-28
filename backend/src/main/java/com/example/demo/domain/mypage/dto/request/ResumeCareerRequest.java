@@ -11,7 +11,7 @@ public class ResumeCareerRequest {
     private String companyNm;        // 회사명
     private String departmentNm;     // 부서
     private String positionNm;       // 직급
-    private LocalDate startDt;          // 입사일자 
-    private String endDt;   
+    private LocalDate startDt;       // 입사일자 
+    private LocalDate endDt;   		 // 퇴사일자(현재까지 근무가능 null)
 
 }

@@ -79,7 +79,7 @@ export const useMypageStore = defineStore('mypage', () => {
     }
   }
 
-  // 현재 모달 정보를 가져오기
+  // 현재 모달 정보를 가져오기.
   const getCurrentModal = () => {
     return modalStack.value[modalStack.value.length - 1]
   }

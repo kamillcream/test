@@ -257,6 +257,7 @@
             </div>
           </div>
 
+          
           <!-- 회사 이력 -->
           <div class="form-group mb-3">
             <label class="form-label mb-1 text-2" style="font-weight: bold">

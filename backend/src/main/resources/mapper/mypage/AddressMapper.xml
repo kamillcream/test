@@ -2,25 +2,25 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.example.demo.domain.address.mapper.AddressMapper">
+<mapper namespace="com.example.demo.domain.mypage.mapper.MypageAddressMapper">
 
   <!-- 1. 지역코드 조회 -->
-  <select id="selectAreaCodeSqBySigungu" parameterType="string" resultType="long">
+ <select id="selectAreaCodeSqBySigungu" parameterType="string" resultType="long">
     SELECT area_code_sq
     FROM TBL_AREA_C
     WHERE area_sigungu = #{sigungu}
     LIMIT 1
-  </select>
+ </select>
 
   <!-- 2. 주소 INSERT -->
-  <insert id="insertAddress"
-    parameterType="com.example.demo.domain.address.dto.AddressDTO"
-    useGeneratedKeys="true" keyProperty="addressSq">
+ <insert id="insertAddress" parameterType="com.example.demo.domain.mypage.dto.AddressDTO">
     INSERT INTO TBL_ADDRESS_S (
-      zonecode, address, detail_address, sigungu, latitude, longitude, area_code_sq
+    zonecode, address, detail_address, sigungu, 
+    latitude, longitude, area_code_sq
     ) VALUES (
-      #{zonecode}, #{address}, #{detailAddress}, #{sigungu}, #{latitude}, #{longitude}, #{areaCodeSq}
+    #{zonecode}, #{address}, #{detailAddress}, #{sigungu},
+    #{latitude}, #{longitude}, #{areaCodeSq}
     )
-  </insert>
+</insert>
 
 </mapper>

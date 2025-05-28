@@ -12,7 +12,7 @@ public class ResumeEducationResponse {
 	    private String majorNm;          // 전공
 	    private LocalDate admissionDt;      // 입학일자
 	    private LocalDate graduationDt;     // 졸업일자
-	    private Long statusCd;           // 졸업상태 코드
+	    private Long statusCd;           // 졸업상태 코드.
 	}
 
 

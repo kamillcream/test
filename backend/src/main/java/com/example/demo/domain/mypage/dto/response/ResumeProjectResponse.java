@@ -18,6 +18,6 @@ public class ResumeProjectResponse {
 	    @JsonFormat(pattern = "yyyy-MM-dd")
 	    private LocalDate startDt;                // 프로젝트 시작일 
 	    @JsonFormat(pattern = "yyyy-MM-dd")
-	    private LocalDate endDt;                  // 프로젝트 종료일 (NULL 허용)
+	    private LocalDate endDt;                  // 프로젝트 종료일 (NULL 허용).
 	}
 

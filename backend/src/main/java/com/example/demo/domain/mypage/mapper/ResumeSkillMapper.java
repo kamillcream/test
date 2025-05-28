@@ -10,4 +10,5 @@ import com.example.demo.domain.mypage.dto.response.ResumeSkillPairResponse;
 
 public interface ResumeSkillMapper {
 	List<ResumeSkillPairResponse> findSkillInfoList();
+
 }

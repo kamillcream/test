@@ -1,5 +1,6 @@
 package com.example.demo.domain.mypage.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,13 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest;
 import com.example.demo.domain.mypage.mapper.ResumeMapper;
 import com.example.demo.domain.mypage.mapper.ResumeSkillMapper;
-import com.example.demo.domain.project.dto.response.SingleSkillInfoResponse;
-import com.example.demo.domain.user.dto.AddressDTO;
+import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.response.ResumeListResponse;
 import com.example.demo.domain.mypage.dto.response.ResumeSkillDataResponse;
 import com.example.demo.domain.mypage.dto.response.ResumeSkillPairResponse;
-import com.example.demo.domain.address.repository.AddressRepository;
-import com.example.demo.domain.address.mapper.AddressMapper;
+import com.example.demo.domain.mypage.mapper.MypageAddressMapper;
+import com.example.demo.domain.mypage.repository.AddressRepository;
+import com.example.demo.domain.mypage.dto.response.ResumeRegisterResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,11 +29,11 @@ public class ResumeService {
 	private final ResumeMapper resumeMapper;
 	private final ResumeSkillMapper skillMapper;
 	private final AddressRepository addressRepository;
-	private final AddressMapper addressMapper;
+	private final MypageAddressMapper addressMapper;
 	
 	//이력서 등록
 	@Transactional
-	public void registerResume(ResumeRegisterRequest request) {
+	public ResumeRegisterResponse registerResume(ResumeRegisterRequest request) {
 		// 1. 지역 코드 조회
 		Long areaCodeSq = addressMapper.selectAreaCodeSqBySigungu(request.getSigungu());
 
@@ -42,31 +43,44 @@ public class ResumeService {
 		addressDTO.setAddress(request.getAddress());
 		addressDTO.setDetailAddress(request.getDetailAddress());
 		addressDTO.setSigungu(request.getSigungu());
-		addressDTO.setLatitude(request.getLatitude());
-		addressDTO.setLongitude(request.getLongitude());
+		addressDTO.setLatitude(BigDecimal.valueOf(request.getLatitude()));
+		addressDTO.setLongitude(BigDecimal.valueOf(request.getLongitude()));
 		addressDTO.setAreaCodeSq(areaCodeSq);
 		addressRepository.insertAddress(addressDTO);
 
 		// 3. 이력서 INSERT (addressSq 참조)
-		ResumeDTO resumeDTO = new ResumeDTO();
-		resumeDTO.setAddressSq(addressDTO.getAddressSq());
-		// ...기타 이력서 필드 세팅...
-		resumeRepository.insertResume(resumeDTO);
+		request.setAddressSq(addressDTO.getAddressSq());
+		resumeMapper.insertResume(request);
+
+		// 4. 응답 객체 생성 및 반환
+		ResumeRegisterResponse response = new ResumeRegisterResponse();
+		response.setResumeSq(request.getResumeSq());
+		response.setResumeTtl(request.getResumeTtl());
+		response.setRepresentative("Y".equals(request.getResumeIsRepresentativeYn()));		
+		return response;
 	}
 	
+
+	//대표 이력서 설정
+	@Transactional
+	public void setMainResume(Long resumSq, Long userSq) {
+		resumeMapper.updateAllRepresentativeN(userSq);
+		resumeMapper.updateRepresentativeY(resumSq);
+	}
+	
+
 	//이력서 상세조회
 	public ResumeRegisterRequest getResumeById(Long resumeSq) {
 	    return resumeMapper.selectResumeById(resumeSq);
 	}
 
 	//이력서 전체 조회
-	public List<ResumeListResponse> getAllResumes() {
-	    Long userSq = 1L;
-	    return resumeMapper.selectAllResumes();
+	public List<ResumeListResponse> getAllResumes(Long userSq) {
+	    return resumeMapper.selectAllResumes(userSq);
 	}
 	//삭제
 	public void softDeleteResume(Long resumeSq) {
-		resumeMapper.updateDeletedYn(resumeSq);
+		resumeMapper.updateDeleteYn(resumeSq);
 	}
 	//기술 스택
 	public List<ResumeSkillDataResponse> getGroupedSkills() {
