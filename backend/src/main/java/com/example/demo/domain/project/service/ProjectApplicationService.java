@@ -1,11 +1,9 @@
 package com.example.demo.domain.project.service;
 
 
-import java.time.LocalDateTime;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.LongBinaryOperator;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -16,18 +14,14 @@ import com.example.demo.domain.company.mapper.CompanyMapper;
 import com.example.demo.domain.mypage.mapper.ResumeCareerMapper;
 import com.example.demo.domain.mypage.mapper.ResumeMapper;
 import com.example.demo.domain.mypage.mapper.ResumeSkillMapper;
-import com.example.demo.domain.mypage.vo.ResumeVo;
+
 import com.example.demo.domain.project.dto.request.ApplicationSqRequest;
 import com.example.demo.domain.project.dto.request.ApplicationStatusRequest;
 import com.example.demo.domain.project.dto.response.ApplicationStatusList;
 import com.example.demo.domain.project.dto.response.ApplicationStatusResponse;
-import com.example.demo.domain.project.dto.response.GroupSkillInfoResponse;
-import com.example.demo.domain.project.dto.response.ProjectAppListResponse;
-import com.example.demo.domain.project.dto.response.SingleSkillInfoResponse;
-import com.example.demo.domain.project.entity.Project;
-import com.example.demo.domain.project.entity.ProjectApplicationEntity;
+
 import com.example.demo.domain.project.mapper.ProjectApplicationMapper;
-import com.example.demo.domain.project.mapper.ProjectMapper;
+
 import com.example.demo.domain.project.vo.ApplicationStatusVo;
 import com.example.demo.domain.project.vo.ApplicationSummary;
 import com.example.demo.domain.project.vo.ResumeNmTtlVo;
