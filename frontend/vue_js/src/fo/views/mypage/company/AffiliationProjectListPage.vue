@@ -67,8 +67,10 @@
                 class="d-flex justify-content-between align-items-center gap-2"
               >
                 <div class="d-flex gap-2">
-                  <a href="#" class="text-6 m-0">{{ post.title }} /</a>
-                  <a href="#" class="text-5 m-0">{{ post.company }}</a>
+                  <a @click="goToProjectSpec(post)" href="#" class="text-6 m-0"
+                    >{{ post.title }} /</a
+                  >
+                  <span href="#" class="text-5 m-0">{{ post.company }}</span>
                 </div>
                 <div class="d-flex gap-2">
                   <span
@@ -110,7 +112,7 @@
                   >
                   | {{ post.applicantCount }}
                   <a
-                    @click="openUserApplyModal"
+                    @click="openUserApplyModal(post.projectSq)"
                     href="#"
                     class="btn btn-outline btn-primary btn-sm"
                     >지원현황 바로가기</a
@@ -186,8 +188,13 @@
 import { ref } from 'vue'
 import { useModalStore } from '../../../stores/modalStore.js'
 import PersonalApplyStatusModal from '@/fo/components/mypage/personal/PersonalApplyStatusModal.vue'
+import CompanyApplyStatusModal from '@/fo/components/mypage/company/ApplyStatusModal.vue'
+
+import { api } from '@/axios.js'
+import { useRouter } from 'vue-router'
 
 const modalStore = useModalStore()
+const router = useRouter()
 
 // 필터 상태
 const currentFilter = ref('all')
@@ -216,6 +223,7 @@ const totalPages = ref(3)
 const posts = ref([
   {
     title: '프로젝트 제목',
+    projectSq: 17,
     company: 'EST Soft',
     status: '채용중',
     dDay: 'D-5',
@@ -226,6 +234,7 @@ const posts = ref([
   },
   {
     title: '프로젝트 제목',
+    projectSq: 17,
     company: 'EST Soft',
     status: '채용 예정',
     registrationDate: '2025.04.30',
@@ -235,6 +244,7 @@ const posts = ref([
   },
   {
     title: '프로젝트 제목',
+    projectSq: 17,
     company: 'EST Soft',
     status: '채용 마감',
     registrationDate: '2025.04.30',
@@ -244,6 +254,7 @@ const posts = ref([
   },
   {
     title: '프로젝트 제목',
+    projectSq: 17,
     company: 'EST Soft',
     status: '채용 마감',
     registrationDate: '2025.04.30',
@@ -270,10 +281,49 @@ const changePage = (page) => {
   // 페이지 변경 로직 구현
 }
 
-const openUserApplyModal = () => {
-  modalStore.openModal(PersonalApplyStatusModal, {
-    size: 'modal-xl',
+const goToProjectSpec = (project) => {
+  router.push({
+    name: 'CompanyProjectSpec',
+    params: {
+      project_sq: project.projectSq,
+    },
   })
+}
+
+function resetModal(component, props = {}) {
+  modalStore.modalStack = [] // 기존 스택 초기화
+  modalStore.openModal(component, props)
+}
+
+const openUserApplyModal = async (projectSq) => {
+  const data = await api.$get(`/projects/applications/${projectSq}`)
+
+  const allApplicants = data.output
+
+  const personalApplicants =
+    allApplicants.find((g) => g.applicantType === '개인')?.response || []
+  const corporateApplicants =
+    allApplicants.find((g) => g.applicantType === '기업')?.response || []
+
+  const openPersonalModal = () => {
+    resetModal(PersonalApplyStatusModal, {
+      size: 'modal-xl',
+      applicants: personalApplicants,
+      projectSq, // 넘김
+      onToggle: openCorporateModal,
+    })
+  }
+
+  const openCorporateModal = () => {
+    resetModal(CompanyApplyStatusModal, {
+      size: 'modal-xl',
+      applicants: corporateApplicants,
+      projectSq, // 넘김
+      onToggle: openPersonalModal,
+    })
+  }
+
+  openPersonalModal()
 }
 </script>
 
