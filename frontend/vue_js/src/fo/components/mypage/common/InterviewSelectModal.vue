@@ -200,7 +200,9 @@ const handleConfirm = () => {
     return
   }
 
-  sendInterviewTimeRequest(interviewTimeSq, props.applicationSq)
+  sendInterviewTimeRequest(interviewTimeSq, props.applicationSq).then(() => {
+    props.onConfirm?.(true)
+  })
 }
 
 const getSelectedInterviewTimeSq = () => {
