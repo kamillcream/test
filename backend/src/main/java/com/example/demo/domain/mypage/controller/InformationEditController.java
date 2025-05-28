@@ -1,6 +1,8 @@
 package com.example.demo.domain.mypage.controller;
 
+import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,10 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.common.ApiResponse;
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
-import com.example.demo.domain.mypage.dto.request.CompanyUserInfoUpdateRequestDTO;
 import com.example.demo.domain.mypage.dto.request.PasswordCheckRequestDTO;
-import com.example.demo.domain.mypage.dto.request.PersonalUserInfoUpdateRequestDTO;
 import com.example.demo.domain.mypage.dto.request.UserInfoUpdateRequestDTO;
+import com.example.demo.domain.mypage.dto.response.AffiliationInfoResponseDTO;
 import com.example.demo.domain.mypage.dto.response.CompanyUserInfoResponseDTO;
 import com.example.demo.domain.mypage.dto.response.PersonalUserInfoResponseDTO;
 import com.example.demo.domain.mypage.service.InformationEditService;
@@ -123,5 +124,16 @@ public class InformationEditController {
         } else {
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "유효하지 않은 회원입니다.");
         }
+    }
+
+    @GetMapping("/affiliation/info")
+    public ApiResponse<AffiliationInfoResponseDTO> getAffiliationInfo(@AuthenticationPrincipal Long userSq) {
+        AffiliationInfoResponseDTO result = informationEditService.getAffiliationInfo(userSq);
+
+        if (result == null) {
+            return ApiResponse.error(HttpStatus.NOT_FOUND, "회원 정보를 찾을 수 없습니다.");
+        }
+
+        return ApiResponse.of(HttpStatus.OK, "기업회원 정보 조회 완료", result);
     }
 }

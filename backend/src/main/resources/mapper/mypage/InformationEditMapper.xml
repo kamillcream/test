@@ -73,4 +73,25 @@
 
     <select id="findUserSqByPhone" resultType="java.lang.Long"> SELECT user_sq FROM TBL_USER_M WHERE
         user_phone_num = #{userPhoneNum} </select>
+
+    <select id="selectUserInfo" parameterType="long"
+        resultType="com.example.demo.domain.mypage.dto.UserInfoDTO"> SELECT user_phone_num FROM
+        TBL_USER_M WHERE user_sq = #{userSq} </select>
+
+    <select id="selectCompanyInfo" parameterType="long"
+        resultType="com.example.demo.domain.mypage.dto.CompanyInfoDTO"> SELECT company_sq,
+        address_sq, company_nm, company_ceo_nm, DATE_FORMAT(company_open_dt, '%Y-%m-%d') AS
+        company_open_dt, company_url, company_greeting_txt, company_is_recruiting_yn FROM
+        TBL_COMPANY_S WHERE user_sq = #{userSq} </select>
+
+
+    <select id="selectAddressInfo" parameterType="long"
+        resultType="com.example.demo.domain.mypage.dto.AddressDTO"> SELECT zonecode, address,
+        detail_address, sigungu, latitude, longitude FROM TBL_ADDRESS_S WHERE address_sq =
+        #{addressSq} </select>
+
+    <select id="selectCompanyTags" parameterType="long" resultType="string"> SELECT tag_nm FROM
+        TBL_COMPANY_TAG_S WHERE company_sq = #{companySq} </select>
+
+
 </mapper>

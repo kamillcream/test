@@ -1,12 +1,16 @@
 package com.example.demo.domain.mypage.service;
 
+import java.util.List;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.domain.mypage.dto.AddressDTO;
+import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
 import com.example.demo.domain.mypage.dto.request.CompanyUserInfoUpdateRequestDTO;
 import com.example.demo.domain.mypage.dto.request.PersonalUserInfoUpdateRequestDTO;
+import com.example.demo.domain.mypage.dto.response.AffiliationInfoResponseDTO;
 import com.example.demo.domain.mypage.repository.InformationEditRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -109,6 +113,19 @@ public class InformationEditService {
                 dto.getSigungu(),
                 dto.getLatitude(),
                 dto.getLongitude());
+    }
+
+    public AffiliationInfoResponseDTO getAffiliationInfo(Long userSq) {
+        CompanyInfoDTO companyInfo = informationEditRepository.getCompanyInfo(userSq);
+        if (companyInfo == null) {
+            return null;
+        }
+
+        UserInfoDTO userInfo = informationEditRepository.getUserInfo(userSq);
+        AddressDTO addressInfo = informationEditRepository.getAddressInfo(companyInfo.getAddressSq());
+        List<String> tagList = informationEditRepository.getCompanyTags(companyInfo.getCompanySq());
+
+        return AffiliationInfoResponseDTO.of(companyInfo, userInfo, addressInfo, tagList);
     }
 
 }

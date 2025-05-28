@@ -1,8 +1,11 @@
 package com.example.demo.domain.mypage.repository;
 
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.domain.mypage.dto.AddressDTO;
+import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
 import com.example.demo.domain.mypage.mapper.InformationEditMapper;
 
@@ -69,6 +72,22 @@ public class InformationEditRepository {
 
     public Long findUserSqByPhone(String userPhoneNum) {
         return informationEditMapper.findUserSqByPhone(userPhoneNum);
+    }
+
+    public CompanyInfoDTO getCompanyInfo(Long userSq) {
+        return informationEditMapper.selectCompanyInfo(userSq);
+    }
+
+    public UserInfoDTO getUserInfo(Long userSq) {
+        return informationEditMapper.selectUserInfo(userSq);
+    }
+
+    public AddressDTO getAddressInfo(Long addressSq) {
+        return informationEditMapper.selectAddressInfo(addressSq);
+    }
+
+    public List<String> getCompanyTags(Long companySq) {
+        return informationEditMapper.selectCompanyTags(companySq);
     }
 
 }

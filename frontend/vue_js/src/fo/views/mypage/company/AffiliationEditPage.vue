@@ -5,7 +5,10 @@
     </div>
 
     <!-- 프로필 이미지 (사람 아이콘으로 대체) -->
-    <div class="text-center mb-4">
+    <div
+      class="text-center mb-4"
+      :class="{ 'disabled-form': form.companyIsRecruitingYn !== 'Y' }"
+    >
       <div class="position-relative d-inline-block">
         <!-- 기본 이미지 아이콘 (사람 아이콘) -->
         <div class="rounded-circle">
@@ -29,29 +32,30 @@
         />
       </div>
     </div>
-
+    <!-- 소속 모집 여부 체크박스 -->
+    <div class="form-group row align-items-center">
+      <label class="col-lg-2 col-form-label text-2">소속 모집 여부</label>
+      <div class="col-lg-10">
+        <input
+          type="checkbox"
+          name="recruiting"
+          id="recruiting"
+          class="form-check-input"
+          :checked="form.companyIsRecruitingYn === 'Y'"
+          @change="onCheckboxChange"
+        />
+        <label for="recruiting" class="form-check-label text-dark text-3"
+          >모집중</label
+        >
+      </div>
+    </div>
     <form
       role="form"
       class="needs-validation"
       novalidate="novalidate"
       @submit.prevent="saveAll"
+      :class="{ 'disabled-form': form.companyIsRecruitingYn !== 'Y' }"
     >
-      <!-- 소속 모집 여부 체크박스 -->
-      <div class="form-group row align-items-center">
-        <label class="col-lg-2 col-form-label text-2">소속 모집 여부</label>
-        <div class="col-lg-10">
-          <input
-            type="checkbox"
-            name="recruiting"
-            id="recruiting"
-            class="form-check-input"
-          />
-          <label for="recruiting" class="form-check-label text-dark text-3"
-            >모집중</label
-          >
-        </div>
-      </div>
-
       <!-- 대표자 이름 (변경 불가) -->
       <div class="form-group row align-items-center">
         <label class="col-lg-2 col-form-label text-2">대표자 이름</label>
@@ -82,8 +86,8 @@
 
       <!-- 개업일자 (변경 불가) -->
       <div class="form-group row align-items-center">
-        <label class="col-lg-10 col-form-label text-2">개업일자</label>
-        <div class="col-lg-2">
+        <label class="col-lg-2 col-form-label text-2">개업일자</label>
+        <div class="col-lg-10">
           <input
             class="form-control text-3 h-auto py-2 border-0"
             type="text"
@@ -98,12 +102,13 @@
       <div class="form-group row align-items-center">
         <label class="col-lg-2 col-form-label text-2">기업 URL</label>
         <div class="col-lg-7">
-          <template v-if="!editing.url"
+          <template v-if="!editing.companyUrl"
             ><input
               class="form-control text-3 h-auto py-2 border-0"
               type="text"
               name="name"
               v-model="form.companyUrl"
+              placeholder="기업 URL을 입력하세요."
               readonly
             />
           </template>
@@ -113,7 +118,7 @@
               type="text"
               name="name"
               v-model="form.companyUrl"
-              placeholder="기업 URL"
+              placeholder="기업 URL을 입력하세요."
               @input="validateUrl"
             />
             <div v-if="urlError" class="invalid-feedback d-block">
@@ -122,11 +127,11 @@
           </template>
         </div>
         <div class="col-lg-3 text-end">
-          <template v-if="!editing.url">
+          <template v-if="!editing.companyUrl">
             <button
               type="button"
               class="btn btn-light btn-outline"
-              @click="toggleEdit('url')"
+              @click="toggleEdit('companyUrl')"
             >
               수정
             </button>
@@ -135,7 +140,7 @@
             <button
               type="button"
               class="btn btn-primary btn-outline d-inline-block me-2"
-              @click="saveField('url')"
+              @click="saveField('companyUrl')"
               :disabled="!urlValid"
             >
               확인
@@ -143,7 +148,7 @@
             <button
               type="button"
               class="btn btn-light btn-outline d-inline-block"
-              @click="cancelEdit('url')"
+              @click="cancelEdit('companyUrl')"
             >
               취소
             </button>
@@ -155,9 +160,9 @@
       <div class="form-group row align-items-center">
         <label class="col-lg-2 col-form-label text-2">대표번호</label>
         <div class="col-lg-7">
-          <template v-if="!editing.phone">
+          <template v-if="!editing.userPhoneNum">
             <input
-              class="form-control text-3 h-auto py-2"
+              class="form-control text-3 h-auto py-2 border-0"
               type="text"
               name="phone"
               readonly
@@ -178,11 +183,11 @@
           </template>
         </div>
         <div class="col-lg-3 text-end">
-          <template v-if="!editing.phone">
+          <template v-if="!editing.userPhoneNum">
             <button
               type="button"
               class="btn btn-light btn-outline"
-              @click="toggleEdit('phone')"
+              @click="toggleEdit('userPhoneNum')"
             >
               수정
             </button>
@@ -191,14 +196,14 @@
             <button
               type="button"
               class="btn btn-primary btn-outline me-2"
-              @click="saveField('phone')"
+              @click="saveField('userPhoneNum')"
             >
               확인
             </button>
             <button
               type="button"
               class="btn btn-light btn-outline"
-              @click="cancelEdit('phone')"
+              @click="cancelEdit('userPhoneNum')"
             >
               취소
             </button>
@@ -212,7 +217,7 @@
         <div class="col-lg-7">
           <template v-if="!editing.address">
             <input
-              class="form-control text-3 h-auto py-2"
+              class="form-control text-3 h-auto py-2 border-0"
               type="text"
               :value="form.address + ' ' + form.detailAddress"
               readonly
@@ -272,24 +277,32 @@
           </template>
         </div>
       </div>
-
-      <!-- 모집 내용 (div로 변경) + 수정 버튼 -->
+      <!-- 모집 내용 -->
       <div class="form-group row align-items-center">
         <label class="col-lg-2 col-form-label text-2">모집 내용</label>
         <div class="col-lg-7 position-relative">
+          <!-- 보기 모드 -->
           <div
+            v-if="!editing.companyGreetingTxt"
             class="form-control text-3 h-auto py-2 border-0 recruitment-content"
           >
-            열정있는 개발자 모집합니다<br />
-            많은 지원 바랍니다.
+            {{ form.companyGreetingTxt }}
           </div>
+
+          <!-- 수정 모드 -->
+          <textarea
+            v-else
+            v-model="form.companyGreetingTxt"
+            class="form-control text-3 h-auto py-2"
+            rows="4"
+          ></textarea>
         </div>
         <div class="col-lg-3 text-end">
-          <template v-if="!editing.recruitmentContent">
+          <template v-if="!editing.companyGreetingTxt">
             <button
               type="button"
               class="btn btn-light btn-outline"
-              @click="toggleEdit('recruitmentContent')"
+              @click="toggleEdit('companyGreetingTxt')"
             >
               수정
             </button>
@@ -298,18 +311,85 @@
             <button
               type="button"
               class="btn btn-primary btn-outline d-inline-block me-2"
-              @click="saveField('recruitmentContent')"
+              @click="saveField('companyGreetingTxt')"
             >
               확인
             </button>
             <button
               type="button"
               class="btn btn-light btn-outline d-inline-block"
-              @click="cancelEdit('recruitmentContent')"
+              @click="cancelEdit('companyGreetingTxt')"
             >
               취소
             </button>
           </template>
+        </div>
+      </div>
+
+      <!-- 태그 + 수정 버튼 -->
+      <div class="form-group row align-items-center">
+        <label class="col-lg-2 col-form-label text-2">태그</label>
+        <!-- 태그 리스트 -->
+        <div class="col-lg-7">
+          <span
+            class="badge me-1"
+            :style="{
+              backgroundColor: '#0088CC',
+              color: 'white',
+              cursor: 'pointer',
+            }"
+            v-for="(item, index) in editTagNm"
+            :key="index"
+            @click="editTagNm.value.splice(index, 1)"
+            title="클릭하여 삭제"
+          >
+            {{ item }} &times;
+          </span>
+        </div>
+
+        <!-- 오른쪽 버튼 영역 -->
+        <div class="col-lg-3 text-end">
+          <template v-if="!editing.tagNm">
+            <button
+              type="button"
+              class="btn btn-light btn-outline"
+              @click="toggleEdit('tagNm')"
+            >
+              수정
+            </button>
+          </template>
+          <template v-else>
+            <button
+              type="button"
+              class="btn btn-primary btn-outline me-2"
+              @click="saveField('tagNm')"
+            >
+              확인
+            </button>
+            <button
+              type="button"
+              class="btn btn-light btn-outline"
+              @click="cancelEdit('tagNm')"
+            >
+              취소
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <!-- 태그 입력 영역 (수정 모드일 때만 표시) -->
+      <div v-if="editing.tagNm" class="row mt-2">
+        <div class="col-lg-2"></div>
+        <div class="form-group col-lg-7">
+          <div class="input-group text-end">
+            <input
+              type="text"
+              class="form-control text-3 h-auto py-2"
+              v-model="preferContent"
+              placeholder="쉼표(,)로 구분하여 입력"
+              name="qualification"
+            />
+          </div>
         </div>
       </div>
 
@@ -335,16 +415,17 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, watch } from 'vue'
 import { api } from '@/axios'
 import { useAlertStore } from '@/fo/stores/alertStore'
+import _ from 'lodash'
 
 const alertStore = useAlertStore()
 
 const error = ref(null)
 
 const originalData = reactive({
-  recruiting_yn: '',
+  companyIsRecruitingYn: '',
   companyCeoNm: '',
   companyNm: '',
   companyOpenDt: '',
@@ -356,21 +437,50 @@ const originalData = reactive({
   sigungu: '',
   latitude: null,
   longitude: null,
+  companyGreetingTxt: '',
 })
+
+const originalTagNm = ref([])
+const editTagNm = ref([])
 
 // 양방향 바인딩용 폼 객체
 const form = reactive({ ...originalData })
 
 // 편집 상태를 관리할 객체
 const editing = reactive({
-  name: false,
-  phone: false,
+  userPhoneNum: false,
   address: false,
-  url: false,
+  companyUrl: false,
+  companyGreetingTxt: false,
+  tagNm: false,
 })
+
+function onCheckboxChange(event) {
+  form.companyIsRecruitingYn = event.target.checked ? 'Y' : 'N'
+}
 
 const urlError = ref('')
 const urlValid = ref(false)
+
+// URL 유효성 검사
+
+function validateUrl() {
+  const url = (form.companyUrl ?? '').trim() // null 또는 undefined일 때 빈 문자열 대체
+  if (!url) {
+    urlError.value = 'URL을 입력해주세요.'
+    urlValid.value = false
+    return
+  }
+
+  const pattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w\-./?%&=]*)?$/
+  if (!pattern.test(url)) {
+    urlError.value = '유효한 URL 형식이 아닙니다.'
+    urlValid.value = false
+  } else {
+    urlError.value = ''
+    urlValid.value = true
+  }
+}
 
 // 주소 검색 함수 (다음 주소 API 사용)
 function openPostcode() {
@@ -426,6 +536,20 @@ const validatePhone = () => {
   }
 }
 
+const preferContent = ref('')
+
+watch(preferContent, (newVal) => {
+  if (newVal.endsWith(',')) {
+    const tags = newVal
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0 && !editTagNm.value.includes(tag))
+
+    editTagNm.value.push(...tags)
+    preferContent.value = ''
+  }
+})
+
 // 편집 모드 토글
 function toggleEdit(field) {
   editing[field] = true
@@ -448,6 +572,8 @@ function cancelEdit(field) {
     form.sigungu = originalData.sigungu
     form.latitude = originalData.latitude
     form.longitude = originalData.longitude
+  } else if (field === 'tagNm') {
+    editTagNm.value = [...originalTagNm.value]
   } else {
     form[field] = originalData[field]
   }
@@ -464,15 +590,15 @@ function resetForm() {
 
 function isFormChanged() {
   return (
-    form.recruiting_yn !== originalData.recruiting_yn ||
     form.userPhoneNum !== originalData.userPhoneNum ||
-    form.companyUrl !== originalData.companyUrl ||
-    form.zonecode !== originalData.zonecode ||
-    form.address !== originalData.address ||
-    form.detailAddress !== originalData.detailAddress ||
-    form.sigungu !== originalData.sigungu ||
-    form.latitude !== originalData.latitude ||
-    form.longitude !== originalData.longitude
+      form.companyUrl !== originalData.companyUrl ||
+      form.zonecode !== originalData.zonecode ||
+      form.address !== originalData.address ||
+      form.detailAddress !== originalData.detailAddress ||
+      form.sigungu !== originalData.sigungu ||
+      form.latitude !== originalData.latitude ||
+      form.longitude !== originalData.longitude,
+    !_.isEqual(editTagNm.value, originalTagNm.value)
   )
 }
 
@@ -497,7 +623,9 @@ const saveAll = async () => {
     sigungu: form.sigungu,
     latitude: form.latitude,
     longitude: form.longitude,
-    recruiting_yn: form.recruiting_yn,
+    companyGreetingTxt: form.companyGreetingTxt,
+    tagNm: [...editTagNm.value],
+    companyIsRecruitingYn: form.companyIsRecruitingYn,
   }
 
   console.log('requestBody', requestBody)
@@ -514,14 +642,14 @@ const saveAll = async () => {
   // }
 }
 
-async function fetchUserInfo() {
+async function fetchAffiliationInfo() {
   try {
-    const response = await api.$get('/mypage/edit/info', null)
+    const response = await api.$get('/mypage/edit/affiliation/info', null)
     const data = response.output
-    // console.log('data', data)
+    console.log('data', data)
 
     Object.assign(originalData, {
-      recruiting_yn: data.recruiting_yn,
+      companyIsRecruitingYn: data.companyIsRecruitingYn,
       companyCeoNm: data.companyCeoNm,
       companyNm: data.companyNm,
       companyOpenDt: data.companyOpenDt,
@@ -533,7 +661,10 @@ async function fetchUserInfo() {
       sigungu: data.sigungu,
       latitude: data.latitude,
       longitude: data.longitude,
+      companyGreetingTxt: data.companyGreetingTxt,
     })
+
+    originalTagNm.value = [...data.tagNm]
 
     Object.assign(form, originalData)
   } catch (err) {
@@ -543,7 +674,7 @@ async function fetchUserInfo() {
 }
 
 onMounted(() => {
-  fetchUserInfo()
+  fetchAffiliationInfo()
 })
 </script>
 
@@ -621,5 +752,22 @@ input:focus {
 /* 하단 버튼 */
 .btn-modern {
   font-weight: 500;
+}
+
+.disabled-form {
+  opacity: 0.5;
+  filter: blur(0.8px);
+  pointer-events: none; /* 클릭 불가 */
+}
+
+input[readonly] {
+  border: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  pointer-events: none;
+}
+
+.form-check-input[disabled] {
+  pointer-events: none;
 }
 </style>

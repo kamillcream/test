@@ -1,11 +1,13 @@
 package com.example.demo.domain.mypage.mapper;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.example.demo.domain.mypage.dto.AddressDTO;
+import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
-
-import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface InformationEditMapper {
@@ -54,4 +56,12 @@ public interface InformationEditMapper {
         Long findUserSqByEmail(@Param("userEmail") String userEmail);
 
         Long findUserSqByPhone(@Param("userPhoneNum") String userPhoneNum);
+
+        CompanyInfoDTO selectCompanyInfo(@Param("userSq") Long userSq);
+
+        UserInfoDTO selectUserInfo(@Param("userSq") Long userSq);
+
+        AddressDTO selectAddressInfo(@Param("addressSq") Long addressSq);
+
+        List<String> selectCompanyTags(@Param("companySq") Long companySq);
 }

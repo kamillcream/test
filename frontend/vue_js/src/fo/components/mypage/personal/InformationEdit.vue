@@ -56,7 +56,7 @@
         <div class="form-group row align-items-center">
           <label class="col-lg-2 col-form-label text-2">비밀번호</label>
           <div class="col-lg-7">
-            <template v-if="!editing.password">
+            <template v-if="!editing.userPw">
               <input
                 class="form-control text-3 h-auto py-2"
                 type="password"
@@ -79,11 +79,11 @@
             </template>
           </div>
           <div class="col-lg-3 text-end">
-            <template v-if="!editing.password">
+            <template v-if="!editing.userPw">
               <button
                 type="button"
                 class="btn btn-light btn-outline"
-                @click="toggleEdit('password')"
+                @click="toggleEdit('userPw')"
               >
                 수정
               </button>
@@ -92,7 +92,7 @@
               <button
                 type="button"
                 class="btn btn-primary btn-outline me-2"
-                @click="saveField('password')"
+                @click="saveField('userPw')"
                 :disabled="!passwordValid"
               >
                 확인
@@ -100,7 +100,7 @@
               <button
                 type="button"
                 class="btn btn-light btn-outline"
-                @click="cancelEdit('password')"
+                @click="cancelEdit('userPw')"
               >
                 취소
               </button>
@@ -155,7 +155,7 @@
           <label class="col-lg-2 col-form-label text-2">이메일</label>
 
           <!-- 수정 모드 아닐 때 -->
-          <div class="col-lg-7" v-if="!editing.email">
+          <div class="col-lg-7" v-if="!editing.userEmail">
             <input
               class="form-control text-3 h-auto py-2 border-0"
               type="email"
@@ -205,11 +205,11 @@
 
           <!-- 오른쪽 버튼 영역 -->
           <div class="col-lg-3 text-end">
-            <template v-if="!editing.email">
+            <template v-if="!editing.userEmail">
               <button
                 type="button"
                 class="btn btn-light btn-outline"
-                @click="toggleEdit('email')"
+                @click="toggleEdit('userEmail')"
               >
                 수정
               </button>
@@ -218,7 +218,7 @@
               <button
                 type="button"
                 class="btn btn-primary btn-outline me-2"
-                @click="saveField('email')"
+                @click="saveField('userEmail')"
                 :disabled="!isVerified"
               >
                 확인
@@ -226,7 +226,7 @@
               <button
                 type="button"
                 class="btn btn-light btn-outline"
-                @click="cancelEdit('email')"
+                @click="cancelEdit('userEmail')"
               >
                 취소
               </button>
@@ -235,7 +235,7 @@
         </div>
 
         <!-- 인증번호 입력 영역 (수정 모드일 때만 표시) -->
-        <div v-if="editing.email" class="row mt-2">
+        <div v-if="editing.userEmail" class="row mt-2">
           <div class="col-lg-5"></div>
           <div class="form-group col-lg-4">
             <div class="input-group text-end">
@@ -266,7 +266,7 @@
         <div class="form-group row align-items-center">
           <label class="col-lg-2 col-form-label text-2">휴대폰번호</label>
           <div class="col-lg-7">
-            <template v-if="!editing.phone">
+            <template v-if="!editing.userPhoneNum">
               <input
                 class="form-control text-3 h-auto py-2"
                 type="text"
@@ -289,11 +289,11 @@
             </template>
           </div>
           <div class="col-lg-3 text-end">
-            <template v-if="!editing.phone">
+            <template v-if="!editing.userPhoneNum">
               <button
                 type="button"
                 class="btn btn-light btn-outline"
-                @click="toggleEdit('phone')"
+                @click="toggleEdit('userPhoneNum')"
               >
                 수정
               </button>
@@ -302,14 +302,14 @@
               <button
                 type="button"
                 class="btn btn-primary btn-outline me-2"
-                @click="saveField('phone')"
+                @click="saveField('userPhoneNum')"
               >
                 확인
               </button>
               <button
                 type="button"
                 class="btn btn-light btn-outline"
-                @click="cancelEdit('phone')"
+                @click="cancelEdit('userPhoneNum')"
               >
                 취소
               </button>
@@ -448,11 +448,10 @@ const editEmail = reactive({
 
 // 편집 상태를 관리할 객체
 const editing = reactive({
-  name: false,
-  email: false,
-  phone: false,
+  userPw: false,
+  userEmail: false,
+  userPhoneNum: false,
   address: false,
-  password: false,
 })
 
 const passwordError = ref('')
