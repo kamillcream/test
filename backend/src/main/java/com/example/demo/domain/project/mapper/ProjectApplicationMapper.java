@@ -17,8 +17,9 @@ public interface ProjectApplicationMapper {
 	public List<ApplicationSummary> findApplicationSummariesByUserSq(Long userSq);
 	public Long findProjectBySq(Long appSq);
 	public Long findResumeBySq(Long appSq);
-	public ApplicationStatusVo findStatusVoByCompanySq(Long applicationSq);
-	public List<Long> findAllSqByCompanySq(Long companySq);
+	public Long findCompanyBySq(Long appSq);
+	public ApplicationStatusVo findStatusVoByAppSq(Long applicationSq);
+	public List<Long> findAllSqByProjectSq(Long projectSq);
 	public String findMmTypStrBySq(Long applicationSq);
 	
 	public void updateApplicationStatus(
@@ -28,7 +29,7 @@ public interface ProjectApplicationMapper {
 	public void updateInterviewTimeSelected(
 			@Param("interviewSq") Long interviewSq);
 	
-	public void updateApplicationInterviewTime(
+	public void updateApplicationInterviewTimeAndStatus(
 			@Param("applicationSq") Long applicationSq,
 			@Param("interviewTime") LocalDateTime interviewTime);
 	

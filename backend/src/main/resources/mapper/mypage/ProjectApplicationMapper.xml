@@ -20,6 +20,7 @@
 	    p.project_ttl               AS projectTitle,
 	    c.company_nm                AS companyTitle,
 	    a.project_application_created_at_dtm AS appliedDt,
+	    a.selected_interview_dtm AS interviewDt,
 	    r.resume_sq                 AS resumeSq,
 	    r.resume_ttl                AS resumeTitle,
 	    p.project_candidate_cnt     AS applicantCnt,
@@ -61,22 +62,30 @@
 	    WHERE project_application_sq = #{applicationSq}
 	</select>
 	
-	
-	<select id="findAllSqByCompanySq" resultType="Long">
-	    SELECT project_application_sq
+	<select id="findCompanyBySq" resultType="Long">
+	    SELECT company_sq
 	    FROM TBL_PROJECT_APPLICATION_H
-	    WHERE project_application_sq = #{applicationSq}
+	    WHERE project_application_sq = #{appSq}
 	</select>
 	
-	<select id="findStatusVoByCompanySq" resultType="com.example.demo.domain.project.vo.ApplicationStatusVo">
+	<select id="findAllSqByProjectSq" resultType="Long">
+	    SELECT project_application_sq
+	    FROM TBL_PROJECT_APPLICATION_H
+	    WHERE project_sq = #{projectSq}
+	</select>
+	
+	<select id="findStatusVoByAppSq" resultType="com.example.demo.domain.project.vo.ApplicationStatusVo">
 	    SELECT read_application_dtm AS readResumeDt, 
 	    project_application_created_at_dtm AS appDt, 
+	    selected_interview_dtm AS interviewDt,
 	    CASE project_application_status_cd
 	        WHEN 801 THEN '지원중'
-	        WHEN 802 THEN '합격'
-	        WHEN 803 THEN '불합격'
+	        WHEN 802 THEN '불합격'
+	        WHEN 803 THEN '합격'
+	        WHEN 804 THEN '인터뷰 요청 중'
+	        WHEN 805 THEN '인터뷰 확정'
 	        ELSE 'UNKNOWN'
-	      END AS status
+	      END AS appStatus
 	    FROM TBL_PROJECT_APPLICATION_H
 	    WHERE project_application_sq = #{appSq}
 	</select>
@@ -94,9 +103,9 @@
 		WHERE interview_sq = #{interviewSq}
 	</update>
 	
-	<update id="updateApplicationInterviewTime" >
+	<update id="updateApplicationInterviewTimeAndStatus" >
 		UPDATE TBL_PROJECT_APPLICATION_H
-		SET selected_interview_dtm = #{interviewTime}
+		SET selected_interview_dtm = #{interviewTime}, project_application_status_cd = 805
 		WHERE project_application_sq = #{applicationSq}
 	</update>
 
