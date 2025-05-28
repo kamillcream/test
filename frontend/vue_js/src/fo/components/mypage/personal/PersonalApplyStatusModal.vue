@@ -173,9 +173,12 @@
                           >
                         </div>
                       </template>
-                      <template v-else-if="applicant.status === 'rejected'">
-                        <span class="btn btn-light btn-sm">불합격</span>
-                        <span class="btn btn-light btn-sm">지원 취소</span>
+                      <template
+                        v-else-if="
+                          applicant.appStatusVo.appStatus === '지원 취소'
+                        "
+                      >
+                        <span class="btn btn-light btn-sm">지원 취소됨</span>
                       </template>
                     </div>
                   </div>
