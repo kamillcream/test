@@ -456,7 +456,23 @@ const editing = reactive({
 })
 
 function onCheckboxChange(event) {
-  form.companyIsRecruitingYn = event.target.checked ? 'Y' : 'N'
+  const isChecked = event.target.checked
+  form.companyIsRecruitingYn = isChecked ? 'Y' : 'N'
+
+  if (!isChecked) {
+    api
+      .$post('/mypage/edit/affiliation/recruiting/cancel')
+      .then((res) => {
+        alertStore.show(res.message, 'success')
+      })
+      .catch((err) => {
+        alertStore.show(
+          err.response?.data?.message ||
+            '모집 상태 해제 중 오류가 발생했습니다.',
+          'danger',
+        )
+      })
+  }
 }
 
 const urlError = ref('')
