@@ -16,16 +16,16 @@ public class WithdrawService {
     public void withdraw(Long userSq, UserWithdrawRequestDTO dto) {
         UserInfoDTO user = withdrawRepository.getUser(userSq);
         if (user == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
         }
 
         if (!user.getUserId().equals(dto.getUserId()) || !user.getUserNm().equals(dto.getUserNm())) {
-            throw new RuntimeException("요청 정보가 일치하지 않습니다.");
+            throw new IllegalArgumentException("요청 정보가 일치하지 않습니다.");
         }
 
         int updated = withdrawRepository.withdraw(userSq);
         if (updated == 0) {
-            throw new RuntimeException("탈퇴 처리에 실패했습니다.");
+            throw new IllegalArgumentException("탈퇴 처리에 실패했습니다.");
         }
     }
 }

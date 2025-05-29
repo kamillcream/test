@@ -4,7 +4,7 @@
       <h2 class="font-weight-normal text-7 mb-0">회원 탈퇴</h2>
     </div>
 
-    <form role="form" class="needs-validation" novalidate>
+    <form @submit="handleSubmit" class="needs-validation" novalidate>
       <!-- 탈퇴 유의사항 textarea -->
       <div class="form-group row mb-4">
         <label class="col-lg-3 col-form-label form-control-label text-2"
@@ -25,8 +25,7 @@
 4. 유료 서비스 이용 중 탈퇴할 경우, 잔여 이용 기간에 대한 보상 또는 환불은 제공되지 않습니다.
 
 위의 내용을 충분히 확인하신 후 탈퇴를 진행해 주세요.
-                </textarea
-          >
+          </textarea>
         </div>
       </div>
 
@@ -40,10 +39,9 @@
           <input
             class="form-control text-3 h-auto py-2"
             type="text"
-            name="userId"
-            required
+            v-model="userId"
           />
-          <div class="invalid-feedback text-danger" style="display: block">
+          <div class="invalid-feedback text-danger" v-if="isInvalidUserId">
             아이디를 입력해 주세요.
           </div>
         </div>
@@ -59,10 +57,12 @@
           <input
             class="form-control text-3 h-auto py-2"
             type="text"
-            name="applicantName"
-            required
+            v-model="applicantName"
           />
-          <div class="invalid-feedback text-danger" style="display: block">
+          <div
+            class="invalid-feedback text-danger"
+            v-if="isInvalidApplicantName"
+          >
             탈퇴 신청자명을 입력해 주세요.
           </div>
         </div>
@@ -76,13 +76,16 @@
               class="form-check-input"
               type="checkbox"
               id="agreeCheck"
-              required
+              v-model="agreeCheck"
             />
             <label class="form-check-label text-2" for="agreeCheck">
               회원 탈퇴 안내 사항을 모두 읽었으며, 이에 동의합니다.
             </label>
           </div>
-          <div class="invalid-feedback text-danger ps-4" style="display: block">
+          <div
+            class="invalid-feedback text-danger ps-4"
+            v-if="isInvalidAgreeCheck"
+          >
             안내 사항에 동의해야 탈퇴가 가능합니다.
           </div>
         </div>
@@ -91,11 +94,7 @@
       <!-- 탈퇴하기 버튼 -->
       <div class="form-group row mt-4">
         <div class="col text-center">
-          <button
-            type="submit"
-            class="btn btn-danger btn-modern"
-            data-loading-text="처리 중..."
-          >
+          <button type="submit" class="btn btn-danger btn-modern">
             탈퇴하기
           </button>
         </div>
@@ -103,3 +102,60 @@
     </form>
   </div>
 </template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { api } from '@/axios'
+import { useAlertStore } from '@/fo/stores/alertStore'
+import { useUserStore } from '@/fo/stores/userStore'
+
+const router = useRouter()
+const alertStore = useAlertStore()
+const userStore = useUserStore()
+
+const userId = ref('')
+const applicantName = ref('')
+const agreeCheck = ref(false)
+
+const isInvalidUserId = ref(false)
+const isInvalidApplicantName = ref(false)
+const isInvalidAgreeCheck = ref(false)
+
+const handleSubmit = async (event) => {
+  event.preventDefault()
+
+  isInvalidUserId.value = !userId.value.trim()
+  isInvalidApplicantName.value = !applicantName.value.trim()
+  isInvalidAgreeCheck.value = !agreeCheck.value
+
+  if (
+    isInvalidUserId.value ||
+    isInvalidApplicantName.value ||
+    isInvalidAgreeCheck.value
+  ) {
+    return
+  }
+
+  try {
+    const response = await api.$post('/mypage/withdraw', {
+      userId: userId.value,
+      userNm: applicantName.value,
+    })
+
+    if (response.status === 'OK') {
+      localStorage.clear()
+      userStore.$reset()
+      alertStore.show(
+        response.message || '회원 탈퇴가 완료되었습니다.',
+        'success',
+      )
+      router.push('/')
+    } else {
+      alertStore.show(response.message || '회원 탈퇴에 실패했습니다.', 'danger')
+    }
+  } catch (error) {
+    alertStore.show('서버 오류로 인해 탈퇴 처리에 실패했습니다.', 'danger')
+  }
+}
+</script>
