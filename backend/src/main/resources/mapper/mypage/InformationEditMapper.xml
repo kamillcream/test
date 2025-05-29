@@ -90,8 +90,33 @@
         detail_address, sigungu, latitude, longitude FROM TBL_ADDRESS_S WHERE address_sq =
         #{addressSq} </select>
 
-    <select id="selectCompanyTags" parameterType="long" resultType="string"> SELECT tag_nm FROM
+    <select id="selectAffiliationTags" parameterType="long" resultType="string"> SELECT tag_nm FROM
         TBL_COMPANY_TAG_S WHERE company_sq = #{companySq} </select>
 
+    <update id="updateRecruitingYnToN"> UPDATE TBL_COMPANY_S SET company_is_recruiting_yn = 'N'
+        WHERE user_sq = #{userSq} </update>
 
+    <select id="findCompanySqByUserSq" parameterType="long" resultType="long"> SELECT company_sq
+        FROM TBL_COMPANY_S WHERE user_sq = #{userSq} </select>
+
+    <select id="findAffiliationAddressSqByCompanySq" parameterType="long" resultType="long"> SELECT
+        address_sq FROM TBL_COMPANY_S WHERE company_sq = #{companySq} </select>
+
+    <update id="updateAffiliationPhoneNumByUserSq" parameterType="map"> UPDATE TBL_USER_M SET
+        user_phone_num = #{phoneNum} WHERE user_sq = #{userSq} </update>
+
+    <update id="updateAffiliationUrlGreetingRecruitingByCompanySq" parameterType="map"> UPDATE
+        TBL_COMPANY_S SET company_url = #{companyUrl}, company_greeting_txt = #{greetingTxt},
+        company_is_recruiting_yn = #{isRecruitingYn} WHERE company_sq = #{companySq} </update>
+
+    <update id="updateAffiliationAddressByAddressSq" parameterType="map"> UPDATE TBL_ADDRESS_S SET
+        zonecode = #{zonecode}, address = #{address}, detail_address = #{detailAddress}, sigungu =
+        #{sigungu}, latitude = #{latitude}, longitude = #{longitude}, address_modified_at_dtm =
+        NOW() WHERE address_sq = #{addressSq} </update>
+
+    <delete id="deleteAffiliationTagsByCompanySq" parameterType="long"> DELETE FROM
+        TBL_COMPANY_TAG_S WHERE company_sq = #{companySq} </delete>
+
+    <insert id="insertAffiliationTagByCompanySq" parameterType="map"> INSERT INTO TBL_COMPANY_TAG_S
+        (tag_nm, company_sq) VALUES (#{tagNm}, #{companySq}) </insert>
 </mapper>

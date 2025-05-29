@@ -712,14 +712,31 @@ const saveAll = async () => {
   }
 
   try {
-    await api.$post('/mypage/edit/update', requestBody)
-    alertStore.show('회원 정보가 성공적으로 수정되었습니다.', 'success')
-    await fetchUserInfo() // 저장 후 다시 원본 데이터 받아오기
-    resetForm() // 폼도 초기화
+    const response = await api.$post('/mypage/edit/update', requestBody)
+
+    if (response.status === 'OK') {
+      alertStore.show(
+        response.message || '회원 정보가 성공적으로 수정되었습니다.',
+        'success',
+      )
+      await fetchUserInfo()
+      resetForm()
+    } else {
+      alertStore.show(
+        response.message || '회원 정보 수정에 실패하였습니다.',
+        'danger',
+      )
+    }
   } catch (err) {
-    // 서버에서 온 에러 메시지
-    const errorMessage =
-      err.response?.data?.message || '회원 정보 수정에 실패하였습니다.'
+    const status = err.response?.status
+    let errorMessage = '회원 정보 수정에 실패하였습니다.'
+
+    if (status === 400) {
+      errorMessage = err.response?.data?.message || '입력값을 확인해주세요.'
+    } else if (status === 500) {
+      errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+    }
+
     alertStore.show(errorMessage, 'danger')
   }
 }

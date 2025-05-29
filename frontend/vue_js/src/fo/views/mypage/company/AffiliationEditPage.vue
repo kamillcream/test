@@ -330,21 +330,23 @@
       <div class="form-group row align-items-center">
         <label class="col-lg-2 col-form-label text-2">태그</label>
         <!-- 태그 리스트 -->
-        <div class="col-lg-7">
-          <span
-            class="badge me-1"
-            :style="{
-              backgroundColor: '#0088CC',
-              color: 'white',
-              cursor: 'pointer',
-            }"
-            v-for="(item, index) in editTagNm"
-            :key="index"
-            @click="editTagNm.value.splice(index, 1)"
-            title="클릭하여 삭제"
+        <div
+          class="col-lg-7 d-flex flex-wrap gap-2"
+          style="align-items: center"
+        >
+          <a
+            v-for="tag in editTagNm"
+            :key="tag"
+            href="#"
+            class="btn btn-rounded btn-3d btn-light btn-sm d-flex align-items-center px-3 py-2"
           >
-            {{ item }} &times;
-          </span>
+            {{ tag }}
+            <i
+              v-if="editing.tagNm"
+              class="fas fa-times ms-2"
+              @click.prevent="removeNTag(tag)"
+            ></i>
+          </a>
         </div>
 
         <!-- 오른쪽 버튼 영역 -->
@@ -385,9 +387,11 @@
             <input
               type="text"
               class="form-control text-3 h-auto py-2"
-              v-model="preferContent"
-              placeholder="쉼표(,)로 구분하여 입력"
-              name="qualification"
+              placeholder="태그를 입력하세요."
+              id="tagInput"
+              @keyup.enter="
+                (addNTag($event.target.value), ($event.target.value = ''))
+              "
             />
           </div>
         </div>
@@ -415,7 +419,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, watch } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import { api } from '@/axios'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import _ from 'lodash'
@@ -458,11 +462,13 @@ const editing = reactive({
 function onCheckboxChange(event) {
   const isChecked = event.target.checked
   form.companyIsRecruitingYn = isChecked ? 'Y' : 'N'
+  console.log('form.companyIsRecruitingYn', form.companyIsRecruitingYn)
 
   if (!isChecked) {
     api
       .$post('/mypage/edit/affiliation/recruiting/cancel')
       .then((res) => {
+        fetchAffiliationInfo()
         alertStore.show(res.message, 'success')
       })
       .catch((err) => {
@@ -552,19 +558,15 @@ const validatePhone = () => {
   }
 }
 
-const preferContent = ref('')
+// 태그 입력
+const addNTag = (tag) => {
+  editTagNm.value.push(tag)
+}
 
-watch(preferContent, (newVal) => {
-  if (newVal.endsWith(',')) {
-    const tags = newVal
-      .split(',')
-      .map((tag) => tag.trim())
-      .filter((tag) => tag.length > 0 && !editTagNm.value.includes(tag))
-
-    editTagNm.value.push(...tags)
-    preferContent.value = ''
-  }
-})
+const removeNTag = (tag) => {
+  let filtered = editTagNm.value.filter((el) => el != tag)
+  editTagNm.value = filtered
+}
 
 // 편집 모드 토글
 function toggleEdit(field) {
@@ -589,7 +591,7 @@ function cancelEdit(field) {
     form.latitude = originalData.latitude
     form.longitude = originalData.longitude
   } else if (field === 'tagNm') {
-    editTagNm.value = [...originalTagNm.value]
+    editTagNm.value = _.cloneDeep(originalTagNm.value)
   } else {
     form[field] = originalData[field]
   }
@@ -607,13 +609,15 @@ function resetForm() {
 function isFormChanged() {
   return (
     form.userPhoneNum !== originalData.userPhoneNum ||
-      form.companyUrl !== originalData.companyUrl ||
-      form.zonecode !== originalData.zonecode ||
-      form.address !== originalData.address ||
-      form.detailAddress !== originalData.detailAddress ||
-      form.sigungu !== originalData.sigungu ||
-      form.latitude !== originalData.latitude ||
-      form.longitude !== originalData.longitude,
+    form.companyUrl !== originalData.companyUrl ||
+    form.zonecode !== originalData.zonecode ||
+    form.address !== originalData.address ||
+    form.detailAddress !== originalData.detailAddress ||
+    form.sigungu !== originalData.sigungu ||
+    form.latitude !== originalData.latitude ||
+    form.longitude !== originalData.longitude ||
+    form.companyIsRecruitingYn !== originalData.companyIsRecruitingYn ||
+    form.companyGreetingTxt !== originalData.companyGreetingTxt ||
     !_.isEqual(editTagNm.value, originalTagNm.value)
   )
 }
@@ -645,17 +649,35 @@ const saveAll = async () => {
   }
 
   console.log('requestBody', requestBody)
-  // try {
-  //   await api.$post('/mypage/edit/update', requestBody)
-  //   alertStore.show('회원 정보가 성공적으로 수정되었습니다.', 'success')
-  //   await fetchUserInfo() // 저장 후 다시 원본 데이터 받아오기
-  //   resetForm() // 폼도 초기화
-  // } catch (err) {
-  //   // 서버에서 온 에러 메시지
-  //   const errorMessage =
-  //     err.response?.data?.message || '회원 정보 수정에 실패하였습니다.'
-  //   alertStore.show(errorMessage, 'danger')
-  // }
+  try {
+    const response = await api.$post(
+      '/mypage/edit/affiliation/update',
+      requestBody,
+    )
+
+    if (response.status === 'OK') {
+      alertStore.show(
+        response.message || '소속 정보가 성공적으로 수정되었습니다.',
+        'success',
+      )
+      await fetchAffiliationInfo()
+      resetForm()
+    } else {
+      alertStore.show(response.message || '수정에 실패했습니다.', 'danger')
+    }
+  } catch (err) {
+    const status = err.response?.status
+    const fallbackMessage = '회원 정보 수정에 실패하였습니다.'
+    let errorMessage = fallbackMessage
+
+    if (status === 400) {
+      errorMessage = err.response?.data?.message || '입력값을 확인해주세요.'
+    } else if (status === 500) {
+      errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+    }
+
+    alertStore.show(errorMessage, 'danger')
+  }
 }
 
 async function fetchAffiliationInfo() {
@@ -681,6 +703,7 @@ async function fetchAffiliationInfo() {
     })
 
     originalTagNm.value = [...data.tagNm]
+    editTagNm.value = _.cloneDeep(originalTagNm.value)
 
     Object.assign(form, originalData)
   } catch (err) {

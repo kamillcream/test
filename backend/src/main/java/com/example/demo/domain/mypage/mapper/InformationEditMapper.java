@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
+import com.example.demo.domain.mypage.dto.request.AffiliationInfoUpdateRequestDTO;
 
 @Mapper
 public interface InformationEditMapper {
@@ -63,5 +64,32 @@ public interface InformationEditMapper {
 
         AddressDTO selectAddressInfo(@Param("addressSq") Long addressSq);
 
-        List<String> selectCompanyTags(@Param("companySq") Long companySq);
+        List<String> selectAffiliationTags(@Param("companySq") Long companySq);
+
+        int updateRecruitingYnToN(@Param("userSq") Long userSq);
+
+        Long findCompanySqByUserSq(@Param("userSq") Long userSq);
+
+        Long findAffiliationAddressSqByCompanySq(@Param("companySq") Long companySq);
+
+        void updateAffiliationPhoneNumByUserSq(@Param("userSq") Long userSq,
+                        @Param("phoneNum") String phoneNum);
+
+        void updateAffiliationUrlGreetingRecruitingByCompanySq(@Param("companySq") Long companySq,
+                        @Param("companyUrl") String companyUrl,
+                        @Param("greetingTxt") String greetingTxt,
+                        @Param("isRecruitingYn") String isRecruitingYn);
+
+        void updateAffiliationAddressByAddressSq(@Param("addressSq") Long addressSq,
+                        @Param("zonecode") String zonecode,
+                        @Param("address") String address,
+                        @Param("detailAddress") String detailAddress,
+                        @Param("sigungu") String sigungu,
+                        @Param("latitude") Double latitude,
+                        @Param("longitude") Double longitude);
+
+        void deleteAffiliationTagsByCompanySq(@Param("companySq") Long companySq);
+
+        void insertAffiliationTagByCompanySq(@Param("companySq") Long companySq,
+                        @Param("tagNm") String tagNm);
 }

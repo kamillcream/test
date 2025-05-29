@@ -3,10 +3,12 @@ package com.example.demo.domain.mypage.repository;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
+import com.example.demo.domain.mypage.dto.request.AffiliationInfoUpdateRequestDTO;
 import com.example.demo.domain.mypage.mapper.InformationEditMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -87,7 +89,41 @@ public class InformationEditRepository {
     }
 
     public List<String> getCompanyTags(Long companySq) {
-        return informationEditMapper.selectCompanyTags(companySq);
+        return informationEditMapper.selectAffiliationTags(companySq);
     }
 
+    public int updateRecruitingStatusToN(Long userSq) {
+        return informationEditMapper.updateRecruitingYnToN(userSq);
+    }
+
+    public Long findCompanySqByUserSq(Long userSq) {
+        return informationEditMapper.findCompanySqByUserSq(userSq);
+    }
+
+    public Long findAffiliationAddressSqByCompanySq(Long companySq) {
+        return informationEditMapper.findAffiliationAddressSqByCompanySq(companySq);
+    }
+
+    public void updateAffiliationPhoneNumByUserSq(Long userSq, String phoneNum) {
+        informationEditMapper.updateAffiliationPhoneNumByUserSq(userSq, phoneNum);
+    }
+
+    public void updateAffiliationUrlGreetingRecruitingByCompanySq(Long companySq, String companyUrl,
+            String greetingTxt, String isRecruitingYn) {
+        informationEditMapper.updateAffiliationUrlGreetingRecruitingByCompanySq(companySq, companyUrl, greetingTxt,
+                isRecruitingYn);
+    }
+
+    public void updateAffiliationAddressByAddressSq(Long addressSq, AffiliationInfoUpdateRequestDTO dto) {
+        informationEditMapper.updateAffiliationAddressByAddressSq(addressSq, dto.getZonecode(), dto.getAddress(),
+                dto.getDetailAddress(), dto.getSigungu(), dto.getLatitude(), dto.getLongitude());
+    }
+
+    public void deleteAffiliationTagsByCompanySq(Long companySq) {
+        informationEditMapper.deleteAffiliationTagsByCompanySq(companySq);
+    }
+
+    public void insertAffiliationTagByCompanySq(Long companySq, String tagNm) {
+        informationEditMapper.insertAffiliationTagByCompanySq(companySq, tagNm);
+    }
 }

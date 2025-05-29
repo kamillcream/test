@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.common.ApiResponse;
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
+import com.example.demo.domain.mypage.dto.request.AffiliationInfoUpdateRequestDTO;
 import com.example.demo.domain.mypage.dto.request.PasswordCheckRequestDTO;
 import com.example.demo.domain.mypage.dto.request.UserInfoUpdateRequestDTO;
 import com.example.demo.domain.mypage.dto.response.AffiliationInfoResponseDTO;
@@ -136,4 +137,29 @@ public class InformationEditController {
 
         return ApiResponse.of(HttpStatus.OK, "기업회원 정보 조회 완료", result);
     }
+
+    @PostMapping("/affiliation/recruiting/cancel")
+    public ApiResponse<Void> cancelRecruiting(@AuthenticationPrincipal Long userSq) {
+        boolean success = informationEditService.cancelCompanyRecruiting(userSq);
+
+        if (!success) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "모집 상태 해제에 실패했습니다.");
+        }
+
+        return ApiResponse.of(HttpStatus.OK, "소속 공고 모집이 취소되었습니다.", null);
+    }
+
+    @PostMapping("/affiliation/update")
+    public ApiResponse<Void> updateAffiliationInfo(@AuthenticationPrincipal Long userSq,
+            @RequestBody AffiliationInfoUpdateRequestDTO dto) {
+        try {
+            informationEditService.updateAffiliationInfo(userSq, dto);
+            return ApiResponse.of(HttpStatus.OK, "소속 정보가 성공적으로 수정되었습니다.", null);
+        } catch (IllegalArgumentException e) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "서버 에러가 발생했습니다.");
+        }
+    }
+
 }
