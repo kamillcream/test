@@ -418,6 +418,7 @@ import { useAlertStore } from '@/fo/stores/alertStore'
 const alertStore = useAlertStore()
 
 const isConfirmed = ref(false)
+
 // 상태 변수들
 const error = ref(null)
 
@@ -572,7 +573,9 @@ const sendVerification = async () => {
     isVerified.value = false
   } catch (error) {
     console.error('이메일 인증 요청 실패:', error)
-    alertStore.show('이메일 인증 요청에 실패했습니다.', 'danger')
+    const message =
+      error.response?.data?.message || '이메일 인증 요청에 실패했습니다.'
+    alertStore.show(message, 'danger')
   }
 }
 

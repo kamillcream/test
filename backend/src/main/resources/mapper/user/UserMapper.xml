@@ -98,4 +98,9 @@
 
   <update id="updatePasswordByUserSq"> UPDATE TBL_USER_M SET user_pw = #{newPassword} WHERE user_sq
     = #{userSq} </update>
+
+
+  <select id="findByEmail" resultType="com.example.demo.domain.user.dto.UserDTO"
+    parameterType="string"> SELECT user_sq, user_id, user_pw, user_nm, user_type_cd,
+    user_is_deleted_yn, user_email FROM TBL_USER_M WHERE user_email = #{email} </select>
 </mapper>

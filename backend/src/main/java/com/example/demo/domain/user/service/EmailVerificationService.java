@@ -5,7 +5,9 @@ import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.domain.user.dto.UserDTO;
 import com.example.demo.domain.user.repository.RedisRepository;
+import com.example.demo.domain.user.repository.UserRepository;
 import com.example.demo.domain.user.util.EmailSender;
 
 import jakarta.mail.MessagingException;
@@ -15,6 +17,9 @@ public class EmailVerificationService {
 
     @Autowired
     private RedisRepository redisRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private EmailSender emailSender;
@@ -32,6 +37,10 @@ public class EmailVerificationService {
 
     // 테스트용
     public String sendVerificationCode(String email) throws MessagingException {
+        UserDTO existingUser = userRepository.findByEmail(email);
+        if (existingUser != null) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
         String code = generateCode();
         redisRepository.saveVerificationCode(email, code);
 

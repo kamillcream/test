@@ -2,6 +2,7 @@ package com.example.demo.domain.user.repository;
 
 import java.util.Map;
 
+import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.domain.user.dto.AddressDTO;
@@ -87,4 +88,9 @@ public class UserRepository {
     public int updatePassword(Long userSq, String newPassword) {
         return userMapper.updatePasswordByUserSq(userSq, newPassword);
     }
+
+    public UserDTO findByEmail(String email) {
+        return userMapper.findByEmail(email);
+    }
+
 }

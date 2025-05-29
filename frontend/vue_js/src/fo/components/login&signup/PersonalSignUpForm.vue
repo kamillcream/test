@@ -400,12 +400,17 @@ const sendVerification = async () => {
     const response = await api.$post('/email/send-code', { email })
     console.log('인증 이메일 전송 완료', response)
     alertStore.show(
-      '인증 코드를 전송했습니다. 인증 코드 : ' + response.code,
-      'success',
+      '인증 코드를 전송했습니다. 인증 코드 : ' + response.data.code,
+      'info',
     )
   } catch (error) {
     console.error('이메일 인증 요청 실패:', error)
-    alertStore.show('이메일 인증 요청에 실패했습니다.', 'danger')
+
+    // 백엔드가 보내준 에러 메시지 꺼내기 (API 응답 구조에 따라 조정)
+    const message =
+      error.response?.data?.message || '이메일 인증 요청에 실패했습니다.'
+    emailValid.value = false
+    emailError.value = message
   }
 }
 

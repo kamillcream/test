@@ -615,7 +615,9 @@ const sendVerification = async () => {
     isVerified.value = false
   } catch (error) {
     console.error('이메일 인증 요청 실패:', error)
-    alertStore.show('이메일 인증 요청에 실패했습니다.', 'danger')
+    const message =
+      error.response?.data?.message || '이메일 인증 요청에 실패했습니다.'
+    alertStore.show(message, 'danger')
   }
 }
 
