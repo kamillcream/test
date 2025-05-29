@@ -4,7 +4,12 @@
       <h2 class="font-weight-normal text-7 mb-0">회원 탈퇴</h2>
     </div>
 
-    <form @submit="handleSubmit" class="needs-validation" novalidate>
+    <form
+      @submit="handleSubmit"
+      class="needs-validation"
+      novalidate
+      @keydown.enter.prevent
+    >
       <!-- 탈퇴 유의사항 textarea -->
       <div class="form-group row mb-4">
         <label class="col-lg-3 col-form-label form-control-label text-2"

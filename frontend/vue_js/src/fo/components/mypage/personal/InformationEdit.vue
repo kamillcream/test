@@ -37,6 +37,7 @@
         class="needs-validation"
         novalidate="novalidate"
         @submit.prevent="saveAll"
+        @keydown.enter.prevent
       >
         <!-- 아이디 (변경 불가) -->
         <div class="form-group row align-items-center">

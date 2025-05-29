@@ -54,6 +54,7 @@
       class="needs-validation"
       novalidate="novalidate"
       @submit.prevent="saveAll"
+      @keydown.enter.prevent
       :class="{ 'disabled-form': form.companyIsRecruitingYn !== 'Y' }"
     >
       <!-- 대표자 이름 (변경 불가) -->
@@ -337,7 +338,6 @@
           <a
             v-for="tag in editTagNm"
             :key="tag"
-            href="#"
             class="btn btn-rounded btn-3d btn-light btn-sm d-flex align-items-center px-3 py-2"
           >
             {{ tag }}
