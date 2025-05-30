@@ -49,6 +49,9 @@ dependencies {
 
 	// p6spy for SQL logging
     implementation 'p6spy:p6spy:3.9.1'
+
+	// AWS S3
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 }
 
 tasks.named('test') {

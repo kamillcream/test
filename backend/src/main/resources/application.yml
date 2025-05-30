@@ -26,6 +26,11 @@ spring:
             enable: true
             required: true
 
+  servlet:
+    multipart:
+      max-file-size: 10MB // 업로드할 수 있는 개별 파일의 최대 크기. 기본 1MB #
+      max-request-size: 10MB //multipart/form-data 요청의 최대 허용 크기. 기본 10MB #
+
   profiles:
     active: dev #
 
@@ -57,3 +62,16 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE # 바인딩된 파라미터 출력
     # org.mybatis: DEBUG # MyBatis SQL 출력
     com.zaxxer.hikari: DEBUG # 커넥션풀 관련 로그
+
+# AWS S3
+cloud:
+  aws:
+    credentials:
+      access-key: AKIAVPEYWFV6FLHYESXG
+      secret-key: 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
+    region:
+      static: ap-northeast-2 # 버킷의 리전
+    s3:
+      bucket: freelancer-service # 버킷 이름
+    stack:
+      auto: false
