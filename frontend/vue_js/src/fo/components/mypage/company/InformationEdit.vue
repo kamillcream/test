@@ -609,7 +609,7 @@ const sendVerification = async () => {
 
     console.log('인증 이메일 전송 완료', response)
     alertStore.show(
-      '인증 코드를 전송했습니다. 인증 코드 : ' + response.code,
+      '인증 코드를 전송했습니다. 인증 코드 : ' + response.output.code,
       'success',
     )
     isVerified.value = false
