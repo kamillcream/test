@@ -53,7 +53,7 @@ external:
 logging:
   level:
     root: INFO
-    org.hibernate.SQL: DEBUG # JPA SQL 출력
+    # org.hibernate.SQL: DEBUG # JPA SQL 출력
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE # 바인딩된 파라미터 출력
-    org.mybatis: DEBUG # MyBatis SQL 출력
+    # org.mybatis: DEBUG # MyBatis SQL 출력
     com.zaxxer.hikari: DEBUG # 커넥션풀 관련 로그
