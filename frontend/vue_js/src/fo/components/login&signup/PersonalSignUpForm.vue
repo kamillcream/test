@@ -167,7 +167,7 @@
           placeholder="주소를 검색하세요"
           readonly
           @click="openPostcode"
-          @input="validateAdress"
+          @input="validateAddress"
         />
         <div v-if="addressError" class="invalid-feedback">
           {{ addressError }}
@@ -308,7 +308,7 @@
   </form>
 </template>
 <script setup>
-import { reactive, ref, computed, onMounted, defineEmits } from 'vue'
+import { reactive, ref, computed, onMounted, defineEmits, watch } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { personalAgreementText } from '@/assets/terms'
 import TermsAgreementModal from '@/fo/components/login&signup/TermsAgreementModal.vue'
@@ -326,7 +326,7 @@ const validateAll = () => {
   validateDob()
   validateGender()
   validatePhone()
-  validateAdress()
+  validateAddress()
   validateEmail()
   validateVerifycode()
   validateTerms()
@@ -663,7 +663,7 @@ onMounted(() => {
 })
 
 // 주소 유효성 검사
-const validateAdress = () => {
+const validateAddress = () => {
   addressError.value = ''
   addressValid.value = false
   if (!form.address) {
@@ -672,6 +672,8 @@ const validateAdress = () => {
     addressValid.value = true
   }
 }
+
+watch(() => form.address, validateAddress)
 
 // 이메일 주소 유효성 검사
 const validateEmail = () => {

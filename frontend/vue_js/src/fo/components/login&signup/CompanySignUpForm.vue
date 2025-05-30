@@ -669,6 +669,8 @@ const validateAddress = () => {
   }
 }
 
+watch(() => form.address, validateAddress)
+
 // 이메일 주소 유효성 검사
 const validateEmail = () => {
   emailError.value = ''
