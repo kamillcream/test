@@ -119,6 +119,12 @@
     </if>
 	</select>
 	
+	<select id="findProjectsByCompany" resultMap="projectMap">
+    SELECT *
+    FROM TBL_PROJECT_M
+    WHERE company_sq = #{companySq}	AND project_is_deleted_yn = 'N'
+	</select>
+	
 	<select id="countProjectsBySearch"
         parameterType="com.example.demo.domain.project.dto.request.ProjectSearchRequest"
         resultType="Integer">
@@ -178,7 +184,7 @@
 	<select id="findCompanySqFromProjectSq" parameterType="Long" resultType="Long">
     SELECT company_sq
     FROM TBL_PROJECT_M
-    WHERE project_sq = #{projectSq}	
+    WHERE project_sq = #{projectSq} AND project_is_deleted_yn = 'N'	
 	</select>
 	
 	<select id="findBySq" parameterType="Long" resultType="com.example.demo.domain.project.entity.Project">

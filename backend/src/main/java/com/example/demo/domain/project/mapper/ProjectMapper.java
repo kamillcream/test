@@ -21,6 +21,7 @@ import com.example.demo.domain.project.entity.Project;
 @Mapper
 public interface ProjectMapper {
 	List<Project> findProjectsBySearch(ProjectSearchRequest request);
+	List<Project> findProjectsByCompany(Long companySq);
 	SkillInsertRequest findSkillTagInfoByName(@Param("name") String name);
 	long findCompanySqFromProjectSq(long projectSq);
 
