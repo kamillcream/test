@@ -37,6 +37,7 @@
         class="needs-validation"
         novalidate="novalidate"
         @submit.prevent="saveAll"
+        @keydown.enter.prevent
       >
         <!-- 아이디 (변경 불가) -->
         <div class="form-group row align-items-center">
@@ -56,7 +57,7 @@
         <div class="form-group row align-items-center">
           <label class="col-lg-2 col-form-label text-2">비밀번호</label>
           <div class="col-lg-7">
-            <template v-if="!editing.password">
+            <template v-if="!editing.userPw">
               <input
                 class="form-control text-3 h-auto py-2"
                 type="password"
@@ -79,11 +80,11 @@
             </template>
           </div>
           <div class="col-lg-3 text-end">
-            <template v-if="!editing.password">
+            <template v-if="!editing.userPw">
               <button
                 type="button"
                 class="btn btn-light btn-outline"
-                @click="toggleEdit('password')"
+                @click="toggleEdit('userPw')"
               >
                 수정
               </button>
@@ -92,7 +93,7 @@
               <button
                 type="button"
                 class="btn btn-primary btn-outline me-2"
-                @click="saveField('password')"
+                @click="saveField('userPw')"
                 :disabled="!passwordValid"
               >
                 확인
@@ -100,7 +101,7 @@
               <button
                 type="button"
                 class="btn btn-light btn-outline"
-                @click="cancelEdit('password')"
+                @click="cancelEdit('userPw')"
               >
                 취소
               </button>
@@ -136,7 +137,7 @@
           </div>
         </div>
 
-        <!-- 성별 + 수정 버튼 -->
+        <!-- 성별 -->
         <div class="form-group row align-items-center">
           <label class="col-lg-2 col-form-label text-2">성별</label>
           <div class="col-lg-7">
@@ -155,7 +156,7 @@
           <label class="col-lg-2 col-form-label text-2">이메일</label>
 
           <!-- 수정 모드 아닐 때 -->
-          <div class="col-lg-7" v-if="!editing.email">
+          <div class="col-lg-7" v-if="!editing.userEmail">
             <input
               class="form-control text-3 h-auto py-2 border-0"
               type="email"
@@ -205,11 +206,11 @@
 
           <!-- 오른쪽 버튼 영역 -->
           <div class="col-lg-3 text-end">
-            <template v-if="!editing.email">
+            <template v-if="!editing.userEmail">
               <button
                 type="button"
                 class="btn btn-light btn-outline"
-                @click="toggleEdit('email')"
+                @click="toggleEdit('userEmail')"
               >
                 수정
               </button>
@@ -218,7 +219,7 @@
               <button
                 type="button"
                 class="btn btn-primary btn-outline me-2"
-                @click="saveField('email')"
+                @click="saveField('userEmail')"
                 :disabled="!isVerified"
               >
                 확인
@@ -226,7 +227,7 @@
               <button
                 type="button"
                 class="btn btn-light btn-outline"
-                @click="cancelEdit('email')"
+                @click="cancelEdit('userEmail')"
               >
                 취소
               </button>
@@ -235,7 +236,7 @@
         </div>
 
         <!-- 인증번호 입력 영역 (수정 모드일 때만 표시) -->
-        <div v-if="editing.email" class="row mt-2">
+        <div v-if="editing.userEmail" class="row mt-2">
           <div class="col-lg-5"></div>
           <div class="form-group col-lg-4">
             <div class="input-group text-end">
@@ -266,7 +267,7 @@
         <div class="form-group row align-items-center">
           <label class="col-lg-2 col-form-label text-2">휴대폰번호</label>
           <div class="col-lg-7">
-            <template v-if="!editing.phone">
+            <template v-if="!editing.userPhoneNum">
               <input
                 class="form-control text-3 h-auto py-2"
                 type="text"
@@ -289,11 +290,11 @@
             </template>
           </div>
           <div class="col-lg-3 text-end">
-            <template v-if="!editing.phone">
+            <template v-if="!editing.userPhoneNum">
               <button
                 type="button"
                 class="btn btn-light btn-outline"
-                @click="toggleEdit('phone')"
+                @click="toggleEdit('userPhoneNum')"
               >
                 수정
               </button>
@@ -302,14 +303,14 @@
               <button
                 type="button"
                 class="btn btn-primary btn-outline me-2"
-                @click="saveField('phone')"
+                @click="saveField('userPhoneNum')"
               >
                 확인
               </button>
               <button
                 type="button"
                 class="btn btn-light btn-outline"
-                @click="cancelEdit('phone')"
+                @click="cancelEdit('userPhoneNum')"
               >
                 취소
               </button>
@@ -409,7 +410,7 @@
 
 <script setup>
 import PasswordCheck from '../common/PasswordCheck.vue'
-import { onMounted, reactive, ref } from 'vue'
+import { watchEffect, reactive, ref } from 'vue'
 import { api } from '@/axios'
 import { debounce } from 'lodash'
 import { useAlertStore } from '@/fo/stores/alertStore'
@@ -417,6 +418,7 @@ import { useAlertStore } from '@/fo/stores/alertStore'
 const alertStore = useAlertStore()
 
 const isConfirmed = ref(false)
+
 // 상태 변수들
 const error = ref(null)
 
@@ -448,11 +450,10 @@ const editEmail = reactive({
 
 // 편집 상태를 관리할 객체
 const editing = reactive({
-  dob: false,
-  email: false,
-  phone: false,
+  userPw: false,
+  userEmail: false,
+  userPhoneNum: false,
   address: false,
-  password: false,
 })
 
 const passwordError = ref('')
@@ -461,7 +462,7 @@ const emailError = ref('')
 const verifycodeError = ref('')
 const isVerified = ref(false)
 
-// 유효성 검사 + 중복 확인 핵심 함수
+// 비밀번호 유효성 검사 + 중복 확인
 const validatePasswordCore = async (pw) => {
   passwordError.value = ''
   passwordValid.value = false
@@ -566,13 +567,15 @@ const sendVerification = async () => {
 
     console.log('인증 이메일 전송 완료', response)
     alertStore.show(
-      '인증 코드를 전송했습니다. 인증 코드 : ' + response.code,
+      '인증 코드를 전송했습니다. 인증 코드 : ' + response.output.code,
       'success',
     )
     isVerified.value = false
   } catch (error) {
     console.error('이메일 인증 요청 실패:', error)
-    alertStore.show('이메일 인증 요청에 실패했습니다.', 'danger')
+    const message =
+      error.response?.data?.message || '이메일 인증 요청에 실패했습니다.'
+    alertStore.show(message, 'danger')
   }
 }
 
@@ -688,32 +691,56 @@ function isFormChanged() {
 }
 
 const saveAll = async () => {
+  const isAnyEditing = Object.values(editing).some((v) => v === true)
+  if (isAnyEditing) {
+    alertStore.show('수정 중인 항목을 먼저 저장하거나 취소해주세요.', 'danger')
+    return
+  }
   if (!isFormChanged()) {
     alertStore.show('변경된 정보가 없습니다.', 'danger')
     return
   }
 
   const requestBody = {
-    userPw: form.userPw || undefined, // 비밀번호는 입력된 경우에만 보냄
-    userEmail: form.userEmail,
-    userPhoneNum: form.userPhoneNum,
-    zonecode: form.zonecode,
-    address: form.address,
-    detailAddress: form.detailAddress,
-    sigungu: form.sigungu,
-    latitude: form.latitude,
-    longitude: form.longitude,
+    personal: {
+      userPw: form.userPw || undefined, // 비밀번호는 입력된 경우에만 보냄
+      userEmail: form.userEmail,
+      userPhoneNum: form.userPhoneNum,
+      zonecode: form.zonecode,
+      address: form.address,
+      detailAddress: form.detailAddress,
+      sigungu: form.sigungu,
+      latitude: form.latitude,
+      longitude: form.longitude,
+    },
   }
 
   try {
-    await api.$post('/mypage/edit/update', requestBody)
-    alertStore.show('회원 정보가 성공적으로 수정되었습니다.', 'success')
-    await fetchUserInfo() // 저장 후 다시 원본 데이터 받아오기
-    resetForm() // 폼도 초기화
+    const response = await api.$post('/mypage/edit/update', requestBody)
+
+    if (response.status === 'OK') {
+      alertStore.show(
+        response.message || '회원 정보가 성공적으로 수정되었습니다.',
+        'success',
+      )
+      await fetchUserInfo()
+      resetForm()
+    } else {
+      alertStore.show(
+        response.message || '회원 정보 수정에 실패하였습니다.',
+        'danger',
+      )
+    }
   } catch (err) {
-    // 서버에서 온 에러 메시지
-    const errorMessage =
-      err.response?.data?.message || '회원가입에 실패하였습니다'
+    const status = err.response?.status
+    let errorMessage = '회원 정보 수정에 실패하였습니다.'
+
+    if (status === 400) {
+      errorMessage = err.response?.data?.message || '입력값을 확인해주세요.'
+    } else if (status === 500) {
+      errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+    }
+
     alertStore.show(errorMessage, 'danger')
   }
 }
@@ -722,6 +749,7 @@ async function fetchUserInfo() {
   try {
     const response = await api.$get('/mypage/edit/info', null)
     const data = response.output
+    // console.log('data', data)
 
     Object.assign(originalData, {
       userId: data.userId,
@@ -746,9 +774,10 @@ async function fetchUserInfo() {
   }
 }
 
-// API 호출로 초기 데이터 불러오기
-onMounted(() => {
-  fetchUserInfo()
+watchEffect(() => {
+  if (isConfirmed.value) {
+    fetchUserInfo()
+  }
 })
 </script>
 

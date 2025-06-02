@@ -18,4 +18,8 @@ public class CompanyVerificationRequestDTO {
 
     @JsonProperty("p_nm") // 대표자 성명
     private String pNm;
+
+    @JsonProperty("b_nm") // 상호명
+    private String bNm;
+
 }

@@ -167,7 +167,7 @@
           placeholder="주소를 검색하세요"
           readonly
           @click="openPostcode"
-          @input="validateAdress"
+          @input="validateAddress"
         />
         <div v-if="addressError" class="invalid-feedback">
           {{ addressError }}
@@ -308,7 +308,7 @@
   </form>
 </template>
 <script setup>
-import { reactive, ref, computed, onMounted, defineEmits } from 'vue'
+import { reactive, ref, computed, onMounted, defineEmits, watch } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { personalAgreementText } from '@/assets/terms'
 import TermsAgreementModal from '@/fo/components/login&signup/TermsAgreementModal.vue'
@@ -326,7 +326,7 @@ const validateAll = () => {
   validateDob()
   validateGender()
   validatePhone()
-  validateAdress()
+  validateAddress()
   validateEmail()
   validateVerifycode()
   validateTerms()
@@ -400,12 +400,17 @@ const sendVerification = async () => {
     const response = await api.$post('/email/send-code', { email })
     console.log('인증 이메일 전송 완료', response)
     alertStore.show(
-      '인증 코드를 전송했습니다. 인증 코드 : ' + response.code,
-      'success',
+      '인증 코드를 전송했습니다. 인증 코드 : ' + response.output.code,
+      'info',
     )
   } catch (error) {
     console.error('이메일 인증 요청 실패:', error)
-    alertStore.show('이메일 인증 요청에 실패했습니다.', 'danger')
+
+    // 백엔드가 보내준 에러 메시지 꺼내기 (API 응답 구조에 따라 조정)
+    const message =
+      error.response?.data?.message || '이메일 인증 요청에 실패했습니다.'
+    emailValid.value = false
+    emailError.value = message
   }
 }
 
@@ -658,7 +663,7 @@ onMounted(() => {
 })
 
 // 주소 유효성 검사
-const validateAdress = () => {
+const validateAddress = () => {
   addressError.value = ''
   addressValid.value = false
   if (!form.address) {
@@ -667,6 +672,8 @@ const validateAdress = () => {
     addressValid.value = true
   }
 }
+
+watch(() => form.address, validateAddress)
 
 // 이메일 주소 유효성 검사
 const validateEmail = () => {

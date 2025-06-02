@@ -51,6 +51,7 @@ public class CompanyVerificationService {
         business.put("b_no", requestDto.getBNo());
         business.put("start_dt", requestDto.getStartDt());
         business.put("p_nm", requestDto.getPNm());
+        business.put("b_nm", requestDto.getBNm());
         requestBody.put("businesses", Collections.singletonList(business));
 
         HttpHeaders headers = new HttpHeaders();

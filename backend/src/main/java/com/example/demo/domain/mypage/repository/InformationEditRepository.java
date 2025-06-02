@@ -1,9 +1,13 @@
 package com.example.demo.domain.mypage.repository;
 
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.domain.mypage.dto.AddressDTO;
+import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
+import com.example.demo.domain.mypage.dto.request.AffiliationInfoUpdateRequestDTO;
 import com.example.demo.domain.mypage.mapper.InformationEditMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -42,6 +46,14 @@ public class InformationEditRepository {
         informationEditMapper.updateUserInfoWithoutPw(userSq, userEmail, userPhoneNum);
     }
 
+    public void updateCompany(Long userSq, String userPw, String userEmail, String userPhoneNum, String userNm) {
+        informationEditMapper.updateCompanyInfo(userSq, userPw, userEmail, userPhoneNum, userNm);
+    }
+
+    public void updateCompanyWithoutPw(Long userSq, String userEmail, String userPhoneNum, String userNm) {
+        informationEditMapper.updateCompanyInfoWithoutPw(userSq, userEmail, userPhoneNum, userNm);
+    }
+
     public void updateAddress(Long userSq, String zonecode, String address, String detailAddress, String sigungu,
             Double lat, Double lon) {
         informationEditMapper.updateAddress(userSq, zonecode, address, detailAddress, sigungu, lat, lon);
@@ -63,4 +75,54 @@ public class InformationEditRepository {
         return informationEditMapper.findUserSqByPhone(userPhoneNum);
     }
 
+    public CompanyInfoDTO getCompanyInfo(Long userSq) {
+        return informationEditMapper.selectCompanyInfo(userSq);
+    }
+
+    public UserInfoDTO getUserInfo(Long userSq) {
+        return informationEditMapper.selectUserInfo(userSq);
+    }
+
+    public AddressDTO getAddressInfo(Long addressSq) {
+        return informationEditMapper.selectAddressInfo(addressSq);
+    }
+
+    public List<String> getCompanyTags(Long companySq) {
+        return informationEditMapper.selectAffiliationTags(companySq);
+    }
+
+    public int updateRecruitingStatusToN(Long userSq) {
+        return informationEditMapper.updateRecruitingYnToN(userSq);
+    }
+
+    public Long findCompanySqByUserSq(Long userSq) {
+        return informationEditMapper.findCompanySqByUserSq(userSq);
+    }
+
+    public Long findAffiliationAddressSqByCompanySq(Long companySq) {
+        return informationEditMapper.findAffiliationAddressSqByCompanySq(companySq);
+    }
+
+    public void updateAffiliationPhoneNumByUserSq(Long userSq, String phoneNum) {
+        informationEditMapper.updateAffiliationPhoneNumByUserSq(userSq, phoneNum);
+    }
+
+    public void updateAffiliationUrlGreetingRecruitingByCompanySq(Long companySq, String companyUrl,
+            String greetingTxt, String isRecruitingYn) {
+        informationEditMapper.updateAffiliationUrlGreetingRecruitingByCompanySq(companySq, companyUrl, greetingTxt,
+                isRecruitingYn);
+    }
+
+    public void updateAffiliationAddressByAddressSq(Long addressSq, AffiliationInfoUpdateRequestDTO dto) {
+        informationEditMapper.updateAffiliationAddressByAddressSq(addressSq, dto.getZonecode(), dto.getAddress(),
+                dto.getDetailAddress(), dto.getSigungu(), dto.getLatitude(), dto.getLongitude());
+    }
+
+    public void deleteAffiliationTagsByCompanySq(Long companySq) {
+        informationEditMapper.deleteAffiliationTagsByCompanySq(companySq);
+    }
+
+    public void insertAffiliationTagByCompanySq(Long companySq, String tagNm) {
+        informationEditMapper.insertAffiliationTagByCompanySq(companySq, tagNm);
+    }
 }
