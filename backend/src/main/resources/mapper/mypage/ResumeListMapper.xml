@@ -4,15 +4,27 @@
 
 <mapper namespace="com.example.demo.domain.mypage.mapper.ResumeListMapper">
 
-  <select id="getResumeListByMemberId" parameterType="long" resultType="com.example.demo.domain.mypage.dto.response.ResumeListResponse">
+  <select id="getResumeListByMemberId" resultType="com.example.demo.domain.mypage.dto.response.ResumeSummary">
     SELECT
-      RESUME_ID AS resumeId,
-      TITLE,
-      DATE_FORMAT(CREATED_AT, '%Y.%m.%d') AS registerDate,
-      IS_REPRESENTATIVE AS isRepresentative
-    FROM TB_RESUME
-    WHERE MEMBER_ID = #{memberId}
-    ORDER BY CREATED_AT DESC
+      RESUME_SQ AS resumeId,
+      RESUME_TTL as title,
+      DATE_FORMAT(resume_created_at_dtm, '%Y.%m.%d') AS registerDate,
+      RESUME_IS_REPRESENTATIVE_YN AS isRepresentative
+    FROM TBL_RESUME_M
+    WHERE USER_SQ = #{userSq}
+    ORDER BY resume_created_at_dtm DESC
+    <if test="request.size != null and request.page != null">
+	  LIMIT #{request.size} OFFSET #{request.page}
+	</if>
   </select>
+  
+  <select id="countByUserSq" parameterType="Long" resultType="Integer">
+    SELECT
+     COUNT(*)
+    FROM TBL_RESUME_M
+    WHERE USER_SQ = #{userSq}
+  </select>
+  
+  
 
 </mapper>
