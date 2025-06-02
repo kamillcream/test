@@ -56,6 +56,12 @@ public class ProjectController {
 	public ResponseEntity<ApiResponse<ProjectListResponse>> getProjectList(@ModelAttribute ProjectSearchRequest request){
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 목록 조회 성공", projectService.fetchAllProject(request)));
 	}
+	
+	@GetMapping("/companies")
+	public ResponseEntity<ApiResponse<ProjectListResponse>> getCompanyProjectList(Authentication authentication){
+		JwtAuthenticationToken token = (JwtAuthenticationToken) authentication;
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 목록 조회 성공", projectService.fetchCompanyProject(token)));
+	}
 
 	
 	@PatchMapping

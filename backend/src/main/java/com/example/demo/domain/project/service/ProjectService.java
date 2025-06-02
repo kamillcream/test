@@ -120,6 +120,28 @@ public class ProjectService {
 		
 		return new ProjectListResponse(request.getOffset(), request.getSize(), totalCount, responses);	
 	}
+	
+	public ProjectListResponse fetchCompanyProject(JwtAuthenticationToken jwtAuthenticationToken) {
+
+		Long userSq = jwtAuthenticationToken.getUserSq();
+		Long userTypeCd = jwtAuthenticationToken.getUserTypeCd();
+		
+		long companySq = companyService.fetchCompanySq(userSq, userTypeCd);
+		
+		List<Project> projects = projectMapper.findProjectsByCompany(companySq);
+		
+		List<ProjectSummary> responses = new ArrayList<>();
+		
+		projects.forEach(
+			p->{
+				String address = fetchAddressString(p.getAddressSq());
+				responses.add(ProjectSummary.from(p, projectUtil, address));
+			}
+		);
+		
+		return new ProjectListResponse(1, 10, 10, responses);
+		
+	}
 
 	public ProjectDetailResponse fetchProject(Long projectSq, JwtAuthenticationToken token){
 		Project p = projectMapper.findBySq(projectSq);
