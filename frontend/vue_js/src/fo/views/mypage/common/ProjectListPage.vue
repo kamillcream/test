@@ -78,6 +78,7 @@ const fetchProjects = async () => {
     console.error('프로젝트 정보 불러오기 실패', e)
   }
 }
+
 const updateFilters = (updated) => {
   filters.value = { ...filters.value, ...updated }
   console.log(filters)

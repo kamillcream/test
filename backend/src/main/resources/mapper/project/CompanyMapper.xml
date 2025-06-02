@@ -17,7 +17,19 @@
         WHERE user_sq = #{userSq}
     </select>
     
+    <select id="findUserNmByCompanySq" parameterType="Long" resultType="Long">
+        SELECT user_sq
+        FROM TBL_COMPANY_MEMBER_R
+        WHERE company_sq = #{companySq}
+    </select>
+    
     <select id="findUserSqByCompanySq" parameterType="Long" resultType="Long">
+        SELECT user_sq
+        FROM TBL_COMPANY_MEMBER_R
+        WHERE company_sq = #{companySq}
+    </select>
+    
+    <select id="findUserSqsByCompanySq" parameterType="Long" resultType="Long">
         SELECT user_sq
         FROM TBL_COMPANY_MEMBER_R
         WHERE company_sq = #{companySq}
@@ -34,6 +46,26 @@
         FROM TBL_COMPANY_S
         WHERE company_sq = #{companySq}
     </select>
+    
+    <select id="findCompanyJoinDt" parameterType="Long" resultType="java.time.LocalDate">
+        SELECT company_member_join_dt
+        FROM TBL_COMPANY_MEMBER_R
+        WHERE user_sq = #{userSq}
+    </select>
+    
+    <select id="findCompanyLeaveDt" parameterType="Long" resultType="java.time.LocalDate">
+        SELECT company_member_leave_dt
+        FROM TBL_COMPANY_MEMBER_R
+        WHERE user_sq = #{userSq}
+    </select>
+    
+    <update id="updateMemberStatus">
+	    UPDATE TBL_COMPANY_MEMBER_R
+	    SET company_member_status_cd = #{memberStatusCd}, company_member_leave_dt = NOW()
+	    WHERE user_sq = #{userSq}
+	</update>
+    
+    
     
     
 </mapper>
