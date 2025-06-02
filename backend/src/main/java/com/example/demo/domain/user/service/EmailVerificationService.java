@@ -48,7 +48,23 @@ public class EmailVerificationService {
         String body = "<h3>이메일 인증 코드</h3><p>아래 코드를 입력해 주세요.</p><h2>" + code + "</h2>";
         emailSender.send(email, subject, body);
 
-        return code; // <- 여기가 핵심!
+        return code; // <- 테스트용
+    }
+
+    // 비밀번호찾기용
+    public String findBysendVerificationCode(String email) throws MessagingException {
+        UserDTO existingUser = userRepository.findByEmail(email);
+        if (existingUser == null) {
+            throw new IllegalArgumentException("존재하지 않은 사용자입니다.");
+        }
+        String code = generateCode();
+        redisRepository.saveVerificationCode(email, code);
+
+        String subject = "이메일 인증 코드입니다.";
+        String body = "<h3>이메일 인증 코드</h3><p>아래 코드를 입력해 주세요.</p><h2>" + code + "</h2>";
+        emailSender.send(email, subject, body);
+
+        return code; // <- 테스트용
     }
 
     public boolean verifyCode(String email, String code) {
