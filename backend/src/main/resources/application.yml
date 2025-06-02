@@ -28,8 +28,9 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 10MB // 업로드할 수 있는 개별 파일의 최대 크기. 기본 1MB #
-      max-request-size: 10MB //multipart/form-data 요청의 최대 허용 크기. 기본 10MB #
+      enabled: true #
+      max-file-size: 10MB # 업로드할 수 있는 개별 파일의 최대 크기. 기본 1MB
+      max-request-size: 10MB #multipart/form-data 요청의 최대 허용 크기. 기본 10MB
 
   profiles:
     active: dev #
@@ -43,7 +44,9 @@ server:
   port: 8080
   # address: 0.0.0.0
   servlet:
-    context-path: /api
+    context-path: /api #
+  tomcat:
+    max-http-form-post-size: 10MB #
 
 jwt:
   secret: MySuperSecretKeyForJWTEncoding123456
@@ -62,6 +65,8 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE # 바인딩된 파라미터 출력
     # org.mybatis: DEBUG # MyBatis SQL 출력
     com.zaxxer.hikari: DEBUG # 커넥션풀 관련 로그
+    # org.apache.coyote.http11: TRACE #
+    # org.springframework.web.multipart: TRACE #
 
 # AWS S3
 cloud:

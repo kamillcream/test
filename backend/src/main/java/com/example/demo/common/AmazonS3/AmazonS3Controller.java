@@ -20,12 +20,12 @@ public class AmazonS3Controller {
     private final AmazonS3Service awsS3Service;
 
     @PostMapping
-    public ResponseEntity<List<String>> uploadFile(List<MultipartFile> multipartFiles) {
+    public ResponseEntity<List<String>> uploadFile(@RequestParam("multipartFiles") List<MultipartFile> multipartFiles) {
         return ResponseEntity.ok(awsS3Service.uploadFile(multipartFiles));
     }
 
     @DeleteMapping
-    public ResponseEntity<String> deleteFile(@RequestParam String fileName) {
+    public ResponseEntity<String> deleteFile(@RequestParam("fileName") String fileName) {
         awsS3Service.deleteFile(fileName);
         return ResponseEntity.ok(fileName);
     }

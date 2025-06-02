@@ -1,8 +1,28 @@
-package com.example.demo.common.AWS_S3;
+package com.example.demo.common.AmazonS3;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class AwsS3Service {
+public class AmazonS3Service {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 

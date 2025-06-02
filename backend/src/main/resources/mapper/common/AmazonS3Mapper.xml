@@ -4,7 +4,7 @@
 <mapper namespace="com.example.demo.common.AmazonS3.AmazonS3Mapper">
 
     <!-- 파일 정보 INSERT -->
-    <insert id="insertFileInfo" parameterType="com.example.demo.common.AmazonS3.UploadedFileDto">
+    <insert id="insertFileInfo" parameterType="com.example.demo.common.AmazonS3.UploadedFileDTO">
         INSERT INTO TBL_COMMON_FILE_S ( file_original_nm, file_save_nm, file_typ, file_size ) VALUES
         ( #{originalName}, #{savedName}, #{contentType}, #{size} ) </insert>
 
