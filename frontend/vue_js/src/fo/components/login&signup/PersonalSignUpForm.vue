@@ -318,8 +318,8 @@ import { debounce } from 'lodash'
 
 const emit = defineEmits(['submit'])
 
-const validateAll = () => {
-  validateId()
+const validateAll = async () => {
+  await validateIdCore(form.id)
   validatePassword()
   validateConfirmPassword()
   validateName()
@@ -365,7 +365,7 @@ const form = reactive({
   verificationCode: '',
   terms: false,
   postcode: '',
-  sigungu: '',
+  sigunguCode: '',
   address: '',
   addressDetail: '',
   latitude: '',
@@ -603,7 +603,7 @@ function openPostcode() {
       form.detailAddress = ''
 
       // 시군구 추출
-      form.sigungu = data.sigungu
+      form.sigunguCode = data.sigunguCode
 
       // 주소 → 좌표 변환
       const geocoder = new window.kakao.maps.services.Geocoder()

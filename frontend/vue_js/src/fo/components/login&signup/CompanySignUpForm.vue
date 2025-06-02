@@ -360,6 +360,7 @@ const form = reactive({
   companyCeoName: companyProfileStore.companyData.ceoName,
   companyBizNumber: companyProfileStore.companyData.bizNumber,
   companyOpenDate: companyProfileStore.companyData.openDate,
+  sigunguCode: '',
   address: '',
   addressDetail: '',
   latitude: '',
@@ -599,7 +600,7 @@ function openPostcode() {
       form.detailAddress = ''
 
       // 시군구 추출
-      form.sigungu = data.sigungu
+      form.sigunguCode = data.sigunguCode
 
       // 주소 → 좌표 변환
       const geocoder = new window.kakao.maps.services.Geocoder()

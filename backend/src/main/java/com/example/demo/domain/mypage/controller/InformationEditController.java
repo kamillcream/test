@@ -1,8 +1,6 @@
 package com.example.demo.domain.mypage.controller;
 
-import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,7 +70,7 @@ public class InformationEditController {
                     .zonecode(address != null ? address.getZonecode() : null)
                     .address(address != null ? address.getAddress() : null)
                     .detailAddress(address != null ? address.getDetailAddress() : null)
-                    .sigungu(address != null ? address.getSigungu() : null)
+                    .sigunguCode(address != null ? address.getAreaCodeSq() : null)
                     .latitude(address != null ? address.getLatitude() : null)
                     .longitude(address != null ? address.getLongitude() : null)
                     .build();
@@ -93,7 +91,7 @@ public class InformationEditController {
                     .zonecode(address != null ? address.getZonecode() : null)
                     .address(address != null ? address.getAddress() : null)
                     .detailAddress(address != null ? address.getDetailAddress() : null)
-                    .sigungu(address != null ? address.getSigungu() : null)
+                    .sigunguCode(address != null ? address.getAreaCodeSq() : null)
                     .latitude(address != null ? address.getLatitude() : null)
                     .longitude(address != null ? address.getLongitude() : null)
                     .companyNm(companyName)

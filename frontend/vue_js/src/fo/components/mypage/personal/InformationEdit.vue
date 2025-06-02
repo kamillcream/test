@@ -434,7 +434,7 @@ const originalData = reactive({
   address: '',
   detailAddress: '',
   zonecode: '',
-  sigungu: '',
+  sigunguCode: '',
   latitude: null,
   longitude: null,
 })
@@ -515,7 +515,7 @@ function openPostcode() {
       form.zonecode = data.zonecode
       form.address = addr
       form.detailAddress = ''
-      form.sigungu = data.sigungu
+      form.sigunguCode = data.sigunguCode
 
       const geocoder = new window.kakao.maps.services.Geocoder()
       geocoder.addressSearch(addr, function (result, status) {
@@ -654,7 +654,7 @@ function cancelEdit(field) {
     form.address = originalData.address
     form.detailAddress = originalData.detailAddress
     form.zonecode = originalData.zonecode
-    form.sigungu = originalData.sigungu
+    form.sigunguCode = originalData.sigunguCode
     form.latitude = originalData.latitude
     form.longitude = originalData.longitude
   } else if (field === 'email') {
@@ -684,7 +684,7 @@ function isFormChanged() {
     form.zonecode !== originalData.zonecode ||
     form.address !== originalData.address ||
     form.detailAddress !== originalData.detailAddress ||
-    form.sigungu !== originalData.sigungu ||
+    form.sigunguCode !== originalData.sigunguCode ||
     form.latitude !== originalData.latitude ||
     form.longitude !== originalData.longitude
   )
@@ -709,7 +709,7 @@ const saveAll = async () => {
       zonecode: form.zonecode,
       address: form.address,
       detailAddress: form.detailAddress,
-      sigungu: form.sigungu,
+      sigunguCode: form.sigunguCode,
       latitude: form.latitude,
       longitude: form.longitude,
     },
@@ -762,7 +762,7 @@ async function fetchUserInfo() {
       address: data.address,
       detailAddress: data.detailAddress || '',
       zonecode: data.zonecode,
-      sigungu: data.sigungu,
+      sigunguCode: data.sigunguCode,
       latitude: data.latitude,
       longitude: data.longitude,
     })

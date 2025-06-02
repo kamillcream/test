@@ -55,8 +55,12 @@ public class InformationEditRepository {
     }
 
     public void updateAddress(Long userSq, String zonecode, String address, String detailAddress, String sigungu,
-            Double lat, Double lon) {
-        informationEditMapper.updateAddress(userSq, zonecode, address, detailAddress, sigungu, lat, lon);
+            Double lat, Double lon, Long areaCodeSq) {
+        informationEditMapper.updateAddress(userSq, zonecode, address, detailAddress, sigungu, lat, lon, areaCodeSq);
+    }
+
+    public String findSigunguByAreaCodeSq(Long areaCodeSq) {
+        return informationEditMapper.findSigunguByAreaCodeSq(areaCodeSq);
     }
 
     public boolean isEmailDuplicate(String email) {
@@ -113,9 +117,10 @@ public class InformationEditRepository {
                 isRecruitingYn);
     }
 
-    public void updateAffiliationAddressByAddressSq(Long addressSq, AffiliationInfoUpdateRequestDTO dto) {
+    public void updateAffiliationAddressByAddressSq(Long addressSq, AffiliationInfoUpdateRequestDTO dto,
+            String sigungu) {
         informationEditMapper.updateAffiliationAddressByAddressSq(addressSq, dto.getZonecode(), dto.getAddress(),
-                dto.getDetailAddress(), dto.getSigungu(), dto.getLatitude(), dto.getLongitude());
+                dto.getDetailAddress(), sigungu, dto.getLatitude(), dto.getLongitude(), dto.getSigunguCode());
     }
 
     public void deleteAffiliationTagsByCompanySq(Long companySq) {

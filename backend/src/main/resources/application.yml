@@ -65,6 +65,8 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE # 바인딩된 파라미터 출력
     # org.mybatis: DEBUG # MyBatis SQL 출력
     com.zaxxer.hikari: DEBUG # 커넥션풀 관련 로그
+    # org.springframework.transaction: DEBUG # 트랜잭션 처리 흐름
+    org.springframework.jdbc.datasource: DEBUG # 커넥션 상태 및 rollback 로그
     # org.apache.coyote.http11: TRACE #
     # org.springframework.web.multipart: TRACE #
 
