@@ -120,4 +120,15 @@
 
     <insert id="insertAffiliationTagByCompanySq" parameterType="map"> INSERT INTO TBL_COMPANY_TAG_S
         (tag_nm, company_sq) VALUES (#{tagNm}, #{companySq}) </insert>
+
+    <!-- 프로필 이미지 -->
+
+    <select id="selectFileSqByUserSq" resultType="long"> SELECT file_sq FROM
+        TBL_USER_PROFILE_IMAGE_S WHERE user_sq = #{userSq} </select>
+
+    <select id="selectFileBySq" resultType="com.example.demo.common.AmazonS3.UploadedFileDTO">
+        SELECT file_original_nm AS originalName, file_save_nm AS savedName, file_typ AS contentType,
+        file_size AS size FROM TBL_COMMON_FILE_S WHERE file_sq = #{fileSq} </select>
+
+
 </mapper>

@@ -6,6 +6,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.example.demo.common.AmazonS3.UploadedFileDTO;
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
@@ -186,6 +188,23 @@ public class InformationEditService {
             log.error("소속 정보 수정 중 예외 발생: {}", e.getMessage(), e);
             throw e; // 트랜잭션 롤백을 위해 다시 던짐
         }
+    }
+
+    // 프로필 이미지
+
+    private final AmazonS3 amazonS3;
+    private final String bucket = "freelancer-service";
+
+    public String getProfileImageUrl(Long userSq) {
+        Long fileSq = informationEditRepository.findFileSqByUserSq(userSq);
+        if (fileSq == null)
+            return null;
+
+        UploadedFileDTO file = informationEditRepository.findByFileSq(fileSq);
+        if (file == null)
+            return null;
+
+        return amazonS3.getUrl(bucket, "profile-images/" + file.getSavedName()).toString();
     }
 
 }

@@ -59,6 +59,8 @@ public class InformationEditController {
                     ? informationEditService.getGenderName(user.getUserGenderCd())
                     : null;
 
+            String profileImageUrl = informationEditService.getProfileImageUrl(userSq);
+
             PersonalUserInfoResponseDTO response = PersonalUserInfoResponseDTO.builder()
                     .userId(user.getUserId())
                     .userEmail(user.getUserEmail())
@@ -66,7 +68,7 @@ public class InformationEditController {
                     .userBirthDt(user.getUserBirthDt())
                     .userGenderNm(genderName != null ? genderName : null)
                     .userPhoneNum(user.getUserPhoneNum())
-                    .userProfileImageUrl(user.getUserProfileImageUrl())
+                    .userProfileImageUrl(profileImageUrl != null ? profileImageUrl : null)
                     .zonecode(address != null ? address.getZonecode() : null)
                     .address(address != null ? address.getAddress() : null)
                     .detailAddress(address != null ? address.getDetailAddress() : null)

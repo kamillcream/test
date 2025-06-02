@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
+import com.example.demo.common.AmazonS3.UploadedFileDTO;
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
@@ -129,5 +130,13 @@ public class InformationEditRepository {
 
     public void insertAffiliationTagByCompanySq(Long companySq, String tagNm) {
         informationEditMapper.insertAffiliationTagByCompanySq(companySq, tagNm);
+    }
+
+    public Long findFileSqByUserSq(Long userSq) {
+        return informationEditMapper.selectFileSqByUserSq(userSq);
+    }
+
+    public UploadedFileDTO findByFileSq(Long fileSq) {
+        return informationEditMapper.selectFileBySq(fileSq);
     }
 }

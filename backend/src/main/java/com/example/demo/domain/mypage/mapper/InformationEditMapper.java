@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.example.demo.common.AmazonS3.UploadedFileDTO;
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
@@ -95,4 +96,8 @@ public interface InformationEditMapper {
 
         void insertAffiliationTagByCompanySq(@Param("companySq") Long companySq,
                         @Param("tagNm") String tagNm);
+
+        Long selectFileSqByUserSq(@Param("userSq") Long userSq);
+
+        UploadedFileDTO selectFileBySq(@Param("fileSq") Long fileSq);
 }

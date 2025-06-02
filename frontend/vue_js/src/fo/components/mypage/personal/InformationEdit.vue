@@ -419,6 +419,7 @@ const alertStore = useAlertStore()
 
 const isConfirmed = ref(false)
 
+const userProfileImageUrl = ref('')
 // 상태 변수들
 const error = ref(null)
 
@@ -749,7 +750,7 @@ async function fetchUserInfo() {
   try {
     const response = await api.$get('/mypage/edit/info', null)
     const data = response.output
-    // console.log('data', data)
+    console.log('data', data)
 
     Object.assign(originalData, {
       userId: data.userId,
@@ -766,8 +767,8 @@ async function fetchUserInfo() {
       latitude: data.latitude,
       longitude: data.longitude,
     })
-
     Object.assign(form, originalData)
+    userProfileImageUrl.value = data.userProfileImageUrl
   } catch (err) {
     console.error('정보 조회 실패', err)
     error.value = err.message
