@@ -8,6 +8,7 @@ import lombok.Getter;
 public enum ParentCodeEnum {
 
     MEMBER_TYPE(300),
+    EMPLOYMENT(400),
     APPLICATION(500),
     DEVELOPER_GRADE(700),
     PRO_APPLICATION(800),
