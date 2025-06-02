@@ -32,5 +32,23 @@
       #{resumeIsRepresentativeYn}
     );
   </insert>
+  
+  <select id="findResumeVoByUserSq" resultType="com.example.demo.domain.mypage.vo.ResumeVo">
+    SELECT
+      RESUME_SQ AS resumeSq,
+      RESUME_TTL as resumeTitle
+    FROM TBL_RESUME_M
+    WHERE USER_SQ = #{userSq}
+  </select>
+  
+   <select id="findResumeNmTtlBySq" resultType="com.example.demo.domain.project.vo.ResumeNmTtlVo">
+    SELECT
+      RESUME_NM AS resumeNM,
+      RESUME_TTL as resumeTtl
+    FROM TBL_RESUME_M
+    WHERE RESUME_SQ = #{resumeSq}
+  </select>
+  
+
 
 </mapper>

@@ -34,7 +34,7 @@
                     v-for="(day, colIndex) in week"
                     :key="'left-' + colIndex + '-' + rowIndex"
                     :class="dayClass(day.date, leftMonth.month)"
-                    @click="selectDate(day.date)"
+                    @click="!isPastDate(day.date) && selectDate(day.date)"
                   >
                     {{ day.label }}
                   </td>
@@ -76,7 +76,7 @@
                     v-for="(day, colIndex) in week"
                     :key="'right-' + colIndex + '-' + rowIndex"
                     :class="dayClass(day.date, rightMonth.month)"
-                    @click="selectDate(day.date)"
+                    @click="!isPastDate(day.date) && selectDate(day.date)"
                   >
                     {{ day.label }}
                   </td>
@@ -92,7 +92,7 @@
       <p v-if="!selectedDate" class="time-warning">날짜를 먼저 선택해주세요.</p>
       <div class="time-grid">
         <button
-          v-for="time in timeOptions"
+          v-for="time in displayedTimeOptions"
           :key="time"
           :class="['time-slot', { selected: isSelectedTime(time) }]"
           :disabled="!selectedDate"
@@ -114,7 +114,7 @@
       <button
         class="applyBtn btn btn-sm btn-primary"
         type="button"
-        @click="confirmSelection"
+        @click="handleConfirm"
       >
         적용
       </button>
@@ -123,35 +123,33 @@
 </template>
 
 <script setup>
-import { ref, computed, defineEmits, defineProps } from 'vue'
-import { useModalStore } from '../../stores/modalStore.js'
+import { ref, computed, defineProps } from 'vue'
+import { useModalStore } from '../../../stores/modalStore.js'
+
+import { api } from '@/axios.js'
 
 const props = defineProps({
   onConfirm: Function,
-  interviewTimes: {
-    type: Array,
-    default: () => [],
-  },
+  interviewTimes: Array,
+  applicationSq: Number,
 })
 
 const selectedDate = ref(null)
 const selectedTimes = ref({})
 
-props.interviewTimes.forEach(({ date, times }) => {
-  selectedTimes.value[date] = [...times]
-})
-
 const leftMonth = ref({ month: 4, year: 2025 })
 const rightMonth = ref({ month: 5, year: 2025 })
 
-console.log(selectedTimes.value)
+const availableTimes = computed(() => {
+  const grouped = {}
+  props.interviewTimes.forEach(({ interviewTime }) => {
+    if (typeof interviewTime !== 'string') return
 
-const emit = defineEmits(['confirm'])
-
-const timeOptions = Array.from({ length: 19 }, (_, i) => {
-  const hour = 9 + Math.floor(i / 2) // 9시부터 시작
-  const minute = i % 2 === 0 ? '00' : '30'
-  return `${String(hour).padStart(2, '0')}:${minute}`
+    const [date, time] = interviewTime.split('T')
+    if (!grouped[date]) grouped[date] = []
+    grouped[date].push(time.slice(0, 5)) // 'HH:MM'
+  })
+  return grouped
 })
 
 const isSelectedTime = (time) => {
@@ -164,28 +162,28 @@ const toggleTime = (time) => {
   if (!selectedTimes.value[date]) {
     selectedTimes.value[date] = []
   }
-  const idx = selectedTimes.value[date].indexOf(time)
-  if (idx === -1) {
-    selectedTimes.value[date].push(time)
+
+  // 이미 선택된 경우 -> 제거
+  if (selectedTimes.value[date][0] === time) {
+    selectedTimes.value[date] = []
   } else {
-    selectedTimes.value[date].splice(idx, 1)
+    // 새로 선택된 경우 -> 기존 값 덮어쓰기
+    selectedTimes.value[date] = [time]
   }
 }
 
 function dayClass(d, currentMonth) {
   const dateString = formatDate(d)
   const isSameMonth = d.getMonth() === currentMonth
-  const isPast = d < new Date().setHours(0, 0, 0, 0)
+  const isPast = isPastDate(d)
 
   return {
-    available: !isPast,
-    selected: dateString === selectedDate.value && isSameMonth && !isPast,
-    'has-times':
-      !!selectedTimes.value[dateString]?.length && isSameMonth && !isPast,
-    disabled: isPast,
+    available: !isPast && dateString in availableTimes.value && isSameMonth,
+    selected: dateString === selectedDate.value && isSameMonth,
+    'has-times': !!availableTimes.value[dateString]?.length && isSameMonth,
+    'past-date': isPast && isSameMonth,
   }
 }
-
 function formatDate(d) {
   const date = new Date(d)
   return `${date.getFullYear()}-${(date.getMonth() + 1)
@@ -193,18 +191,37 @@ function formatDate(d) {
     .padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`
 }
 
-function selectDate(date) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  if (date < today) return // 지난 날짜는 클릭 무시
-
-  const formatted = formatDate(date)
-
-  if (selectedDate.value === formatted) {
-    selectedDate.value = null
-  } else {
-    selectedDate.value = formatted
+const handleConfirm = () => {
+  const interviewTimeSq = getSelectedInterviewTimeSq()
+  console.log(interviewTimeSq)
+  console.log(props.applicationSq)
+  if (!interviewTimeSq || !props.applicationSq) {
+    alert('날짜와 시간을 선택해주세요.')
+    return
   }
+
+  sendInterviewTimeRequest(interviewTimeSq, props.applicationSq).then(() => {
+    props.onConfirm?.(true)
+  })
+}
+
+const getSelectedInterviewTimeSq = () => {
+  const date = selectedDate.value
+  const time = selectedTimes.value[date]?.[0]
+  if (!date || !time) return null
+
+  const targetDatetime = `${date}T${time}:00`
+  const matched = props.interviewTimes.find(
+    (i) => i.interviewTime === targetDatetime,
+  )
+  return matched?.interviewTimeSq ?? null
+}
+
+function selectDate(date) {
+  const formatted = formatDate(date)
+  if (isPastDate(date) || !(formatted in availableTimes.value)) return
+
+  selectedDate.value = selectedDate.value === formatted ? null : formatted
 }
 
 function getMonthYear(obj) {
@@ -265,13 +282,52 @@ function nextMonth() {
   }
 }
 
-const confirmSelection = () => {
-  const result = Object.entries(selectedTimes.value).map(([date, times]) => ({
-    date,
-    times,
-  }))
-  emit('confirm', result)
-  useModalStore().closeModal()
+const getAccessTokenFromCookie = () => {
+  const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]*)/)
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+const sendInterviewTimeRequest = async (interviewTimeSq, applicationSq) => {
+  try {
+    const token = getAccessTokenFromCookie()
+
+    const config = {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+      withCredentials: true,
+    }
+
+    const payload = {
+      applicationSq,
+    }
+
+    const response = await api.$patch(
+      `/projects/applications/interviews/${interviewTimeSq}`,
+      payload,
+      config,
+    )
+
+    console.log('✅ 인터뷰 시간 선택 성공', response)
+    useModalStore().closeModal()
+  } catch (e) {
+    console.error('❌ 인터뷰 시간 선택 실패', e)
+  }
+}
+
+const displayedTimeOptions = computed(() => {
+  if (!selectedDate.value) return []
+  return availableTimes.value[selectedDate.value] || []
+})
+
+function isPastDate(d) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const target = new Date(d)
+  target.setHours(0, 0, 0, 0)
+
+  return target < today
 }
 </script>
 <style scoped>
@@ -328,7 +384,7 @@ const confirmSelection = () => {
 
 .calendar-table td.start-date,
 .calendar-table td.end-date {
-  background-color: #00acc1;
+  background-color: #0088cc;
   color: white;
   font-weight: bold;
 }
@@ -338,7 +394,14 @@ const confirmSelection = () => {
 }
 
 .calendar-table td.selected {
-  border: 2px solid #00acc1;
+  border: 2px solid #0088cc;
+}
+
+.calendar-table td.past-date {
+  background-color: #f0f0f0;
+  color: #aaa;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .drp-buttons {
@@ -360,13 +423,6 @@ const confirmSelection = () => {
   font-weight: normal;
   color: #555;
   margin-right: 4px;
-}
-
-td.disabled {
-  background-color: #f0f0f0;
-  color: #aaa;
-  cursor: not-allowed;
-  pointer-events: none;
 }
 
 td.selected {
@@ -413,6 +469,7 @@ td.has-times:not(.selected) {
   background-color: #0088cc;
   color: white;
   border-color: #0088cc;
+  font-weight: bold;
 }
 
 .time-slot:disabled {
