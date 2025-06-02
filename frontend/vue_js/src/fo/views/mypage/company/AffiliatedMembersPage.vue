@@ -52,17 +52,17 @@
             <div class="d-flex justify-content-between align-items-center">
               <div class="d-flex gap-2 align-items-center">
                 <a href="#" class="text-5 m-0" style="font-size: 14px"
-                  >{{ member.name }} /</a
+                  >{{ member.userNm }} /</a
                 >
                 <a href="#" class="text-4 m-0" style="font-size: 14px">{{
-                  member.intro
+                  member.resumeTtl
                 }}</a>
               </div>
               <span
-                v-if="member.status === '재직'"
+                v-if="!member.careerEndDt"
                 class="btn btn-primary btn-outline btn-lg"
                 style="font-size: 14px; padding: 8px 12px"
-                @click="fireMember(member.id)"
+                @click="fireMember(6, member.userSq)"
                 >퇴사 처리</span
               >
               <span
@@ -83,7 +83,7 @@
                   <span class="text-dark text-uppercase font-weight-semibold"
                     >경력</span
                   >
-                  | {{ member.career }}
+                  | {{ member.careerYr }}년차
                 </div>
                 <div class="d-flex align-items-center gap-2 ms-3">
                   <span class="text-dark text-uppercase font-weight-semibold"
@@ -91,25 +91,23 @@
                   >
                   |
                   <div
-                    v-for="skill in member.skills"
+                    v-for="skill in member.skillTagNms"
                     :key="skill.name"
                     class="btn d-flex align-items-center gap-2 border-0"
                     style="padding: 2px 6px"
                   >
                     <img :src="skill.icon" width="16" />
-                    {{ skill.name }}
+                    {{ skill }}
                   </div>
                 </div>
               </div>
               <!-- 우측: 입사일자/퇴사일자 -->
               <div class="text-muted" style="white-space: nowrap">
                 <span class="text-dark text-uppercase font-weight-semibold">
-                  {{ member.status === '재직' ? '입사일자' : '퇴사일자' }}
+                  {{ member.careerEndDt ? '퇴사일자' : '입사일자' }}
                 </span>
                 |
-                {{
-                  member.status === '재직' ? member.joinDate : member.leaveDate
-                }}
+                {{ member.careerEndDt || member.careerStartDt }}
               </div>
             </div>
           </li>
@@ -152,92 +150,44 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { api } from '@/axios.js'
 
 const searchType = ref('all')
 const searchText = ref('')
 const currentPage = ref('1')
 const totalPages = ref('3')
-const members = ref([
-  {
-    id: 1,
-    name: '홍길동',
-    intro: '안녕하세요. Java 개발자입니다.',
-    career: '0년차',
-    skills: [
-      {
-        name: 'Java',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-      },
-      {
-        name: 'Python',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-      },
-      {
-        name: 'Spring Boot',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
-      },
-    ],
-    status: '재직',
-    joinDate: '2023-06-01',
-    leaveDate: '',
-  },
-  {
-    id: 2,
-    name: '홍길동',
-    intro: '대표이력서 미설정',
-    career: '0년차',
-    skills: [
-      {
-        name: 'Java',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-      },
-      {
-        name: 'Python',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-      },
-      {
-        name: 'Spring Boot',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
-      },
-    ],
-    status: '재직',
-    joinDate: '2023-06-01',
-    leaveDate: '',
-  },
-  {
-    id: 3,
-    name: '홍길동',
-    intro: '안녕하세요. Java 개발자입니다.',
-    career: '0년차',
-    skills: [
-      {
-        name: 'Java',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-      },
-      {
-        name: 'Python',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-      },
-      {
-        name: 'Spring Boot',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
-      },
-    ],
-    status: '퇴사',
-    joinDate: '2023-06-01',
-    leaveDate: '2024-12-01',
-  },
-])
+
+onMounted(() => {
+  fetchAffiliationMemberList()
+})
+
+const members = ref([])
+
+const fetchAffiliationMemberList = async () => {
+  try {
+    const response = await api.$get('/companies/6')
+    members.value = response.output
+    console.log(members.value)
+  } catch (e) {
+    console.log(e)
+  }
+}
 
 function search() {
   //검색 로직 구현
   console.log('검색:', searchType.value, searchText.value)
 }
 
-function fireMember(id) {
-  //퇴사 처리 로직 구현
-  console.log('퇴사 처리:', id)
+const fireMember = async (companySq, userSq) => {
+  try {
+    await api.$patch(`/companies/${companySq}`, {
+      userSq: userSq,
+      newStatus: '퇴사',
+    })
+  } catch (e) {
+    console.error(e)
+  }
 }
 
 function changePage(page) {
