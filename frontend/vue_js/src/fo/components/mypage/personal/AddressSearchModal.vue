@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-/* global daum */ // 주소 전역 변수 선언
+/* global daum */ //주소 전역 변수 선언
 
 import { onMounted, defineProps } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
@@ -24,7 +24,35 @@ const modalStore = useModalStore()
 onMounted(() => {
   new daum.Postcode({
     onComplete: function (data) {
-      props.onComplete?.(data.address)
+      let addr = ''
+      if (data.userSelectedType === 'R') {
+        addr = data.roadAddress
+      } else {
+        addr = data.jibunAddress
+      }
+
+      // 시도 + 시군구 분리
+      const parts = addr.split(' ')
+      const sido = parts[0] || ''
+      const sigungu = parts[1] || ''
+      // 정확한 sigungu가 추출되었는지 다시 검증
+      if (!sido || !sigungu) {
+        alert(
+          '주소에서 시군구 정보를 추출할 수 없습니다. 다른 주소를 선택해주세요.',
+        )
+        return
+      }
+
+      props.onComplete?.({
+        zonecode: data.zonecode,
+        address: addr,
+        sido,
+        sigungu,
+        latitude: data.latitude ? Number(data.latitude) : null,
+        longitude: data.longitude ? Number(data.longitude) : null,
+      })
+
+      console.log('[주소 선택 완료]', { sido, sigungu, addr })
       modalStore.closeModal()
     },
   }).embed(document.getElementById('daum-postcode'))

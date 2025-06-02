@@ -1,7 +1,7 @@
 package com.example.demo.domain.mypage.service;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,30 +34,61 @@ public class ResumeService {
 	//이력서 등록
 	@Transactional
 	public ResumeRegisterResponse registerResume(ResumeRegisterRequest request) {
-		// 1. 지역 코드 조회
-		Long areaCodeSq = addressMapper.selectAreaCodeSqBySigungu(request.getSigungu());
+		
+		// 유저 정보 기본값 강제
+		request.setUserSq(18L);
+		System.out.println(" request.getUserSq(): " + request.getUserSq()); // 추후에 지우기
 
-		// 2. 주소 INSERT
-		AddressDTO addressDTO = new AddressDTO();
-		addressDTO.setZonecode(request.getZonecode());
-		addressDTO.setAddress(request.getAddress());
-		addressDTO.setDetailAddress(request.getDetailAddress());
-		addressDTO.setSigungu(request.getSigungu());
-		addressDTO.setLatitude(BigDecimal.valueOf(request.getLatitude()));
-		addressDTO.setLongitude(BigDecimal.valueOf(request.getLongitude()));
-		addressDTO.setAreaCodeSq(areaCodeSq);
-		addressRepository.insertAddress(addressDTO);
 
-		// 3. 이력서 INSERT (addressSq 참조)
-		request.setAddressSq(addressDTO.getAddressSq());
-		resumeMapper.insertResume(request);
+		// null 방지 처리
+		if (request.getResumeIsRepresentativeYn() == null) {
+		    request.setResumeIsRepresentativeYn("N");
+		}
+		if (request.getResumeIsNotificationYn() == null) {
+		    request.setResumeIsNotificationYn("N");
+		}
+		if (request.getResumePhotoUrl() == null) {
+		    request.setResumePhotoUrl("");
+		}
+		
+		
+	    // addressSq가 null인 경우에만 새 주소 insert
+	    if (request.getAddressSq() == null) {
+	        // 1. 부모 지역코드(sido → parent)
+	        Long parentAreaCode = addressMapper.selectParentAreaCodeBySido(request.getSido());
 
-		// 4. 응답 객체 생성 및 반환
-		ResumeRegisterResponse response = new ResumeRegisterResponse();
-		response.setResumeSq(request.getResumeSq());
-		response.setResumeTtl(request.getResumeTtl());
-		response.setRepresentative("Y".equals(request.getResumeIsRepresentativeYn()));		
-		return response;
+	        // 2. 자식 지역코드(sigungu + parent → 최종)
+	        Long areaCodeSq = addressMapper.selectAreaCodeBySigunguAndParent(
+	        	    request.getSigungu(),
+	        	    parentAreaCode
+	        	);
+
+	        // 3. 주소 INSERT
+	        AddressDTO addressDTO = new AddressDTO();
+	        addressDTO.setZonecode(request.getZonecode());
+	        addressDTO.setAddress(request.getAddress());
+	        addressDTO.setDetailAddress(request.getDetailAddress());
+	        addressDTO.setSigungu(request.getSigungu());
+	        addressDTO.setLatitude(request.getLatitude());
+	        addressDTO.setLongitude(request.getLongitude());
+	        addressDTO.setAreaCodeSq(areaCodeSq);
+
+	        addressRepository.insertAddress(addressDTO);
+
+	        // 4. 이력서 INSERT 시 addressSq 설정
+	        request.setAddressSq(addressDTO.getAddressSq());
+	    }
+
+	    // 5. 이력서 INSERT
+	    resumeMapper.insertResume(request);
+
+	    // 6. 응답 생성
+	    ResumeRegisterResponse response = new ResumeRegisterResponse();
+	    response.setResumeSq(request.getResumeSq());
+	    response.setResumeTtl(request.getResumeTtl());
+	    response.setRepresentative("Y".equals(request.getResumeIsRepresentativeYn()));
+
+	    return response;
 	}
 	
 

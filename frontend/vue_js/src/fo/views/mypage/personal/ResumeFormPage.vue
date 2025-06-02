@@ -14,7 +14,7 @@
               >이력서 제목</label
             >
             <input
-              v-model="resumeData.title"
+              v-model="resumeData.resumeTtl"
               type="text"
               class="form-control text-3 h-auto py-2"
               style="border: none"
@@ -104,7 +104,7 @@
                     >이름</label
                   >
                   <input
-                    v-model="resumeData.name"
+                    v-model="resumeData.resumeNm"
                     type="text"
                     class="form-control text-3 h-auto py-2"
                     style="border: none"
@@ -119,7 +119,7 @@
                     >생년월일</label
                   >
                   <input
-                    v-model="resumeData.dob"
+                    v-model="resumeData.resumeBirthDt"
                     type="date"
                     class="form-control text-3 h-auto py-2"
                     style="border: none"
@@ -135,7 +135,7 @@
                     >전화번호</label
                   >
                   <input
-                    v-model="resumeData.phone"
+                    v-model="resumeData.resumePhoneNum"
                     type="tel"
                     class="form-control text-3 h-auto py-2"
                     style="border: none"
@@ -257,7 +257,6 @@
             </div>
           </div>
 
-          
           <!-- 회사 이력 -->
           <div class="form-group mb-3">
             <label class="form-label mb-1 text-2" style="font-weight: bold">
@@ -275,7 +274,7 @@
                 :key="idx"
                 class="company-tag"
               >
-                {{ item.company }}회사  {{ item.department }}부서 
+                {{ item.company }}회사 {{ item.department }}부서
                 {{ item.position }} ({{ item.period }})
                 <span
                   class="text-grey ms-2"
@@ -514,16 +513,30 @@
                 >+ 추가하기</a
               >
             </label>
-            <!-- 선택된 기술 미리보기 -->
-            <div
-              id="selectedSkillsPreview"
-              class="mb-2 d-flex gap-2 flex-wrap"
-            >
-              <ProjectSkillButtonGroup
-                v-if="selectedSkillNames.length > 0"
-                :selectedSkills="selectedSkillNames"
-                @remove="removeSkill"
-              />
+            <div class="mb-2 d-flex gap-2 flex-wrap">
+              <div
+                v-for="(skill, index) in resumeData.skills"
+                :key="index"
+                class="btn btn-rounded btn-light d-flex align-items-center gap-2 mb-2 btn-3d position-relative"
+                style="padding-right: 24px"
+              >
+                <img
+                  v-if="skill.icon"
+                  :src="skill.icon"
+                  :alt="skill.name"
+                  width="20"
+                  height="20"
+                />
+                <span>{{ skill.name }}</span>
+                <a
+                  href="#"
+                  class="position-absolute end-0 me-2 text-grey text-decoration-none"
+                  style="top: 50%; transform: translateY(-50%)"
+                  title="삭제"
+                  @click.prevent="removeSkill(index)"
+                  >×</a
+                >
+              </div>
             </div>
           </div>
 
@@ -537,7 +550,6 @@
               @change="handleFileUpload"
               class="form-control text-3 h-auto py-2"
               accept=".pdf"
-              required
             />
           </div>
 
@@ -547,7 +559,7 @@
               >자기소개</label
             >
             <textarea
-              v-model="resumeData.about"
+              v-model="resumeData.resumeGreetingTxt"
               rows="5"
               class="form-control text-3 h-auto py-2"
               required
@@ -558,11 +570,10 @@
           <div class="form-group mb-3">
             <div class="form-check">
               <input
-                v-model="resumeData.agree"
+                v-model="resumeData.resumeIsNotificationYn"
                 class="form-check-input"
                 type="checkbox"
                 id="agreeCheck"
-                required
               />
               <label class="form-check-label" for="agreeCheck"
                 >알림 발신 여부</label
@@ -575,7 +586,7 @@
             <button
               type="button"
               class="btn btn-primary px-4 py-2"
-              @click="openDetailModal(apply)"
+              @click="openDetailModal"
             >
               이력서 등록
             </button>
@@ -587,45 +598,61 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, computed, onMounted } from 'vue'
+import { ref, reactive, watch, onMounted } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import ResumeModal from '@/fo/components/mypage/personal/ResumeModal.vue'
-import AddressSerchModal from '@/fo/components/mypage/personal/AddressSerchModal.vue'
 import EducationSearchModal from '@/fo/components/mypage/personal/EducationSearchModal.vue'
 import ResumeCompanyModal from '@/fo/components/mypage/personal/ResumeCompanyModal.vue'
 import TrainingModal from '@/fo/components/mypage/personal/TrainingModal.vue'
 import ShowProjectFormModal from '@/fo/components/mypage/personal/ShowProjectFormModal.vue'
 import LicenseModal from '@/fo/components/mypage/personal/LicenseModal.vue'
 import SkillSelectModal from '@/fo/components/project/SkillSelectModal.vue'
-import ProjectSkillButtonGroup from '@/fo/components/project/ProjectSkillButtonGroup.vue'
-import { api } from '@/axios.js'
+import AddressSearchModal from '@/fo/components/mypage/personal/AddressSearchModal.vue'
+import axios from 'axios'
+import { useRoute } from 'vue-router'
 
 const modalStore = useModalStore()
+const route = useRoute()
+const resumeSq = route.params.resumeSq
 
 //주소 모달창
 const openAddressSearchModal = () => {
-  modalStore.openModal(AddressSerchModal, {
-    onComplete: (selectedAddress) => {
-      resumeData.address = selectedAddress
+  modalStore.openModal(AddressSearchModal, {
+    onComplete: (data) => {
+      // 기본 정보 저장
+      resumeData.postcode = data.zonecode
+      resumeData.address = data.address
+      resumeData.sigungu = data.sigungu
+      resumeData.sido = data.sido
+
+      // 좌표 초기화 (변환 전 잠깐 null로 비워두기)
+      resumeData.latitude = null
+      resumeData.longitude = null
+
+      // 주소 → 좌표 변환
+      const geocoder = new window.kakao.maps.services.Geocoder()
+      geocoder.addressSearch(data.address, function (result, status) {
+        if (status === window.kakao.maps.services.Status.OK) {
+          resumeData.latitude = result[0].y
+          resumeData.longitude = result[0].x
+          console.log('[좌표 변환 성공]', result[0])
+        } else {
+          resumeData.latitude = null
+          resumeData.longitude = null
+          console.warn('[좌표 변환 실패]', data.address)
+          alert('선택한 주소의 좌표 정보를 찾을 수 없습니다.')
+        }
+      })
     },
   })
 }
 
-const submitResume = async () => {
-  try {
-    const requestBody = buildResumeRequest();
-    console.log('보내는 데이터:', requestBody);
-    await api.$post('/mypage/resume/register', requestBody)
-    alert('등록 완료!')
-  } catch (e) {
-    alert('이력서 등록 실패!')
-    console.error('이력서 등록 실패:', e)
-  }
-}
-
-const openDetailModal = () => {
+const openDetailModal = (resumeParam = null) => {
   modalStore.openModal(ResumeModal, {
-    onConfirm: submitResume, // 등록 버튼 누르면 submitResume 실행
+    resume: resumeParam,
+    onConfirm: submitResume, // 함수 호출 ❌ → 함수 참조 ⭕
+
+    // 필요하면 다른 props도 여기서 전달 가능
   })
 }
 
@@ -637,22 +664,28 @@ const photoPreview = ref(null)
 
 // 이력서 데이터
 const resumeData = reactive({
-  title: '',
-  name: '',
-  dob: '',
-  phone: '',
-  emailId: '',
+  resumeTtl: '',
+  resumeNm: '',
+  resumeBirthDt: '',
+  resumePhoneNum: '',
+  resumeEmail: '',
   emailDomain: '',
   customDomain: '',
   address: '',
+  addressDetail: '',
+  postcode: '',
+  sido: '',
+  sigungu: '',
+  latitude: '',
+  longitude: '',
   education: [],
   career: [],
   trainingHistories: [],
   projects: [],
   certificates: [],
   skills: [],
-  about: '',
-  agree: false,
+  resumeGreetingTxt: '',
+  resumeIsNotificationYn: false,
 })
 
 // 사진 업로드 처리
@@ -723,38 +756,14 @@ const showCertificateForm = () => {
     },
   })
 }
-
 // 기술 입력 폼 표시 로직
-
-const allSkills = ref([])
-
-onMounted(async () => {
-  try {
-    const res = await api.$get('/projects/forms')
-    console.log('전체응답:', res)
-    allSkills.value = res.output.skills
-    console.log('DB에서 받아온 기술 목록:', allSkills.value)
-  } catch (e) {
-    console.error('기술 목록 불러오기 실패:', e)
-  }
-})
-
-
 const showSkillsForm = () => {
-  console.log('모달에 넘기는 skills:', allSkills.value)
   modalStore.openModal(SkillSelectModal, {
-    onConfirm: (skills) => {
-      console.log('선택된 기술:', skills)
-      resumeData.skills = skills.map((s) => s.name || s)  // 문자열로 변환
+    onComplete: (skills) => {
+      resumeData.skills = skills
     },
-    skills: allSkills.value,
   })
 }
-
-// name만 뽑아서 버튼에 표시하도록 
-const selectedSkillNames = computed(() =>
-  resumeData.skills.map((s) => (typeof s === 'string' ? s : s.name))
-)
 
 // 데이터 삭제 메서드
 const removeEducation = (index) => {
@@ -777,11 +786,8 @@ const removeCertificate = (index) => {
   resumeData.certificates.splice(index, 1)
 }
 
-const removeSkill = (name) => {
-  resumeData.skills = resumeData.skills.filter((skill) => {
-    const skillName = typeof skill === 'string' ? skill : skill.name
-    return skillName !== name
-  })
+const removeSkill = (index) => {
+  resumeData.skills.splice(index, 1)
 }
 
 // 프로젝트 토글
@@ -798,6 +804,12 @@ const collapseAllProjects = () => {
   resumeData.projects.forEach((project) => (project.isExpanded = false))
 }
 
+// 폼 제출
+// const submitResume = () => {
+//   // 폼 제출 로직 구현
+//   console.log('이력서 데이터:', resumeData)
+// }
+
 // 프로젝트가 추가/변경될 때 전체 펼침
 watch(
   () => resumeData.projects.length,
@@ -806,26 +818,97 @@ watch(
       project.isExpanded = true
     })
   },
-  { immediate: true }
+  { immediate: true },
 )
 
-function buildResumeRequest() {
-  return {
-    userSq: 1, // 실제 로그인 사용자 ID로 대체
-    addressSq: 1, // 실제 주소 ID로 대체
-    resumeTtl: resumeData.title,
-    resumePhotoUrl: '', // 필요시 사진 URL
-    resumeNm: resumeData.name,
-    resumeBirthDt: resumeData.dob,
-    resumePhoneNum: resumeData.phone,
-    resumeEmail: resumeData.emailId + '@' +
-      (resumeData.emailDomain === 'custom' ? resumeData.customDomain : resumeData.emailDomain),
-    resumeGreetingTxt: resumeData.about,
-    resumeIsNotificationYn: resumeData.agree ? 'Y' : 'N',
-    resumeIsRepresentativeYn: 'N',
+//폼 제출
+// 1. resumeSq가 있을 경우 → 수정 모드 → 데이터 불러오기
+onMounted(async () => {
+  if (resumeSq) {
+    try {
+      const res = await axios.get(`/api/mypage/resume/detail/${resumeSq}`)
+      Object.assign(resumeData, res.data)
+      console.log('[기존 이력서 불러오기 완료]', res.data) // 콘솔 추가
+    } catch (e) {
+      console.error('[ 이력서 데이터 조회 실패]', e)
+    }
+  }
+})
+
+// 2. 등록 또는 수정 제출 처리
+const submitResume = async () => {
+  // 1. 좌표 확인
+  if (!resumeData.latitude || !resumeData.longitude) {
+    alert('주소 좌표 정보가 없습니다. 주소를 다시 선택해주세요.')
+    return
+  }
+
+  // 2. 이메일 조합
+  const email = `${resumeData.emailId}@${
+    resumeData.emailDomain === 'custom'
+      ? resumeData.customDomain
+      : resumeData.emailDomain
+  }`
+
+  // 3. 전송용 객체 생성
+  const payload = {
+    userSq: 18,
+    resumeTtl: resumeData.resumeTtl,
+    resumeNm: resumeData.resumeNm,
+    resumeBirthDt: resumeData.resumeBirthDt,
+    resumePhoneNum: resumeData.resumePhoneNum,
+    resumeEmail: email,
+    address: resumeData.address,
+    detailAddress: resumeData.addressDetail,
+    zonecode: resumeData.postcode,
+    sido: resumeData.sido,
+    sigungu: resumeData.sigungu,
+    latitude: resumeData.latitude,
+    longitude: resumeData.longitude,
+    resumeGreetingTxt: resumeData.resumeGreetingTxt,
+    resumeIsNotificationYn: resumeData.resumeIsNotificationYn ? 'Y' : 'N',
+    resumePhotoUrl: resumeData.resumePhotoUrl || '',
+    education: resumeData.education,
+    career: resumeData.career,
+    projects: resumeData.projects,
+    certificates: resumeData.certificates,
+    skills: resumeData.skills,
+    attachments: resumeData.attachments,
+  }
+
+  console.log('[📤 최종 전송 데이터]', payload)
+
+  try {
+    if (resumeSq) {
+      await axios.put(`/api/mypage/resume/update/${resumeSq}`, payload)
+      alert('수정 완료!')
+    } else {
+      await axios.post('/api/mypage/resume/new', payload)
+      alert('등록 완료!')
+    }
+  } catch (e) {
+    console.error('[ 이력서 등록/수정 실패 ]', e)
+    alert('오류 발생')
   }
 }
 
+//폼 등록
+// const submitResume = async () => {
+//   try {
+//     await axios.post('/api/resume', resumeData)
+//     alert('등록 완료!')
+//     modalStore.closeModal()
+//   } catch (error) {
+//     console.error('이력서 등록 실패:', error)
+//     alert('등록 중 오류 발생')
+//   }
+// }
+// TODO 교체 예시:
+// onConfirm: submitResume
+// const submitResume = async () => {
+//   await axios.post('/api/resume', resumeData)
+//   alert('등록 완료!')
+// }
 </script>
 
 <style scoped>
