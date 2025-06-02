@@ -68,7 +68,7 @@
             <div class="form-group">
               <label class="modal-label">기종</label>
               <input
-                :value="selectedDeviceText"
+                v-model="form.device"
                 type="text"
                 class="form-control"
                 placeholder="기종 (예: PC)"
@@ -79,7 +79,7 @@
             <div class="form-group">
               <label class="modal-label">OS</label>
               <input
-                :value="selectedOsText"
+                v-model="form.os"
                 type="text"
                 class="form-control"
                 placeholder="OS (예: Linux)"
@@ -90,7 +90,7 @@
             <div class="form-group">
               <label class="modal-label">DBMS</label>
               <input
-                :value="selectedDbmsText"
+                v-model="form.dbms"
                 type="text"
                 class="form-control"
                 placeholder="DBMS (예: MySQL)"
@@ -103,7 +103,7 @@
             <div class="form-group">
               <label class="modal-label">언어</label>
               <input
-                :value="selectedLanguagesText"
+                v-model="form.languages"
                 type="text"
                 class="form-control"
                 placeholder="언어 (쉼표로 구분, 예: Java, Python)"
@@ -114,7 +114,7 @@
             <div class="form-group">
               <label class="modal-label">TOOL</label>
               <input
-                :value="selectedToolsText"
+                v-model="form.tools"
                 type="text"
                 class="form-control"
                 placeholder="TOOL (쉼표로 구분, 예: Eclipse, VSCode)"
@@ -125,7 +125,7 @@
             <div class="form-group">
               <label class="modal-label">FW</label>
               <input
-                :value="selectedFrameworksText"
+                v-model="form.frameworks"
                 type="text"
                 class="form-control"
                 placeholder="FW (쉼표로 구분, 예: Spring Boot, Vue.js)"
@@ -157,11 +157,9 @@
 </template>
 
 <script setup>
-import { ref, defineProps, onMounted, computed } from 'vue'
+import { ref, defineProps } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import SkillSelectModal from '@/fo/components/project/SkillSelectModal.vue'
-
-import { api } from '@/axios.js'
 
 const props = defineProps({
   onComplete: Function,
@@ -183,43 +181,59 @@ const form = ref({
   frameworks: '',
   etc: '',
 })
-const skills = ref([])
+
 const selectedSkills = ref([])
 
-// 각 타입별 computed
-const selectedDeviceText = computed(() =>
-  selectedSkills.value.filter(s => s.type === 'device').map(s => s.name).join(', ')
-)
-const selectedOsText = computed(() =>
-  selectedSkills.value.filter(s => s.type === 'os').map(s => s.name).join(', ')
-)
-const selectedDbmsText = computed(() =>
-  selectedSkills.value.filter(s => s.type === 'dbms').map(s => s.name).join(', ')
-)
-const selectedLanguagesText = computed(() =>
-  selectedSkills.value.filter(s => s.type === 'language').map(s => s.name).join(', ')
-)
-const selectedToolsText = computed(() =>
-  selectedSkills.value.filter(s => s.type === 'tool').map(s => s.name).join(', ')
-)
-const selectedFrameworksText = computed(() =>
-  selectedSkills.value.filter(s => s.type === 'framework').map(s => s.name).join(', ')
-)
+const languageList = [
+  'Java',
+  'Python',
+  'JavaScript',
+  'PHP',
+  'TypeScript',
+  'C',
+  'C#',
+  'C++',
+  'Go',
+]
+const frameworkList = [
+  'Spring Boot',
+  'Spring',
+  'React.js',
+  'Vue.js',
+  'Angular.js',
+  'Express.js',
+  'Django',
+  'Bootstrap',
+  'Ember',
+  'BackboneJS',
+  '전자정부 프레임워크',
+  'myBatis',
+]
+const toolList = [
+  'VSCode',
+  'IntelliJ',
+  'Vim',
+  'Android Studio',
+  'Eclipse',
+  'Visual Studio',
+  'Notepad++',
+  'PyCharm',
+  'Sublime Text',
+]
 
 function parseArray(str) {
   if (!str) return []
-  if (Array.isArray(str)) return str // 이미 배열이면 그대로 반환
   return str
     .split(/[,\n;]/)
     .map((s) => s.trim())
     .filter(Boolean)
 }
 
-onMounted(async () => {
-  await loadDefaultFormData() // 신규 등록용
-})
-
 const updateSelectedSkills = () => {
+  const languages = parseArray(form.value.languages).map((name) => ({
+    name,
+    type: 'language',
+  }))
   const tools = parseArray(form.value.tools).map((name) => ({
     name,
     type: 'tool',
@@ -228,60 +242,46 @@ const updateSelectedSkills = () => {
     name,
     type: 'framework',
   }))
-  selectedSkills.value = [...tools, ...frameworks]
-}
-
-const loadDefaultFormData = async () => {
-  try {
-    const response = await api.$get('/projects/forms')
-    skills.value = response.output.skills
-  } catch (e) {
-    console.error('프로젝트 정보 불러오기 실패 (신규)', e)
-  }
+  selectedSkills.value = [...languages, ...tools, ...frameworks]
 }
 
 const openSkillModal = () => {
   updateSelectedSkills()
   modalStore.openModal(SkillSelectModal, {
-    skills: skills.value,
+    skills: selectedSkills.value,
     onConfirm: handleSkillConfirm,
   })
 }
-const handleSkillConfirm = (skills) => {
-  selectedSkills.value = skills
-  //  각 타입별로 form에 값 반영
-  form.value.device = selectedDeviceText.value
-  form.value.os = selectedOsText.value
-  form.value.dbms = selectedDbmsText.value
-  form.value.languages = selectedLanguagesText.value
-  form.value.tools = selectedToolsText.value
-  form.value.frameworks = selectedFrameworksText.value
 
-  // 콘솔 로그 추가
-  console.log('--- [handleSkillConfirm] ---')
-  console.log('selectedSkills:', JSON.parse(JSON.stringify(selectedSkills.value)))
-  console.log('form.value.device:', form.value.device)
-  console.log('form.value.os:', form.value.os)
-  console.log('form.value.dbms:', form.value.dbms)
-  console.log('form.value.languages:', form.value.languages)
-  console.log('form.value.tools:', form.value.tools)
-  console.log('form.value.frameworks:', form.value.frameworks)
+const handleSkillConfirm = (selected) => {
+  form.value.languages = selected
+    .filter((s) => languageList.includes(s.name))
+    .map((s) => s.name)
+    .join(', ')
+  form.value.tools = selected
+    .filter((s) => toolList.includes(s.name))
+    .map((s) => s.name)
+    .join(', ')
+  form.value.frameworks = selected
+    .filter((s) => frameworkList.includes(s.name))
+    .map((s) => s.name)
+    .join(', ')
 }
 
 const submit = () => {
   const project = {
-    device: form.value.device,
-    os: form.value.os,
-    dbms: form.value.dbms,
-    languages: form.value.languages.split(',').map(name => ({ name: name.trim() })),
-    tools: form.value.tools.split(',').map(name => name.trim()),
-    frameworks: form.value.frameworks.split(',').map(name => ({ name: name.trim() })),
-    etc: form.value.etc.split(',').map(name => ({ name: name.trim() })),
     name: form.value.name,
     period: form.value.period,
     client: form.value.client,
     workUnit: form.value.workUnit,
     role: form.value.role,
+    device: form.value.device,
+    os: form.value.os,
+    dbms: form.value.dbms,
+    languages: parseArray(form.value.languages).map((name) => ({ name })),
+    tools: parseArray(form.value.tools),
+    frameworks: parseArray(form.value.frameworks).map((name) => ({ name })),
+    etc: parseArray(form.value.etc).map((name) => ({ name })),
   }
   props.onComplete(project)
   closeModal()

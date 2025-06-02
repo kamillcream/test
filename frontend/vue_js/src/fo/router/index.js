@@ -6,6 +6,7 @@ import TestPage from '../views/TestPage.vue'
 import UserProjectSpecPage from '../views/project/UserProjectSpecPage.vue'
 import CompanyProjectSpecPage from '../views/project/CompanyProjectSpecPage.vue'
 import ProjectPostPage from '../views/mypage/common/ProjectPostPage.vue'
+import ProjectListPage from '../views/mypage/common/ProjectListPage.vue'
 
 import BoardListPage from '../views/community/BoardListPage.vue'
 import BoardDetailPage from '../views/community/BoardDetailPage.vue'
@@ -26,7 +27,8 @@ import InformationEditPage from '../views/mypage/common/InformationEditPage.vue'
 import ResumeListPage from '../views/mypage/personal/ResumeListPage.vue'
 import AffiliatedMembersPage from '../views/mypage/company/AffiliatedMembersPage.vue'
 import AffiliationApplicantListPage from '../views/mypage/company/AffiliationApplicantListPage.vue'
-import ProjectListPage from '../views/mypage/common/ProjectListPage.vue'
+import AffiliationProjectListPage from '../views/mypage/company/AffiliationProjectListPage.vue'
+
 import ResumeFormPage from '../views/mypage/personal/ResumeFormPage.vue'
 import WithdrawPage from '../views/mypage/common/WithdrawPage.vue'
 import AffiliatedJobApplicationsPage from '../views/mypage/personal/AffiliatedJobApplicationsPage.vue'
@@ -136,6 +138,12 @@ const routes = [
   },
 
   {
+    path: '/projectListPage',
+    name: 'ProjectListPage',
+    component: ProjectListPage,
+  },
+
+  {
     path: '/myPage',
     component: MyPageLayout,
     children: [
@@ -205,11 +213,10 @@ const routes = [
         component: AffiliationApplicantListPage,
       },
       {
-        path: 'projectListPage',
-        name: 'ProjectListPage',
-        component: ProjectListPage,
+        path: 'affiliationProjectList',
+        name: 'AffiliationProjectList',
+        component: AffiliationProjectListPage,
       },
-
       {
         path: 'projectPostPage/:project_sq',
         name: 'ProjectPostPageWithId',

@@ -14,5 +14,5 @@ public class ResumeListResponse {
     private String resumeIsRepresentativeYn; // 대표 여부 (Y or N)
     private LocalDateTime resumeCreatedAtDtm; // 등록일자.
 
-}
 
+}

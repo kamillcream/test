@@ -11,7 +11,9 @@
         <button class="btn btn-rounded btn-primary me-2" @click="fetchProjects">
           검색
         </button>
-        <a href="#" class="btn btn-rounded btn-light">등록하기</a>
+        <a href="/mypage/projectPostPage" class="btn btn-rounded btn-light"
+          >등록하기</a
+        >
       </div>
       <ProjectCardGroup :projects="projects" />
       <div v-if="projects.length === 0" class="text-center text-muted py-5">

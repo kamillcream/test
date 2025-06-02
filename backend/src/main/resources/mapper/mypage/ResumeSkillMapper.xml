@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.demo.domain.mypage.mapper.ResumeSkillMapper">
 
-    <select id="findSkillInfoList" resultType="com.example.demo.domain.mypage.dto.response.ResumeSkillPairResponse">
-        SELECT 
-            p.skill_tag_nm AS parentSkillTagNm,
-            c.skill_tag_nm AS childSkillTagNm
-        FROM TBL_SKILL_TAG_C p
-        JOIN TBL_SKILL_TAG_C c ON p.skill_tag_sq = c.parent_skill_tag_sq
-        WHERE p.skill_tag_is_deleted_yn = 'N'
-          AND c.skill_tag_is_deleted_yn = 'N'
-        ORDER BY p.skill_tag_sq, c.skill_tag_sq
-    </select>
+  
+  <select id="findAllNmBySq" resultType="String">
+    SELECT skill_tag_nm
+    FROM TBL_RESUME_SKILL_TAG_S
+    WHERE resume_sq = #{resumeSq}
+  </select>
+  
+  
 
 
 </mapper>

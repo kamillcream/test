@@ -73,22 +73,22 @@
                 </div>
                 <div class="d-flex gap-2">
                   <a
-                    v-if="resume.resumeIsRepresentativeYn !== 'Y'"
+                    v-if="!resume.isMain"
                     href="#"
                     class="btn btn-outline btn-primary btn-sm"
-                    @click.prevent="setMainResume(resume.resumeSq)"
+                    @click.prevent="setMainResume(resume.id)"
                     >대표이력서 설정</a
                   >
                   <a
                     href="#"
                     class="btn btn-outline btn-primary btn-sm"
-                    @click.prevent="editResume(resume.resumeSq)"
+                    @click.prevent="editResume(resume.id)"
                     >수정하기</a
                   >
                   <a
                     href="#"
                     class="btn btn-outline btn-primary btn-sm"
-                    @click.prevent="copyResume(resume.resumeSq)"
+                    @click.prevent="copyResume(resume.id)"
                     >복사하기</a
                   >
                 </div>

@@ -6,9 +6,13 @@ import com.example.demo.domain.mypage.dto.response.ResumeListResponse;
 import io.lettuce.core.dynamic.annotation.Param;
 
 import org.apache.ibatis.annotations.Mapper;
+import com.example.demo.domain.mypage.vo.ResumeVo;
+import com.example.demo.domain.project.vo.ResumeNmTtlVo;
 
 import java.util.List;
 import java.util.Map;
+
+import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface ResumeMapper {
@@ -27,4 +31,6 @@ public interface ResumeMapper {
 	void updateDeleteYn(@Param("resumeSq")Long resumeSq);
 
 
+	public List<ResumeVo> findResumeVoByUserSq(Long userSq);
+	public ResumeNmTtlVo findResumeNmTtlBySq(Long resumeSq);
 }

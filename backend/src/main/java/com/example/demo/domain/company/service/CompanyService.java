@@ -15,6 +15,10 @@ public class CompanyService {
 	private final CompanyMapper companyMapper;
 	private final CommonCodeMapper commonCodeMapper;
 	
+	public Long fetchCompanySq(Long userSq) {
+		return companyMapper.findCompanySqByUserSq(userSq);
+	}
+	
 	public Long fetchCompanySq(Long userSq, Long userTypeCd) {
 		if (userTypeCd.equals(commonCodeMapper.findCommonCodeSqByEngName("COMPANY", ParentCodeEnum.MEMBER_TYPE.getCode()))) {
 		    return companyMapper.findCompanySqByUserSq(userSq);

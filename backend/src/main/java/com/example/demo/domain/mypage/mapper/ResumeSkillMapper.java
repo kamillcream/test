@@ -7,8 +7,9 @@ import org.apache.ibatis.annotations.Mapper;
 import com.example.demo.domain.mypage.dto.response.ResumeSkillPairResponse;
 
 @Mapper
-
 public interface ResumeSkillMapper {
 	List<ResumeSkillPairResponse> findSkillInfoList();
 
+//	public List<String> findAllNmBySq(Long resumeSq);
+//>>>>>>> main
 }

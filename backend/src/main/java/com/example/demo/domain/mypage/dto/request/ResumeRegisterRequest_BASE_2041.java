@@ -1,26 +1,24 @@
 package com.example.demo.domain.mypage.dto.request;
 
-import java.math.BigDecimal;
+import lombok.*;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Data
 
 public class ResumeRegisterRequest {
-    private Long userSq;
-    private Long addressSq;
+	private Long userSq;
     private String resumeTtl;
     private String resumePhotoUrl;
     private String resumeNm;
-    private Long resumeSq;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate resumeBirthDt;
     private String resumePhoneNum;
     private String resumeEmail;
+    private Long addressSq;
     private String resumeGreetingTxt;
     private String resumeIsNotificationYn;
     private String resumeIsRepresentativeYn;
@@ -37,8 +35,6 @@ public class ResumeRegisterRequest {
     private String address;
     private String detailAddress;
     private String sigungu;
-    private String sido;
-    private BigDecimal latitude;
-    private BigDecimal longitude;
-
+    private Double latitude;
+    private Double longitude;
 }

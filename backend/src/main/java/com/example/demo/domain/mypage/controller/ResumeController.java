@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/mypage/resume")
 @RequiredArgsConstructor
 
+@RequiredArgsConstructor
 public class ResumeController {
 
     private final ResumeService resumeService;

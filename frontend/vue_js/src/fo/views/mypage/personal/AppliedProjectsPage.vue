@@ -65,48 +65,79 @@
               <div
                 class="d-flex justify-content-between align-items-center gap-2"
               >
+                <!-- 왼쪽: 제목 / 회사명 -->
                 <div class="d-flex gap-2">
-                  <a href="#" class="text-6 m-0">{{ item.title }} /</a>
-                  <a href="#" class="text-5 m-0">{{ item.company }}</a>
-                </div>
-                <div class="d-flex gap-2" v-if="item.status === '지원중'">
-                  <span class="btn btn-primary btn-sm">지원중</span>
-                  <a
-                    href="#"
-                    class="btn btn-outline btn-primary btn-sm"
-                    @click.prevent="removeProject(item.id)"
-                    >지원 취소</a
+                  <a @click="goToProjectSpec(item)" href="#" class="text-6 m-0"
+                    >{{ item.projectTitle }} /</a
                   >
+                  <span class="text-5 m-0">{{ item.companyTitle }}</span>
                 </div>
-                <div class="d-flex gap-2" v-else-if="item.status === '합격'">
-                  <span class="btn btn-light btn-sm">합격</span>
-                  <a href="#" class="btn btn-outline btn-primary btn-sm"
-                    >인터뷰 일정 선택</a
-                  >
-                </div>
-                <div
-                  class="position-relative d-inline-block"
-                  v-else-if="item.status === '인터뷰 확정'"
-                >
-                  <span class="btn btn-light btn-sm interview"
-                    >인터뷰 확정</span
-                  >
-                  <div
-                    class="position-absolute bg-white border p-2 rounded shadow-sm text-dark font-weight-semibold"
-                    style="
-                      bottom: 80%;
-                      left: 30%;
-                      white-space: nowrap;
-                      display: block;
-                    "
-                  >
-                    {{ item.interviewDate }}
-                  </div>
-                </div>
-                <div class="d-flex gap-2" v-else>
-                  <span class="btn btn-light btn-sm">불합격</span>
-                  <span class="btn btn-light btn-sm">지원 취소</span>
-                  <span class="btn btn-light btn-sm">지원 마감</span>
+
+                <!-- 오른쪽: 상태 버튼들 -->
+                <div class="d-flex gap-2">
+                  <template v-if="item.applicantType === '지원중'">
+                    <span class="btn btn-primary btn-sm">지원중</span>
+                    <span
+                      class="btn btn-primary btn-outline btn-sm"
+                      @click.prevent="
+                        cancelApplication('지원취소', item.applicationSq)
+                      "
+                      >지원취소</span
+                    >
+                  </template>
+
+                  <template v-else-if="item.applicantType === '합격'">
+                    <span class="btn btn-light btn-sm">합격</span>
+                  </template>
+
+                  <template v-else-if="item.applicantType === '인터뷰확정'">
+                    <div
+                      class="interview-wrapper position-relative d-inline-block"
+                    >
+                      <!-- 툴팁 -->
+                      <div
+                        class="interview-tooltip position-absolute bg-white border p-2 rounded shadow-sm text-dark font-weight-semibold"
+                        style="
+                          bottom: 80%;
+                          left: 50%;
+                          transform: translateX(-60%);
+                          white-space: nowrap;
+                        "
+                      >
+                        {{ formatDate(item.interviewDt) }}
+                      </div>
+
+                      <!-- 인터뷰 확정 버튼 -->
+                      <span class="btn btn-light btn-sm interview"
+                        >인터뷰 확정</span
+                      >
+                    </div>
+                  </template>
+
+                  <template v-else-if="item.applicantType === '불합격'">
+                    <span class="btn btn-light btn-sm">불합격</span>
+                  </template>
+                  <template v-else-if="item.applicantType === '지원취소'">
+                    <span class="btn btn-light btn-sm">지원 취소됨</span>
+                  </template>
+
+                  <template v-else-if="item.applicantType === '인터뷰요청중'">
+                    <a
+                      @click.prevent="
+                        fetchAvailableInterviewTimes(
+                          item.projectSq,
+                          item.applicationSq,
+                        )
+                      "
+                      href="#"
+                      class="btn btn-outline btn-primary btn-sm"
+                      >인터뷰 요청중</a
+                    >
+                  </template>
+
+                  <template v-if="item.recruitEnded === true">
+                    <span class="btn btn-light btn-sm">지원 마감</span>
+                  </template>
                 </div>
               </div>
 
@@ -118,13 +149,13 @@
                   <span class="text-dark text-uppercase font-weight-semibold"
                     >지원일자</span
                   >
-                  | {{ item.applyDate }}
+                  | {{ formatDate(item.appliedDt) }}
                 </div>
                 <div class="post-meta text-4">
                   <span class="text-dark text-uppercase font-weight-semibold"
                     >지원자 수</span
                   >
-                  | {{ item.applicantCount }}
+                  | {{ item.applicantCnt }}
                 </div>
               </div>
               <div
@@ -134,13 +165,20 @@
                   <span class="text-dark text-uppercase font-weight-semibold"
                     >지원 이력서</span
                   >
-                  | {{ item.resume }}
+                  |
+                  <span
+                    @click="openResumeDetailModal()"
+                    class="text-muted resume-hover"
+                  >
+                    {{ item.resumeTitle }}
+                  </span>
                 </div>
+
                 <div class="post-meta text-4">
                   <span class="text-dark text-uppercase font-weight-semibold"
                     >열람일자</span
                   >
-                  | {{ item.readDate }}
+                  | {{ formatDate(item.readApplicationDt) }}
                 </div>
               </div>
             </div>
@@ -188,98 +226,148 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useModalStore } from '../../../stores/modalStore.js'
+import InterviewTimeModal from '@/fo/components/mypage/common/InterviewSelectModal.vue'
+import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
+import ResumeDetailModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
 
+import { api } from '@/axios.js'
+
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 const searchType = ref('all')
+const searchAppliedType = ref('')
 const searchKeyword = ref('')
+const searchAppliedKeyword = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 4
 const currentToggle = ref('all')
 
-const projects = ref([
-  {
-    id: 1,
-    title: '프로젝트 제목',
-    company: 'EST Soft',
-    status: '지원중',
-    applyDate: '2025.04.30',
-    applicantCount: 50,
-    resume: '안녕하세요. JAVA 개발자입니다.',
-    readDate: '2025.05.15',
-  },
-  {
-    id: 2,
-    title: '프로젝트 제목',
-    company: 'EST Soft',
-    status: '합격',
-    applyDate: '2025.04.30',
-    applicantCount: 50,
-    resume: '안녕하세요. JAVA 개발자입니다.',
-    readDate: '2025.05.15',
-  },
-  {
-    id: 3,
-    title: '프로젝트 제목',
-    company: 'EST Soft',
-    status: '인터뷰 확정',
-    interviewDate: '2025.05.30 16:00 ~ 17:00',
-    applyDate: '2025.04.30',
-    applicantCount: 50,
-    resume: '안녕하세요. JAVA 개발자입니다.',
-    readDate: '2025.05.15',
-  },
-  {
-    id: 4,
-    title: '프로젝트 제목',
-    company: 'EST Soft',
-    status: '불합격',
-    applyDate: '2025.04.30',
-    applicantCount: '미열람',
-    resume: '안녕하세요. JAVA 개발자입니다.',
-    readDate: '2025.05.15',
-  },
-])
+const selectedInterviewTimes = ref([])
+
+const modalStore = useModalStore()
+
+const projects = ref([])
+
+onMounted(async () => {
+  fetchApplicationList()
+})
+
+function formatDate(dateString) {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}`
+}
+
+const fetchApplicationList = async () => {
+  try {
+    const response = await api.$get(`/projects/applications`, {
+      withCredentials: true, // <-- 필수!
+    })
+
+    projects.value = response.output
+    console.log(projects.value)
+  } catch (e) {
+    console.error('❌ [catch 블록 진입]', e)
+
+    console.error('프로젝트 상세 정보 불러오기 실패', e)
+  }
+}
+
+const updateAppStatus = async (status, applicationSq) => {
+  try {
+    await api.$patch(
+      `/projects/applications/${applicationSq}`,
+      { status },
+      { withCredentials: true },
+    )
+  } catch (e) {
+    console.error('❌ 지원 상태 변경 실패:', e)
+  }
+}
+
+const goToProjectSpec = (project) => {
+  router.push({
+    name: 'UserProjectSpec',
+    params: {
+      project_sq: project.projectSq,
+    },
+  })
+}
+
+const cancelApplication = (status, applicationSq) => {
+  modalStore.openModal(CommonConfirmModal, {
+    title: '프로젝트 지원 취소',
+    message: '취소한 프로젝트 내역은 복구할 수 없습니다. 취소하시겠습니까?',
+    onConfirm: async () => {
+      await updateAppStatus(status, applicationSq) // 1. 상태 변경 완료 대기
+      await fetchApplicationList() // 2. 그 후 리스트 갱신
+      modalStore.closeModal() // 3. 그리고 모달 닫기
+    },
+  })
+}
+
+const filteredCounts = computed(() => {
+  const list = filteredProjects.value
+  return {
+    all: list.length,
+    read: list.filter((p) => p.readApplicationDt !== null).length,
+    unread: list.filter((p) => p.readApplicationDt === null).length,
+  }
+})
 
 const toggleTypes = computed(() => [
   {
     value: 'all',
     label: '전체',
-    count: projects.value.length,
+    count: filteredCounts.value.all,
   },
   {
     value: 'read',
     label: '열람',
-    count: projects.value.filter(
-      (p) => p.status === '합격' || p.status === '인터뷰 확정',
-    ).length,
+    count: filteredCounts.value.read,
   },
   {
     value: 'unread',
     label: '미열람',
-    count: projects.value.filter((p) => p.status === '불합격').length,
+    count: filteredCounts.value.unread,
   },
 ])
 
 const filteredProjects = computed(() => {
   let list = projects.value
   if (currentToggle.value === 'read') {
-    list = list.filter((p) => p.status === '합격' || p.status === '인터뷰 확정')
+    list = list.filter((p) => p.readApplicationDt !== null)
   } else if (currentToggle.value === 'unread') {
-    list = list.filter((p) => p.status === '불합격')
+    list = list.filter((p) => p.readApplicationDt === null)
   }
-  if (searchKeyword.value) {
-    if (searchType.value === 'all') {
+
+  if (searchAppliedKeyword.value) {
+    const keyword = searchAppliedKeyword.value.toLowerCase()
+    if (searchAppliedType.value === 'all') {
       list = list.filter(
         (p) =>
-          p.title.includes(searchKeyword.value) ||
-          p.company.includes(searchKeyword.value),
+          (p.projectTitle || '').toLowerCase().includes(keyword) ||
+          (p.companyTitle || '').toLowerCase().includes(keyword),
       )
-    } else if (searchType.value === 'title') {
-      list = list.filter((p) => p.title.includes(searchKeyword.value))
-    } else if (searchType.value === 'company') {
-      list = list.filter((p) => p.company.includes(searchKeyword.value))
+    } else if (searchAppliedType.value === 'title') {
+      list = list.filter((p) =>
+        (p.projectTitle || '').toLowerCase().includes(keyword),
+      )
+    } else if (searchAppliedType.value === 'company') {
+      list = list.filter((p) =>
+        (p.companyTitle || '').toLowerCase().includes(keyword),
+      )
     }
   }
+
   return list
 })
 
@@ -297,13 +385,57 @@ function setToggle(type) {
 }
 function handleSearch() {
   currentPage.value = 1
+  searchAppliedKeyword.value = searchKeyword.value
+  searchAppliedType.value = searchType.value
 }
-function removeProject(id) {
-  projects.value = projects.value.filter((p) => p.id !== id)
-}
+
 function changePage(page) {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
+}
+
+const fetchAvailableInterviewTimes = async (projectSq, applicationSq) => {
+  try {
+    console.log(projectSq, applicationSq)
+    const response = await api.$get(
+      `/projects/applications/interviews/${projectSq}`,
+      { withCredentials: true },
+    )
+
+    selectedInterviewTimes.value = response.output
+
+    const confirmed = await openInterviewTimeModal(applicationSq)
+    if (confirmed) {
+      await fetchApplicationList()
+    }
+
+    console.log(response.output)
+  } catch (e) {
+    console.error('❌ 인터뷰 시간 조회 실패:', e)
+  }
+}
+
+const openInterviewTimeModal = (applicationSq) => {
+  return new Promise((resolve) => {
+    modalStore.openModal(InterviewTimeModal, {
+      applicationSq,
+      interviewTimes: selectedInterviewTimes.value,
+      onConfirm: (result) => {
+        resolve(result) // 모달 내부에서 확인 눌렀을 때 호출
+        modalStore.closeModal()
+      },
+      onCancel: () => {
+        resolve(null)
+        modalStore.closeModal()
+      },
+    })
+  })
+}
+
+const openResumeDetailModal = () => {
+  modalStore.openModal(ResumeDetailModal, {
+    size: 'modal-xl',
+  })
 }
 </script>
 
@@ -311,5 +443,24 @@ function changePage(page) {
 .simple-post-list {
   list-style: none;
   padding: 0;
+}
+
+.interview-tooltip {
+  bottom: 80%;
+  left: 30%;
+  white-space: nowrap;
+  display: none;
+}
+
+.interview-wrapper:hover .interview-tooltip {
+  display: block;
+}
+
+.resume-hover {
+  cursor: pointer;
+}
+
+.resume-hover:hover {
+  text-decoration: underline;
 }
 </style>
