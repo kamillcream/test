@@ -12,4 +12,5 @@ public class AddressDTO {
     private String sigungu;
     private BigDecimal latitude;
     private BigDecimal longitude;
+    private Long areaCodeSq;
 }

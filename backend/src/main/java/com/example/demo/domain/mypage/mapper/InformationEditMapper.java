@@ -41,13 +41,16 @@ public interface InformationEditMapper {
                         @Param("userPhoneNum") String userPhoneNum,
                         @Param("userNm") String userNm);
 
+        String findSigunguByAreaCodeSq(@Param("areaCodeSq") Long areaCodeSq);
+
         int updateAddress(@Param("userSq") Long userSq,
                         @Param("zonecode") String zonecode,
                         @Param("address") String address,
                         @Param("detailAddress") String detailAddress,
                         @Param("sigungu") String sigungu,
                         @Param("latitude") Double latitude,
-                        @Param("longitude") Double longitude);
+                        @Param("longitude") Double longitude,
+                        @Param("areaCodeSq") Long areaCodeSq);
 
         boolean existsByEmail(@Param("userEmail") String userEmail);
 
@@ -85,7 +88,8 @@ public interface InformationEditMapper {
                         @Param("detailAddress") String detailAddress,
                         @Param("sigungu") String sigungu,
                         @Param("latitude") Double latitude,
-                        @Param("longitude") Double longitude);
+                        @Param("longitude") Double longitude,
+                        @Param("areaCodeSq") Long areaCodeSq);
 
         void deleteAffiliationTagsByCompanySq(@Param("companySq") Long companySq);
 

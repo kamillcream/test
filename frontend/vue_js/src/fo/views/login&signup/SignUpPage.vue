@@ -76,7 +76,7 @@ async function handleSubmit(rawFormData) {
     zonecode: rawFormData.postcode,
     address: rawFormData.address,
     detailAddress: rawFormData.detailAddress || rawFormData.addressDetail,
-    sigungu: rawFormData.sigungu,
+    sigunguCode: rawFormData.sigunguCode,
     latitude: Number(rawFormData.latitude),
     longitude: Number(rawFormData.longitude),
 
@@ -88,14 +88,28 @@ async function handleSubmit(rawFormData) {
   }
   console.log('formData', formData)
   try {
-    await api.$post('/signup', formData)
-    alertStore.show('회원가입이 완료되었습니다!', 'info')
-    companyProfileStore.resetProfile() // ✅ 스토어 초기화
-    router.push('/login')
+    const response = await api.$post('/signup', formData)
+    if (response.status === 'OK') {
+      alertStore.show(
+        response.message || '회원 정보가 성공적으로 수정되었습니다.',
+        'success',
+      )
+      companyProfileStore.resetProfile() // ✅ 스토어 초기화
+      router.push('/login')
+    } else {
+      alertStore.show(
+        response.message || '회원 정보 수정에 실패하였습니다.',
+        'danger',
+      )
+    }
   } catch (err) {
-    // 서버에서 온 에러 메시지
-    const errorMessage =
-      err.response?.data?.message || '회원가입에 실패하였습니다'
+    const status = err.response?.status
+    let errorMessage = '회원가입에 실패하였습니다'
+    if (status === 400) {
+      errorMessage = err.response?.data?.message || '입력값을 확인해주세요.'
+    } else if (status === 500) {
+      errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+    }
     alertStore.show(errorMessage, 'danger')
   }
 }

@@ -23,7 +23,7 @@ public class AffiliationInfoResponseDTO {
     private String zonecode;
     private String address;
     private String detailAddress;
-    private String sigungu;
+    private Long sigunguCode;
     private BigDecimal latitude;
     private BigDecimal longitude;
     private List<String> tagNm;
@@ -44,7 +44,7 @@ public class AffiliationInfoResponseDTO {
                 .zonecode(address.getZonecode())
                 .address(address.getAddress())
                 .detailAddress(address.getDetailAddress())
-                .sigungu(address.getSigungu())
+                .sigunguCode(address.getAreaCodeSq())
                 .latitude(address.getLatitude())
                 .longitude(address.getLongitude())
                 .tagNm(tags)

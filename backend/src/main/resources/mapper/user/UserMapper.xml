@@ -5,8 +5,8 @@
 
   <!-- 1. 지역코드 조회 -->
   <select
-    id="selectAreaCodeSqBySigungu" parameterType="string" resultType="long"> SELECT area_code_sq
-    FROM TBL_AREA_C WHERE area_sigungu = #{sigungu} LIMIT 1 </select>
+    id="selectSigunguByAreaCode" parameterType="Long" resultType="String"> SELECT area_sigungu FROM
+    TBL_AREA_C WHERE area_code_sq = #{areaCodeSq} LIMIT 1 </select>
 
   <!-- 2. 주소 INSERT -->
   <insert id="insertAddress"

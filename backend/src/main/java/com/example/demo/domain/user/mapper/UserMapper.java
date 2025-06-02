@@ -13,7 +13,7 @@ import com.example.demo.domain.user.dto.response.LoginResponseDTO;
 @Mapper
 public interface UserMapper {
 
-    Long selectAreaCodeSqBySigungu(String sigungu);
+    String selectSigunguByAreaCode(Long areaCodeSq);
 
     int insertAddress(AddressDTO addressDTO);
 

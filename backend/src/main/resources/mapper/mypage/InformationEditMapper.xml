@@ -9,14 +9,15 @@
 
     <select id="findUserInfoByUserSq" parameterType="long"
         resultType="com.example.demo.domain.mypage.dto.UserInfoDTO"> SELECT user_sq, user_id,
-        user_email, user_nm, user_birth_dt, user_gender_cd, user_phone_num, user_type_cd,
-        user_profile_image_url, address_sq FROM TBL_USER_M WHERE user_sq = #{userSq} AND
-        user_is_deleted_yn = 'N' </select>
+        user_email, user_nm, user_birth_dt, user_gender_cd, user_phone_num, user_type_cd, address_sq
+        FROM TBL_USER_M WHERE user_sq = #{userSq} AND user_is_deleted_yn = 'N' </select>
 
     <select id="findAddressByAddressSq" parameterType="long"
         resultType="com.example.demo.domain.mypage.dto.AddressDTO"> SELECT zonecode, address,
-        detail_address, sigungu, latitude, longitude FROM TBL_ADDRESS_S WHERE address_sq =
-        #{addressSq} </select>
+        detail_address, sigungu, latitude, longitude, area_code_sq As areaCodeSq FROM TBL_ADDRESS_S
+        WHERE address_sq = #{addressSq} </select>
+    <select id="findSigunguByAreaCodeSq" parameterType="long"
+        resultType="String"> SELECT area_sigungu FROM TBL_AREA_C WHERE area_code_sq = #{areaCodeSq} </select>
 
     <select id="findCommonCodeNameByGenderCd" resultType="String"> SELECT common_code_nm FROM
         TBL_COMMON_CODE_C WHERE common_code_sq = #{codeSq} </select>
@@ -87,8 +88,8 @@
 
     <select id="selectAddressInfo" parameterType="long"
         resultType="com.example.demo.domain.mypage.dto.AddressDTO"> SELECT zonecode, address,
-        detail_address, sigungu, latitude, longitude FROM TBL_ADDRESS_S WHERE address_sq =
-        #{addressSq} </select>
+        detail_address, sigungu, latitude, longitude , area_code_sq FROM TBL_ADDRESS_S WHERE
+        address_sq = #{addressSq} </select>
 
     <select id="selectAffiliationTags" parameterType="long" resultType="string"> SELECT tag_nm FROM
         TBL_COMPANY_TAG_S WHERE company_sq = #{companySq} </select>
@@ -111,8 +112,8 @@
 
     <update id="updateAffiliationAddressByAddressSq" parameterType="map"> UPDATE TBL_ADDRESS_S SET
         zonecode = #{zonecode}, address = #{address}, detail_address = #{detailAddress}, sigungu =
-        #{sigungu}, latitude = #{latitude}, longitude = #{longitude}, address_modified_at_dtm =
-        NOW() WHERE address_sq = #{addressSq} </update>
+        #{sigungu}, latitude = #{latitude}, longitude = #{longitude}, area_code_sq = #{areaCodeSq},
+        address_modified_at_dtm = NOW() WHERE address_sq = #{addressSq} </update>
 
     <delete id="deleteAffiliationTagsByCompanySq" parameterType="long"> DELETE FROM
         TBL_COMPANY_TAG_S WHERE company_sq = #{companySq} </delete>
