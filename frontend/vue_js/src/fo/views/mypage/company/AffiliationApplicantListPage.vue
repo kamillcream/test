@@ -87,7 +87,7 @@
                       'btn-sm',
                       { 'btn-light': applicant.status !== '불합격' },
                     ]"
-                    @click.prevent="updateStatus(applicant.id, '불합격')"
+                    @click.prevent="openStatusFailureModal(applicant.id)"
                   >
                     불합격
                   </a>
@@ -182,11 +182,15 @@
 import { ref } from 'vue'
 import { api } from '@/axios.js'
 
+import { useModalStore } from '../../../stores/modalStore.js'
+import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 const currentFilter = ref('all')
 const searchType = ref('all')
 const searchText = ref('')
 const currentPage = ref(1)
 const totalPages = ref(3)
+
+const modalStore = useModalStore()
 
 const filters = ref([
   { type: 'all', label: '전체', count: 10 },
@@ -283,6 +287,21 @@ const updateStatus = async (applicationSq, status) => {
   } catch (e) {
     console.error('❌ 지원 상태 변경 실패', e)
   }
+}
+
+const openStatusFailureModal = (applicationSq) => {
+  modalStore.openModal(CommonConfirmModal, {
+    message: '해당 지원자를 불합격 처리하겠습니까?',
+    onConfirm: async () => {
+      try {
+        updateStatus(applicationSq, '불합격')
+        modalStore.closeModal()
+      } catch (error) {
+        console.error('삭제 실패:', error)
+        alert('삭제 중 오류가 발생했습니다.')
+      }
+    },
+  })
 }
 </script>
 
