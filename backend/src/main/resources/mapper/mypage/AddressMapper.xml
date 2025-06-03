@@ -5,31 +5,36 @@
 <mapper namespace="com.example.demo.domain.mypage.mapper.MypageAddressMapper">
 
   <!-- 1. 지역코드 조회 -->
-<select id="selectParentAreaCodeBySido" parameterType="string" resultType="long">
-  SELECT area_code_sq
-  FROM TBL_AREA_C
-  WHERE TRIM(area_sigungu) = TRIM(#{sido})
-    AND parent_area_code_sq IS NULL
-</select>
-
-<select id="selectAreaCodeBySigunguAndParent" resultType="long">
-  SELECT area_code_sq
-  FROM TBL_AREA_C
-  WHERE TRIM(area_sigungu) = TRIM(#{sigungu})
-    AND parent_area_code_sq = #{parentCode}
-</select>
-
-
+	   <select id="selectAreaCodeSqBySigungu" parameterType="string" resultType="long">
+        SELECT area_code_sq
+        FROM TBL_AREA_C
+        WHERE area_sigungu = #{sigungu}
+        LIMIT 1
+    </select>
+	
   <!-- 2. 주소 INSERT -->
- <insert id="insertAddress" parameterType="com.example.demo.domain.mypage.dto.AddressDTO"
- 		 useGeneratedKeys="true" keyProperty="addressSq">
-    INSERT INTO TBL_ADDRESS_S (
-    zonecode, address, detail_address, sigungu, 
-    latitude, longitude, area_code_sq
-    ) VALUES (
-    #{zonecode}, #{address}, #{detailAddress}, #{sigungu},
-    #{latitude}, #{longitude}, #{areaCodeSq}
-    )
-</insert>
+	<insert id="insertAddress"
+            parameterType="com.example.demo.domain.mypage.dto.AddressDTO"
+            useGeneratedKeys="true"
+            keyProperty="addressSq">
+        INSERT INTO TBL_ADDRESS_S (
+            zonecode, 
+            address, 
+            detail_address, 
+            sigungu, 
+            latitude, 
+            longitude, 
+            area_code_sq
+        ) VALUES (
+            #{zonecode}, 
+            #{address}, 
+            #{detailAddress}, 
+            #{sigungu}, 
+            #{latitude}, 
+            #{longitude}, 
+            #{areaCodeSq}
+        )
+	</insert>
+
 
 </mapper>

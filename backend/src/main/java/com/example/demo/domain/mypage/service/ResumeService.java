@@ -30,68 +30,74 @@ public class ResumeService {
 	private final ResumeSkillMapper skillMapper;
 	private final AddressRepository addressRepository;
 	private final MypageAddressMapper addressMapper;
-	
-	//이력서 등록
+
+
 	@Transactional
 	public ResumeRegisterResponse registerResume(ResumeRegisterRequest request) {
-		
-		// 유저 정보 기본값 강제
-		request.setUserSq(18L);
-		System.out.println(" request.getUserSq(): " + request.getUserSq()); // 추후에 지우기
+	    
+	    // 유저 정보 강제 지정 (임시)
+	    request.setUserSq(18L);
+	    
+	    // 기본값 설정
+	    setDefaultValues(request);
 
-
-		// null 방지 처리
-		if (request.getResumeIsRepresentativeYn() == null) {
-		    request.setResumeIsRepresentativeYn("N");
-		}
-		if (request.getResumeIsNotificationYn() == null) {
-		    request.setResumeIsNotificationYn("N");
-		}
-		if (request.getResumePhotoUrl() == null) {
-		    request.setResumePhotoUrl("");
-		}
-		
-		
-	    // addressSq가 null인 경우에만 새 주소 insert
+	    // 주소 처리
 	    if (request.getAddressSq() == null) {
-	        // 1. 부모 지역코드(sido → parent)
-	        Long parentAreaCode = addressMapper.selectParentAreaCodeBySido(request.getSido());
-
-	        // 2. 자식 지역코드(sigungu + parent → 최종)
-	        Long areaCodeSq = addressMapper.selectAreaCodeBySigunguAndParent(
-	        	    request.getSigungu(),
-	        	    parentAreaCode
-	        	);
-
-	        // 3. 주소 INSERT
-	        AddressDTO addressDTO = new AddressDTO();
-	        addressDTO.setZonecode(request.getZonecode());
-	        addressDTO.setAddress(request.getAddress());
-	        addressDTO.setDetailAddress(request.getDetailAddress());
-	        addressDTO.setSigungu(request.getSigungu());
-	        addressDTO.setLatitude(request.getLatitude());
-	        addressDTO.setLongitude(request.getLongitude());
-	        addressDTO.setAreaCodeSq(areaCodeSq);
-
-	        addressRepository.insertAddress(addressDTO);
-
-	        // 4. 이력서 INSERT 시 addressSq 설정
-	        request.setAddressSq(addressDTO.getAddressSq());
+	        processAddress(request);
 	    }
 
-	    // 5. 이력서 INSERT
+	    // 이력서 등록
 	    resumeMapper.insertResume(request);
 
-	    // 6. 응답 생성
-	    ResumeRegisterResponse response = new ResumeRegisterResponse();
-	    response.setResumeSq(request.getResumeSq());
-	    response.setResumeTtl(request.getResumeTtl());
-	    response.setRepresentative("Y".equals(request.getResumeIsRepresentativeYn()));
+	    return createResponse(request);
+	}
 
-	    return response;
+	private void setDefaultValues(ResumeRegisterRequest request) {
+	    if (request.getResumeIsRepresentativeYn() == null) {
+	        request.setResumeIsRepresentativeYn("N");
+	    }
+	    if (request.getResumeIsNotificationYn() == null) {
+	        request.setResumeIsNotificationYn("N");
+	    }
+	    if (request.getResumePhotoUrl() == null) {
+	        request.setResumePhotoUrl("");
+	    }
+	}
+
+	private void processAddress(ResumeRegisterRequest request) {
+	    // 시군구 기준으로 지역코드 조회
+		 System.out.println("request.getSigungu() = " + request.getSigungu());
+		    Long areaCodeSq = addressMapper.selectAreaCodeSqBySigungu(request.getSigungu());
+		    System.out.println("조회된 areaCodeSq = " + areaCodeSq);
+
+		    if (areaCodeSq == null) {
+		        throw new IllegalArgumentException("[" + request.getSigungu() + "]에 해당하는 지역 코드가 존재하지 않습니다.");
+		    }
+
+	    // 주소 객체 생성 및 저장
+	    AddressDTO addressDTO = AddressDTO.builder()
+	        .zonecode(request.getZonecode())
+	        .address(request.getAddress())
+	        .detailAddress(request.getDetailAddress())
+	        .sigungu(request.getSigungu())
+	        .latitude(request.getLatitude())
+	        .longitude(request.getLongitude())
+	        .areaCodeSq(areaCodeSq)
+	        .build();
+
+	    addressRepository.insertAddress(addressDTO);
+	    request.setAddressSq(addressDTO.getAddressSq());
+	}
+
+	private ResumeRegisterResponse createResponse(ResumeRegisterRequest request) {
+	    return ResumeRegisterResponse.builder()
+	        .resumeSq(request.getResumeSq())
+	        .resumeTtl(request.getResumeTtl())
+	        .representative("Y".equals(request.getResumeIsRepresentativeYn()))
+	        .build();
 	}
 	
-
+	
 	//대표 이력서 설정
 	@Transactional
 	public void setMainResume(Long resumSq, Long userSq) {

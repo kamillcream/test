@@ -13,7 +13,7 @@
 	        user_sq,
 	        address_sq,
 	        resume_ttl,
-	        resume_photo_url,         
+	        resume_photo_url,
 	        resume_nm,
 	        resume_birth_dt,         
 	        resume_phone_num,         
@@ -33,43 +33,12 @@
 	        #{resumePhoneNum},         
 	        #{resumeEmail},
 	        #{resumeGreetingTxt},
-	        #{resumeIsNotificationYn},
-	        'N', 
 	        #{resumeIsRepresentativeYn},
+	        'N', 
+	        #{resumeIsNotificationYn},
 	        NOW()
 	    )
 	</insert>
-
-  <!--이력서 등록시 주소관련 -->
-  <!--상위 지역 코드 sido 조회 -->
-  <select id="selectAreaParentCodeBySido" parameterType="string" resultType="long">
-	SELECT area_code_sq
-	FROM TBL_AREA_C
-	WHERE TRIM(area_sido) = TRIM(#{sido})
-	  AND parent_area_code_sq IS NULL
-  </select>
-
-  <!--하위 지역 코드(sigungu) 조회 -->
-  <select id="selectAreaCodeBySigunguAndParent" resultType="long">
-  	SELECT area_code_sq
-  	FROM TBL_AREA_C
-  	WHERE TRIM(area_sigungu) = TRIM(#{sigungu})
-      AND parent_area_code_sq = #{parentCode}
-  </select>
-  
-  <!--주소 INSERT-->
-  <insert id="insertAddress"
-        parameterType="com.example.demo.domain.user.dto.AddressDTO"
-        useGeneratedKeys="true"
-        keyProperty="addressSq">
-	INSERT INTO TBL_ADDRESS_S (
-  		zonecode, address, detail_address, area_code_sq,
-  		latitude, longitude
-  	) VALUES (
-    	#{zonecode}, #{address}, #{detailAddress}, #{areaCodeSq},
-   		#{latitude}, #{longitude}
-  	)
-</insert>
 
 
   <!-- 이력서 전체 조회 (userSq 기준) -->

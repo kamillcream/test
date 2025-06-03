@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-/* global daum */ //주소 전역 변수 선언
+/* global daum, kakao */ // 주소/좌표 API 전역 선언
 
 import { onMounted, defineProps } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
@@ -24,18 +24,15 @@ const modalStore = useModalStore()
 onMounted(() => {
   new daum.Postcode({
     onComplete: function (data) {
-      let addr = ''
-      if (data.userSelectedType === 'R') {
-        addr = data.roadAddress
-      } else {
-        addr = data.jibunAddress
-      }
-
-      // 시도 + 시군구 분리
+      const addr =
+        data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress
       const parts = addr.split(' ')
-      const sido = parts[0] || ''
-      const sigungu = parts[1] || ''
-      // 정확한 sigungu가 추출되었는지 다시 검증
+      let sido = parts[0] || ''
+      let sigungu = parts[1] || ''
+      // 복합명칭(예: "광주 동구") 처리
+      if (sido.endsWith('시') && parts.length > 2) {
+        sigungu = parts[1] + ' ' + parts[2]
+      }
       if (!sido || !sigungu) {
         alert(
           '주소에서 시군구 정보를 추출할 수 없습니다. 다른 주소를 선택해주세요.',
@@ -43,21 +40,42 @@ onMounted(() => {
         return
       }
 
-      props.onComplete?.({
-        zonecode: data.zonecode,
-        address: addr,
-        sido,
-        sigungu,
-        latitude: data.latitude ? Number(data.latitude) : null,
-        longitude: data.longitude ? Number(data.longitude) : null,
-      })
+      // 좌표 변환
+      const geocoder = new kakao.maps.services.Geocoder()
+      geocoder.addressSearch(addr, (result, status) => {
+        if (status === kakao.maps.services.Status.OK) {
+          const latitude = result[0].y
+          const longitude = result[0].x
 
-      console.log('[주소 선택 완료]', { sido, sigungu, addr })
-      modalStore.closeModal()
+          props.onComplete?.({
+            zonecode: data.zonecode,
+            address: addr,
+            sido,
+            sigungu,
+            latitude,
+            longitude,
+          })
+
+          console.log('[주소 선택 완료]', {
+            zonecode: data.zonecode,
+            address: addr,
+            sido,
+            sigungu,
+            latitude,
+            longitude,
+          })
+
+          modalStore.closeModal()
+        } else {
+          alert('선택한 주소의 좌표 정보를 찾을 수 없습니다.')
+          console.warn('[좌표 변환 실패]', addr)
+        }
+      })
     },
   }).embed(document.getElementById('daum-postcode'))
 })
 </script>
+
 <style scoped>
 .modal-layer {
   position: fixed;
@@ -82,7 +100,7 @@ onMounted(() => {
   box-sizing: border-box;
 }
 .modal-header {
-  height: 40px; /* 닫기 버튼 높이만큼 */
+  height: 40px;
   display: flex;
   justify-content: flex-end;
   align-items: center;

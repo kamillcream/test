@@ -490,10 +490,10 @@
                 class="btn btn-rounded btn-3d btn-light mb-2 position-relative"
                 style="padding-right: 24px"
               >
-                {{ certificate.name }}
+                {{ certificate.certificateName }}
                 <span
-                  class="text-grey ms-2 position-absolute end-0 me-2"
-                  style="top: 50%; transform: translateY(-50%)"
+                  @click.stop="removeCertificate(index)"
+                  class="delete-icon"
                   title="삭제"
                   @click="removeCertificate(index)"
                   >×</span
@@ -619,30 +619,11 @@ const resumeSq = route.params.resumeSq
 const openAddressSearchModal = () => {
   modalStore.openModal(AddressSearchModal, {
     onComplete: (data) => {
-      // 기본 정보 저장
-      resumeData.postcode = data.zonecode
-      resumeData.address = data.address
-      resumeData.sigungu = data.sigungu
-      resumeData.sido = data.sido
-
-      // 좌표 초기화 (변환 전 잠깐 null로 비워두기)
-      resumeData.latitude = null
-      resumeData.longitude = null
-
-      // 주소 → 좌표 변환
-      const geocoder = new window.kakao.maps.services.Geocoder()
-      geocoder.addressSearch(data.address, function (result, status) {
-        if (status === window.kakao.maps.services.Status.OK) {
-          resumeData.latitude = result[0].y
-          resumeData.longitude = result[0].x
-          console.log('[좌표 변환 성공]', result[0])
-        } else {
-          resumeData.latitude = null
-          resumeData.longitude = null
-          console.warn('[좌표 변환 실패]', data.address)
-          alert('선택한 주소의 좌표 정보를 찾을 수 없습니다.')
-        }
-      })
+      if (!data.sido || !data.sigungu) {
+        alert('주소 선택에 실패했습니다. 다시 시도해주세요.')
+        return
+      }
+      Object.assign(resumeData, data)
     },
   })
 }
@@ -650,7 +631,7 @@ const openAddressSearchModal = () => {
 const openDetailModal = (resumeParam = null) => {
   modalStore.openModal(ResumeModal, {
     resume: resumeParam,
-    onConfirm: submitResume, // 함수 호출 ❌ → 함수 참조 ⭕
+    onConfirm: submitResume,
 
     // 필요하면 다른 props도 여기서 전달 가능
   })
@@ -674,7 +655,6 @@ const resumeData = reactive({
   address: '',
   addressDetail: '',
   postcode: '',
-  sido: '',
   sigungu: '',
   latitude: '',
   longitude: '',
@@ -751,8 +731,14 @@ const showProjectForm = () => {
 // 자격증 입력 폼 표시 로직
 const showCertificateForm = () => {
   modalStore.openModal(LicenseModal, {
-    onComplete: (certificate) => {
-      resumeData.certificates.push(certificate)
+    onLicenseSelected: (license) => {
+      resumeData.certificates.push({
+        certificateName: license.name,
+        certificateCode: license.id,
+        certificateLevel: license.level,
+        certificateIssuer: license.org,
+        certificateDate: '', // 사용자 직접 입력 예정
+      })
     },
   })
 }
@@ -860,8 +846,7 @@ const submitResume = async () => {
     resumeEmail: email,
     address: resumeData.address,
     detailAddress: resumeData.addressDetail,
-    zonecode: resumeData.postcode,
-    sido: resumeData.sido,
+    zonecode: resumeData.zonecode,
     sigungu: resumeData.sigungu,
     latitude: resumeData.latitude,
     longitude: resumeData.longitude,
@@ -876,7 +861,7 @@ const submitResume = async () => {
     attachments: resumeData.attachments,
   }
 
-  console.log('[📤 최종 전송 데이터]', payload)
+  console.log('[최종 전송 데이터]', payload)
 
   try {
     if (resumeSq) {
