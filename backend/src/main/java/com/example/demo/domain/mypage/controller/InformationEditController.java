@@ -88,6 +88,8 @@ public class InformationEditController {
 
             String companyName = informationEditService.getCompanyName(userSq);
 
+            String profileImageUrl = informationEditService.getProfileImageUrl(userSq);
+
             CompanyUserInfoResponseDTO response = CompanyUserInfoResponseDTO.builder()
                     .userId(user.getUserId())
                     .userEmail(user.getUserEmail())
@@ -96,6 +98,7 @@ public class InformationEditController {
                     .zonecode(address != null ? address.getZonecode() : null)
                     .address(address != null ? address.getAddress() : null)
                     .detailAddress(address != null ? address.getDetailAddress() : null)
+                    .userProfileImageUrl(profileImageUrl != null ? profileImageUrl : null)
                     .sigunguCode(address != null ? address.getAreaCodeSq() : null)
                     .latitude(address != null ? address.getLatitude() : null)
                     .longitude(address != null ? address.getLongitude() : null)
