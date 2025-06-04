@@ -1,5 +1,7 @@
 package com.example.demo.domain.project.dto.request;
 
+import com.example.demo.domain.company.dto.request.BaseRequest;
+
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,18 +12,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProjectSearchRequest {
+public class ProjectSearchRequest extends BaseRequest{
 
     @NotNull(message = "지역 코드(addressCodeSq)는 필수입니다.")
     private Long addressCodeSq;
-
-    @NotNull(message = "페이지 번호(offset)는 필수입니다.")
-    @Min(value = 1, message = "페이지 번호는 1 이상이어야 합니다.")
-    private Integer offset;
-
-    @NotNull(message = "페이지 크기(size)는 필수입니다.")
-    @Min(value = 1, message = "페이지 크기는 1 이상이어야 합니다.")
-    private Integer size;
 
     private String sortBy;                  // 예: "project_start_dt"
     private String sortOrder;               // 예: "asc" 또는 "desc"
