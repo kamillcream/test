@@ -11,7 +11,10 @@ import org.springframework.stereotype.Service;
 import com.example.demo.common.ParentCodeEnum;
 import com.example.demo.common.mapper.CommonCodeMapper;
 import com.example.demo.domain.company.dto.CompanyMemberVo;
-import com.example.demo.domain.company.dto.CompanyStatusRequest;
+import com.example.demo.domain.company.dto.request.BaseRequest;
+import com.example.demo.domain.company.dto.request.CompanyMemberSearchRequest;
+import com.example.demo.domain.company.dto.request.CompanyStatusRequest;
+import com.example.demo.domain.company.dto.response.CompanyMemberResponse;
 import com.example.demo.domain.company.mapper.CompanyMapper;
 import com.example.demo.domain.mypage.mapper.ResumeCareerMapper;
 import com.example.demo.domain.mypage.mapper.ResumeMapper;
@@ -58,8 +61,11 @@ public class CompanyService {
 		return companyMapper.findBizNumByCompanySq(companySq);
 	}
 	
-	public List<CompanyMemberVo> fetchMemberList(Long companySq) {
-		List<Long> companyUserSqs = companyMapper.findUserSqsByCompanySq(companySq);
+	public CompanyMemberResponse fetchMemberList(Long companySq, CompanyMemberSearchRequest request) {
+		Long totalCount = companyMapper.countUsersBySearch(companySq, request);
+
+		
+		List<Long> companyUserSqs = companyMapper.findUserSqsByCompanySqAndSearch(companySq, request);
 		List<CompanyMemberVo> responses = new ArrayList<>();
 		
 		companyUserSqs.forEach(
@@ -76,12 +82,16 @@ public class CompanyService {
 					
 					List<String> skillTags = resumeSkillMapper.findAllNmBySq(repResumeSq);
 					
-					responses.add(CompanyMemberVo.from(sq, resumeNmTtlVo, joinDt, leaveDt, skillTags, careerYr));
+					Long leavedYn = companyMapper.findCompanyMemberStatus(sq);
+					
+					responses.add(CompanyMemberVo.from(sq, resumeNmTtlVo, joinDt, leaveDt, skillTags, careerYr, leavedYn));
 					
 				}
 		);
-		
-		return responses;
+		int page = (request.getOffset() / request.getSize()) + 1;
+	    int totalPages = (int) Math.ceil((double) totalCount / request.getSize());
+
+	    return new CompanyMemberResponse(page, request.getSize(), totalCount, totalPages, responses);
 	}
 	
 	public void updateMemberStatus(Long companySq, CompanyStatusRequest request) {
