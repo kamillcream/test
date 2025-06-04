@@ -5,11 +5,14 @@ import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.example.demo.common.AmazonS3.AmazonS3Service;
 import com.example.demo.common.AmazonS3.UploadedFileDTO;
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
+import com.example.demo.domain.mypage.dto.ProfileImageInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
 import com.example.demo.domain.mypage.dto.request.AffiliationInfoUpdateRequestDTO;
 import com.example.demo.domain.mypage.dto.request.CompanyUserInfoUpdateRequestDTO;
@@ -194,6 +197,7 @@ public class InformationEditService {
 
     private final AmazonS3 amazonS3;
     private final String bucket = "freelancer-service";
+    private final AmazonS3Service amazonS3Service;
 
     public String getProfileImageUrl(Long userSq) {
         Long fileSq = informationEditRepository.findFileSqByUserSq(userSq);
@@ -204,7 +208,32 @@ public class InformationEditService {
         if (file == null)
             return null;
 
-        return amazonS3.getUrl(bucket, "profile-images/" + file.getSavedName()).toString();
+        return amazonS3.getUrl(bucket, file.getSavedName()).toString();
     }
 
+    public void updateProfileImage(Long userSq, MultipartFile multipartFile) {
+        // 1. 기존 이미지 조회 및 삭제
+        ProfileImageInfoDTO existing = informationEditRepository.findFileByUserSq(userSq);
+        if (existing != null) {
+            amazonS3Service.deleteFile(existing.getSavedName());
+            informationEditRepository.deleteUserProfileImageByUserSq(userSq);
+        }
+
+        // 2. 새 이미지 업로드
+        UploadedFileDTO uploaded = amazonS3Service.uploadFile(multipartFile);
+
+        // 3. DB 저장용 DTO 생성
+        ProfileImageInfoDTO fileInfo = ProfileImageInfoDTO.builder()
+                .originalName(uploaded.getOriginalName())
+                .savedName(uploaded.getSavedName())
+                .contentType(uploaded.getContentType())
+                .size(uploaded.getSize())
+                .build();
+
+        // 4. 파일 정보 저장
+        informationEditRepository.saveFile(fileInfo);
+
+        // 5. 사용자-파일 매핑 저장
+        informationEditRepository.saveUserProfileImage(userSq, fileInfo.getFileSq());
+    }
 }

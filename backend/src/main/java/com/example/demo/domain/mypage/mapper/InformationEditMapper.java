@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import com.example.demo.common.AmazonS3.UploadedFileDTO;
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
+import com.example.demo.domain.mypage.dto.ProfileImageInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
 
 @Mapper
@@ -100,4 +101,12 @@ public interface InformationEditMapper {
         Long selectFileSqByUserSq(@Param("userSq") Long userSq);
 
         UploadedFileDTO selectFileBySq(@Param("fileSq") Long fileSq);
+
+        int insertFile(ProfileImageInfoDTO fileInfo);
+
+        int insertUserProfileImage(@Param("userSq") Long userSq, @Param("fileSq") Long fileSq);
+
+        int deleteUserProfileImageByUserSq(@Param("userSq") Long userSq);
+
+        ProfileImageInfoDTO findFileByUserSq(@Param("userSq") Long userSq);
 }

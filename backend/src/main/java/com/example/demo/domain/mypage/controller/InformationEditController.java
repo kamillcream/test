@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.common.ApiResponse;
 import com.example.demo.domain.mypage.dto.AddressDTO;
@@ -162,4 +164,21 @@ public class InformationEditController {
         }
     }
 
+    @PostMapping("/profile-image/update")
+    public ApiResponse<Void> updateProfileImage(
+            @AuthenticationPrincipal Long userSq,
+            @RequestParam("file") MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "업로드할 파일이 없습니다.");
+        }
+
+        try {
+            informationEditService.updateProfileImage(userSq, file);
+            return ApiResponse.of(HttpStatus.OK, "프로필 이미지가 성공적으로 업데이트되었습니다.", null);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "프로필 이미지 업데이트 중 오류가 발생했습니다.");
+        }
+
+    }
 }

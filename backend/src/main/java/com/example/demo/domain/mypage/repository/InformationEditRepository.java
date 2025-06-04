@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import com.example.demo.common.AmazonS3.UploadedFileDTO;
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
+import com.example.demo.domain.mypage.dto.ProfileImageInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
 import com.example.demo.domain.mypage.dto.request.AffiliationInfoUpdateRequestDTO;
 import com.example.demo.domain.mypage.mapper.InformationEditMapper;
@@ -138,5 +139,21 @@ public class InformationEditRepository {
 
     public UploadedFileDTO findByFileSq(Long fileSq) {
         return informationEditMapper.selectFileBySq(fileSq);
+    }
+
+    public void saveFile(ProfileImageInfoDTO fileInfo) {
+        informationEditMapper.insertFile(fileInfo);
+    }
+
+    public void saveUserProfileImage(Long userSq, Long fileSq) {
+        informationEditMapper.insertUserProfileImage(userSq, fileSq);
+    }
+
+    public void deleteUserProfileImageByUserSq(Long userSq) {
+        informationEditMapper.deleteUserProfileImageByUserSq(userSq);
+    }
+
+    public ProfileImageInfoDTO findFileByUserSq(Long userSq) {
+        return informationEditMapper.findFileByUserSq(userSq);
     }
 }

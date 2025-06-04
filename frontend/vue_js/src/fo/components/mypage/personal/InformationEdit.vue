@@ -6,28 +6,43 @@
         <h2 class="font-weight-normal text-7 mb-0">회원 정보 수정</h2>
       </div>
 
-      <!-- 프로필 이미지 (사람 아이콘으로 대체) -->
+      <!-- 프로필 이미지 (사람 아이콘 또는 URL 이미지) -->
       <div class="text-center mb-4">
         <div class="position-relative d-inline-block">
-          <!-- 기본 이미지 아이콘 (사람 아이콘) -->
-          <div class="rounded-circle">
-            <i class="fas fa-user text-muted"></i>
+          <!-- 조건부 렌더링: 이미지가 있으면 이미지 표시, 없으면 아이콘 표시 -->
+          <div
+            class="rounded-circle overflow-hidden"
+            style="width: 100px; height: 100px"
+          >
+            <img
+              v-if="userProfileImageUrl"
+              :src="userProfileImageUrl"
+              alt="Profile Image"
+              class="img-fluid w-100 h-100 object-fit-cover"
+            />
+            <div v-else class="rounded-circle">
+              <i class="fas fa-user text-muted"></i>
+            </div>
           </div>
 
-          <!-- 사진 변경 버튼 (카메라 아이콘이 이미지의 우측 하단 밖으로 걸쳐짐) -->
+          <!-- 사진 변경 버튼 -->
           <label
             for="profileImage"
             class="btn btn-light btn-sm position-absolute add"
+            style="bottom: 0; right: 0"
           >
             <i class="fas fa-camera text-muted"></i>
           </label>
 
           <!-- 파일 입력 필드 (보이지 않음) -->
           <input
+            ref="profileImageInput"
             type="file"
             id="profileImage"
             class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
             title="사진 변경"
+            @change="onFileChange"
+            accept="image/*"
           />
         </div>
       </div>
@@ -419,7 +434,9 @@ const alertStore = useAlertStore()
 
 const isConfirmed = ref(false)
 
-const userProfileImageUrl = ref('')
+const userProfileImageUrl = ref(null)
+const profileImageInput = ref(null)
+
 // 상태 변수들
 const error = ref(null)
 
@@ -456,6 +473,40 @@ const editing = reactive({
   userPhoneNum: false,
   address: false,
 })
+
+// 파일 변경 이벤트 핸들러
+const onFileChange = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    // API 호출 (경로 및 토큰 등 필요에 맞게 변경)
+    const response = await api.$post(
+      '/mypage/edit/profile-image/update',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    )
+
+    if (response.status === 'OK') {
+      // 성공하면 새 이미지 URL을 다시 조회하거나, 클라이언트에서 미리 URL 생성해서 교체 가능
+      // 여기선 간단히 URL.createObjectURL 로 미리보기 처리
+      userProfileImageUrl.value = URL.createObjectURL(file)
+      alert('프로필 이미지가 업데이트되었습니다.')
+    } else {
+      alert('프로필 이미지 업데이트에 실패했습니다.')
+    }
+  } catch (error) {
+    alert('프로필 이미지 업데이트 중 오류가 발생했습니다.')
+    console.error(error)
+  }
+}
 
 const passwordError = ref('')
 const passwordValid = ref(false)

@@ -130,5 +130,24 @@
         SELECT file_original_nm AS originalName, file_save_nm AS savedName, file_typ AS contentType,
         file_size AS size FROM TBL_COMMON_FILE_S WHERE file_sq = #{fileSq} </select>
 
+    <!-- 파일 메타데이터 저장 -->
+    <insert id="insertFile" useGeneratedKeys="true" keyProperty="fileSq"> INSERT INTO
+        TBL_COMMON_FILE_S ( file_original_nm, file_save_nm, file_typ, file_size ) VALUES (
+        #{originalName}, #{savedName}, #{contentType}, #{size} ) </insert>
+
+    <!-- 사용자 프로필 이미지 매핑 저장 -->
+    <insert id="insertUserProfileImage"> INSERT INTO TBL_USER_PROFILE_IMAGE_S ( user_sq, file_sq )
+        VALUES ( #{userSq}, #{fileSq} ) </insert>
+
+    <!-- 사용자 기존 프로필 이미지 매핑 삭제 -->
+    <delete id="deleteUserProfileImageByUserSq"> DELETE FROM TBL_USER_PROFILE_IMAGE_S WHERE user_sq
+        = #{userSq} </delete>
+
+    <!-- 사용자 기존 파일 정보 조회 -->
+    <select id="findFileByUserSq"
+        resultType="com.example.demo.domain.mypage.dto.ProfileImageInfoDTO"> SELECT f.file_sq AS
+        fileSq, f.file_original_nm AS originalName, f.file_save_nm AS savedName, f.file_typ AS
+        contentType, f.file_size AS size FROM TBL_COMMON_FILE_S f JOIN TBL_USER_PROFILE_IMAGE_S up
+        ON up.file_sq = f.file_sq WHERE up.user_sq = #{userSq} </select>
 
 </mapper>
