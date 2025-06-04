@@ -13,11 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.common.ParentCodeEnum;
 import com.example.demo.common.mapper.CommonCodeMapper;
+import com.example.demo.domain.company.dto.request.BaseRequest;
 import com.example.demo.domain.company.mapper.CompanyMapper;
 import com.example.demo.domain.company.service.CompanyService;
 import com.example.demo.domain.project.dto.AddressInsertDto;
 
 import com.example.demo.domain.project.dto.UserRole;
+import com.example.demo.domain.project.dto.request.CompanyFilterRequest;
 import com.example.demo.domain.project.dto.request.ContractInsertRequest;
 import com.example.demo.domain.project.dto.request.JobInsertRequest;
 import com.example.demo.domain.project.dto.request.ProjectApplyRequest;
@@ -32,6 +34,7 @@ import com.example.demo.domain.project.dto.response.InterviewTimeInfoResponse;
 import com.example.demo.domain.project.dto.response.ProjectDetailResponse;
 import com.example.demo.domain.project.dto.response.ProjectFormDataResponse;
 import com.example.demo.domain.project.dto.response.ProjectListResponse;
+import com.example.demo.domain.project.dto.response.ProjectRecruitStatus;
 import com.example.demo.domain.project.dto.response.SingleSkillInfoResponse;
 import com.example.demo.domain.project.entity.Project;
 import com.example.demo.domain.project.entity.ProjectApplicationEntity;
@@ -106,41 +109,68 @@ public class ProjectService {
 	    return parentName + " " + subDistrict.getAreaName();
 	}
 	
-	public ProjectListResponse fetchAllProject(ProjectSearchRequest request){
+	public ProjectListResponse fetchAllProject(JwtAuthenticationToken token, ProjectSearchRequest request){
 		List<Project> projects = projectMapper.findProjectsBySearch(request);
-		int totalCount = projectMapper.countProjectsBySearch(request);
+		Long totalCount = projectMapper.countProjectsBySearch(request);
 		List<ProjectSummary> responses = new ArrayList<>();
+		
+		Long userSq = token.getUserSq();
 		
 		projects.forEach(
 			p->{
 				String address = fetchAddressString(p.getAddressSq());
-				responses.add(ProjectSummary.from(p, projectUtil, address));
+				String status = projectMapper.judgeProjectRecruitStatus(p.getProjectSq());
+
+				String hasScrapped = (scrapMapper.findScrapSqByUserSqAndProjectSq(userSq, p.getProjectSq()) != null) ? "Y" : "N";
+				
+				responses.add(ProjectSummary.from(p, projectUtil, address, status, hasScrapped));
 			}
 		);
 		
-		return new ProjectListResponse(request.getOffset(), request.getSize(), totalCount, responses);	
+		int page = (request.getOffset() / request.getSize()) + 1;
+	    int totalPages = (int) Math.ceil((double) totalCount / request.getSize());
+		
+		return new ProjectListResponse(page, request.getSize(), totalCount, totalPages, responses);	
 	}
 	
-	public ProjectListResponse fetchCompanyProject(JwtAuthenticationToken jwtAuthenticationToken) {
+	public ProjectListResponse fetchCompanyProject(CompanyFilterRequest request, JwtAuthenticationToken jwtAuthenticationToken) {
 
+		Long totalCount = projectMapper.countCompanyProjectsBySearch(request);
+		
 		Long userSq = jwtAuthenticationToken.getUserSq();
 		Long userTypeCd = jwtAuthenticationToken.getUserTypeCd();
 		
 		long companySq = companyService.fetchCompanySq(userSq, userTypeCd);
 		
-		List<Project> projects = projectMapper.findProjectsByCompany(companySq);
+		List<Project> projects = projectMapper.findProjectsByCompany(companySq, request);
 		
 		List<ProjectSummary> responses = new ArrayList<>();
 		
 		projects.forEach(
 			p->{
 				String address = fetchAddressString(p.getAddressSq());
-				responses.add(ProjectSummary.from(p, projectUtil, address));
+				String status = projectMapper.judgeProjectRecruitStatus(p.getProjectSq());
+				
+				String hasScrapped = (scrapMapper.findScrapSqByUserSqAndProjectSq(userSq, p.getProjectSq()) != null) ? "Y" : "N";
+				responses.add(ProjectSummary.from(p, projectUtil, address, status, hasScrapped));
 			}
 		);
 		
-		return new ProjectListResponse(1, 10, 10, responses);
+		int page = (request.getOffset() / request.getSize()) + 1;
+	    int totalPages = (int) Math.ceil((double) totalCount / request.getSize());
 		
+		return new ProjectListResponse(page, request.getSize(), totalCount, totalPages, responses);	
+		
+	}
+	
+	public ProjectRecruitStatus fetchCompanyProjectCount (CompanyFilterRequest request, JwtAuthenticationToken jwtAuthenticationToken) {
+
+		Long userSq = jwtAuthenticationToken.getUserSq();
+		Long userTypeCd = jwtAuthenticationToken.getUserTypeCd();
+		
+		Long companySq = companyService.fetchCompanySq(userSq, userTypeCd);
+		
+		return projectMapper.countCompanyProjectsByStatus(request, companySq);
 	}
 
 	public ProjectDetailResponse fetchProject(Long projectSq, JwtAuthenticationToken token){
@@ -156,13 +186,20 @@ public class ProjectService {
 		List<GroupSkillInfoResponse> preferSkills = groupingSkills(projectMapper.findPreferSkillsByProjectSq(projectSq));
 		String projectAddress = fetchAddressString(p.getAddressSq());
 		
-		Long scrapSq = scrapMapper.findScrapSqByUserSq(userSq);
+		Long scrapSq = scrapMapper.findScrapSqByUserSqAndProjectSq(userSq, projectSq);
 		int hasScrapped = (scrapSq != null) ? 1 : 0;
 		
 		// TODO: mapper로 지원 여부 확인
 		int hasApplied = 1; 
 		
+		System.out.println("==============================");
+		System.out.println("BEFORE USERROLE");
+		System.out.println("==============================");
 		UserRole userRole = findUserRole(token, p);
+
+		System.out.println("==============================");
+		System.out.println("AFTER USERROLE : " + userRole.toString());
+		System.out.println("==============================");
 		
 		return ProjectDetailResponse.from(p,projectUtil, reqSkills, preferSkills, projectAddress, hasScrapped, hasApplied, userRole);
 	}
@@ -246,7 +283,7 @@ public class ProjectService {
 		boolean hasScrapped = scrapRequest.isHasScrapped();
 		if(!hasScrapped) { 
 			long companySq = projectMapper.findCompanySqFromProjectSq(projectSq);
-			long scrapTypeCd = 1;
+			long scrapTypeCd = commonCodeMapper.findCommonCodeSqByName(scrapRequest.getTarget(), ParentCodeEnum.SCRAP_TYPE.getCode());
 			ScrapInsertRequest scrapInsertRequest = new ScrapInsertRequest(userSq, companySq, projectSq, scrapTypeCd);
 			projectMapper.insertScrap(scrapInsertRequest);
 			projectMapper.increaseScrap(projectSq);
@@ -369,19 +406,23 @@ public class ProjectService {
 		Long userSq = token.getUserSq();
 		Long userTypeCd = token.getUserTypeCd();
 		Long companySq = project.getCompanySq();
+		Long userCompanySq = companyService.fetchCompanySq(userSq);
 		String ownedCompanyBizNum = companyService.fetchCompanyBizNumByCompany(companySq);
 		
+		// 개인 사용자
 		if(userTypeCd.equals(commonCodeMapper.findCommonCodeSqByEngName("PERSONAL", ParentCodeEnum.MEMBER_TYPE.getCode()))) {
 			return UserRole.PERSONAL;
 		} 
+		// 프로젝트 공고를 작성한 사람
 		else if(userTypeCd.equals(commonCodeMapper.findCommonCodeSqByEngName("COMPANY", ParentCodeEnum.MEMBER_TYPE.getCode()))
 				&& userSq.equals(companyService.fetchUserSq(companySq))
-				&& ownedCompanyBizNum.equals(companyService.fetchCompanyBizNumByUser(userSq))) {
+				&& ownedCompanyBizNum.equals(companyService.fetchCompanyBizNumByCompany(userCompanySq))) {
 			return UserRole.COMPANY_AUTHOR;
 		} 
+		// 위 사람과 같은 기업에 속하는 멤버
 		else if(userTypeCd.equals(commonCodeMapper.findCommonCodeSqByEngName("COMPANY", ParentCodeEnum.MEMBER_TYPE.getCode()))
 				&& !userSq.equals(companyService.fetchUserSq(companySq))
-				&& ownedCompanyBizNum.equals(companyService.fetchCompanyBizNumByUser(userSq))) {
+				&& ownedCompanyBizNum.equals(companyService.fetchCompanyBizNumByCompany(userCompanySq))) {
 			return UserRole.COMPANY_MEMBER;
 		}
 		return UserRole.COMPANY_EXTERNAL;

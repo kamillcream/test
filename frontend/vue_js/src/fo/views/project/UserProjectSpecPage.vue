@@ -152,6 +152,7 @@
 
             <div class="d-flex justify-content-center align-items-center gap-3">
               <a
+                v-if="project.userRole === 'PERSONAL'"
                 @click="applyCheck"
                 href="#"
                 class="btn btn-lg btn-rounded btn-primary btn-lg"
@@ -159,11 +160,20 @@
                 지원하기
               </a>
               <a
+                v-if="project.userRole === 'PERSONAL'"
                 @click="clickScrap"
                 href="#"
                 class="btn btn-lg btn-rounded btn-light btn-lg"
               >
                 {{ project.isScrap === 1 ? '스크랩 해제' : '스크랩' }}
+              </a>
+              <a
+                v-if="project.userRole === 'COMPANY_MEMBER'"
+                @click="applyCheck"
+                href="#"
+                class="btn btn-lg btn-rounded btn-primary btn-lg"
+              >
+                해당 프로젝트에는 참여할 수 없습니다.
               </a>
             </div>
           </div>
@@ -242,6 +252,7 @@ const clickScrap = async () => {
     const hasScrapped = project.value.isScrap === 1
     await api.$post(`/projects/${projectSq}/scraps`, {
       hasScrapped,
+      target: '프로젝트',
     })
 
     if (hasScrapped) {
@@ -283,8 +294,6 @@ const getSkillIconUrl = (skill) => {
     'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/code/code-original.svg'
   )
 }
-
-// TODO: 스크랩 토글
 </script>
 <style scoped>
 .child-skill-list {

@@ -159,6 +159,7 @@
               </a>
               <a
                 v-if="project.userRole === 'COMPANY_EXTERNAL'"
+                @click="clickScrap"
                 href="#"
                 class="btn btn-lg btn-rounded btn-light btn-lg"
               >
@@ -199,6 +200,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import AffiliationMemberModal from '@/fo/components/company/AffiliationMemberModal.vue'
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 import { useModalStore } from '../../stores/modalStore.js'
+import { useAlertStore } from '../../stores/alertStore.js'
 import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -206,6 +208,7 @@ import { api } from '@/axios.js'
 const router = useRouter()
 const route = useRoute()
 const modalStore = useModalStore()
+const alertStore = useAlertStore()
 
 const projectSq = route.params.project_sq
 
@@ -312,7 +315,27 @@ const getSkillIconUrl = (skill) => {
   )
 }
 
-// TODO: 스크랩 토글
+const clickScrap = async () => {
+  try {
+    const hasScrapped = project.value.isScrap === 1
+    await api.$post(`/projects/${projectSq}/scraps`, {
+      hasScrapped,
+      target: '프로젝트',
+    })
+
+    if (hasScrapped) {
+      alertStore.show('스크랩 해제에 성공하였습니다.')
+    } else {
+      alertStore.show('스크랩에 성공하였습니다.')
+    }
+
+    // 상태를 바꿔줘야 버튼 표시도 바뀜
+    project.value.isScrap = hasScrapped ? 0 : 1
+  } catch (error) {
+    console.error(error)
+    alertStore.show('스크랩에 실패했습니다.', 'danger')
+  }
+}
 </script>
 <style scoped>
 .child-skill-list {
