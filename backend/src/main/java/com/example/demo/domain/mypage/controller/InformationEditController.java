@@ -195,4 +195,32 @@ public class InformationEditController {
             return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "프로필 이미지 삭제에 실패했습니다.");
         }
     }
+
+    @PostMapping("/affiliation/profile-image/update")
+    public ApiResponse<Void> updateAffiliationProfileImage(
+            @AuthenticationPrincipal Long userSq,
+            @RequestParam("file") MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "업로드할 파일이 없습니다.");
+        }
+
+        try {
+            informationEditService.updateAffiliationProfileImage(userSq, file);
+            return ApiResponse.of(HttpStatus.OK, "프로필 이미지가 성공적으로 업데이트되었습니다.", null);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "프로필 이미지 업데이트 중 오류가 발생했습니다.");
+        }
+
+    }
+
+    @DeleteMapping("/affiliation/profile-image")
+    public ApiResponse<Void> deleteAffiliationProfileImage(@AuthenticationPrincipal Long userSq) {
+        try {
+            informationEditService.deleteAffiliationProfileImage(userSq);
+            return ApiResponse.of(HttpStatus.OK, "프로필 이미지가 삭제되었습니다.", null);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "프로필 이미지 삭제에 실패했습니다.");
+        }
+    }
 }

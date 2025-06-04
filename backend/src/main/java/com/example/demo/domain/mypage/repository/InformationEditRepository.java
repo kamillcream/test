@@ -160,4 +160,20 @@ public class InformationEditRepository {
     public ProfileImageInfoDTO findFileByUserSq(Long userSq) {
         return informationEditMapper.findFileByUserSq(userSq);
     }
+
+    public Long findFileSqByCompanySq(Long companySq) {
+        return informationEditMapper.selectFileSqByCompanySq(companySq);
+    }
+
+    public void saveAffiliationProfileImage(Long companySq, Long fileSq) {
+        informationEditMapper.insertAffiliationProfileImage(companySq, fileSq);
+    }
+
+    public void deleteAffiliationProfileImageByUserSq(Long companySq) {
+        informationEditMapper.deleteAffiliationProfileImageByUserSq(companySq);
+    }
+
+    public ProfileImageInfoDTO findAffiliationFileByUserSq(Long companySq) {
+        return informationEditMapper.findAffiliationFileByUserSq(companySq);
+    }
 }

@@ -153,4 +153,23 @@
     <update id="markFileAsDeleted"> UPDATE TBL_COMMON_FILE_S SET file_is_deleted_yn = 'Y' WHERE
         file_sq = #{fileSq} </update>
 
+    <select id="selectFileSqByCompanySq" resultType="long"> SELECT file_sq FROM
+        TBL_COMPANY_PROFILE_IMAGE_S WHERE company_sq = #{companySq} </select>
+
+    <!-- 소속 프로필 이미지 매핑 저장 -->
+    <insert id="insertAffiliationProfileImage"> INSERT INTO TBL_COMPANY_PROFILE_IMAGE_S (
+        company_sq, file_sq ) VALUES ( #{companySq}, #{fileSq} ) </insert>
+
+    <!-- 소속 기존 프로필 이미지 매핑 삭제 -->
+    <delete id="deleteAffiliationProfileImageByUserSq"> DELETE FROM TBL_COMPANY_PROFILE_IMAGE_S
+        WHERE company_sq = #{companySq} </delete>
+
+    <!-- 소속 기존 파일 정보 조회 -->
+    <select id="findAffiliationFileByUserSq"
+        resultType="com.example.demo.domain.mypage.dto.ProfileImageInfoDTO"> SELECT f.file_sq AS
+        fileSq, f.file_original_nm AS originalName, f.file_save_nm AS savedName, f.file_typ AS
+        contentType, f.file_size AS size FROM TBL_COMMON_FILE_S f JOIN TBL_COMPANY_PROFILE_IMAGE_S
+        cp ON cp.file_sq = f.file_sq WHERE cp.company_sq = #{companySq} </select>
+
+
 </mapper>

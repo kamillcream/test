@@ -142,7 +142,17 @@ public class InformationEditService {
         AddressDTO addressInfo = informationEditRepository.getAddressInfo(companyInfo.getAddressSq());
         List<String> tagList = informationEditRepository.getCompanyTags(companyInfo.getCompanySq());
 
-        return AffiliationInfoResponseDTO.of(companyInfo, userInfo, addressInfo, tagList);
+        Long fileSq = informationEditRepository.findFileSqByCompanySq(companyInfo.getCompanySq());
+        if (fileSq == null)
+            return null;
+
+        UploadedFileDTO file = informationEditRepository.findByFileSq(fileSq);
+        if (file == null)
+            return null;
+
+        String imageUrl = (file != null) ? amazonS3.getUrl(bucket, file.getSavedName()).toString() : null;
+
+        return AffiliationInfoResponseDTO.of(companyInfo, userInfo, addressInfo, tagList, imageUrl);
     }
 
     public boolean cancelCompanyRecruiting(Long userSq) {
@@ -211,19 +221,24 @@ public class InformationEditService {
         return amazonS3.getUrl(bucket, file.getSavedName()).toString();
     }
 
+    @Transactional
     public void updateProfileImage(Long userSq, MultipartFile multipartFile) {
-        // 1. 기존 이미지 조회 및 삭제
+        if (userSq == null) {
+            throw new IllegalArgumentException("사용자 순번(userSq)이 null입니다.");
+        }
+        if (multipartFile == null || multipartFile.isEmpty()) {
+            throw new IllegalArgumentException("업로드할 파일이 없습니다.");
+        }
+
         ProfileImageInfoDTO existing = informationEditRepository.findFileByUserSq(userSq);
         if (existing != null) {
             amazonS3Service.deleteFile(existing.getSavedName());
-            informationEditRepository.markFileAsDeleted(existing.getFileSq()); // DB 논리 삭제
+            informationEditRepository.markFileAsDeleted(existing.getFileSq());
             informationEditRepository.deleteUserProfileImageByUserSq(userSq);
         }
 
-        // 2. 새 이미지 업로드
         UploadedFileDTO uploaded = amazonS3Service.uploadFile(multipartFile);
 
-        // 3. DB 저장용 DTO 생성
         ProfileImageInfoDTO fileInfo = ProfileImageInfoDTO.builder()
                 .originalName(uploaded.getOriginalName())
                 .savedName(uploaded.getSavedName())
@@ -231,22 +246,79 @@ public class InformationEditService {
                 .size(uploaded.getSize())
                 .build();
 
-        // 4. 파일 정보 저장
         informationEditRepository.saveFile(fileInfo);
-
-        // 5. 사용자-파일 매핑 저장
         informationEditRepository.saveUserProfileImage(userSq, fileInfo.getFileSq());
     }
 
     @Transactional
     public void deleteProfileImage(Long userSq) {
+        if (userSq == null) {
+            throw new IllegalArgumentException("사용자 순번(userSq)이 null입니다.");
+        }
 
-        // 필요시 S3에서 이미지도 삭제하려면 아래 추가
         ProfileImageInfoDTO existing = informationEditRepository.findFileByUserSq(userSq);
+        if (existing == null) {
+            throw new IllegalArgumentException("사용자에 대한 기존 프로필 이미지가 존재하지 않습니다.");
+        }
+
+        amazonS3Service.deleteFile(existing.getSavedName());
+        informationEditRepository.markFileAsDeleted(existing.getFileSq());
+        informationEditRepository.deleteUserProfileImageByUserSq(userSq);
+    }
+
+    @Transactional
+    public void updateAffiliationProfileImage(Long userSq, MultipartFile multipartFile) {
+        if (userSq == null) {
+            throw new IllegalArgumentException("사용자 순번(userSq)이 null입니다.");
+        }
+        if (multipartFile == null || multipartFile.isEmpty()) {
+            throw new IllegalArgumentException("업로드할 파일이 없습니다.");
+        }
+
+        Long companySq = informationEditRepository.findCompanySqByUserSq(userSq);
+        if (companySq == null) {
+            throw new IllegalArgumentException("사용자에 해당하는 기업이 존재하지 않습니다.");
+        }
+
+        ProfileImageInfoDTO existing = informationEditRepository.findAffiliationFileByUserSq(companySq);
         if (existing != null) {
             amazonS3Service.deleteFile(existing.getSavedName());
-            informationEditRepository.markFileAsDeleted(existing.getFileSq()); // DB 논리 삭제
-            informationEditRepository.deleteUserProfileImageByUserSq(userSq);
+            informationEditRepository.markFileAsDeleted(existing.getFileSq());
+            informationEditRepository.deleteAffiliationProfileImageByUserSq(companySq);
         }
+
+        UploadedFileDTO uploaded = amazonS3Service.uploadFile(multipartFile);
+
+        ProfileImageInfoDTO fileInfo = ProfileImageInfoDTO.builder()
+                .originalName(uploaded.getOriginalName())
+                .savedName(uploaded.getSavedName())
+                .contentType(uploaded.getContentType())
+                .size(uploaded.getSize())
+                .build();
+
+        informationEditRepository.saveFile(fileInfo);
+        informationEditRepository.saveAffiliationProfileImage(companySq, fileInfo.getFileSq());
     }
+
+    @Transactional
+    public void deleteAffiliationProfileImage(Long userSq) {
+        if (userSq == null) {
+            throw new IllegalArgumentException("사용자 순번(userSq)이 null입니다.");
+        }
+
+        Long companySq = informationEditRepository.findCompanySqByUserSq(userSq);
+        if (companySq == null) {
+            throw new IllegalArgumentException("사용자에 해당하는 기업이 존재하지 않습니다.");
+        }
+
+        ProfileImageInfoDTO existing = informationEditRepository.findAffiliationFileByUserSq(companySq);
+        if (existing == null) {
+            throw new IllegalArgumentException("해당 기업에 대한 기존 프로필 이미지가 존재하지 않습니다.");
+        }
+
+        amazonS3Service.deleteFile(existing.getSavedName());
+        informationEditRepository.markFileAsDeleted(existing.getFileSq());
+        informationEditRepository.deleteAffiliationProfileImageByUserSq(companySq);
+    }
+
 }

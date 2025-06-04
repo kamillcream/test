@@ -14,18 +14,15 @@
           @mouseleave="hovering = false"
         >
           <!-- 프로필 이미지 영역 -->
-          <div
-            class="rounded-circle overflow-hidden"
-            style="width: 100px; height: 100px"
-          >
+          <div class="rounded-circle overflow-hidden">
             <img
               v-if="userProfileImageUrl"
               :src="userProfileImageUrl"
               alt="Profile Image"
-              class="img-fluid w-100 h-100 object-fit-cover"
+              class="img-fluid object-fit-cover"
             />
             <div v-else class="rounded-circle">
-              <i class="fas fa-building text-muted fa-2x"></i>
+              <i class="fas fa-building text-muted"></i>
             </div>
 
             <!-- X 버튼 (hover 시에만 표시) -->

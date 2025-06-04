@@ -111,4 +111,12 @@ public interface InformationEditMapper {
         ProfileImageInfoDTO findFileByUserSq(@Param("userSq") Long userSq);
 
         void markFileAsDeleted(@Param("fileSq") Long fileSq);
+
+        Long selectFileSqByCompanySq(@Param("companySq") Long companySq);
+
+        int insertAffiliationProfileImage(@Param("companySq") Long companySq, @Param("fileSq") Long fileSq);
+
+        int deleteAffiliationProfileImageByUserSq(@Param("companySq") Long companySq);
+
+        ProfileImageInfoDTO findAffiliationFileByUserSq(@Param("companySq") Long companySq);
 }
