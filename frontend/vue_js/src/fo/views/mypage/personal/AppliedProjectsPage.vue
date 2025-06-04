@@ -242,7 +242,6 @@ const searchAppliedType = ref('')
 const searchKeyword = ref('')
 const searchAppliedKeyword = ref('')
 const currentPage = ref(1)
-const itemsPerPage = 4
 const currentToggle = ref('all')
 
 const selectedInterviewTimes = ref([])
@@ -250,6 +249,11 @@ const selectedInterviewTimes = ref([])
 const modalStore = useModalStore()
 
 const projects = ref([])
+const pagedProjects = computed(() => projects.value)
+
+const totalPages = ref('')
+const itemsPerPage = 5
+//const offset = computed(() => (currentPage.value - 1) * itemsPerPage)
 
 onMounted(async () => {
   fetchApplicationList()
@@ -269,15 +273,25 @@ function formatDate(dateString) {
 const fetchApplicationList = async () => {
   try {
     const response = await api.$get(`/projects/applications`, {
-      withCredentials: true, // <-- 필수!
+      withCredentials: true,
+      params: {
+        offset: 1,
+        size: 5,
+        searchType: searchAppliedType.value,
+        keyword: searchAppliedKeyword.value,
+        status: currentToggle.value === 'all' ? null : currentToggle.value,
+      },
     })
+    console.log(response.value)
 
-    projects.value = response.output
-    console.log(projects.value)
+    projects.value = response.output.projects
+    totalPages.value = Math.max(
+      1,
+      Math.ceil(response.output.totalCount / itemsPerPage),
+    )
   } catch (e) {
     console.error('❌ [catch 블록 진입]', e)
-
-    console.error('프로젝트 상세 정보 불러오기 실패', e)
+    console.error('프로젝트 지원 리스트 불러오기 실패', e)
   }
 }
 
@@ -314,71 +328,6 @@ const cancelApplication = (status, applicationSq) => {
   })
 }
 
-const filteredCounts = computed(() => {
-  const list = filteredProjects.value
-  return {
-    all: list.length,
-    read: list.filter((p) => p.readApplicationDt !== null).length,
-    unread: list.filter((p) => p.readApplicationDt === null).length,
-  }
-})
-
-const toggleTypes = computed(() => [
-  {
-    value: 'all',
-    label: '전체',
-    count: filteredCounts.value.all,
-  },
-  {
-    value: 'read',
-    label: '열람',
-    count: filteredCounts.value.read,
-  },
-  {
-    value: 'unread',
-    label: '미열람',
-    count: filteredCounts.value.unread,
-  },
-])
-
-const filteredProjects = computed(() => {
-  let list = projects.value
-  if (currentToggle.value === 'read') {
-    list = list.filter((p) => p.readApplicationDt !== null)
-  } else if (currentToggle.value === 'unread') {
-    list = list.filter((p) => p.readApplicationDt === null)
-  }
-
-  if (searchAppliedKeyword.value) {
-    const keyword = searchAppliedKeyword.value.toLowerCase()
-    if (searchAppliedType.value === 'all') {
-      list = list.filter(
-        (p) =>
-          (p.projectTitle || '').toLowerCase().includes(keyword) ||
-          (p.companyTitle || '').toLowerCase().includes(keyword),
-      )
-    } else if (searchAppliedType.value === 'title') {
-      list = list.filter((p) =>
-        (p.projectTitle || '').toLowerCase().includes(keyword),
-      )
-    } else if (searchAppliedType.value === 'company') {
-      list = list.filter((p) =>
-        (p.companyTitle || '').toLowerCase().includes(keyword),
-      )
-    }
-  }
-
-  return list
-})
-
-const totalPages = computed(() =>
-  Math.ceil(filteredProjects.value.length / itemsPerPage),
-)
-const pagedProjects = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  return filteredProjects.value.slice(start, start + itemsPerPage)
-})
-
 function setToggle(type) {
   currentToggle.value = type
   currentPage.value = 1
@@ -392,6 +341,7 @@ function handleSearch() {
 function changePage(page) {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
+  fetchApplicationList()
 }
 
 const fetchAvailableInterviewTimes = async (projectSq, applicationSq) => {

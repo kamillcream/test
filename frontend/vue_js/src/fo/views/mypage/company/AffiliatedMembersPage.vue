@@ -1,3 +1,4 @@
+ew
 <template>
   <div>
     <!-- 🔽 필터/검색 UI -->
@@ -62,7 +63,7 @@
                 v-if="!member.careerEndDt"
                 class="btn btn-primary btn-outline btn-lg"
                 style="font-size: 14px; padding: 8px 12px"
-                @click="fireMember(6, member.userSq)"
+                @click="confirmFire(6, member.userSq)"
                 >퇴사 처리</span
               >
               <span
@@ -153,10 +154,16 @@
 import { ref, onMounted } from 'vue'
 import { api } from '@/axios.js'
 
+import { useModalStore } from '../../../stores/modalStore.js'
+import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
+
 const searchType = ref('all')
 const searchText = ref('')
 const currentPage = ref('1')
-const totalPages = ref('3')
+const totalPages = ref('')
+const pageSize = ref(5)
+
+const modalStore = useModalStore()
 
 onMounted(() => {
   fetchAffiliationMemberList()
@@ -164,19 +171,29 @@ onMounted(() => {
 
 const members = ref([])
 
+const search = () => {
+  currentPage.value = 1
+  fetchAffiliationMemberList()
+}
+
 const fetchAffiliationMemberList = async () => {
   try {
-    const response = await api.$get('/companies/6')
-    members.value = response.output
-    console.log(members.value)
+    const response = await api.$get('/companies/6', {
+      params: {
+        page: currentPage.value,
+        size: pageSize.value,
+        searchType: searchType.value === 'all' ? null : searchType.value,
+        keyword: searchText.value.trim() || null,
+      },
+    })
+
+    const output = response.output
+    members.value = output.members
+    currentPage.value = output.page
+    totalPages.value = output.totalPages
   } catch (e) {
     console.log(e)
   }
-}
-
-function search() {
-  //검색 로직 구현
-  console.log('검색:', searchType.value, searchText.value)
 }
 
 const fireMember = async (companySq, userSq) => {
@@ -190,10 +207,22 @@ const fireMember = async (companySq, userSq) => {
   }
 }
 
+const confirmFire = (companySq, userSq) => {
+  modalStore.openModal(CommonConfirmModal, {
+    title: '소속 인원 퇴사 처리',
+    message: '해당 인원을 퇴사처리 하겠습니까?',
+    onConfirm: async () => {
+      await fireMember(companySq, userSq)
+      await fetchAffiliationMemberList()
+      modalStore.closeModal()
+    },
+  })
+}
+
 function changePage(page) {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
-  //페이지 변경 로직 구현
+  fetchAffiliationMemberList()
 }
 </script>
 
