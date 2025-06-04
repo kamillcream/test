@@ -5,6 +5,16 @@
 
 <mapper namespace="com.example.demo.domain.project.mapper.SkillMapper">
 
+	<select id="findAllSkills" resultType="com.example.demo.domain.project.dto.response.SingleSkillInfoResponse">
+	    SELECT DISTINCT
+        skill_tag_nm AS parentSkillTagNm,
+        skill_tag_nm AS childSkillTagNm
+	    FROM TBL_SKILL_TAG_C 
+	    WHERE c.skill_tag_is_deleted_yn = 'N'
+	      AND p.skill_tag_is_deleted_yn = 'N'
+	    ORDER BY p.skill_tag_nm, c.skill_tag_nm
+  	</select>
+
 	<select id="findAllReqSkillsByProjectSq" parameterType="Long" resultType="String">
     SELECT skill_tag_nm
     FROM TBL_PROJECT_REQUIRED_SKILL_TAG_S
