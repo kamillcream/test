@@ -8,7 +8,21 @@
       >
         <!-- 스크랩 아이콘 (카드 우측 상단 고정) -->
         <div class="position-absolute top-0 end-0 m-3">
-          <a href="#" class="text-muted"><i class="bi bi-heart fs-4"></i></a>
+          <a
+            @click="clickScrap(project)"
+            class="text-decoration-none"
+            style="cursor: pointer"
+          >
+            <i
+              :class="[
+                'bi',
+                project.hasScrapped === 'Y'
+                  ? 'bi-heart-fill text-danger'
+                  : 'bi-heart text-muted',
+                'fs-4',
+              ]"
+            ></i>
+          </a>
         </div>
 
         <!-- 카드 본문 -->
@@ -98,9 +112,12 @@
 <script setup>
 import { defineProps } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAlertStore } from '../../stores/alertStore.js'
+import { api } from '@/axios.js'
 
 const router = useRouter()
 
+const alertStore = useAlertStore()
 const goToProjectSpec = (project) => {
   router.push({
     name: 'CompanyProjectSpec',
@@ -147,6 +164,26 @@ const getProjectStatus = (project) => {
   } else {
     const diff = Math.ceil((end - today) / (1000 * 60 * 60 * 24))
     return { status: '채용중', dDay: `D-${diff}` }
+  }
+}
+const clickScrap = async (project) => {
+  try {
+    const isScrapped = project.hasScrapped === 'Y'
+
+    project.hasScrapped = isScrapped ? 'N' : 'Y'
+
+    await api.$post(`/projects/${project.projectSq}/scraps`, {
+      hasScrapped: isScrapped,
+      target: '프로젝트',
+    })
+
+    alertStore.show(
+      isScrapped ? '스크랩 해제에 성공하였습니다.' : '스크랩에 성공하였습니다.',
+    )
+  } catch (error) {
+    project.hasScrapped = project.hasScrapped === 'Y' ? 'N' : 'Y'
+    console.error(error)
+    alertStore.show('스크랩에 실패했습니다.', 'danger')
   }
 }
 

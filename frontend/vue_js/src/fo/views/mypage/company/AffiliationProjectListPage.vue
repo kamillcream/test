@@ -55,12 +55,12 @@
 
     <div class="row">
       <div class="col">
-        <span v-if="filteredPosts.length === 0"
+        <span v-if="projects.length === 0"
           >검색 조건을 만족하는 프로젝트가 없습니다.</span
         >
 
         <ul
-          v-for="(post, index) in filteredPosts"
+          v-for="(post, index) in filteredProjects"
           :key="index"
           class="simple-post-list m-0 position-relative"
         >
@@ -101,7 +101,7 @@
                     수정
                   </a>
                   <a
-                    @click="deleteCompanyProject(post.projectSq)"
+                    @click="confirmDelete(post.projectSq)"
                     class="btn btn-outline btn-primary btn-sm"
                     >삭제</a
                   >
@@ -226,76 +226,94 @@ import { ref, onMounted, computed } from 'vue'
 import { useModalStore } from '../../../stores/modalStore.js'
 import PersonalApplyStatusModal from '@/fo/components/mypage/personal/PersonalApplyStatusModal.vue'
 import CompanyApplyStatusModal from '@/fo/components/mypage/company/ApplyStatusModal.vue'
+import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 
 import { api } from '@/axios.js'
 import { useRouter } from 'vue-router'
 
 const modalStore = useModalStore()
 const router = useRouter()
-const posts = ref([])
-const filteredPosts = computed(() => {
-  const today = new Date()
 
-  const filterByRecruitStatus = (post) => {
-    const start = new Date(post.recruitStartDt)
-    const end = new Date(post.recruitEndDt)
+const currentPage = ref(1)
+const totalPages = ref(1)
+const pageSize = ref(5)
 
-    switch (currentFilter.value) {
-      case 'recruiting':
-        return today >= start && today <= end
-      case 'closed':
-        return today > end
-      case 'scheduled':
-        return today < start
-      default:
-        return true // 'all'
-    }
-  }
+const projects = ref([])
 
-  const filterBySearch = (post) => {
-    const keyword = searchText.value.toLowerCase()
+const currentFilter = ref('all')
+const currnetStatusCnt = ref([])
 
-    if (!keyword) return true
-
-    switch (searchType.value) {
-      case 'title':
-        return post.projectTtl?.toLowerCase().includes(keyword)
-      case 'content':
-        return (
-          post.descrption?.toLowerCase().includes(keyword) ||
-          post.preferContent?.toLowerCase().includes(keyword)
-        )
-      case 'all':
-      default:
-        return (
-          post.projectTtl?.toLowerCase().includes(keyword) ||
-          post.descrption?.toLowerCase().includes(keyword) ||
-          post.preferContent?.toLowerCase().includes(keyword)
-        )
-    }
-  }
-
-  return posts.value.filter((post) => {
-    return filterByRecruitStatus(post) && filterBySearch(post)
-  })
-})
+const filters = computed(() => [
+  { type: 'all', label: '전체', count: currnetStatusCnt.value.allCount },
+  {
+    type: 'recruiting',
+    label: '채용중',
+    count: currnetStatusCnt.value.recruiting,
+  },
+  { type: 'closed', label: '지원 마감', count: currnetStatusCnt.value.closed },
+  { type: 'scheduled', label: '예정', count: currnetStatusCnt.value.scheduled },
+])
 
 onMounted(async () => {
   fetchCompanyProjectList()
+  fetchStatusCounts()
 })
+const filteredProjects = computed(() => {
+  if (currentFilter.value === 'all') return projects.value
+  return projects.value.filter((post) => {
+    const status = getPostStatus(post).status
+    return (
+      (currentFilter.value === 'recruiting' && status === '채용중') ||
+      (currentFilter.value === 'closed' && status === '채용종료') ||
+      (currentFilter.value === 'scheduled' && status === '채용예정')
+    )
+  })
+})
+const fetchStatusCounts = async () => {
+  const params = {
+    keyword: searchText.value || null,
+    searchType: searchType.value || null,
+    status: currentFilter.value !== 'all' ? currentFilter.value : null,
+  }
 
+  const res = await api.$get(`/projects/companies/status`, {
+    params,
+    withCredentials: true,
+  })
+
+  currnetStatusCnt.value = res.output
+}
 const fetchCompanyProjectList = async () => {
   try {
     const response = await api.$get(`/projects/companies`, {
-      withCredentials: true, // <-- 필수!
+      withCredentials: true,
+      params: {
+        page: currentPage.value,
+        size: pageSize.value,
+        searchType: searchType.value,
+        keyword: searchText.value,
+        status: currentFilter.value,
+      },
     })
+    fetchStatusCounts()
 
-    posts.value = response.output.projects
+    projects.value = response.output.projects
+    totalPages.value = response.output.totalPages
   } catch (e) {
-    console.error('❌ [catch 블록 진입]', e)
-
-    console.error('프로젝트 상세 정보 불러오기 실패', e)
+    console.error('❌ 프로젝트 목록 불러오기 실패', e)
   }
+}
+
+const confirmDelete = async (projectSq) => {
+  modalStore.openModal(CommonConfirmModal, {
+    title: '프로젝트 삭제',
+    message: '한 번 삭제한 프로젝트는 복구할 수 없습니다. 삭제하시겠습니까?',
+    onConfirm: async () => {
+      await deleteCompanyProject(projectSq)
+      await fetchCompanyProjectList()
+      modalStore.closeModal()
+    },
+  })
 }
 
 const deleteCompanyProject = async (projectSq) => {
@@ -343,37 +361,6 @@ const generateIconUrl = (name) => {
   return `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${processed}/${processed}-original.svg`
 }
 
-const filterCounts = computed(() => {
-  const today = new Date()
-  const base = {
-    all: 0,
-    recruiting: 0,
-    closed: 0,
-    scheduled: 0,
-  }
-
-  filteredPosts.value.forEach((post) => {
-    const start = new Date(post.recruitStartDt)
-    const end = new Date(post.recruitEndDt)
-
-    base.all++
-    if (today < start) base.scheduled++
-    else if (today > end) base.closed++
-    else base.recruiting++
-  })
-
-  return base
-})
-
-// 필터 상태
-const currentFilter = ref('all')
-const filters = computed(() => [
-  { type: 'all', label: '전체', count: filterCounts.value.all },
-  { type: 'recruiting', label: '채용중', count: filterCounts.value.recruiting },
-  { type: 'closed', label: '지원 마감', count: filterCounts.value.closed },
-  { type: 'scheduled', label: '예정', count: filterCounts.value.scheduled },
-])
-
 // 검색 상태
 const searchType = ref('all')
 const searchText = ref('')
@@ -383,29 +370,22 @@ const searchOptions = ref([
   { value: 'content', label: '내용' },
 ])
 
-// 페이지네이션 상태
-const currentPage = ref(1)
-const totalPages = ref(3)
-
-// 게시글 데이터
-
-// 메서드
-const setFilter = (type) => {
-  currentFilter.value = type
-  // 필터링 로직 구현
+const search = () => {
+  currentPage.value = 1
+  fetchCompanyProjectList()
 }
 
-const search = () => {
-  // 검색 로직 구현
-  console.log('검색:', searchType.value, searchText.value)
+const setFilter = (type) => {
+  currentFilter.value = type
+  currentPage.value = 1
+  fetchCompanyProjectList()
 }
 
 const changePage = (page) => {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
-  // 페이지 변경 로직 구현
+  fetchCompanyProjectList()
 }
-
 const goToProjectSpec = (project) => {
   router.push({
     name: 'CompanyProjectSpec',

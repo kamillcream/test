@@ -34,10 +34,14 @@ public class ProjectSummary {
 	private LocalDate recruitStartDt;
 	private LocalDate recruitEndDt;
 	
+	private String recruitStatus;
+	
 	private Long salary;
 	private List<String> reqSkills;
 	
-	public static ProjectSummary from(Project project, ProjectUtil util, String address) {
+	private String hasScrapped;
+	
+	public static ProjectSummary from(Project project, ProjectUtil util, String address, String status, String hasScrapped) {
 		return ProjectSummary.builder()
 				.projectSq(project.getProjectSq())
 				.address(address)
@@ -55,6 +59,8 @@ public class ProjectSummary {
 				.reqSkills(util.fetchReqSkillsByProjectSq(project.getProjectSq()))
 				.devGradeNm(util.convertCommonCodeSqToNm(project.getProjectDeveloperGradeCd()))
 				.requiredEduLvl(util.convertCommonCodeSqToNm(project.getProjectRequiredEducationCd()))
+				.recruitStatus(status)
+				.hasScrapped(hasScrapped)
 				.build();
 	}
 }
