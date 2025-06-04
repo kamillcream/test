@@ -14,6 +14,7 @@ public class CompanyMemberVo {
 	private final Long userSq;
 	private final String userNm;
 	private final String resumeTtl;
+	private final Long leavedYn;
 	
 	private final LocalDate careerStartDt;
 	private final LocalDate careerEndDt;
@@ -23,11 +24,13 @@ public class CompanyMemberVo {
 	private final Integer careerYr;
 	
 	
+	
 	public static CompanyMemberVo from(Long userSq, ResumeNmTtlVo resumeNmTtlVo, LocalDate careerStart, LocalDate careerEnd
-			, List<String> skillTags, Integer careerYr) {
+			, List<String> skillTags, Integer careerYr, Long leavedYn) {
 		return CompanyMemberVo.builder()
 				.userSq(userSq)
 				.userNm(resumeNmTtlVo.getResumeNm())
+				.leavedYn(leavedYn)
 				.resumeTtl(resumeNmTtlVo.getResumeTtl())
 				.careerStartDt(careerStart)
 				.careerEndDt(careerEnd)
