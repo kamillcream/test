@@ -30,7 +30,7 @@
         </div>
         <button
           v-if="companyProfileImageUrl && hovering"
-          class="btn btn-sm btn-light position-absolute"
+          class="position-absolute"
           style="top: 0; right: 0; z-index: 10"
           @click="removeProfileImage"
         >
@@ -812,7 +812,7 @@ input:focus {
   border-color: inherit; /* 또는 원래의 border 색 */
 }
 
-.btn.btn-light.btn-sm.position-absolute {
+.add {
   cursor: pointer;
   z-index: 10;
   border-radius: 50%;

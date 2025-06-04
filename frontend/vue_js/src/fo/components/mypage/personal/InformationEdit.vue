@@ -32,7 +32,7 @@
           </div>
           <button
             v-if="userProfileImageUrl && hovering"
-            class="btn btn-sm btn-light position-absolute"
+            class="position-absolute"
             style="top: 0; right: 0; z-index: 10"
             @click="removeProfileImage"
           >
