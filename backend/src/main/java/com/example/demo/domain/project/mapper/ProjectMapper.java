@@ -8,6 +8,8 @@ import com.example.demo.domain.project.entity.ProjectApplicationEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.example.demo.domain.company.dto.request.BaseRequest;
+import com.example.demo.domain.project.dto.request.CompanyFilterRequest;
 import com.example.demo.domain.project.dto.request.ContractInsertRequest;
 import com.example.demo.domain.project.dto.request.JobInsertRequest;
 import com.example.demo.domain.project.dto.request.ProjectSearchRequest;
@@ -15,13 +17,14 @@ import com.example.demo.domain.project.dto.request.ScrapInsertRequest;
 import com.example.demo.domain.project.dto.request.SkillInsertRequest;
 import com.example.demo.domain.project.dto.response.InterviewTimeInfoResponse;
 import com.example.demo.domain.project.dto.response.ProjectFormDataResponse;
+import com.example.demo.domain.project.dto.response.ProjectRecruitStatus;
 import com.example.demo.domain.project.dto.response.SingleSkillInfoResponse;
 import com.example.demo.domain.project.entity.Project;
 
 @Mapper
 public interface ProjectMapper {
 	List<Project> findProjectsBySearch(ProjectSearchRequest request);
-	List<Project> findProjectsByCompany(Long companySq);
+	List<Project> findProjectsByCompany(@Param("companySq") Long companySq, @Param("request") CompanyFilterRequest request);
 	SkillInsertRequest findSkillTagInfoByName(@Param("name") String name);
 	long findCompanySqFromProjectSq(long projectSq);
 
@@ -32,11 +35,15 @@ public interface ProjectMapper {
 	List<String> findWorkTypesByProjectSq(@Param("projectSq") Long projectSq);
 	List<String> findJobsByProjectSq(@Param("projectSq") Long projectSq);
 	Map<String, LocalDateTime> findInterviewTimeMinMaxBySq(@Param("projectSq") Long projectSq);
-	int countProjectsBySearch(ProjectSearchRequest request);
+	Long countProjectsBySearch(ProjectSearchRequest request);
+	Long countCompanyProjectsBySearch(@Param("request") BaseRequest request);
 	List<LocalDateTime> findInterviewTimesByProjectSq(@Param("projectSq") Long projectSq);
 	List<InterviewTimeInfoResponse> findInterviewSqTmByProjectSq (Long projectSq);
 	Project findBySq(@Param("projectSq") Long projectSq);
 	Long findAddressSqByProjectSq(@Param("projectSq") Long projectSq);
+	
+	String judgeProjectRecruitStatus(@Param("projectSq") Long projectSq);
+	ProjectRecruitStatus countCompanyProjectsByStatus(@Param("request") CompanyFilterRequest request, @Param("companySq") Long companySq);
 
 
 	void insertProject(Project project);

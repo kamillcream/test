@@ -121,13 +121,52 @@
 	
 	<select id="findProjectsByCompany" resultMap="projectMap">
     SELECT *
-    FROM TBL_PROJECT_M
+    FROM TBL_PROJECT_M p
     WHERE company_sq = #{companySq}	AND project_is_deleted_yn = 'N'
+    
+    
+    
+    <if test="request.keyword != null and request.searchType == 'title'">
+	    AND p.project_ttl LIKE CONCAT('%', #{request.keyword}, '%')
+	</if>
+	<if test="request.keyword != null and request.searchType == 'content'">
+	    AND ( p.project_description_txt LIKE CONCAT('%', #{request.keyword}, '%') OR p.project_preference_txt LIKE CONCAT('%', #{request.keyword}, '%') )
+	</if>
+	<if test="request.keyword != null and request.searchType == 'all'">
+	    AND (
+	        p.project_ttl LIKE CONCAT('%', #{request.keyword}, '%')
+	        OR p.project_description_txt LIKE CONCAT('%', #{request.keyword}, '%')
+	        OR p.project_preference_txt LIKE CONCAT('%', #{request.keyword}, '%')
+	    )
+	</if>
+	
+	<if test="request.status == 'recruiting'">
+    <![CDATA[
+      AND NOW() BETWEEN project_recruit_start_dt AND project_recruit_end_dt
+    ]]>
+	  </if>
+	
+	  <if test="request.status == 'scheduled'">
+	    <![CDATA[
+	      AND NOW() < project_recruit_start_dt
+	    ]]>
+	  </if>
+	
+	  <if test="request.status == 'closed'">
+	    <![CDATA[
+	      AND NOW() > project_recruit_end_dt
+	    ]]>
+	  </if>
+    
+    <if test="request.size != null and request.offset != null">
+        LIMIT #{request.size} OFFSET #{request.offset}
+    </if>
+    
 	</select>
 	
 	<select id="countProjectsBySearch"
         parameterType="com.example.demo.domain.project.dto.request.ProjectSearchRequest"
-        resultType="Integer">
+        resultType="Long">
 
     SELECT COUNT(*)
     FROM TBL_PROJECT_M
@@ -178,8 +217,104 @@
         </otherwise>
     </choose>
 	</select>
-
 	
+	<select id="countCompanyProjectsBySearch" resultType="Long">
+  SELECT COUNT(*)
+  FROM TBL_PROJECT_M p
+  WHERE project_is_deleted_yn = 'N'
+  
+  <if test="request.keyword != null and request.searchType == 'title'">
+    AND p.project_ttl LIKE CONCAT('%', #{request.keyword}, '%')
+  </if>
+  <if test="request.keyword != null and request.searchType == 'content'">
+    AND (
+      p.project_description_txt LIKE CONCAT('%', #{request.keyword}, '%')
+      OR p.project_preference_txt LIKE CONCAT('%', #{request.keyword}, '%')
+    )
+  </if>
+  <if test="request.keyword != null and request.searchType == 'all'">
+    AND (
+      p.project_ttl LIKE CONCAT('%', #{request.keyword}, '%')
+      OR p.project_description_txt LIKE CONCAT('%', #{request.keyword}, '%')
+      OR p.project_preference_txt LIKE CONCAT('%', #{request.keyword}, '%')
+    )
+  </if>
+
+  <!-- ✅ status 조건 추가 -->
+  <if test="request.status == 'recruiting'">
+    <![CDATA[
+      AND NOW() BETWEEN p.project_recruit_start_dt AND p.project_recruit_end_dt
+    ]]>
+  </if>
+
+  <if test="request.status == 'scheduled'">
+    <![CDATA[
+      AND NOW() < p.project_recruit_start_dt
+    ]]>
+  </if>
+
+  <if test="request.status == 'closed'">
+    <![CDATA[
+      AND NOW() > p.project_recruit_end_dt
+    ]]>
+  </if>
+</select>
+
+
+	<select id="judgeProjectRecruitStatus" resultType="String">
+	  <![CDATA[
+	    SELECT
+	      CASE
+	        WHEN NOW() < project_recruit_start_dt THEN '채용예정'
+	        WHEN NOW() > project_recruit_end_dt THEN '지원마감'
+	        ELSE '채용중'
+	      END AS recruit_status
+	    FROM TBL_PROJECT_M
+	    WHERE project_sq = #{projectSq}
+	  ]]>
+	</select>
+	
+	<select id="countCompanyProjectsByStatus" resultType="com.example.demo.domain.project.dto.response.ProjectRecruitStatus">
+  <![CDATA[
+    SELECT
+      COUNT(*) AS allCount,
+      SUM(CASE WHEN NOW() < project_recruit_start_dt THEN 1 ELSE 0 END) AS scheduled,
+      SUM(CASE WHEN NOW() > project_recruit_end_dt THEN 1 ELSE 0 END) AS closed,
+      SUM(CASE WHEN NOW() BETWEEN project_recruit_start_dt AND project_recruit_end_dt THEN 1 ELSE 0 END) AS recruiting
+    FROM TBL_PROJECT_M
+  ]]>
+	  <where>
+	    project_is_deleted_yn = 'N'
+	    AND company_sq = #{companySq}
+	
+	    <if test="request.keyword != null and request.keyword != '' and request.searchType == 'title'">
+	      <![CDATA[
+	        AND project_ttl LIKE CONCAT('%', #{request.keyword}, '%')
+	      ]]>
+	    </if>
+	
+	    <if test="request.keyword != null and request.keyword != '' and request.searchType == 'content'">
+	      <![CDATA[
+	        AND (
+	          project_description_txt LIKE CONCAT('%', #{request.keyword}, '%')
+	          OR project_preference_txt LIKE CONCAT('%', #{request.keyword}, '%')
+	        )
+	      ]]>
+	    </if>
+	
+	    <if test="request.keyword != null and request.keyword != '' and request.searchType == 'all'">
+	      <![CDATA[
+	        AND (
+	          project_ttl LIKE CONCAT('%', #{request.keyword}, '%')
+	          OR project_description_txt LIKE CONCAT('%', #{request.keyword}, '%')
+	          OR project_preference_txt LIKE CONCAT('%', #{request.keyword}, '%')
+	        )
+	      ]]>
+	    </if>
+	  </where>
+	</select>
+
+
 
 	<select id="findCompanySqFromProjectSq" parameterType="Long" resultType="Long">
     SELECT company_sq
