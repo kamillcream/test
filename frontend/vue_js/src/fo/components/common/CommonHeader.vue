@@ -25,7 +25,7 @@
                   <li class="dropdown">
                     <a
                       class="dropdown-item dropdown-toggle active current-page-active"
-                      href="/affiliation"
+                      href="#"
                     >
                       소속
                       <i class="fas fa-chevron-down"></i
@@ -50,10 +50,18 @@
                     ></a>
                     <ul class="dropdown-menu">
                       <li>
-                        <a class="dropdown-item" href="/board">일반 게시판 </a>
+                        <a
+                          class="dropdown-item"
+                          href="feature-style-switcher.html"
+                          >일반 게시판
+                        </a>
                       </li>
                       <li>
-                        <a class="dropdown-item" href="/qna">Q&A 게시판 </a>
+                        <a
+                          class="dropdown-item"
+                          href="feature-style-switcher.html"
+                          >Q&A 게시판
+                        </a>
                       </li>
                     </ul>
                   </li>
