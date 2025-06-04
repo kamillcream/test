@@ -109,4 +109,6 @@ public interface InformationEditMapper {
         int deleteUserProfileImageByUserSq(@Param("userSq") Long userSq);
 
         ProfileImageInfoDTO findFileByUserSq(@Param("userSq") Long userSq);
+
+        void markFileAsDeleted(@Param("fileSq") Long fileSq);
 }

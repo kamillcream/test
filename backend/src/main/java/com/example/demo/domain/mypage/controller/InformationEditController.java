@@ -2,6 +2,7 @@ package com.example.demo.domain.mypage.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -180,5 +181,15 @@ public class InformationEditController {
             return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "프로필 이미지 업데이트 중 오류가 발생했습니다.");
         }
 
+    }
+
+    @DeleteMapping("/profile-image")
+    public ApiResponse<Void> deleteProfileImage(@AuthenticationPrincipal Long userSq) {
+        try {
+            informationEditService.deleteProfileImage(userSq);
+            return ApiResponse.of(HttpStatus.OK, "프로필 이미지가 삭제되었습니다.", null);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "프로필 이미지 삭제에 실패했습니다.");
+        }
     }
 }

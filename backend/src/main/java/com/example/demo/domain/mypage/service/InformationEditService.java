@@ -216,6 +216,7 @@ public class InformationEditService {
         ProfileImageInfoDTO existing = informationEditRepository.findFileByUserSq(userSq);
         if (existing != null) {
             amazonS3Service.deleteFile(existing.getSavedName());
+            informationEditRepository.markFileAsDeleted(existing.getFileSq()); // DB 논리 삭제
             informationEditRepository.deleteUserProfileImageByUserSq(userSq);
         }
 
@@ -235,5 +236,17 @@ public class InformationEditService {
 
         // 5. 사용자-파일 매핑 저장
         informationEditRepository.saveUserProfileImage(userSq, fileInfo.getFileSq());
+    }
+
+    @Transactional
+    public void deleteProfileImage(Long userSq) {
+
+        // 필요시 S3에서 이미지도 삭제하려면 아래 추가
+        ProfileImageInfoDTO existing = informationEditRepository.findFileByUserSq(userSq);
+        if (existing != null) {
+            amazonS3Service.deleteFile(existing.getSavedName());
+            informationEditRepository.markFileAsDeleted(existing.getFileSq()); // DB 논리 삭제
+            informationEditRepository.deleteUserProfileImageByUserSq(userSq);
+        }
     }
 }

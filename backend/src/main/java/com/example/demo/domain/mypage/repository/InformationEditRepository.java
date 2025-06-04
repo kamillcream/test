@@ -153,6 +153,10 @@ public class InformationEditRepository {
         informationEditMapper.deleteUserProfileImageByUserSq(userSq);
     }
 
+    public void markFileAsDeleted(Long fileSq) {
+        informationEditMapper.markFileAsDeleted(fileSq);
+    }
+
     public ProfileImageInfoDTO findFileByUserSq(Long userSq) {
         return informationEditMapper.findFileByUserSq(userSq);
     }

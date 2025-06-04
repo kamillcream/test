@@ -8,8 +8,12 @@
 
       <!-- 프로필 이미지 (사람 아이콘 또는 URL 이미지) -->
       <div class="text-center mb-4">
-        <div class="position-relative d-inline-block">
-          <!-- 조건부 렌더링: 이미지가 있으면 이미지 표시, 없으면 아이콘 표시 -->
+        <div
+          class="position-relative d-inline-block"
+          @mouseenter="hovering = true"
+          @mouseleave="hovering = false"
+        >
+          <!-- 프로필 이미지 영역 -->
           <div
             class="rounded-circle overflow-hidden"
             style="width: 100px; height: 100px"
@@ -21,29 +25,37 @@
               class="img-fluid w-100 h-100 object-fit-cover"
             />
             <div v-else class="rounded-circle">
-              <i class="fas fa-user text-muted"></i>
+              <i class="fas fa-user text-muted fa-2x"></i>
             </div>
+
+            <!-- X 버튼 (hover 시에만 표시) -->
           </div>
+          <button
+            v-if="userProfileImageUrl && hovering"
+            class="btn btn-sm btn-light position-absolute"
+            style="top: 0; right: 0; z-index: 10"
+            @click="removeProfileImage"
+          >
+            &times;
+          </button>
 
           <!-- 사진 변경 버튼 -->
           <label
             for="profileImage"
             class="btn btn-light btn-sm position-absolute add"
-            style="bottom: 0; right: 0"
           >
             <i class="fas fa-camera text-muted"></i>
+            <!-- 파일 입력 -->
+            <input
+              ref="profileImageInput"
+              type="file"
+              id="profileImage"
+              class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+              title="사진 변경"
+              @change="onFileChange"
+              accept="image/*"
+            />
           </label>
-
-          <!-- 파일 입력 필드 (보이지 않음) -->
-          <input
-            ref="profileImageInput"
-            type="file"
-            id="profileImage"
-            class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
-            title="사진 변경"
-            @change="onFileChange"
-            accept="image/*"
-          />
         </div>
       </div>
 
@@ -436,6 +448,7 @@ const isConfirmed = ref(false)
 
 const userProfileImageUrl = ref(null)
 const profileImageInput = ref(null)
+const hovering = ref(false)
 
 // 상태 변수들
 const error = ref(null)
@@ -498,13 +511,26 @@ const onFileChange = async (event) => {
       // 성공하면 새 이미지 URL을 다시 조회하거나, 클라이언트에서 미리 URL 생성해서 교체 가능
       // 여기선 간단히 URL.createObjectURL 로 미리보기 처리
       userProfileImageUrl.value = URL.createObjectURL(file)
-      alert('프로필 이미지가 업데이트되었습니다.')
+      alertStore.show('프로필 이미지가 업데이트되었습니다.', 'success')
     } else {
-      alert('프로필 이미지 업데이트에 실패했습니다.')
+      alertStore.show('프로필 이미지 업데이트에 실패했습니다.', 'danger')
     }
   } catch (error) {
-    alert('프로필 이미지 업데이트 중 오류가 발생했습니다.')
+    alertStore('프로필 이미지 업데이트 중 오류가 발생했습니다.', 'danger')
     console.error(error)
+  }
+}
+
+const removeProfileImage = async () => {
+  try {
+    const response = await api.$delete('/mypage/edit/profile-image')
+    if (response.status === 'OK') {
+      alertStore.show('프로필 이미지가 삭제되었습니다.', 'sucess')
+      userProfileImageUrl.value = null
+    }
+  } catch (error) {
+    alertStore('프로필 이미지 삭제에 실패하였습니다.', 'danger')
+    console.err(error)
   }
 }
 
