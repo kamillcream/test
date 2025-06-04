@@ -29,7 +29,6 @@
                   v-model="password"
                   maxlength="32"
                   @input="validatePassword"
-                  :class="{ 'is-invalid': passwordError }"
                 />
                 <div v-if="passwordError" class="invalid-feedback">
                   {{ passwordError }}
@@ -52,7 +51,6 @@
                   v-model="confirmPassword"
                   maxlength="32"
                   @input="validateConfirmPassword"
-                  :class="{ 'is-invalid': confirmPasswordError }"
                 />
                 <div v-if="confirmPasswordError" class="invalid-feedback">
                   {{ confirmPasswordError }}

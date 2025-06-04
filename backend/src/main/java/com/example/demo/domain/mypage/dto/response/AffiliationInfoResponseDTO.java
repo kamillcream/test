@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
+import com.example.demo.domain.mypage.dto.ProfileImageInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
 
 import lombok.Builder;
@@ -19,6 +20,7 @@ public class AffiliationInfoResponseDTO {
     private String companyUrl;
     private String companyGreetingTxt;
     private String companyIsRecruitingYn;
+    private String companyProfileImageUrl;
     private String userPhoneNum;
     private String zonecode;
     private String address;
@@ -32,7 +34,8 @@ public class AffiliationInfoResponseDTO {
             CompanyInfoDTO company,
             UserInfoDTO user,
             AddressDTO address,
-            List<String> tags) {
+            List<String> tags,
+            String companyProfileImageUrl) {
         return AffiliationInfoResponseDTO.builder()
                 .companyNm(company.getCompanyNm())
                 .companyCeoNm(company.getCompanyCeoNm())
@@ -40,6 +43,7 @@ public class AffiliationInfoResponseDTO {
                 .companyUrl(company.getCompanyUrl())
                 .companyGreetingTxt(company.getCompanyGreetingTxt())
                 .companyIsRecruitingYn(company.getCompanyIsRecruitingYn())
+                .companyProfileImageUrl(companyProfileImageUrl)
                 .userPhoneNum(user.getUserPhoneNum())
                 .zonecode(address.getZonecode())
                 .address(address.getAddress())

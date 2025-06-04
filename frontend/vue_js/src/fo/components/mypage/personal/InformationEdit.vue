@@ -6,29 +6,56 @@
         <h2 class="font-weight-normal text-7 mb-0">회원 정보 수정</h2>
       </div>
 
-      <!-- 프로필 이미지 (사람 아이콘으로 대체) -->
+      <!-- 프로필 이미지 (사람 아이콘 또는 URL 이미지) -->
       <div class="text-center mb-4">
-        <div class="position-relative d-inline-block">
-          <!-- 기본 이미지 아이콘 (사람 아이콘) -->
-          <div class="rounded-circle">
-            <i class="fas fa-user text-muted"></i>
-          </div>
+        <div
+          class="position-relative d-inline-block"
+          @mouseenter="hovering = true"
+          @mouseleave="hovering = false"
+        >
+          <!-- 프로필 이미지 영역 -->
+          <div
+            class="rounded-circle overflow-hidden"
+            style="width: 100px; height: 100px"
+          >
+            <img
+              v-if="userProfileImageUrl"
+              :src="userProfileImageUrl"
+              alt="Profile Image"
+              class="img-fluid w-100 h-100 object-fit-cover"
+            />
+            <div v-else class="rounded-circle">
+              <i class="fas fa-user text-muted fa-2x"></i>
+            </div>
 
-          <!-- 사진 변경 버튼 (카메라 아이콘이 이미지의 우측 하단 밖으로 걸쳐짐) -->
+            <!-- X 버튼 (hover 시에만 표시) -->
+          </div>
+          <button
+            v-if="userProfileImageUrl && hovering"
+            class="position-absolute"
+            style="top: 0; right: 0; z-index: 10"
+            @click="removeProfileImage"
+          >
+            &times;
+          </button>
+
+          <!-- 사진 변경 버튼 -->
           <label
             for="profileImage"
             class="btn btn-light btn-sm position-absolute add"
           >
             <i class="fas fa-camera text-muted"></i>
+            <!-- 파일 입력 -->
+            <input
+              ref="profileImageInput"
+              type="file"
+              id="profileImage"
+              class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+              title="사진 변경"
+              @change="onFileChange"
+              accept="image/*"
+            />
           </label>
-
-          <!-- 파일 입력 필드 (보이지 않음) -->
-          <input
-            type="file"
-            id="profileImage"
-            class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
-            title="사진 변경"
-          />
         </div>
       </div>
 
@@ -419,6 +446,10 @@ const alertStore = useAlertStore()
 
 const isConfirmed = ref(false)
 
+const userProfileImageUrl = ref(null)
+const profileImageInput = ref(null)
+const hovering = ref(false)
+
 // 상태 변수들
 const error = ref(null)
 
@@ -455,6 +486,53 @@ const editing = reactive({
   userPhoneNum: false,
   address: false,
 })
+
+// 파일 변경 이벤트 핸들러
+const onFileChange = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    // API 호출 (경로 및 토큰 등 필요에 맞게 변경)
+    const response = await api.$post(
+      '/mypage/edit/profile-image/update',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    )
+
+    if (response.status === 'OK') {
+      // 성공하면 새 이미지 URL을 다시 조회하거나, 클라이언트에서 미리 URL 생성해서 교체 가능
+      // 여기선 간단히 URL.createObjectURL 로 미리보기 처리
+      userProfileImageUrl.value = URL.createObjectURL(file)
+      alertStore.show('프로필 이미지가 업데이트되었습니다.', 'success')
+    } else {
+      alertStore.show('프로필 이미지 업데이트에 실패했습니다.', 'danger')
+    }
+  } catch (error) {
+    alertStore('프로필 이미지 업데이트 중 오류가 발생했습니다.', 'danger')
+    console.error(error)
+  }
+}
+
+const removeProfileImage = async () => {
+  try {
+    const response = await api.$delete('/mypage/edit/profile-image')
+    if (response.status === 'OK') {
+      alertStore.show('프로필 이미지가 삭제되었습니다.', 'sucess')
+      userProfileImageUrl.value = null
+    }
+  } catch (error) {
+    alertStore('프로필 이미지 삭제에 실패하였습니다.', 'danger')
+    console.err(error)
+  }
+}
 
 const passwordError = ref('')
 const passwordValid = ref(false)
@@ -749,7 +827,7 @@ async function fetchUserInfo() {
   try {
     const response = await api.$get('/mypage/edit/info', null)
     const data = response.output
-    // console.log('data', data)
+    console.log('data', data)
 
     Object.assign(originalData, {
       userId: data.userId,
@@ -766,8 +844,8 @@ async function fetchUserInfo() {
       latitude: data.latitude,
       longitude: data.longitude,
     })
-
     Object.assign(form, originalData)
+    userProfileImageUrl.value = data.userProfileImageUrl
   } catch (err) {
     console.error('정보 조회 실패', err)
     error.value = err.message

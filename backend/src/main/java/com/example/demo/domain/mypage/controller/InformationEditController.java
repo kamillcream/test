@@ -2,11 +2,14 @@ package com.example.demo.domain.mypage.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.common.ApiResponse;
 import com.example.demo.domain.mypage.dto.AddressDTO;
@@ -59,6 +62,8 @@ public class InformationEditController {
                     ? informationEditService.getGenderName(user.getUserGenderCd())
                     : null;
 
+            String profileImageUrl = informationEditService.getProfileImageUrl(userSq);
+
             PersonalUserInfoResponseDTO response = PersonalUserInfoResponseDTO.builder()
                     .userId(user.getUserId())
                     .userEmail(user.getUserEmail())
@@ -66,7 +71,7 @@ public class InformationEditController {
                     .userBirthDt(user.getUserBirthDt())
                     .userGenderNm(genderName != null ? genderName : null)
                     .userPhoneNum(user.getUserPhoneNum())
-                    .userProfileImageUrl(user.getUserProfileImageUrl())
+                    .userProfileImageUrl(profileImageUrl != null ? profileImageUrl : null)
                     .zonecode(address != null ? address.getZonecode() : null)
                     .address(address != null ? address.getAddress() : null)
                     .detailAddress(address != null ? address.getDetailAddress() : null)
@@ -83,6 +88,8 @@ public class InformationEditController {
 
             String companyName = informationEditService.getCompanyName(userSq);
 
+            String profileImageUrl = informationEditService.getProfileImageUrl(userSq);
+
             CompanyUserInfoResponseDTO response = CompanyUserInfoResponseDTO.builder()
                     .userId(user.getUserId())
                     .userEmail(user.getUserEmail())
@@ -91,6 +98,7 @@ public class InformationEditController {
                     .zonecode(address != null ? address.getZonecode() : null)
                     .address(address != null ? address.getAddress() : null)
                     .detailAddress(address != null ? address.getDetailAddress() : null)
+                    .userProfileImageUrl(profileImageUrl != null ? profileImageUrl : null)
                     .sigunguCode(address != null ? address.getAreaCodeSq() : null)
                     .latitude(address != null ? address.getLatitude() : null)
                     .longitude(address != null ? address.getLongitude() : null)
@@ -160,4 +168,59 @@ public class InformationEditController {
         }
     }
 
+    @PostMapping("/profile-image/update")
+    public ApiResponse<Void> updateProfileImage(
+            @AuthenticationPrincipal Long userSq,
+            @RequestParam("file") MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "업로드할 파일이 없습니다.");
+        }
+
+        try {
+            informationEditService.updateProfileImage(userSq, file);
+            return ApiResponse.of(HttpStatus.OK, "프로필 이미지가 성공적으로 업데이트되었습니다.", null);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "프로필 이미지 업데이트 중 오류가 발생했습니다.");
+        }
+
+    }
+
+    @DeleteMapping("/profile-image")
+    public ApiResponse<Void> deleteProfileImage(@AuthenticationPrincipal Long userSq) {
+        try {
+            informationEditService.deleteProfileImage(userSq);
+            return ApiResponse.of(HttpStatus.OK, "프로필 이미지가 삭제되었습니다.", null);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "프로필 이미지 삭제에 실패했습니다.");
+        }
+    }
+
+    @PostMapping("/affiliation/profile-image/update")
+    public ApiResponse<Void> updateAffiliationProfileImage(
+            @AuthenticationPrincipal Long userSq,
+            @RequestParam("file") MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "업로드할 파일이 없습니다.");
+        }
+
+        try {
+            informationEditService.updateAffiliationProfileImage(userSq, file);
+            return ApiResponse.of(HttpStatus.OK, "프로필 이미지가 성공적으로 업데이트되었습니다.", null);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "프로필 이미지 업데이트 중 오류가 발생했습니다.");
+        }
+
+    }
+
+    @DeleteMapping("/affiliation/profile-image")
+    public ApiResponse<Void> deleteAffiliationProfileImage(@AuthenticationPrincipal Long userSq) {
+        try {
+            informationEditService.deleteAffiliationProfileImage(userSq);
+            return ApiResponse.of(HttpStatus.OK, "프로필 이미지가 삭제되었습니다.", null);
+        } catch (Exception e) {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "프로필 이미지 삭제에 실패했습니다.");
+        }
+    }
 }

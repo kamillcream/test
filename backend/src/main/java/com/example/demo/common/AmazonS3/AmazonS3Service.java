@@ -51,6 +51,28 @@ public class AmazonS3Service {
         return fileNameList;
     }
 
+    public UploadedFileDTO uploadFile(MultipartFile multipartFile) {
+        String savedFileName = createFileName(multipartFile.getOriginalFilename());
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(multipartFile.getSize());
+        objectMetadata.setContentType(multipartFile.getContentType());
+
+        try (InputStream inputStream = multipartFile.getInputStream()) {
+            amazonS3.putObject(new PutObjectRequest(bucket, savedFileName, inputStream, objectMetadata)
+                    .withCannedAcl(CannedAccessControlList.PublicRead));
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
+        }
+
+        UploadedFileDTO uploadedFileDTO = new UploadedFileDTO();
+        uploadedFileDTO.setOriginalName(multipartFile.getOriginalFilename());
+        uploadedFileDTO.setSavedName(savedFileName);
+        uploadedFileDTO.setContentType(multipartFile.getContentType());
+        uploadedFileDTO.setSize(multipartFile.getSize());
+
+        return uploadedFileDTO;
+    }
+
     // 파일명을 난수화하기 위해 UUID 를 활용하여 난수를 돌린다.
     public String createFileName(String fileName) {
         return UUID.randomUUID().toString().concat(getFileExtension(fileName));

@@ -55,6 +55,20 @@ input:focus {
   align-items: center;
 }
 
+.add:hover {
+  cursor: pointer;
+}
+
+input[type='file']:hover {
+  cursor: pointer;
+}
+.add i {
+  pointer-events: none; /* 아이콘이 클릭 방해 안 하게 */
+}
+#file-upload-button:hover {
+  cursor: pointer;
+}
+
 .fas.fa-camera.text-muted {
   font-size: 20px;
 }

@@ -15,6 +15,7 @@ public class CompanyUserInfoResponseDTO {
     private String zonecode;
     private String address;
     private String detailAddress;
+    private String userProfileImageUrl;
     private Long sigunguCode;
     private BigDecimal latitude;
     private BigDecimal longitude;

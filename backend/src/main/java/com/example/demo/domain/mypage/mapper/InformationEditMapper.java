@@ -5,8 +5,10 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.example.demo.common.AmazonS3.UploadedFileDTO;
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
+import com.example.demo.domain.mypage.dto.ProfileImageInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
 
 @Mapper
@@ -95,4 +97,26 @@ public interface InformationEditMapper {
 
         void insertAffiliationTagByCompanySq(@Param("companySq") Long companySq,
                         @Param("tagNm") String tagNm);
+
+        Long selectFileSqByUserSq(@Param("userSq") Long userSq);
+
+        UploadedFileDTO selectFileBySq(@Param("fileSq") Long fileSq);
+
+        int insertFile(ProfileImageInfoDTO fileInfo);
+
+        int insertUserProfileImage(@Param("userSq") Long userSq, @Param("fileSq") Long fileSq);
+
+        int deleteUserProfileImageByUserSq(@Param("userSq") Long userSq);
+
+        ProfileImageInfoDTO findFileByUserSq(@Param("userSq") Long userSq);
+
+        void markFileAsDeleted(@Param("fileSq") Long fileSq);
+
+        Long selectFileSqByCompanySq(@Param("companySq") Long companySq);
+
+        int insertAffiliationProfileImage(@Param("companySq") Long companySq, @Param("fileSq") Long fileSq);
+
+        int deleteAffiliationProfileImageByUserSq(@Param("companySq") Long companySq);
+
+        ProfileImageInfoDTO findAffiliationFileByUserSq(@Param("companySq") Long companySq);
 }

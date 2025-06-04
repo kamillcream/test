@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
+import com.example.demo.common.AmazonS3.UploadedFileDTO;
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
+import com.example.demo.domain.mypage.dto.ProfileImageInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
 import com.example.demo.domain.mypage.dto.request.AffiliationInfoUpdateRequestDTO;
 import com.example.demo.domain.mypage.mapper.InformationEditMapper;
@@ -129,5 +131,49 @@ public class InformationEditRepository {
 
     public void insertAffiliationTagByCompanySq(Long companySq, String tagNm) {
         informationEditMapper.insertAffiliationTagByCompanySq(companySq, tagNm);
+    }
+
+    public Long findFileSqByUserSq(Long userSq) {
+        return informationEditMapper.selectFileSqByUserSq(userSq);
+    }
+
+    public UploadedFileDTO findByFileSq(Long fileSq) {
+        return informationEditMapper.selectFileBySq(fileSq);
+    }
+
+    public void saveFile(ProfileImageInfoDTO fileInfo) {
+        informationEditMapper.insertFile(fileInfo);
+    }
+
+    public void saveUserProfileImage(Long userSq, Long fileSq) {
+        informationEditMapper.insertUserProfileImage(userSq, fileSq);
+    }
+
+    public void deleteUserProfileImageByUserSq(Long userSq) {
+        informationEditMapper.deleteUserProfileImageByUserSq(userSq);
+    }
+
+    public void markFileAsDeleted(Long fileSq) {
+        informationEditMapper.markFileAsDeleted(fileSq);
+    }
+
+    public ProfileImageInfoDTO findFileByUserSq(Long userSq) {
+        return informationEditMapper.findFileByUserSq(userSq);
+    }
+
+    public Long findFileSqByCompanySq(Long companySq) {
+        return informationEditMapper.selectFileSqByCompanySq(companySq);
+    }
+
+    public void saveAffiliationProfileImage(Long companySq, Long fileSq) {
+        informationEditMapper.insertAffiliationProfileImage(companySq, fileSq);
+    }
+
+    public void deleteAffiliationProfileImageByUserSq(Long companySq) {
+        informationEditMapper.deleteAffiliationProfileImageByUserSq(companySq);
+    }
+
+    public ProfileImageInfoDTO findAffiliationFileByUserSq(Long companySq) {
+        return informationEditMapper.findAffiliationFileByUserSq(companySq);
     }
 }
