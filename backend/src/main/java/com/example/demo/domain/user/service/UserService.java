@@ -44,17 +44,17 @@ public class UserService {
         }
 
         // 2. 지역 코드 조회
-        Long areaCodeSq = userRepository.findAreaCodeSqBySigungu(requestDto.getSigungu());
+        String sigungu = userRepository.findSigunguByAreaCode(requestDto.getSigunguCode());
 
         // 3. 주소 INSERT
         AddressDTO addressDTO = new AddressDTO();
         addressDTO.setZonecode(requestDto.getZonecode());
         addressDTO.setAddress(requestDto.getAddress());
         addressDTO.setDetailAddress(requestDto.getDetailAddress());
-        addressDTO.setSigungu(requestDto.getSigungu());
+        addressDTO.setSigungu(sigungu);
         addressDTO.setLatitude(requestDto.getLatitude());
         addressDTO.setLongitude(requestDto.getLongitude());
-        addressDTO.setAreaCodeSq(areaCodeSq);
+        addressDTO.setAreaCodeSq(requestDto.getSigunguCode());
         userRepository.insertAddress(addressDTO);
 
         // 4. 사용자 INSERT

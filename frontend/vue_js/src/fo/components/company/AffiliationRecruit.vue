@@ -21,7 +21,7 @@
           >회사명</label
         >
         <div class="text-dark" id="companyName">
-          {{ afltnInfo.company_nm }}
+          {{ afltnInfo.companyNm }}
         </div>
       </div>
 
@@ -30,7 +30,7 @@
         <label for="ceoName" class="form-label text-primary text-bold"
           >대표자명</label
         >
-        <div class="text-dark" id="ceoName">{{ afltnInfo.user_nm }}</div>
+        <div class="text-dark" id="ceoName">{{ afltnInfo.ceoNm }}</div>
       </div>
 
       <!-- 개업년수 -->
@@ -40,7 +40,7 @@
         >
         <!-- [수정] 오픈일자부터 개업일수 계산 -->
         <div class="text-dark" id="yearsInBusiness">
-          {{ afltnInfo.company_open_dt }}
+          {{ afltnInfo.openYear }}년차
         </div>
       </div>
 
@@ -50,7 +50,7 @@
           >회사위치</label
         >
         <div class="text-dark" id="companyLocation">
-          {{ afltnInfo.company_adress }}
+          {{ afltnInfo.address }}
         </div>
       </div>
 
@@ -62,7 +62,7 @@
           >회사 설명</label
         >
         <div class="text-dark" id="companyDescription">
-          {{ afltnInfo.company_greeting_txt }}
+          {{ afltnInfo.greeting }}
         </div>
       </div>
 
@@ -92,7 +92,9 @@
         <!-- [추가] 선택한 이력서로 이력서 이름 변경 -->
         <div class="text-dark" id="resume">
           선택한 이력서:
-          <a href="#" class="text-primary">이력서를 선택하세요.</a>
+          <a href="#" class="text-primary" @click="openResumeModal"
+            >이력서를 선택하세요.</a
+          >
         </div>
       </div>
 
@@ -106,6 +108,7 @@
           id="selfIntroduction"
           rows="4"
           placeholder="자기소개를 입력해주세요."
+          v-model="affiliationStore.greeting"
         ></textarea>
       </div>
     </div>
@@ -125,20 +128,58 @@
   </div>
 </template>
 <script setup>
+import { api } from '@/axios'
+import { useAffiliationStore } from '@/fo/stores/AffiliationStore'
+import { useAlertStore } from '@/fo/stores/alertStore'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { computed, defineProps } from 'vue'
+import ResumeSelectModal from '../mypage/common/ResumeSelectModal.vue'
+import CommonConfirmModal from '../common/CommonConfirmModal.vue'
 
 const props = defineProps({ afltnInfo: Array })
 const afltnInfo = computed(() => props.afltnInfo)
+console.log(afltnInfo)
 
 const modalStore = useModalStore()
+const alertStore = useAlertStore()
+const affiliationStore = useAffiliationStore()
 
 const closeModal = () => {
+  affiliationStore.resetGreeting()
   modalStore.closeModal()
 }
 
 // 소속 신청하기 버튼 클릭 이벤트
-const clickRecruit = () => {}
+const clickRecruit = async () => {
+  if (affiliationStore.viewerSq == null) {
+    alertStore.show('로그인 후 이용해주세요.', 'danger')
+  }
+  modalStore.openModal(CommonConfirmModal, {
+    title: '소속 신청',
+    message: `${afltnInfo.value.companyNm} 소속 신청하시겠습니까?`,
+    onConfirm: async () => {
+      // [추가] 이력서 미선택시 리턴
+      try {
+        const res = await api.$post(`/affiliation/apply`, {
+          companySq: afltnInfo.value.sq,
+          resumeSq: 1,
+          companyApplicationGreetingTxt: affiliationStore.greeting,
+        })
+        if (res.status == 'CREATED') {
+          alertStore.show(res.message, 'success')
+          closeModal()
+        }
+      } catch (error) {
+        alertStore.show('소속 신청에 실패했습니다.', 'danger')
+      }
+    },
+  })
+}
+
+// 이력서 선택
+const openResumeModal = () => {
+  modalStore.openModal(ResumeSelectModal)
+}
 </script>
 <style>
 .text-bold {

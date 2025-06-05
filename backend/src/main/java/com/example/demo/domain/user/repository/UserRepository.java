@@ -7,8 +7,6 @@ import org.springframework.stereotype.Repository;
 import com.example.demo.domain.user.dto.AddressDTO;
 import com.example.demo.domain.user.dto.CompanyProfileDTO;
 import com.example.demo.domain.user.dto.UserDTO;
-import com.example.demo.domain.user.dto.request.FindIdRequestDTO;
-import com.example.demo.domain.user.dto.response.FindIdResponseDTO;
 import com.example.demo.domain.user.dto.response.LoginResponseDTO;
 import com.example.demo.domain.user.mapper.UserMapper;
 
@@ -32,8 +30,8 @@ public class UserRepository {
         return userMapper.existsByUserPhoneNum(userPhoneNum);
     }
 
-    public Long findAreaCodeSqBySigungu(String sigungu) {
-        return userMapper.selectAreaCodeSqBySigungu(sigungu);
+    public String findSigunguByAreaCode(Long areaCodeSq) {
+        return userMapper.selectSigunguByAreaCode(areaCodeSq);
     }
 
     public int insertAddress(AddressDTO dto) {
@@ -87,4 +85,9 @@ public class UserRepository {
     public int updatePassword(Long userSq, String newPassword) {
         return userMapper.updatePasswordByUserSq(userSq, newPassword);
     }
+
+    public UserDTO findByEmail(String email) {
+        return userMapper.findByEmail(email);
+    }
+
 }

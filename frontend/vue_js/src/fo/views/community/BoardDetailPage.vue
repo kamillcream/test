@@ -29,8 +29,10 @@ import { onMounted, ref } from 'vue'
 import { defineProps } from 'vue'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { api } from '@/axios'
+import { useBoardStore } from '@/fo/stores/boardStore'
 
 const alertStore = useAlertStore()
+const boardStore = useBoardStore()
 
 const props = defineProps({ board_sq: String })
 
@@ -44,8 +46,10 @@ const boardInfo = ref({
 const getBoard = async () => {
   try {
     const res = await api.$get(`/board/${props.board_sq}`)
+    console.log(res)
     if (res) {
       boardInfo.value = res.output
+      boardStore.viewerSq = res.output.viewerSq
     }
   } catch (error) {
     alertStore.show('게시글을 불러올 수 없습니다.', 'danger')

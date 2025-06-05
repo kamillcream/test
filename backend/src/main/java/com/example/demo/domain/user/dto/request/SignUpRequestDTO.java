@@ -23,7 +23,7 @@ public class SignUpRequestDTO {
     private String zonecode;
     private String address;
     private String detailAddress;
-    private String sigungu;
+    private Long sigunguCode;
     private BigDecimal latitude;
     private BigDecimal longitude;
 

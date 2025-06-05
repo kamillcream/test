@@ -89,7 +89,7 @@
             class="btn btn-primary"
             data-bs-dismiss="modal"
           >
-            지원하기
+            선택완료
           </button>
           <button
             @click="close"

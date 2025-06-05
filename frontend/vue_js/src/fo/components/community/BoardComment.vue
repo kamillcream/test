@@ -9,10 +9,14 @@
               class="img-thumbnail img-thumbnail-no-borders d-none d-sm-block"
             >
               <img
+                v-if="comment.userProfileImgUrl != null"
                 class="avatar"
                 alt=""
                 :src="`${comment.userProfileImgUrl}`"
               />
+              <div v-else class="rounded-circle comment-profile">
+                <i class="fas fa-user text-muted"></i>
+              </div>
             </div>
             <div class="comment-block font-size-12">
               <div class="comment-arrow"></div>
@@ -25,25 +29,10 @@
                   <strong>{{ comment.userNm }}</strong>
                 </span>
                 <!-- 작성자 본인일 경우 -->
-                <!-- [추가] 본인 인증 로직 -->
-                <span v-if="comment.userSq == 3" class="comment-icons d-flex">
-                  <button
-                    href="#"
-                    class="text-danger me-2 font-size-10"
-                    @click="clickEdit(comment.sq, comment.description)"
-                  >
-                    <span class="ms-2 text-primary">수정</span>
-                  </button>
-                  <button
-                    href="#"
-                    class="text-danger font-size-10"
-                    @click="openDeleteConfirm"
-                  >
-                    <span class="ms-2 text-primary">삭제</span>
-                  </button>
-                </span>
-                <!-- 작성자 아닌 경우 -->
-                <span v-else class="comment-icons d-flex">
+                <span
+                  v-if="comment.userSq == viewerSq"
+                  class="comment-icons d-flex"
+                >
                   <button
                     href="#"
                     class="text-danger me-2 font-size-10"
@@ -58,6 +47,9 @@
                   >
                     <span class="ms-2 text-primary">삭제</span>
                   </button>
+                </span>
+                <!-- 작성자 아닌 경우 -->
+                <span v-else class="comment-icons d-flex">
                   <button
                     class="text-danger me-2 font-size-10"
                     @click="rcmndComment(comment.sq)"
@@ -147,18 +139,21 @@
 <script setup>
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { useModalStore } from '@/fo/stores/modalStore'
-import { defineProps, ref } from 'vue'
+import { defineProps, onMounted, ref, watch } from 'vue'
 import CommonConfirmModal from '../common/CommonConfirmModal.vue'
 import { api } from '@/axios'
 import { useRoute } from 'vue-router'
 import ReportModal from './ReportModal.vue'
+import { useBoardStore } from '@/fo/stores/boardStore'
 
 const alertStore = useAlertStore()
-
 const modalStore = useModalStore()
+const boardStore = useBoardStore()
+
 const route = useRoute()
 const boardSq = route.params.board_sq
 const editSq = ref(null)
+const viewerSq = ref(boardStore.viewerSq)
 
 const formatTime = (createdAt) => {
   const date = new Date(createdAt)
@@ -195,13 +190,20 @@ const props = defineProps({
     default: () => {},
   },
 })
+console.log(props.comments)
 
 const description = ref('')
 const editdescription = ref('')
 
 // 추천
 const rcmndComment = async (sq) => {
+  console.log(`/comment/${sq}/recommend`)
+  if (viewerSq.value == null) {
+    alertStore.show('로그인 후 이용해주세요.', 'danger')
+    return
+  }
   const res = await api.$post(`/comment/${sq}/recommend`)
+  console.log(res)
 
   if (res.status == 'OK') {
     alertStore.show(res.message, 'success')
@@ -210,8 +212,6 @@ const rcmndComment = async (sq) => {
     alertStore.show('추천 반영에 실패하였습니다.', 'danger')
   }
 }
-
-// [추가] 신고
 
 // 삭제 컨펌 모달
 const openDeleteConfirm = (sq) => {
@@ -275,6 +275,10 @@ const editRegisterConfirm = (sq) => {
 
 // 댓글 등록 컨펌 모달
 const openRegisterConfirm = () => {
+  if (viewerSq.value == null) {
+    alertStore.show('로그인 후 이용해주세요.', 'danger')
+    return
+  }
   if (description.value == null || description.value.trim() == '') {
     alertStore.show('내용을 입력해주세요.', 'danger')
     return
@@ -307,8 +311,23 @@ const openRegisterConfirm = () => {
 
 // 신고 모달
 const clickReportApplication = (sq) => {
+  if (viewerSq.value == null) {
+    alertStore.show('로그인 후 이용해주세요.', 'danger')
+    return
+  }
   modalStore.openModal(ReportModal, { reportTypeCd: 2003, sq })
 }
+
+watch(
+  () => boardStore.viewerSq,
+  (newVal) => {
+    viewerSq.value = newVal
+  },
+)
+
+onMounted(() => {
+  viewerSq.value = boardStore.viewerSq
+})
 </script>
 <style>
 button {
@@ -334,5 +353,12 @@ button {
 }
 .font-size-15 {
   font-size: 1.5rem;
+}
+.rounded-circle.comment-profile {
+  width: 48px;
+  height: 48px;
+}
+.comment-profile .fas.fa-user.text-muted {
+  font-size: 20px;
 }
 </style>

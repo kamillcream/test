@@ -52,9 +52,8 @@
               <span>{{ boardInfo.recommendCnt }}</span>
             </button>
             <!-- 신고 버튼 -->
-            <!-- [추가] 본인 인증 로직 -->
             <button
-              v-if="boardInfo.userSq != viewUsersq"
+              v-if="boardInfo.userSq != viewerSq"
               type="button"
               class="btn btn-light btn-rounded text-grey d-flex align-items-center me-2 font-size-xs"
               @click="clickReportApplication"
@@ -117,18 +116,18 @@
       >
     </div>
     <div class="post-admin mt-4 text-end">
-      <!-- [추가] 본인 게시글이 아닐 경우에만 보이게 -->
       <button
-        v-if="boardType == 'qna' && boardInfo.userSq != viewUsersq"
+        v-if="
+          boardType == 'qna' && boardInfo.userSq != viewerSq && viewerSq != null
+        "
         type="button"
         class="btn btn-primary me-2"
         @click="clickApplication"
       >
         답변 작성
       </button>
-      <!-- [추가] 아래 버튼 4개 본인 게시글인 경우에만 보이게 -->
       <button
-        v-if="boardType == 'qna'"
+        v-if="boardType == 'qna' && boardInfo.userSq == viewerSq"
         type="button"
         class="btn btn-primary me-2"
         @click="updateStatus(1503)"
@@ -136,20 +135,34 @@
         자체 해결
       </button>
       <button
-        v-if="boardType == 'qna'"
+        v-if="boardType == 'qna' && boardInfo.userSq == viewerSq"
         type="button"
         class="btn btn-primary me-2"
         @click="updateStatus(1504)"
       >
         미해결
       </button>
-      <button class="btn btn-primary me-2" @click="editBoard">수정</button>
-      <button type="button" class="btn btn-primary" @click="openConfirm">
+      <button
+        v-if="boardInfo.userSq == viewerSq"
+        class="btn btn-primary me-2"
+        @click="editBoard"
+      >
+        수정
+      </button>
+      <button
+        v-if="boardInfo.userSq == viewerSq"
+        type="button"
+        class="btn btn-primary"
+        @click="openConfirm"
+      >
         삭제
       </button>
 
       <!-- [추가] 답변글인 경우에만 && 원 QnA 게시글의 작성자 본인일 경우에만 -->
-      <a v-if="boardInfo.userSq == viewUsersq" href="#" class="btn btn-primary"
+      <a
+        v-if="boardType == 'answer' && boardInfo.userSq == viewerSq"
+        href="#"
+        class="btn btn-primary"
         >답변 채택하기</a
       >
     </div>
@@ -157,7 +170,7 @@
 </template>
 <script setup>
 import { useModalStore } from '@/fo/stores/modalStore'
-import { computed, defineProps, ref } from 'vue'
+import { computed, defineProps, onMounted, ref, watch } from 'vue'
 import AnswerRegisterModal from './AnswerRegisterModal.vue'
 import CommonConfirmModal from '../common/CommonConfirmModal.vue'
 import { useAlertStore } from '@/fo/stores/alertStore'
@@ -209,7 +222,7 @@ const formatTime = (createdAt) => {
 }
 
 // 현재 사용자 시퀀스
-const viewUsersq = ref(1)
+const viewerSq = ref(boardStore.viewerSq)
 
 // 상태 변경
 const updateStatus = (cd) => {
@@ -241,9 +254,16 @@ const updateStatus = (cd) => {
 
 // 추천
 const rcmndBoard = async () => {
+  console.log(`/${boardType.value}/${boardInfo.value.sq}/recommend`)
+  console.log(viewerSq.value)
+  if (viewerSq.value == null) {
+    alertStore.show('로그인 후 이용해주세요.', 'danger')
+    return
+  }
   const res = await api.$post(
     `/${boardType.value}/${boardInfo.value.sq}/recommend`,
   )
+  console.log(res)
   if (res.status == 'OK') {
     alertStore.show(res.message, 'success')
     props.getBoard()
@@ -252,10 +272,12 @@ const rcmndBoard = async () => {
   }
 }
 
-// [추가] 신고
-
 // 게시글 수정 모달
 const editBoard = () => {
+  if (viewerSq.value == null) {
+    alertStore.show('로그인 후 이용해주세요.', 'danger')
+    return
+  }
   boardStore.setBoard(boardInfo.value)
   boardStore.editSq = Number(boardInfo.value.sq)
   if (boardType.value == 'board' || boardType.value == 'qna') {
@@ -294,16 +316,35 @@ const openConfirm = () => {
 
 // 답변 작성 모달
 const clickApplication = () => {
+  if (viewerSq.value == null) {
+    alertStore.show('로그인 후 이용해주세요.', 'danger')
+    return
+  }
   modalStore.openModal(AnswerRegisterModal, { size: 'modal-lg' })
 }
 
 // 신고 모달
 const clickReportApplication = () => {
+  if (viewerSq.value == null) {
+    alertStore.show('로그인 후 이용해주세요.', 'danger')
+    return
+  }
   modalStore.openModal(ReportModal, {
     reportTypeCd: boardType.value == 'answer' ? 2002 : 2001,
     sq: boardInfo.value.sq,
   })
 }
+
+watch(
+  () => boardStore.viewerSq,
+  (newVal) => {
+    viewerSq.value = newVal
+  },
+)
+
+onMounted(() => {
+  viewerSq.value = boardStore.viewerSq
+})
 </script>
 <style>
 button {

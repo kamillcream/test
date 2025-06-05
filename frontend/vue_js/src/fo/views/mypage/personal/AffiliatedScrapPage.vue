@@ -10,18 +10,26 @@
     <!-- 🔽 필터 UI 추가 영역 -->
     <div class="row align-items-center mt-3 mb-2">
       <div class="col-md-12 d-flex justify-content-end gap-2">
-        <select class="form-select form-select-sm w-auto">
-          <option selected>전체</option>
-          <option>제목 + 내용</option>
-          <option>제목</option>
-          <option>내용</option>
+        <select v-model="searchType" class="form-select form-select-sm w-auto">
+          <option value="all">전체</option>
+          <option value="company">회사명</option>
+          <option value="tag">태그</option>
+          <option value="content">소개</option>
         </select>
         <input
+          v-model="keyword"
           type="text"
           class="form-control form-control-sm w-auto"
           placeholder="검색어 입력"
+          @keyup.enter="getScrapList"
         />
-        <button class="btn btn-primary btn-sm">검색</button>
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          @click="getScrapList"
+        >
+          검색
+        </button>
       </div>
     </div>
     <!-- 🔼 필터 UI 끝 -->
@@ -44,22 +52,26 @@
                 class="d-flex justify-content-between align-items-center gap-2"
               >
                 <div class="d-flex gap-2">
-                  <a href="#" class="text-6 m-0">{{ scrap.company }}</a>
+                  <a href="#" class="text-6 m-0" @click="clickDetail(scrap)">{{
+                    scrap.companyNm
+                  }}</a>
                 </div>
                 <div class="d-flex gap-2">
                   <span
                     :class="[
                       'btn btn-sm',
-                      scrap.status === '모집 마감'
+                      scrap.isRecruitingYn === 'N'
                         ? 'btn-light'
                         : 'btn-primary',
                     ]"
-                    >{{ scrap.status }}</span
+                    >{{
+                      scrap.isRecruitingYn == 'Y' ? '모집 중' : '모집 마감'
+                    }}</span
                   >
                   <a
                     href="#"
                     class="btn btn-outline btn-primary btn-sm"
-                    @click.prevent="removeScrap(scrap.id)"
+                    @click.prevent="removeScrap(scrap.sq)"
                     >삭제</a
                   >
                 </div>
@@ -72,7 +84,7 @@
                   <span class="text-dark text-uppercase font-weight-semibold"
                     >소속 직원 수</span
                   >
-                  | {{ scrap.employeeCount }}
+                  | {{ scrap.memberCnt }}
                 </div>
               </div>
               <!-- 지원자격/개업일자 -->
@@ -81,48 +93,52 @@
               >
                 <div class="post-meta text-4">
                   <span class="text-dark text-uppercase font-weight-semibold"
-                    >지원 자격</span
+                    >태그</span
                   >
-                  | {{ scrap.qualification }}
+                  | {{ scrap.tags?.join(' / ') }}
                 </div>
                 <div class="post-meta text-4">
                   <span class="text-dark text-uppercase font-weight-semibold"
                     >개업일자</span
                   >
-                  | {{ scrap.openDate }}
+                  | {{ scrap.openDt }}
                 </div>
               </div>
             </div>
           </li>
         </ul>
         <!-- 페이징 -->
-        <div class="mt-5 py-5">
-          <ul class="pagination float-end">
-            <li class="page-item">
-              <a class="page-link" href="#"
-                ><i class="fas fa-angle-left"></i
-              ></a>
-            </li>
-            <li class="page-item active">
-              <a class="page-link" href="#">1</a>
-            </li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item">
-              <a class="page-link" href="#"
-                ><i class="fas fa-angle-right"></i
-              ></a>
-            </li>
-          </ul>
-        </div>
+        <CommonPagination
+          :currentPage="currentPage"
+          :totalPages="totalPages"
+          @update:currentPage="currentPage = $event"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-//좌측 마이페이지 사이드바
+import { api } from '@/axios'
+import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
+import CommonPagination from '@/fo/components/common/CommonPagination.vue'
+import AffiliationRecruit from '@/fo/components/company/AffiliationRecruit.vue'
+import { useAlertStore } from '@/fo/stores/alertStore'
+import { useModalStore } from '@/fo/stores/modalStore'
+import { onMounted, ref } from 'vue'
+
+const searchType = ref('all')
+const keyword = ref(null)
+const size = 10
+const currentPage = ref(1)
+const totalPages = ref(1)
+const totalElements = ref(1)
+
+const alertStore = useAlertStore()
+const modalStore = useModalStore()
+const closeModal = () => {
+  modalStore.closeModal()
+}
 
 const scraps = ref([
   {
@@ -159,9 +175,56 @@ const scraps = ref([
   },
 ])
 
-function removeScrap(id) {
-  scraps.value = scraps.value.filter((s) => s.id !== id)
+const getScrapList = async () => {
+  try {
+    const searchFilter =
+      keyword.value == null || keyword.value.trim() == ''
+        ? ''
+        : `&searchType=${searchType.value}&keyword=${keyword.value}`
+    const res = await api.$get(
+      `/mypage/applications/scraps?page=${currentPage.value}&size=${size}${searchFilter}`,
+    )
+    if (res.status == 'OK') {
+      const totalCnt = res.output.totalElements
+
+      console.log(res)
+      scraps.value = res.output.companies
+      totalElements.value = totalCnt
+
+      if (totalCnt == 0) {
+        totalPages.value = 1
+      } else {
+        totalPages.value = Math.floor((totalCnt + size - 1) / size)
+      }
+    }
+  } catch (error) {
+    alertStore.show('지원자를 불러올 수 없습니다.', 'danger')
+  }
 }
+
+const clickDetail = (afltnInfo) => {
+  modalStore.openModal(AffiliationRecruit, { afltnInfo })
+}
+
+const removeScrap = (id) => {
+  scraps.value = scraps.value.filter((s) => s.id !== id)
+  modalStore.openModal(CommonConfirmModal, {
+    title: '소속 스크랩 삭제',
+    message: `해당 스크랩 내역을 삭제하시겠습니까?`,
+    onConfirm: async () => {
+      try {
+        const res = await api.$post(`/affiliation/${id}/scrap`)
+        if (res.status == 'OK') getScrapList()
+      } catch (error) {
+        alertStore.show('스크랩 내역 삭제에 실패했습니다.', 'danger')
+      }
+      closeModal()
+    },
+  })
+}
+onMounted(() => {
+  getScrapList()
+})
 </script>
 
 <style scoped>

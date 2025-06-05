@@ -17,7 +17,7 @@
                   :class="
                     loginType === 'PERSONAL'
                       ? 'btn-primary'
-                      : 'btn-outline-primary'
+                      : 'btn-outline btn-primary'
                   "
                   @click="loginType = 'PERSONAL'"
                 >
@@ -28,7 +28,7 @@
                   :class="
                     loginType === 'COMPANY'
                       ? 'btn-primary'
-                      : 'btn-outline-primary'
+                      : 'btn-outline btn-primary'
                   "
                   @click="loginType = 'COMPANY'"
                 >

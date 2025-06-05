@@ -2,6 +2,7 @@ package com.example.demo.domain.community.controller;
 
 
 import org.springframework.http.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.common.ApiResponse;
@@ -36,29 +37,30 @@ public class BoardController {
     
 //    게시글 하나 조회
     @GetMapping("/{boardSq}")
-    public ResponseEntity<ApiResponse<BoardResponse>> getBoard(@PathVariable("boardSq") Long boardSq){
-        return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "게시글 조회 성공", boardService.getBoard(boardSq, 1401L)));
+    public ResponseEntity<ApiResponse<BoardResponse>> getBoard(@AuthenticationPrincipal Long userSq, @PathVariable("boardSq") Long boardSq){
+        return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "게시글 조회 성공", boardService.getBoard(userSq, boardSq, 1401L)));
     }
     
 //    게시글 등록
     @PostMapping
-    public ResponseEntity<ApiResponse<NullType>> createBoard(@RequestBody BoardRequest boardRequest){
-    	System.out.println("일반 게시글 등록");
+    public ResponseEntity<ApiResponse<NullType>> createBoard(@AuthenticationPrincipal Long userSq, @RequestBody BoardRequest boardRequest){
+    	boardRequest.setUserSq(userSq);
     	boardService.createBoard(boardRequest, 1401L);
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.CREATED, "게시글 등록이 완료되었습니다.", null));
     }
     
 //    게시글 수정
     @PutMapping("/{boardSq}")
-    public ResponseEntity<ApiResponse<NullType>> updateBoard(@RequestBody BoardRequest boardRequest, @PathVariable("boardSq") Long boardSq){
+    public ResponseEntity<ApiResponse<NullType>> updateBoard(@AuthenticationPrincipal Long userSq, @RequestBody BoardRequest boardRequest, @PathVariable("boardSq") Long boardSq){
+    	boardRequest.setUserSq(userSq);
     	boardService.updateBoard(boardRequest, boardSq, 1401L);
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "게시글 수정이 완료되었습니다.", null));
     }
     
 //    게시글 삭제
     @PatchMapping("/{boardSq}")
-    public ResponseEntity<ApiResponse<NullType>> deleteBoard(@PathVariable("boardSq") Long boardSq){
-    	boardService.deleteBoard(boardSq);
+    public ResponseEntity<ApiResponse<NullType>> deleteBoard(@AuthenticationPrincipal Long userSq, @PathVariable("boardSq") Long boardSq){
+    	boardService.deleteBoard(userSq, boardSq);
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "게시글 삭제가 완료되었습니다.", null));
     }
     
@@ -71,8 +73,8 @@ public class BoardController {
     
 //  게시글 추천 클릭
 	@PostMapping("/{boardSq}/recommend")
-	public ResponseEntity<ApiResponse<NullType>> updateRecommendBoard(@PathVariable("boardSq") Long boardSq){
-		boardService.updateBoardRecommend(boardSq);
+	public ResponseEntity<ApiResponse<NullType>> updateRecommendBoard(@AuthenticationPrincipal Long userSq, @PathVariable("boardSq") Long boardSq){
+		boardService.updateBoardRecommend(userSq, boardSq);
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "추천 반영이 완료되었습니다.", null));
 	}
 	

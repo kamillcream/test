@@ -18,4 +18,5 @@ public class UserDTO {
     private Long userTypeCd;
     private Long userSignupTypeCd;
     private String userProfileImageUrl;
+    private String userIsDeletedYn;
 }
