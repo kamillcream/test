@@ -136,9 +136,12 @@
                             <a href="#" class="text-6 m-0"
                               >{{ applicant.nameTitleVo.resumeNm }} /</a
                             >
-                            <a href="#" class="text-5 m-0">{{
-                              applicant.nameTitleVo.resumeTtl
-                            }}</a>
+                            <a
+                              @click="openResumeDetailModal()"
+                              href="#"
+                              class="text-5 m-0"
+                              >{{ applicant.nameTitleVo.resumeTtl }}</a
+                            >
                           </div>
                           <div class="d-flex gap-2">
                             <template
@@ -364,6 +367,7 @@ import { ref, defineProps, computed } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 
 import InterviewTimeModal from '@/fo/components/mypage/common/InterviewSelectModal.vue'
+import ResumeDetailModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
 import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 
 import { api } from '@/axios.js'
@@ -426,7 +430,7 @@ const filteredApplicants = computed(() => {
         case 'interview_requested':
           return status === '인터뷰요청중'
         case 'rejected':
-          return ['불합격', '반려', '지원 취소'].includes(status)
+          return ['불합격', '반려', '지원취소'].includes(status)
         default:
           return true
       }
@@ -468,7 +472,7 @@ const filterCounts = computed(() => {
     const status = a.appStatusVo?.appStatus
     if (status === '인터뷰 확정') counts.interview_confirmed++
     else if (status === '인터뷰요청중') counts.interview_requested++
-    else if (['불합격', '반려', '지원 취소'].includes(status)) counts.rejected++
+    else if (['불합격', '반려', '지원취소'].includes(status)) counts.rejected++
   })
 
   return counts
@@ -519,6 +523,9 @@ const openInterviewTimeModal = (applicationSq) => {
   })
 }
 
+const openResumeDetailModal = () => {
+  modalStore.openModal(ResumeDetailModal, {})
+}
 function getAccessTokenFromCookie() {
   const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]*)/)
   return match ? decodeURIComponent(match[1]) : null
