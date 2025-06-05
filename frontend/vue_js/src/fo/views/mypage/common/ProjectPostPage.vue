@@ -680,6 +680,7 @@ const submitProject = async () => {
       await api.$post('/projects', requestBody, config)
       alert('등록 성공')
     }
+    router.push({ name: 'ProjectListPage' })
   } catch (error) {
     console.error('프로젝트 등록 실패: ', error)
   }
