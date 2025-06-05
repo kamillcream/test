@@ -16,6 +16,7 @@ public interface ResumeMapper {
 	
 	public ResumeNmTtlVo findLatestResumeBySq(Long resumeSq);
 	public ResumeNmTtlVo findRepResumeNmTtlByUserSq(Long userSq);
+	
 	public List<Long> findResumesByUserSq(Long userSq);
 	public Long findRepResumeByUserSq(Long userSq);
 	public Long findLatestResumeSqByUserSq(Long userSq);
