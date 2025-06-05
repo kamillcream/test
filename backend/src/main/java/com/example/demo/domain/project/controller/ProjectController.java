@@ -87,20 +87,13 @@ public class ProjectController {
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 삭제 성공", null)); 
 	}
 	
-	@PostMapping("/{projectSq}/applications")
-	public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectSq") Long projectSq
-			, @RequestBody ProjectApplyRequest applyRequest
-			, @AuthenticationPrincipal Long userSq){
-		projectService.createProjectApplication(projectSq, applyRequest, userSq);
-		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 지원 성공", null));
-	}
 	
 	@PostMapping("/{projectSq}/scraps")
-	public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectSq") Long projectSq
+	public ResponseEntity<ApiResponse<Long>> scrapProject(@PathVariable("projectSq") Long projectSq
 			, @RequestBody ScrapRequest scrapRequest
 			, @AuthenticationPrincipal Long userSq){
 		projectService.toggleProjectScrap(projectSq, scrapRequest, userSq);
-		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 스크랩 토글 성공", null));
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 스크랩 토글 성공", projectService.fetchScrapCount(projectSq)));
 	}
 	
 	@GetMapping("/{projectSq}/details")
