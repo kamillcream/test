@@ -1,18 +1,19 @@
-package com.example.demo.domain.project.dto.response;
+package com.example.demo.domain.company.dto.response;
 
 import java.util.List;
 
-import com.example.demo.domain.project.vo.ProjectSummary;
+import com.example.demo.domain.company.dto.CompanyMemberVo;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@Getter
+
 @AllArgsConstructor
-public class ProjectListResponse {
+@Getter
+public class CompanyMemberResponse {
 	private Integer page;
     private Integer size;
     private Long totalCount;
     private Integer totalPages; 
-    private List<ProjectSummary> projects;
+    private List<CompanyMemberVo> members;
 }
