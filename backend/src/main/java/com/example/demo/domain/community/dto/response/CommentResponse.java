@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentResponse{
-	private Long sq;
+public class CommentResponse {
+    private Long sq;
     private Long userSq;
     private String userProfileImgUrl;
     private String userNm;
@@ -19,26 +19,24 @@ public class CommentResponse{
     private LocalDateTime createdAt;
     private Integer recommendCnt;
 
-    
     public static CommentResponse fromEntity(Comment comment, UserDTO userDto) {
         String userNm = "존재하지 않는 사용자";
         String userProfileImageUrl = null;
-        
+
         if (userDto != null) {
             if (userDto.getUserNm() != null) {
                 userNm = userDto.getUserNm();
             }
-            userProfileImageUrl = userDto.getUserProfileImageUrl(); // null 허용
+            userProfileImageUrl = null; // null 허용
         }
-        
+
         return new CommentResponse(
-			comment.getCommentSq(),
-			comment.getUserSq(),
-			userProfileImageUrl,
-			userNm,
-			comment.getCommentDescriptionTxt(),
-			comment.getCommentCreatedAtDtm(),
-			comment.getCommentRecommendCnt()
-        );
+                comment.getCommentSq(),
+                comment.getUserSq(),
+                userProfileImageUrl,
+                userNm,
+                comment.getCommentDescriptionTxt(),
+                comment.getCommentCreatedAtDtm(),
+                comment.getCommentRecommendCnt());
     }
 }
