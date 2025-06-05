@@ -17,6 +17,5 @@ public class UserDTO {
     private LocalDate userBirthDt;
     private Long userTypeCd;
     private Long userSignupTypeCd;
-    private String userProfileImageUrl;
     private String userIsDeletedYn;
 }
