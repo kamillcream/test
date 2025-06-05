@@ -12,5 +12,12 @@ import org.apache.ibatis.annotations.Mapper;
 public interface ResumeMapper {
 	void insertResume(ResumeRegisterRequest request);
 	public List<ResumeVo> findResumeVoByUserSq(Long userSq);
+	public ResumeNmTtlVo findRepResumeNmTtlBySq(Long resumeSq);
 	public ResumeNmTtlVo findResumeNmTtlBySq(Long resumeSq);
+	public ResumeNmTtlVo findRepResumeNmTtlByUserSq(Long userSq);
+	
+	public ResumeNmTtlVo findLatestResumeBySq(Long resumeSq);
+	public List<Long> findResumesByUserSq(Long userSq);
+	public Long findRepResumeByUserSq(Long userSq);
+	public Long findLatestResumeSqByUserSq(Long userSq);
 }
