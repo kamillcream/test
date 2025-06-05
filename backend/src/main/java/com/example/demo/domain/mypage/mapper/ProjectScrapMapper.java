@@ -3,8 +3,8 @@ package com.example.demo.domain.mypage.mapper;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
-import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyDTO;
 import com.example.demo.domain.mypage.dto.ProjectDTO;
 import com.example.demo.domain.mypage.dto.ProjectScrapAddressDTO;
@@ -24,4 +24,7 @@ public interface ProjectScrapMapper {
     String findDeveloperGradeName(Long commonCodeSq);
 
     List<String> findSkillTagsByProjectSq(Long projectSq);
+
+    int deleteByUserAndProject(@Param("userSq") Long userSq, @Param("projectSq") Long projectSq);
+
 }

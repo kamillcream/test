@@ -43,4 +43,8 @@ public class ProjectScrapRepository {
     public List<String> findSkillTags(Long projectSq) {
         return mapper.findSkillTagsByProjectSq(projectSq);
     }
+
+    public int deleteByUserAndProject(Long userSq, Long projectSq) {
+    return mapper.deleteByUserAndProject(userSq, projectSq);
+}
 }

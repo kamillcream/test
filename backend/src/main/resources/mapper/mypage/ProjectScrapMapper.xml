@@ -31,4 +31,7 @@
     <select id="findSkillTagsByProjectSq" resultType="string"> SELECT skill_tag_nm FROM
         TBL_PROJECT_REQUIRED_SKILL_TAG_S WHERE project_sq = #{projectSq} </select>
 
+    <delete id="deleteByUserAndProject" parameterType="map"> DELETE FROM TBL_SCRAP_S WHERE user_sq =
+        #{userSq} AND project_sq = #{projectSq} AND scrap_type_cd = 601 </delete>
+
 </mapper>

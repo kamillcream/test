@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.domain.mypage.dto.CompanyDTO;
 import com.example.demo.domain.mypage.dto.ProjectDTO;
@@ -50,4 +51,9 @@ public class ProjectScrapService {
         }).collect(Collectors.toList());
     }
 
+    @Transactional
+    public boolean deleteProjectScrap(Long userSq, Long projectSq) {
+        int affected = repository.deleteByUserAndProject(userSq, projectSq);
+        return affected > 0;
+    }
 }
