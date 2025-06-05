@@ -95,7 +95,13 @@ const getBoardList = async () => {
       `/board?page=${currentPage.value}&size=${size}&sortType=${sortType.value}${searchFilter}`,
     )
     if (res) {
-      totalPages.value = (res.output.totalElements + size - 1) / size
+      if (res.output.totalElements == 0) {
+        totalPages.value = 1
+      } else {
+        totalPages.value = Math.floor(
+          (res.output.totalElements + size - 1) / size,
+        )
+      }
       boardList.value = res.output.boards
     }
   } catch (error) {

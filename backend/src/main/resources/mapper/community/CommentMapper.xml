@@ -29,7 +29,7 @@
     <update id="delete" parameterType="com.example.demo.domain.community.entity.Comment">
         UPDATE TBL_BOARD_COMMENT_S
         SET comment_is_deleted_yn = 'Y'
-        WHERE comment_sq = #{commentSq}
+        WHERE comment_sq = #{commentSq} AND user_sq = #{userSq}
     </update>
 
     <update id="updateRecommendCnt" parameterType="com.example.demo.domain.community.entity.Comment">

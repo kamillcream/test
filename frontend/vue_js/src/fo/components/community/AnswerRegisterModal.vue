@@ -80,7 +80,7 @@ const isHtmlEmpty = (htmlString) => {
   return textOnly === ''
 }
 
-// [추가] 등록 함수
+// 등록 함수
 const registerFunc = async () => {
   try {
     const reqData = registerRef.value.sendData()

@@ -9,6 +9,7 @@ import com.example.demo.domain.community.entity.*;
 import com.example.demo.domain.community.mapper.*;
 import com.example.demo.domain.community.dto.response.*;
 import com.example.demo.domain.community.converter.*;
+import com.example.demo.domain.user.dto.UserDTO;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,8 @@ public class BoardService {
     private final NormalTagConverter normalTagConverter;
     private final SkillTagConverter skillTagConverter;
     private final RecommendationMapper recommendationMapper;
+    private final CommunityUserMapper communityUserMapper;
+    private final AnswerService answerService;
 
     @Transactional
     public BoardListResponse getAllBoards(Long boardTypeCd, Long boardAdoptStatusCd, String searchType, String keyword, List<Long> searchSkillTags, String sortType, Long page, Long size) {
@@ -49,9 +52,14 @@ public class BoardService {
             	// 각 게시글의 답변 리스트 조회
             	Integer boardAnswerCnt = answerMapper.findAllCnt(board.getBoardSq());
             	
+            	// 각 게시글의 작성자 조회
+            	UserDTO userInfo = communityUserMapper.findById(board.getUserSq());
+            	String userNm = Optional.ofNullable(userInfo)
+            	                        .map(UserDTO::getUserNm)
+            	                        .orElse("존재하지 않는 사용자");
                 
                 // BoardListResponse 생성 (태그 포함)
-                return BoardListDTO.fromEntity(board, boardAnswerCnt, normalTags, skillTags);
+                return BoardListDTO.fromEntity(board, userNm, boardAnswerCnt, normalTags, skillTags);
             })
             .collect(Collectors.toList());
 
@@ -59,7 +67,7 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardResponse getBoard(Long boardSq, Long boardTypeCd) {
+    public BoardResponse getBoard(Long userSq, Long boardSq, Long boardTypeCd) {
     	Board board = boardMapper.findByIdBoard(boardSq, boardTypeCd);
     	if(board == null) {
     		throw new IllegalArgumentException("게시글이 존재하지 않습니다.");
@@ -70,24 +78,25 @@ public class BoardService {
     	List<String> normalTags = normalTagConverter.convertNormalTagsToStrings(cmntTagMapper.findNT(boardSq, null));
     	List<SkillTagDTO> skillTags = skillTagConverter.convertSkillTagsToStrings(cmntTagMapper.findST(boardSq, null));
     	
-    	List<Answer> answers = answerMapper.findAll(board.getBoardSq());
+    	// 각 게시글의 작성자 조회
+    	UserDTO userInfo = communityUserMapper.findById(board.getUserSq());
+    	String userNm = Optional.ofNullable(userInfo)
+    			.map(UserDTO::getUserNm)
+                    .orElse("존재하지 않는 사용자");
     	
-    	List<AnswerListResponse> answerListResponses = answers.stream()
-            .filter(Objects::nonNull)
-            .map(answer -> {
-            	if(answer.getAnswerIsDeletedYn().equals("Y")) {
-            		return AnswerListResponse.builder().isDeletedYn("Y").build(); 
-            	} else {
-            		return AnswerListResponse.fromEntity(answer);            		            		
-            	}
-            })
-            .collect(Collectors.toList());
+    	List<AnswerListResponse> answerListResponses = answerService.getAllAnswers(board.getBoardSq());
     	
-    	List<CommentResponse> comments = commentMapper.findByBoardSq(boardSq).stream().filter(Objects::nonNull)
-    			.map(comment -> CommentResponse.fromEntity(comment)).collect(Collectors.toList());
+    	// 각 게시글의 댓글 조회
+    	List<CommentResponse> comments = commentMapper.findByBoardSq(boardSq).stream()
+    		    .filter(Objects::nonNull)
+    		    .map(comment -> {
+    		        UserDTO userDto = communityUserMapper.findById(comment.getUserSq());
+    		        return CommentResponse.fromEntity(comment, userDto);
+    		    })
+    		    .collect(Collectors.toList());
     			
     	
-        return BoardResponse.fromEntity(board, normalTags, skillTags, answerListResponses, comments);
+        return BoardResponse.fromEntity(board, userNm, normalTags, skillTags, answerListResponses, comments, userSq);
     }
     
     @Transactional
@@ -136,6 +145,11 @@ public class BoardService {
     	
         Board board = boardMapper.findByIdBoard(boardSq, boardTypeCd);
 
+        
+        if(board.getUserSq() != boardRequest.getUserSq()) {
+        	throw new IllegalArgumentException("작성자와 사용자가 일치하지 않습니다.");
+        }
+
         board.setBoardTtl(boardRequest.getTtl());
         board.setBoardDescriptionEdt(boardRequest.getDescription());
         
@@ -164,8 +178,11 @@ public class BoardService {
     }
 
     @Transactional
-    public void deleteBoard(Long boardSq) {
-        boardMapper.delete(boardSq);
+    public void deleteBoard(Long userSq, Long boardSq) {
+        boardMapper.delete(userSq, boardSq);
+    	cmntTagMapper.deleteNT(boardSq, null);
+    	cmntTagMapper.deleteST(boardSq, null);
+    	recommendationMapper.deleteAll(boardSq, null, null);
 
     }
 
@@ -176,13 +193,16 @@ public class BoardService {
 
 //    추천
     @Transactional
-    public void updateBoardRecommend(Long boardSq) {
+    public void updateBoardRecommend(Long userSq, Long boardSq) {
+    	
+    	if(userSq == null) {
+    		throw new IllegalArgumentException("로그인 후 이용해주세요.");
+    	}
         
-        Recommendation recommendation = recommendationMapper.findByBoardSq(boardSq);
+        Recommendation recommendation = recommendationMapper.findByBoardSq(userSq, boardSq);
         
         if(recommendation == null) {
-//        	추후 Authorization 에서 userSq 가져올 예정
-        	recommendation = Recommendation.builder().boardSq(boardSq).userSq(3L).recommendationTypeCd(1901L).build();
+        	recommendation = Recommendation.builder().boardSq(boardSq).userSq(userSq).recommendationTypeCd(1901L).build();
         	recommendationMapper.insert(recommendation);
         	
         } else {

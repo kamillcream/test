@@ -17,7 +17,7 @@
           v-for="filter in filters"
           :key="filter.type"
           class="btn btn-primary fw-bold px-4 py-2 d-flex align-items-center gap-2 fs-6"
-          :class="{ active: currentFilter === filter.type }"
+          :class="{ active: readType === filter.type }"
           @click="setFilter(filter.type)"
         >
           {{ filter.label }}
@@ -30,16 +30,20 @@
       <div class="col-md-6 d-flex justify-content-end gap-2">
         <select v-model="searchType" class="form-select form-select-sm w-auto">
           <option value="all">전체</option>
-          <option value="title">제목</option>
+          <option value="title">이력서 제목</option>
           <option value="name">지원자명</option>
+          <option value="greeting">인사말</option>
         </select>
         <input
-          v-model="searchText"
+          v-model="keyword"
           type="text"
           class="form-control form-control-sm w-auto"
           placeholder="검색어 입력"
+          @keyup.enter="getApplicants"
         />
-        <button class="btn btn-primary btn-sm" @click="search">검색</button>
+        <button class="btn btn-primary btn-sm" @click="getApplicants">
+          검색
+        </button>
       </div>
     </div>
 
@@ -49,12 +53,12 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="applicants.length > 0">
       <div class="col">
         <ul class="simple-post-list m-0 position-relative">
           <li
             v-for="applicant in applicants"
-            :key="applicant.id"
+            :key="applicant.applicationSq"
             style="border-bottom: 1px rgb(230, 230, 230) solid"
           >
             <div class="post-info position-relative">
@@ -63,30 +67,42 @@
                 class="d-flex justify-content-between align-items-center gap-2"
               >
                 <div class="d-flex gap-2">
-                  <a href="#" class="text-6 m-0">{{ applicant.name }}</a>
-                </div>
-                <div class="d-flex gap-2">
-                  <span
-                    :class="[
-                      'btn',
-                      'btn-outline',
-                      'btn-primary',
-                      'btn-sm',
-                      { 'btn-light': applicant.status !== '합격' },
-                    ]"
-                    >합격</span
-                  >
                   <a
                     href="#"
+                    class="text-6 m-0"
+                    @click="handleOpenApplicant(applicant.applicationSq)"
+                    >{{ applicant.userNm }}</a
+                  >
+                </div>
+                <div class="d-flex gap-2">
+                  <button
+                    type="button"
                     :class="[
                       'btn',
                       'btn-outline',
                       'btn-primary',
                       'btn-sm',
-                      { 'btn-light': applicant.status !== '불합격' },
+                      { 'btn-light': applicant.statusCd !== 502 },
                     ]"
-                    >불합격</a
+                    v-if="applicant.statusCd !== 503"
+                    @click="handlePassClick(applicant, 502)"
                   >
+                    합격
+                  </button>
+                  <button
+                    type="button"
+                    :class="[
+                      'btn',
+                      'btn-outline',
+                      'btn-primary',
+                      'btn-sm',
+                      { 'btn-light': applicant.statusCd !== 503 },
+                    ]"
+                    v-if="applicant.statusCd !== 502"
+                    @click="handlePassClick(applicant, 503)"
+                  >
+                    불합격
+                  </button>
                 </div>
               </div>
               <!-- 경력/열람일자 -->
@@ -97,13 +113,16 @@
                   <span class="text-dark text-uppercase font-weight-semibold"
                     >경력</span
                   >
-                  | {{ applicant.career }}
+                  | {{ convertCareer(applicant.career) }}
                 </div>
                 <div class="post-meta text-4">
                   <span class="text-dark text-uppercase font-weight-semibold"
                     >열람일자</span
                   >
-                  | {{ applicant.readDate }}
+                  |
+                  {{
+                    applicant.readAt ? convertDate(applicant.readAt) : '미열람'
+                  }}
                 </div>
               </div>
               <!-- 사용 기술/지원일자 -->
@@ -118,11 +137,11 @@
                   |
                   <div
                     v-for="skill in applicant.skills"
-                    :key="skill.name"
+                    :key="skill.skillTagNm"
                     class="btn d-flex align-items-center gap-2 border-0"
                   >
-                    <img :src="skill.icon" width="20" />
-                    {{ skill.name }}
+                    <img :src="getSkillIcon(skill.skillTagNm)" width="20" />
+                    {{ skill.skillTagNm }}
                   </div>
                 </div>
                 <div class="post-meta" style="font-size: 16.8px">
@@ -131,126 +150,171 @@
                     style="font-size: 16.8px"
                     >지원일자</span
                   >
-                  | {{ applicant.applyDate }}
+                  | {{ convertDate(applicant.createdAt) }}
                 </div>
               </div>
             </div>
           </li>
         </ul>
 
-        <!-- 페이징 -->
-        <div class="mt-5 py-5">
-          <ul class="pagination float-end">
-            <li class="page-item">
-              <a
-                class="page-link"
-                href="#"
-                @click.prevent="changePage(currentPage - 1)"
-                ><i class="fas fa-angle-left"></i
-              ></a>
-            </li>
-            <li
-              v-for="page in totalPages"
-              :key="page"
-              class="page-item"
-              :class="{ active: currentPage === page }"
-            >
-              <a class="page-link" href="#" @click.prevent="changePage(page)">{{
-                page
-              }}</a>
-            </li>
-            <li class="page-item">
-              <a
-                class="page-link"
-                href="#"
-                @click.prevent="changePage(currentPage + 1)"
-                ><i class="fas fa-angle-right"></i
-              ></a>
-            </li>
-          </ul>
-        </div>
+        <!-- 페이지네이션: 우측 하단 정렬 -->
+        <CommonPagination
+          :currentPage="currentPage"
+          :totalPages="totalPages"
+          @update:currentPage="currentPage = $event"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { api } from '@/axios'
+import CommonPagination from '@/fo/components/common/CommonPagination.vue'
+import { useAlertStore } from '@/fo/stores/alertStore'
+import { onMounted, ref } from 'vue'
+import skillIconMap from '@/assets/skillIconMap.js'
+import { useModalStore } from '@/fo/stores/modalStore'
+import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 
-const currentFilter = ref('all')
+const readType = ref('all')
 const searchType = ref('all')
-const searchText = ref('')
+const keyword = ref(null)
+const size = 10
 const currentPage = ref(1)
-const totalPages = ref(3)
+const totalPages = ref(1)
+const totalElements = ref(0)
+const readElements = ref(0)
+const unreadElements = ref(0)
+
+const alertStore = useAlertStore()
+const modalStore = useModalStore()
 
 const filters = ref([
-  { type: 'all', label: '전체', count: 10 },
-  { type: 'read', label: '열람', count: 5 },
-  { type: 'unread', label: '미열람', count: 5 },
+  { type: 'all', label: '전체', count: totalElements },
+  { type: 'read', label: '열람', count: readElements },
+  { type: 'unread', label: '미열람', count: unreadElements },
 ])
 
-const applicants = ref([
-  {
-    id: 1,
-    name: '홍길동',
-    status: '합격',
-    career: '0년차',
-    readDate: '2025.04.18',
-    applyDate: '2025.04.15',
-    skills: [
-      {
-        name: 'Java',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-      },
-      {
-        name: 'Python',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-      },
-      {
-        name: 'Spring Boot',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: '홍길동',
-    status: '불합격',
-    career: '0년차',
-    readDate: '미열람',
-    applyDate: '2025.04.15',
-    skills: [
-      {
-        name: 'Java',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-      },
-      {
-        name: 'Python',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-      },
-      {
-        name: 'Spring Boot',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
-      },
-    ],
-  },
-])
+const applicants = ref([])
+
+const getApplicants = async () => {
+  try {
+    const searchFilter =
+      keyword.value == null || keyword.value.trim() == ''
+        ? ''
+        : `&searchType=${searchType.value}&keyword=${keyword.value}`
+
+    const readFilter =
+      readType.value == null || readType.value == 'all'
+        ? ''
+        : `&readType=${readType.value}`
+    const res = await api.$get(
+      `/mypage/applications/company?page=${currentPage.value}&size=${size}${searchFilter}${readFilter}`,
+    )
+    if (res.status == 'OK') {
+      const totalCnt = res.output.totalElements
+      const unreadCnt = res.output.totalElements - res.output.readElements
+      const readCnt = res.output.readElements
+
+      console.log(res)
+      applicants.value = res.output.applicants
+      totalElements.value = totalCnt
+      readElements.value = readCnt
+      unreadElements.value = unreadCnt
+
+      if (totalCnt == 0) {
+        totalPages.value = 1
+      } else {
+        totalPages.value = Math.floor((totalCnt + size - 1) / size)
+      }
+
+      if (readType.value == 'read') {
+        if (readCnt == 0) {
+          totalPages.value = 1
+        } else {
+          totalPages.value = Math.floor((readCnt + size - 1) / size)
+        }
+      } else if (readType.value == 'unread') {
+        if (unreadCnt == 0) {
+          totalPages.value = 1
+        } else {
+          totalPages.value = Math.floor((unreadCnt + size - 1) / size)
+        }
+      }
+    }
+  } catch (error) {
+    alertStore.show('지원자를 불러올 수 없습니다.', 'danger')
+  }
+}
+
+const handlePassClick = (applicant, cd) => {
+  if (applicant.statusCd == cd) {
+    return
+  }
+  modalStore.openModal(CommonConfirmModal, {
+    title: '지원 상태 변경',
+    message: `해당 지원자를 ${cd == 502 ? '합격' : '불합격'} 하시겠습니까?`,
+    onConfirm: async () => {
+      try {
+        const res = await api.$put(
+          `/mypage/applications/apply/${applicant.applicationSq}`,
+          {
+            companyApplicationStatusCd: cd,
+          },
+        )
+        if (res.status == 'OK') {
+          alertStore.show('지원 상태 변경이 완료되었습니다.', 'success')
+          getApplicants()
+        }
+      } catch (error) {
+        alertStore.show('지원 상태 변경에 실패했습니다.', 'danger')
+      }
+      modalStore.closeModal()
+    },
+  })
+}
+
+const handleOpenApplicant = async (sq) => {
+  await api.$put(`/mypage/applications/read/${sq}`) // 이력서 열람으로 업데이트
+  // [추가] 이력서 모달 오픈
+}
+
+const convertCareer = (career) => {
+  if (!career || career <= 0) return '신입'
+  const years = Math.floor(career / 12)
+  const months = career % 12
+
+  const yearPart = years > 0 ? `${years}년 ` : ''
+  const monthPart = months > 0 ? `${months}개월` : ''
+  return `${yearPart}${monthPart}`
+}
+
+const convertDate = (createdAt) => {
+  const date = new Date(createdAt)
+  const year = date.getFullYear()
+  let month = date.getMonth() + 1
+  let day = date.getDate()
+
+  if (month < 10) month = '0' + month
+  if (day < 10) day = '0' + day
+
+  return `${year}.${month}.${day}`
+}
+
+const getSkillIcon = (name) => {
+  const key = name.toLowerCase().replace(/[\s.]+/g, '')
+  return skillIconMap[key] || skillIconMap.default
+}
 
 const setFilter = (type) => {
-  currentFilter.value = type
-  // 필터링 로직 구현
+  readType.value = type
+  getApplicants()
 }
 
-const search = () => {
-  // 검색 로직 구현
-  console.log('검색:', searchType.value, searchText.value)
-}
-
-const changePage = (page) => {
-  if (page < 1 || page > totalPages.value) return
-  currentPage.value = page
-  // 페이지 변경 로직 구현
-}
+onMounted(() => {
+  getApplicants()
+})
 </script>
 
 <style scoped>

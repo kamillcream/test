@@ -14,7 +14,7 @@ public interface CommentMapper {
      List<Comment> findByAnswerSq(@Param("answerSq")Long answerSq);
      void insert(Comment comment);
      void update(Comment comment);
-     void delete(Long commentSq);
+     void delete(@Param("userSq") Long userSq, @Param("commentSq") Long commentSq);
      void updateRecommendCnt(Long commentSq);
      
 }

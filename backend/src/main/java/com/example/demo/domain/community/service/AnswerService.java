@@ -7,6 +7,7 @@ import com.example.demo.domain.community.dto.*;
 import com.example.demo.domain.community.dto.request.*;
 import com.example.demo.domain.community.entity.*;
 import com.example.demo.domain.community.mapper.*;
+import com.example.demo.domain.user.dto.UserDTO;
 import com.example.demo.domain.community.dto.response.*;
 import com.example.demo.domain.community.converter.*;
 
@@ -25,6 +26,7 @@ public class AnswerService {
     private final NormalTagConverter normalTagConverter;
     private final SkillTagConverter skillTagConverter;
     private final RecommendationMapper recommendationMapper;
+    private final CommunityUserMapper communityUserMapper;
 
 //    답변 리스트
     @Transactional
@@ -37,7 +39,13 @@ public class AnswerService {
             	if(answer.getAnswerIsDeletedYn().equals("Y")) {
             		return AnswerListResponse.builder().isDeletedYn("Y").build(); 
             	} else {
-            		return AnswerListResponse.fromEntity(answer);            		            		
+            		UserDTO userInfo = communityUserMapper.findById(answer.getUserSq());
+                    String userNm = "존재하지 않는 사용자";
+                    if (userInfo != null && userInfo.getUserNm() != null) {
+                        userNm = userInfo.getUserNm();
+                    }
+
+                    return AnswerListResponse.fromEntity(answer, userNm);            		            		
             	}
             })
             .collect(Collectors.toList());
@@ -58,11 +66,22 @@ public class AnswerService {
     	List<String> normalTags = normalTagConverter.convertNormalTagsToStrings(cmntTagMapper.findNT(null, answerSq));
     	List<SkillTagDTO> skillTags = skillTagConverter.convertSkillTagsToStrings(cmntTagMapper.findST(null, answerSq));
     	
-    	List<CommentResponse> comments = commentMapper.findByAnswerSq(answerSq).stream().filter(Objects::nonNull)
-    			.map(comment -> CommentResponse.fromEntity(comment)).collect(Collectors.toList());
+
+    	UserDTO userInfo = communityUserMapper.findById(answer.getUserSq());
+    	String userNm = Optional.ofNullable(userInfo)
+    			.map(UserDTO::getUserNm)
+                    .orElse("존재하지 않는 사용자");
+
+    	List<CommentResponse> comments = commentMapper.findByAnswerSq(answerSq).stream()
+    		    .filter(Objects::nonNull)
+    		    .map(comment -> {
+    		        UserDTO userDto = communityUserMapper.findById(comment.getUserSq());
+    		        return CommentResponse.fromEntity(comment, userDto);
+    		    })
+    		    .collect(Collectors.toList());
     			
     	
-        return AnswerResponse.fromEntity(answer, normalTags, skillTags, comments);
+        return AnswerResponse.fromEntity(answer, userNm, normalTags, skillTags, comments);
     }
     
 //    답변 등록
@@ -111,6 +130,10 @@ public class AnswerService {
     	}
     	
         Answer answer = answerMapper.findById(answerSq);
+        
+        if(answer.getUserSq() != answerRequest.getUserSq()) {
+        	throw new IllegalArgumentException("작성자와 사용자가 일치하지 않습니다.");
+        }
 
         answer.setAnswerTtl(answerRequest.getTtl());
         answer.setAnswerDescriptionEdt(answerRequest.getDescription());
@@ -136,8 +159,11 @@ public class AnswerService {
 
 //    답변 삭제
     @Transactional
-    public void deleteAnswer(Long answerSq) {
-    	answerMapper.delete(answerSq);
+    public void deleteAnswer(Long userSq, Long answerSq) {
+    	answerMapper.delete(userSq, answerSq);
+    	cmntTagMapper.deleteNT(null, answerSq);
+    	cmntTagMapper.deleteST(null, answerSq);
+    	recommendationMapper.deleteAll(null, answerSq, null);
 
     }
 
@@ -149,14 +175,11 @@ public class AnswerService {
 
 //    추천
     @Transactional
-    public void updateAnswerRecommend(Long answerSq) {
+    public void updateAnswerRecommend(Long userSq, Long answerSq) {
         
-        Recommendation recommendation = recommendationMapper.findByAnswerSq(answerSq);
-//        추후 Authorization 에서 userSq 추출
-        Long userSq = 3L;
+        Recommendation recommendation = recommendationMapper.findByAnswerSq(userSq, answerSq);
         
         if(recommendation == null) {
-//        	추후 Authorization 에서 userSq 가져올 예정
         	recommendation = Recommendation.builder().answerSq(answerSq).userSq(userSq).recommendationTypeCd(1902L).build();
         	recommendationMapper.insert(recommendation);
         	

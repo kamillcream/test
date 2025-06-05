@@ -1,8 +1,8 @@
-// src/stores/companyProfileStore.js
 import { defineStore } from 'pinia'
 
 export const useBoardStore = defineStore('board', {
   state: () => ({
+    viewerSq: null,
     boardData: {
       ttl: '',
       description: '',
