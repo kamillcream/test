@@ -28,6 +28,11 @@ public class LoginService {
             throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
         }
 
+        // 탈퇴 여부 확인
+        if ("Y".equalsIgnoreCase(user.getUserIsDeletedYn())) {
+            throw new IllegalArgumentException("탈퇴한 사용자입니다.");
+        }
+
         if (!user.getUserTypeCd().equals(userTypeCd)) {
             throw new IllegalArgumentException("회원 유형이 일치하지 않습니다.");
         }

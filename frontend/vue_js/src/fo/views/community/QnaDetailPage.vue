@@ -26,7 +26,7 @@
             <div
               class="d-flex justif y-content-between align-items-center mb-2"
             >
-              <h5 class="mb-0 text-dark f-s-13">
+              <h5 class="mb-0 text-dark f-s-13 me-2">
                 {{ answer.ttl || '삭제된 답변입니다.' }}
               </h5>
               <span
@@ -42,8 +42,8 @@
               <div>
                 <i class="far fa-user"></i> By
                 <span>{{ answer.userNm }}</span> &nbsp;&nbsp;
-                <i class="far fa-calendar-alt"></i
-                >{{ formatTime(answer.createdAt) }}
+                <i class="far fa-calendar-alt"></i>
+                &nbsp;{{ formatTime(answer.createdAt) }}
               </div>
               <div>
                 조회 {{ answer.viewCnt }} · 댓글 {{ answer.commentCnt }} · 추천
@@ -71,10 +71,11 @@ import { defineProps, ref } from 'vue'
 import { api } from '@/axios'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { onMounted } from 'vue'
+import { useBoardStore } from '@/fo/stores/boardStore'
 
 const alertStore = useAlertStore()
-
 const modalStore = useModalStore()
+const boardStore = useBoardStore()
 
 const props = defineProps({ board_sq: String })
 
@@ -100,6 +101,8 @@ const getBoard = async () => {
     const res = await api.$get(`/qna/${props.board_sq}`)
     if (res) {
       boardInfo.value = res.output
+      boardStore.viewerSq = res.output.viewerSq
+      console.log(boardStore.viewerSq)
     }
   } catch (error) {
     alertStore.show('게시글을 불러올 수 없습니다.', 'danger')

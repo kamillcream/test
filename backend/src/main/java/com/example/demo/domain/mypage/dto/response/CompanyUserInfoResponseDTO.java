@@ -1,7 +1,6 @@
 package com.example.demo.domain.mypage.dto.response;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 
 import lombok.Builder;
 import lombok.Data;
@@ -12,13 +11,12 @@ public class CompanyUserInfoResponseDTO {
     private String userId;
     private String userEmail;
     private String userNm;
-    private Date userBirthDt;
-    private String userGenderNm;
     private String userPhoneNum;
     private String zonecode;
     private String address;
     private String detailAddress;
-    private String sigungu;
+    private String userProfileImageUrl;
+    private Long sigunguCode;
     private BigDecimal latitude;
     private BigDecimal longitude;
     private String companyNm;

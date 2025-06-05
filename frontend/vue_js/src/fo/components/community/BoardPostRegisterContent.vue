@@ -112,6 +112,7 @@ const options = {
 }
 
 const openSkillModal = async () => {
+  console.log(skillTags.value)
   modalStore.openModal(SkillTagModal, {
     skillTags: [...skillTags.value],
     onConfirm: onSkillsConfirmed,

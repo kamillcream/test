@@ -259,7 +259,7 @@
             </li>
           </ul>
 
-          <!-- 자격증 -->
+          <!-- 자격증  -->
           <h5 class="text-primary">자격증</h5>
           <ul class="list-unstyled">
             <li

@@ -25,10 +25,7 @@
                     :class="{ selected: isSelected(skill) }"
                     @click="toggleSkill(skill)"
                   >
-                    <img
-                      :src="generateIconUrl(skill.skillTagNm)"
-                      :alt="skill"
-                    />
+                    <img :src="getSkillIcon(skill.skillTagNm)" :alt="skill" />
                     <span>{{ skill.skillTagNm }}</span>
                   </button>
                 </div>
@@ -62,6 +59,7 @@ import { api } from '@/axios'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { ref, defineProps, onMounted } from 'vue'
+import skillIconMap from '@/assets/skillIconMap.js'
 
 const alertStore = useAlertStore()
 const modalStore = useModalStore()
@@ -90,6 +88,7 @@ const syncSelectedSkills = () => {
 const getSkills = async () => {
   try {
     const res = await api.$get(`/board/skill-tags`)
+    console.log(res)
     if (res.status == 'OK') {
       skillList.value = [...res.output]
 
@@ -124,22 +123,9 @@ const toggleSkill = (skill) => {
   }
 }
 
-const generateIconUrl = (name) => {
-  const exceptionList = [
-    '전자정부 프레임워크',
-    'myBatis',
-    'Notepad++',
-    'PyCharm',
-    'Sublime Text',
-  ]
-  if (exceptionList.includes(name)) return null
-
-  const processed = name
-    .toLowerCase()
-    .replace('#', 'sharp')
-    .replace('++', 'plusplus')
-
-  return `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${processed}/${processed}-original.svg`
+const getSkillIcon = (name) => {
+  const key = name.toLowerCase().replace(/[\s.]+/g, '')
+  return skillIconMap[key] || skillIconMap.default
 }
 
 const isSelected = (skill) =>

@@ -31,7 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = resolveToken(request);
-        System.out.println("토큰값" + token);
+        // System.out.println("토큰값" + token);
 
         try {
             if (token != null && jwtProvider.validateToken(token)) {
@@ -56,12 +56,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("accessToken".equals(cookie.getName())) {
-                    System.out.println("Found accessToken cookie");
+                    // System.out.println("Found accessToken cookie");
                     return cookie.getValue();
                 }
             }
         }
-        System.out.println("No accessToken cookie found");
+        // System.out.println("No accessToken cookie found");
         return null;
     }
 

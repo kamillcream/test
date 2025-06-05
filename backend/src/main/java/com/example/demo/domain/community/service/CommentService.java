@@ -67,6 +67,10 @@ public class CommentService {
     	}
     	
         Comment comment = getComment(commentSq);
+        
+        if(comment.getUserSq() != commentRequest.getUserSq()) {
+        	throw new IllegalArgumentException("작성자와 사용자가 일치하지 않습니다.");
+        }
 
         comment.setCommentDescriptionTxt(commentRequest.getDescription());
         
@@ -76,9 +80,10 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteComment(Long commentSq) {
+    public void deleteComment(Long userSq, Long commentSq) {
     	Comment comment = getComment(commentSq);
-        commentMapper.delete(commentSq);
+        commentMapper.delete(userSq, commentSq);
+    	recommendationMapper.deleteAll(null, null, commentSq);
         
 //      댓글수 카운트        
       if(comment.getBoardSq() != null) {
@@ -90,13 +95,16 @@ public class CommentService {
     }
 
     @Transactional
-    public void updateRecommendCntComment(Long commentSq) {
+    public void updateRecommendCntComment(Long userSq, Long commentSq) {
     	
-    	Recommendation recommendation = recommendationMapper.findByCommentSq(commentSq);
+    	if(userSq == null) {
+    		throw new IllegalArgumentException("로그인 후 이용해주세요.");
+    	}
+    	
+    	Recommendation recommendation = recommendationMapper.findByCommentSq(userSq, commentSq);
     	
     	if(recommendation == null) {
-//        	추후 Authorization 에서 userSq 가져올 예정
-    		recommendation = Recommendation.builder().commentSq(commentSq).userSq(3L).recommendationTypeCd(1903L).build();
+    		recommendation = Recommendation.builder().commentSq(commentSq).userSq(userSq).recommendationTypeCd(1903L).build();
         	recommendationMapper.insert(recommendation);
         	
         } else {

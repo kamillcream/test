@@ -13,7 +13,7 @@ import com.example.demo.domain.user.dto.response.LoginResponseDTO;
 @Mapper
 public interface UserMapper {
 
-    Long selectAreaCodeSqBySigungu(String sigungu);
+    String selectSigunguByAreaCode(Long areaCodeSq);
 
     int insertAddress(AddressDTO addressDTO);
 
@@ -47,5 +47,7 @@ public interface UserMapper {
     String findPasswordByUserSq(@Param("userSq") Long userSq);
 
     int updatePasswordByUserSq(@Param("userSq") Long userSq, @Param("newPassword") String newPassword);
+
+    UserDTO findByEmail(@Param("email") String email);
 
 }
