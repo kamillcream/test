@@ -64,23 +64,11 @@
           </div>
 
           <!-- 페이지네이션  -->
-          <ul class="pagination float-end mt-3 mb-0">
-            <li class="page-item">
-              <a class="page-link" href="#"
-                ><i class="fas fa-angle-left"></i
-              ></a>
-            </li>
-            <li class="page-item active">
-              <a class="page-link" href="#">1</a>
-            </li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item">
-              <a class="page-link" href="#"
-                ><i class="fas fa-angle-right"></i
-              ></a>
-            </li>
-          </ul>
+          <CommonPagination
+            :currentPage="currentPage"
+            :totalPages="totalPages"
+            @update:currentPage="currentPage = $event"
+          />
         </div>
         <div class="modal-footer">
           <button
@@ -109,6 +97,7 @@ import { ref, defineEmits, defineProps, onMounted } from 'vue'
 import { useModalStore } from '../../../stores/modalStore'
 import { useAlertStore } from '../../../stores/alertStore'
 import { api } from '@/axios.js'
+import CommonPagination from '../../common/CommonPagination.vue'
 
 const resumes = ref([
   { id: 1, title: '대표 이력서', date: '2025.04.03', isMain: false },
