@@ -151,6 +151,11 @@
 
                   <!-- 기술 스택 -->
                   <div class="d-flex flex-wrap gap-2">
+                    <span class="text-dark text-uppercase font-weight-semibold"
+                      >사용 기술</span
+                    >
+                    <span class="text-muted">|</span>
+
                     <span
                       v-for="(skill, index) in [].concat(post.reqSkills)"
                       :key="index"
