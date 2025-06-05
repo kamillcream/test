@@ -23,7 +23,7 @@
         </div>
       </div>
 
-      <!-- 대표자명 -->
+      <!-- 대표자명  -->
       <div class="mb-3">
         <label
           for="ceoName"

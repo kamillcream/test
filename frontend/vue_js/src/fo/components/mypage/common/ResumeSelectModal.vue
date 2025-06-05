@@ -63,7 +63,7 @@
             </ul>
           </div>
 
-          <!-- 페이지네이션 -->
+          <!-- 페이지네이션  -->
           <ul class="pagination float-end mt-3 mb-0">
             <li class="page-item">
               <a class="page-link" href="#"

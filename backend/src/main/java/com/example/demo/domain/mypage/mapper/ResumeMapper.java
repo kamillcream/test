@@ -1,16 +1,31 @@
 package com.example.demo.domain.mypage.mapper;
 
 import com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest;
+import com.example.demo.domain.mypage.dto.response.ResumeListResponse;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import com.example.demo.domain.mypage.vo.ResumeVo;
 import com.example.demo.domain.project.vo.ResumeNmTtlVo;
 
 import java.util.List;
-
-import org.apache.ibatis.annotations.Mapper;
+import java.util.Map;
 
 @Mapper
 public interface ResumeMapper {
 	void insertResume(ResumeRegisterRequest request);
-	public List<ResumeVo> findResumeVoByUserSq(Long userSq);
-	public ResumeNmTtlVo findResumeNmTtlBySq(Long resumeSq);
+	ResumeRegisterRequest selectResumeById(@Param("resumeSq") Long resumeSq);
+	Long selectAreaCodeBySigunguAndParent(Map<String, Object> params);
+
+	//전체이력서 조회
+	List<ResumeListResponse> selectAllResumes(@Param("userSq") Long userSq);
+	
+	//대표이력서 하나만
+	void updateAllRepresentativeN(@Param("userSq") Long userSq);
+    void updateRepresentativeY(@Param("resumeSq") Long resumeSq);
+	
+    //이력서 삭제.
+	void updateDeleteYn(@Param("resumeSq") Long resumeSq);
+
+	public List<ResumeVo> findResumeVoByUserSq(@Param("userSq") Long userSq);
+	public ResumeNmTtlVo findResumeNmTtlBySq(@Param("resumeSq") Long resumeSq);
 }

@@ -157,9 +157,10 @@
 </template>
 
 <script setup>
-import { ref, defineProps } from 'vue'
+import { ref, defineProps, onMounted } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import SkillSelectModal from '@/fo/components/project/SkillSelectModal.vue'
+import axios from 'axios'
 
 const props = defineProps({
   onComplete: Function,
@@ -173,53 +174,21 @@ const form = ref({
   client: '',
   workUnit: '',
   role: '',
-  device: '',
-  os: '',
-  dbms: '',
-  languages: '',
-  tools: '',
-  frameworks: '',
+  // device: '',
+  // os: '',
+  // dbms: '',
+  // languages: '',
+  // tools: '',
+  // frameworks: '',
+  skills: [],
   etc: '',
 })
 
 const selectedSkills = ref([])
-
-const languageList = [
-  'Java',
-  'Python',
-  'JavaScript',
-  'PHP',
-  'TypeScript',
-  'C',
-  'C#',
-  'C++',
-  'Go',
-]
-const frameworkList = [
-  'Spring Boot',
-  'Spring',
-  'React.js',
-  'Vue.js',
-  'Angular.js',
-  'Express.js',
-  'Django',
-  'Bootstrap',
-  'Ember',
-  'BackboneJS',
-  '전자정부 프레임워크',
-  'myBatis',
-]
-const toolList = [
-  'VSCode',
-  'IntelliJ',
-  'Vim',
-  'Android Studio',
-  'Eclipse',
-  'Visual Studio',
-  'Notepad++',
-  'PyCharm',
-  'Sublime Text',
-]
+const skillList = ref([])
+// const languageList = ref([])
+// const frameworkList = ref([])
+// const toolList = ref([])
 
 function parseArray(str) {
   if (!str) return []
@@ -229,44 +198,47 @@ function parseArray(str) {
     .filter(Boolean)
 }
 
-const updateSelectedSkills = () => {
-  const languages = parseArray(form.value.languages).map((name) => ({
-    name,
-    type: 'language',
-  }))
-  const tools = parseArray(form.value.tools).map((name) => ({
-    name,
-    type: 'tool',
-  }))
-  const frameworks = parseArray(form.value.frameworks).map((name) => ({
-    name,
-    type: 'framework',
-  }))
-  selectedSkills.value = [...languages, ...tools, ...frameworks]
-}
+// const updateSelectedSkills = () => {
+//   const languages = parseArray(form.value.languages).map((name) => ({
+//     name,
+//     type: 'language',
+//   }))
+//   const tools = parseArray(form.value.tools).map((name) => ({
+//     name,
+//     type: 'tool',
+//   }))
+//   const frameworks = parseArray(form.value.frameworks).map((name) => ({
+//     name,
+//     type: 'framework',
+//   }))
+//   selectedSkills.value = [...languages, ...tools, ...frameworks]
+// }
 
 const openSkillModal = () => {
-  updateSelectedSkills()
   modalStore.openModal(SkillSelectModal, {
-    skills: selectedSkills.value,
-    onConfirm: handleSkillConfirm,
+    skills: skillList.value,
+    onComplete: handleSkillConfirm,
   })
 }
 
 const handleSkillConfirm = (selected) => {
-  form.value.languages = selected
-    .filter((s) => languageList.includes(s.name))
-    .map((s) => s.name)
-    .join(', ')
-  form.value.tools = selected
-    .filter((s) => toolList.includes(s.name))
-    .map((s) => s.name)
-    .join(', ')
-  form.value.frameworks = selected
-    .filter((s) => frameworkList.includes(s.name))
-    .map((s) => s.name)
-    .join(', ')
+  form.value.skills = selected
 }
+
+// const handleSkillConfirm = (selected) => {
+//   form.value.languages = selected
+//     .filter((s) => s.type === 'language')
+//     .map((s) => s.name)
+//     .join(', ')
+//   form.value.tools = selected
+//     .filter((s) => s.type === 'tool')
+//     .map((s) => s.name)
+//     .join(', ')
+//   form.value.frameworks = selected
+//     .filter((s) => s.type === 'framework')
+//     .map((s) => s.name)
+//     .join(', ')
+// }
 
 const submit = () => {
   const project = {
@@ -275,12 +247,13 @@ const submit = () => {
     client: form.value.client,
     workUnit: form.value.workUnit,
     role: form.value.role,
-    device: form.value.device,
-    os: form.value.os,
-    dbms: form.value.dbms,
-    languages: parseArray(form.value.languages).map((name) => ({ name })),
-    tools: parseArray(form.value.tools),
-    frameworks: parseArray(form.value.frameworks).map((name) => ({ name })),
+    skills: selectedSkills.value,
+    // device: form.value.device,
+    // os: form.value.os,
+    // dbms: form.value.dbms,
+    // languages: parseArray(form.value.languages).map((name) => ({ name })),
+    // tools: parseArray(form.value.tools),
+    // frameworks: parseArray(form.value.frameworks).map((name) => ({ name })),
     etc: parseArray(form.value.etc).map((name) => ({ name })),
   }
   props.onComplete(project)
@@ -290,6 +263,21 @@ const submit = () => {
 const closeModal = () => {
   modalStore.closeModal()
 }
+
+onMounted(async () => {
+  try {
+    const res = await axios.get(
+      'http://localhost:8080/api/mypage/resume/skills',
+      console.log('기술 목록:', res.data),
+    )
+    skillList.value = res.data
+    // languageList.value = res.data.filter((skill) => skill.type === 'language')
+    // frameworkList.value = res.data.filter((skill) => skill.type === 'framework')
+    // toolList.value = res.data.filter((skill) => skill.type === 'tool')
+  } catch (e) {
+    console.error('[ 기술 목록 조회 실패]', e)
+  }
+})
 </script>
 
 <style scoped>

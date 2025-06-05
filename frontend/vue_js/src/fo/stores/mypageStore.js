@@ -10,7 +10,7 @@ export const useMypageStore = defineStore('mypage', () => {
     modalStack.value.push({
       component,
       props,
-      type: 'skill'
+      type: 'skill',
     })
     isOpen.value = true
   }
@@ -19,7 +19,7 @@ export const useMypageStore = defineStore('mypage', () => {
     modalStack.value.push({
       component,
       props,
-      type: 'project'
+      type: 'project',
     })
     isOpen.value = true
   }
@@ -28,7 +28,7 @@ export const useMypageStore = defineStore('mypage', () => {
     modalStack.value.push({
       component,
       props,
-      type: 'education'
+      type: 'education',
     })
     isOpen.value = true
   }
@@ -37,7 +37,7 @@ export const useMypageStore = defineStore('mypage', () => {
     modalStack.value.push({
       component,
       props,
-      type: 'career'
+      type: 'career',
     })
     isOpen.value = true
   }
@@ -46,7 +46,7 @@ export const useMypageStore = defineStore('mypage', () => {
     modalStack.value.push({
       component,
       props,
-      type: 'training'
+      type: 'training',
     })
     isOpen.value = true
   }
@@ -55,7 +55,25 @@ export const useMypageStore = defineStore('mypage', () => {
     modalStack.value.push({
       component,
       props,
-      type: 'certificate'
+      type: 'certificate',
+    })
+    isOpen.value = true
+  }
+
+  const openResumeModal = (component, props = {}) => {
+    modalStack.value.push({
+      component,
+      props,
+      type: 'resume',
+    })
+    isOpen.value = true
+  }
+
+  const openAddressSearchModal = (component, props = {}) => {
+    modalStack.value.push({
+      component,
+      props,
+      type: 'addressSearch',
     })
     isOpen.value = true
   }
@@ -70,7 +88,7 @@ export const useMypageStore = defineStore('mypage', () => {
     }
   }
 
-  // 현재 모달 정보를 가져오기
+  // 현재 모달 정보를 가져오기.
   const getCurrentModal = () => {
     return modalStack.value[modalStack.value.length - 1]
   }
@@ -85,17 +103,19 @@ export const useMypageStore = defineStore('mypage', () => {
     openTrainingModal,
     openCertificateModal,
     closeModal,
-    getCurrentModal
+    getCurrentModal,
+    openResumeModal,
+    openAddressSearchModal,
   }
 })
 //학력 검색 시 주소 유지하도록 전역 상태 저장
 export const useSchoolStore = defineStore('school', {
   state: () => ({
-    selectedSchool: null
+    selectedSchool: null,
   }),
   actions: {
     setSchool(school) {
       this.selectedSchool = school
-    }
-  }
+    },
+  },
 })
