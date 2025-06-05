@@ -56,13 +56,13 @@ public class ProjectApplicationEntity {
     }
     
     public static ProjectApplicationEntity from(long projectSq, ProjectMapper projectMapper,
-    		ProjectApplyRequest request, CommonCodeMapper commonCodeMapper, Optional<Long> companySq) {
+    		Long resumeSq, String memberType, CommonCodeMapper commonCodeMapper, Optional<Long> companySq) {
     	return ProjectApplicationEntity.builder()
 				.projectSq(projectSq)
 				.companySq(companySq.orElse(null))
-				.resumeSq(request.getResumeSq())
+				.resumeSq(resumeSq)
 				.projectApplicationStatusCd(commonCodeMapper.findCommonCodeSqByEngName(ProjectApplicationStatus.APPLIED.getCode(), ParentCodeEnum.PRO_APPLICATION.getCode()))
-				.projectApplicationMemberTypeCd(commonCodeMapper.findCommonCodeSqByEngName(request.getProjectApplicationTyp(), ParentCodeEnum.MEMBER_TYPE.getCode()))
+				.projectApplicationMemberTypeCd(commonCodeMapper.findCommonCodeSqByEngName(memberType, ParentCodeEnum.MEMBER_TYPE.getCode()))
 				.build();
     }
     

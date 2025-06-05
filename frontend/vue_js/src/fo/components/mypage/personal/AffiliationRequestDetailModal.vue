@@ -18,10 +18,12 @@
           style="font-weight: bold"
           >회사명</label
         >
-        <div class="text-dark" id="companyName">{{ companyInfo.name }}</div>
+        <div class="text-dark" id="companyName">
+          {{ companyInfo.companyNm }}
+        </div>
       </div>
 
-      <!-- 대표자명 -->
+      <!-- 대표자명  -->
       <div class="mb-3">
         <label
           for="ceoName"
@@ -29,7 +31,7 @@
           style="font-weight: bold"
           >대표자명</label
         >
-        <div class="text-dark" id="ceoName">{{ companyInfo.ceoName }}</div>
+        <div class="text-dark" id="ceoName">{{ companyInfo.ceoNm }}</div>
       </div>
 
       <!-- 개업년수 -->
@@ -41,7 +43,7 @@
           >개업년수</label
         >
         <div class="text-dark" id="yearsInBusiness">
-          {{ companyInfo.yearsInBusiness }}년
+          {{ companyInfo.openYear }}년
         </div>
       </div>
 
@@ -54,7 +56,7 @@
           >회사위치</label
         >
         <div class="text-dark" id="companyLocation">
-          {{ companyInfo.location }}
+          {{ companyInfo.address }}
         </div>
       </div>
 
@@ -67,7 +69,7 @@
           >회사 설명</label
         >
         <div class="text-dark" id="companyDescription">
-          {{ companyInfo.description }}
+          {{ companyInfo.greeting }}
         </div>
       </div>
 
@@ -100,7 +102,7 @@
         >
         <div class="text-dark" id="resume">
           선택한 이력서:
-          <a href="#" class="text-primary">{{ resumeInfo.title }}</a>
+          <a href="#" class="text-primary">{{ props.apply.resumeTtl }}</a>
         </div>
       </div>
 
@@ -113,14 +115,14 @@
           >간단한 자기소개</label
         >
         <div class="text-dark" id="introduce">
-          {{ resumeInfo.introduction }}
+          {{ props.apply.greeting }}
         </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-primary" @click="handleSubmit">
-        소속 신청하기
-      </button>
+      <!-- <button type="button" class="btn btn-primary" @click="handleSubmit">
+        신청 취소
+      </button> -->
       <button type="button" class="btn btn-light" @click="closeModal">
         닫기
       </button>
@@ -129,43 +131,40 @@
 </template>
 
 <script setup>
-import { ref, defineProps } from 'vue'
+import { ref, defineProps, onMounted } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
+import { api } from '@/axios'
+import { useAlertStore } from '@/fo/stores/alertStore'
 
 const modalStore = useModalStore()
+const alertStore = useAlertStore()
 
 const props = defineProps({
-  applyData: {
+  apply: {
     type: Object,
     required: true,
   },
 })
 
-// 회사 정보 데이터
-// const companyInfo = ref({
-//   name: 'EST Soft',
-//   ceoName: '홍길동',
-//   yearsInBusiness: 10,
-//   location: '서울시 강남구',
-//   description:
-//     'EST Soft는 기술 혁신과 뛰어난 팀워크로 다양한 산업에 최적화된 솔루션을 제공합니다.',
-//   tags: ['서울', '신입', '학력무관', 'JAVA'],
-// })
-const companyInfo = {
-  name: props.applyData.company,
+const companyInfo = ref({
+  name: '회사명',
   ceoName: '홍길동', // 실제 있으면 넣고, 없으면 더미
   yearsInBusiness: 10, // 실제 있으면 props에서 가져오기
   location: '서울시 강남구', // 실제 있으면 props에서 가져오기
   description:
     'EST Soft는 기술 혁신과 뛰어난 팀워크로 다양한 산업에 최적화된 솔루션을 제공합니다.',
   tags: ['서울', '신입', '학력무관', 'JAVA'], // 태그 있으면 넘기고, 없으면 기본
-}
-
-// 이력서 정보 데이터
-const resumeInfo = ref({
-  title: '안녕하세요. JAVA 개발자입니다.',
-  introduction: '안녕하세요. 잘 부탁드립니다.',
 })
+
+const getCompanyInfo = async () => {
+  try {
+    const res = await api.$get(`/mypage/applications/${props.apply.companySq}`)
+    companyInfo.value = res.output
+    console.log(res)
+  } catch (error) {
+    alertStore.show('소속 정보를 불러올 수 없습니다.', 'danger')
+  }
+}
 
 // 모달 닫기
 const closeModal = () => {
@@ -173,11 +172,15 @@ const closeModal = () => {
 }
 
 // 소속 신청 제출
-const handleSubmit = () => {
-  // TODO: 소속 신청 로직 구현
-  console.log('소속 신청 제출')
-  closeModal()
-}
+// const handleSubmit = () => {
+//   // TODO: 소속 신청 로직 구현
+//   console.log('소속 신청 제출')
+//   closeModal()
+// }
+
+onMounted(() => {
+  getCompanyInfo()
+})
 </script>
 
 <style scoped>

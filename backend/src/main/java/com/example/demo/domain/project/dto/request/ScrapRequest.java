@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ScrapRequest {
     private boolean hasScrapped;
+    private String target;
 }

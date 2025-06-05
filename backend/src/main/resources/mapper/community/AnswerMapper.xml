@@ -32,7 +32,7 @@
     <update id="delete" parameterType="Long">
         UPDATE TBL_BOARD_ANSWER_S
         SET answer_is_deleted_yn = 'Y'
-        WHERE answer_sq = #{answerSq}
+        WHERE answer_sq = #{answerSq} AND user_sq = #{userSq}
     </update>
 
     <update id="addViewCnt" parameterType="Long">

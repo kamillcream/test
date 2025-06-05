@@ -16,7 +16,7 @@
           v-for="filter in filters"
           :key="filter.type"
           class="btn btn-primary fw-bold px-4 py-2 d-flex align-items-center gap-2 fs-6"
-          :class="{ active: currentFilter === filter.type }"
+          :class="{ active: readType === filter.type }"
           @click="setFilter(filter.type)"
         >
           {{ filter.label }}
@@ -30,16 +30,18 @@
       <div class="col-md-6 d-flex justify-content-end gap-2">
         <select v-model="searchType" class="form-select form-select-sm w-auto">
           <option value="all">전체</option>
-          <option value="title">제목</option>
-          <option value="company">회사명</option>
+          <option value="title">이력서 제목</option>
+          <option value="name">회사명</option>
+          <option value="greeting">인사말</option>
         </select>
         <input
-          v-model="searchText"
+          v-model="keyword"
           type="text"
           class="form-control form-control-sm w-auto"
           placeholder="검색어 입력"
+          @keyup.enter="getApplies"
         />
-        <button class="btn btn-primary btn-sm" @click="search">검색</button>
+        <button class="btn btn-primary btn-sm" @click="getApplies">검색</button>
       </div>
     </div>
     <!-- 🔼 필터 UI 끝 -->
@@ -55,7 +57,7 @@
         <ul class="simple-post-list m-0 position-relative">
           <li
             v-for="apply in applies"
-            :key="apply.id"
+            :key="apply.sq"
             style="border-bottom: 1px rgb(230, 230, 230) solid"
           >
             <div class="post-info position-relative">
@@ -68,24 +70,33 @@
                     href="#"
                     class="text-6 m-0"
                     @click.prevent="openDetailModal(apply)"
-                    >{{ apply.company }}</a
+                    >{{ apply.companyNm }}</a
                   >
                 </div>
                 <div class="d-flex gap-2">
-                  <template v-if="apply.status === '지원중'">
-                    <span class="btn btn-primary btn-sm">{{
-                      apply.status
-                    }}</span>
+                  <template v-if="apply.isDeleted == 'Y'">
+                    <span class="btn btn-light btn-sm">지원 취소 완료</span>
+                  </template>
+                  <template v-else-if="apply.statusCd == 501">
+                    <span class="btn btn-primary btn-sm">지원중</span>
                     <a
                       href="#"
                       class="btn btn-outline btn-primary btn-sm"
-                      @click.prevent="cancelApply(apply.id)"
+                      @click.prevent="cancelApply(apply.sq)"
                       >지원 취소</a
                     >
                   </template>
                   <template v-else>
-                    <span class="btn btn-light btn-sm">{{ apply.status }}</span>
-                    <span class="btn btn-light btn-sm">{{ apply.result }}</span>
+                    <span
+                      class="btn btn-light btn-sm"
+                      v-if="apply.statusCd == 502"
+                      >합격</span
+                    >
+                    <span
+                      class="btn btn-light btn-sm"
+                      v-if="apply.statusCd == 503"
+                      >불합격</span
+                    >
                   </template>
                 </div>
               </div>
@@ -98,13 +109,13 @@
                   <span class="text-dark text-uppercase font-weight-semibold"
                     >지원일자</span
                   >
-                  | {{ apply.applyDate }}
+                  | {{ convertDate(apply.createdAt) }}
                 </div>
                 <div class="post-meta text-4">
                   <span class="text-dark text-uppercase font-weight-semibold"
                     >지원자 수</span
                   >
-                  | {{ apply.applicantCount }}
+                  | {{ apply.applicantCnt }}
                 </div>
               </div>
               <!-- 지원 이력서 + 열람일자 -->
@@ -115,13 +126,13 @@
                   <span class="text-dark text-uppercase font-weight-semibold"
                     >지원 이력서</span
                   >
-                  | {{ apply.resumeTitle }}
+                  | {{ apply.resumeTtl }}
                 </div>
                 <div class="post-meta text-4">
                   <span class="text-dark text-uppercase font-weight-semibold"
                     >열람일자</span
                   >
-                  | {{ apply.readDate }}
+                  | {{ apply.readAt ? convertDate(apply.readAt) : '미열람' }}
                 </div>
               </div>
             </div>
@@ -167,80 +178,120 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import AffiliationRequestDetailModal from '@/fo/components/mypage/personal/AffiliationRequestDetailModal.vue'
+import { api } from '@/axios'
+import { useAlertStore } from '@/fo/stores/alertStore'
+import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 
 const modalStore = useModalStore()
 
-const currentFilter = ref('all')
+const readType = ref('all')
 const searchType = ref('all')
-const searchText = ref('')
+const keyword = ref(null)
+const size = 10
 const currentPage = ref(1)
-const totalPages = ref(3)
+const totalPages = ref(1)
+const totalElements = ref(0)
+const readElements = ref(0)
+const unreadElements = ref(0)
+
+const alertStore = useAlertStore()
 
 const filters = ref([
-  { type: 'all', label: '전체', count: 10 },
-  { type: 'read', label: '열람', count: 5 },
-  { type: 'unread', label: '미열람', count: 5 },
+  { type: 'all', label: '전체', count: totalElements },
+  { type: 'read', label: '열람', count: readElements },
+  { type: 'unread', label: '미열람', count: unreadElements },
 ])
 
-const applies = ref([
-  {
-    id: 1,
-    company: 'EST Soft',
-    status: '지원중',
-    result: '',
-    applyDate: '2025.04.30',
-    applicantCount: 50,
-    resumeTitle: '안녕하세요. JAVA 개발자입니다.',
-    readDate: '2025.05.15',
-  },
-  {
-    id: 2,
-    company: 'EST Soft',
-    status: '합격',
-    result: '불합격',
-    applyDate: '2025.04.30',
-    applicantCount: '미열람',
-    resumeTitle: '안녕하세요. JAVA 개발자입니다.',
-    readDate: '2025.05.15',
-  },
-  {
-    id: 3,
-    company: 'EST Soft',
-    status: '합격',
-    result: '불합격',
-    applyDate: '2025.04.30',
-    applicantCount: '미열람',
-    resumeTitle: '안녕하세요. JAVA 개발자입니다.',
-    readDate: '2025.05.15',
-  },
-  {
-    id: 4,
-    company: 'EST Soft',
-    status: '합격',
-    result: '불합격',
-    applyDate: '2025.04.30',
-    applicantCount: '미열람',
-    resumeTitle: '안녕하세요. JAVA 개발자입니다.',
-    readDate: '2025.05.15',
-  },
-])
+const applies = ref([])
 
-function setFilter(type) {
-  currentFilter.value = type
-  // 필터링 로직 구현
+const getApplies = async () => {
+  try {
+    const searchFilter =
+      keyword.value == null || keyword.value.trim() == ''
+        ? ''
+        : `&searchType=${searchType.value}&keyword=${keyword.value}`
+    const readFilter =
+      readType.value == null || readType.value == 'all'
+        ? ''
+        : `&readType=${readType.value}`
+    const res = await api.$get(
+      `/mypage/applications/user?page=${currentPage.value}&size=${size}${searchFilter}${readFilter}`,
+    )
+
+    if (res.status == 'OK') {
+      const totalCnt = res.output.totalElements
+      const unreadCnt = res.output.totalElements - res.output.readElements
+      const readCnt = res.output.readElements
+
+      console.log(res)
+      console.log(unreadCnt)
+      applies.value = res.output.applies
+      totalElements.value = totalCnt
+      readElements.value = readCnt
+      unreadElements.value = unreadCnt
+
+      if (!totalCnt || !size || size <= 0) {
+        totalPages.value = 1
+      } else {
+        totalPages.value = Math.floor((totalCnt + size - 1) / size)
+      }
+
+      if (readType.value == 'read') {
+        if (!readCnt || !size || size <= 0) {
+          totalPages.value = 1
+        } else {
+          totalPages.value = Math.floor((readCnt + size - 1) / size)
+        }
+      } else if (readType.value == 'unread') {
+        if (!unreadCnt || !size || size <= 0) {
+          totalPages.value = 1
+        } else {
+          totalPages.value = Math.floor((unreadCnt + size - 1) / size)
+        }
+      }
+    }
+  } catch (error) {
+    alertStore.show('지원 현황을 불러올 수 없습니다.', 'danger')
+  }
 }
 
-function search() {
-  // 검색 로직 구현
-  console.log('검색:', searchType.value, searchText.value)
+const convertDate = (createdAt) => {
+  const date = new Date(createdAt)
+  const year = date.getFullYear()
+  let month = date.getMonth() + 1
+  let day = date.getDate()
+
+  if (month < 10) month = '0' + month
+  if (day < 10) day = '0' + day
+
+  return `${year}.${month}.${day}`
+}
+
+function setFilter(type) {
+  readType.value = type
+  getApplies()
 }
 
 function cancelApply(id) {
-  // 지원 취소 로직 구현
-  console.log('지원 취소:', id)
+  modalStore.openModal(CommonConfirmModal, {
+    title: '지원 상태 변경',
+    message: `해당 소속에 지원 취소하시겠습니까?`,
+    onConfirm: async () => {
+      try {
+        const res = await api.$patch(`/mypage/applications/${id}`)
+        if (res.status == 'OK') {
+          alertStore.show('지원 취소되었습니다.', 'success')
+          getApplies()
+        }
+      } catch (error) {
+        alertStore.show('지원 취소에 실패했습니다.', 'danger')
+      }
+      modalStore.closeModal()
+    },
+  })
 }
 
 function changePage(page) {
@@ -251,10 +302,21 @@ function changePage(page) {
 
 function openDetailModal(apply) {
   modalStore.openModal(AffiliationRequestDetailModal, {
-    size: ' ',
-    applyData: apply,
+    apply,
   })
 }
+
+watch(totalElements, () => {
+  unreadElements.value = totalElements.value - readElements.value
+})
+
+watch(readElements, () => {
+  unreadElements.value = totalElements.value - readElements.value
+})
+
+onMounted(() => {
+  getApplies()
+})
 </script>
 
 <style scoped>

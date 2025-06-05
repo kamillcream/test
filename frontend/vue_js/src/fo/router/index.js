@@ -249,7 +249,9 @@ router.beforeEach((to, from, next) => {
   const authRequiredPages = [
     'MyPageDefault',
     'InformationEdit',
-    'Withdraw' /* ... 로그인 필요 페이지들 */,
+    'Withdraw',
+    'QnaResisterPage',
+    'BoardResisterPage' /* ... 로그인 필요 페이지들 */,
   ]
 
   // 로그인 중인데 로그인/회원가입 페이지 접근 시 메인으로 리다이렉트

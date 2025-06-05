@@ -10,7 +10,7 @@
       ></div>
     </transition>
 
-    <!-- Modal -->
+    <!-- Modal  -->
     <transition name="fade">
       <div
         v-show="isOpen"

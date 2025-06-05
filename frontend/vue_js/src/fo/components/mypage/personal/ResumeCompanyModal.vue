@@ -75,7 +75,7 @@ import { ref, defineProps } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 
 const props = defineProps({
-  onComplete: Function, //부모에서 내려주는 콜백함수
+  onComplete: Function, // 부모에서 내려주는 콜백함수
 })
 const modalStore = useModalStore()
 

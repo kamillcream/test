@@ -29,7 +29,7 @@
 import { useModalStore } from '@/fo/stores/modalStore'
 import { defineEmits } from 'vue'
 
-// ✅ 나중에 API 호출 함수 연결될 emit
+//  나중에 API 호출 함수 연결될 emit
 const emit = defineEmits(['confirm'])
 
 const modalStore = useModalStore()

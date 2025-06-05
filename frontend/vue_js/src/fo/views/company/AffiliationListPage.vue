@@ -5,23 +5,97 @@
       strongText="소속 모집 공고"
       :breadcrumbs="[{ text: 'Home', link: '/' }, { text: '소속' }]"
     />
-    <AffiliationFilter
+    <!-- <AffiliationFilter
       :localFilters="['서울', '부산', '대구']"
       :careerFilters="['신입', '경력']"
       :jobTypeFilters="['백엔드', '프론트엔드', 'PM', '디자이너']"
       @update="updateFilters"
-    />
+    /> -->
     <div class="container py-4">
+      <!-- 검색창 및 필터 영역 -->
+      <div
+        class="row align-items-center justify-content-between py-3 border-bottom mb-3"
+      >
+        <div class="col-md-6">
+          <form class="d-flex" @submit.prevent="changeFilter">
+            <select v-model="searchType" class="form-select w-auto me-2">
+              <option selected value="all">전체</option>
+              <option value="company">회사명</option>
+              <option value="content">내용</option>
+              <option value="tag">태그</option>
+            </select>
+            <input
+              v-model="keyword"
+              class="form-control w-auto me-2"
+              type="search"
+              placeholder="검색어 입력"
+              @keyup.enter="submit"
+            />
+            <button class="btn btn-primary px-3" type="submit">검색</button>
+          </form>
+        </div>
+        <div class="col text-end">
+          <!-- <select
+            v-model="addressCd"
+            @change="changeFilter"
+            class="form-select w-auto d-inline-block me-2"
+          >
+            <option selected value="all">주소</option>
+            <option v-for="cd in addressCdList" :key="cd" :value="cd.areaCodeSq">
+              {{ areaSigungu }}
+            </option>
+          </select> -->
+          <!-- 부모 선택 -->
+          <select
+            v-model="selectedParent"
+            @change="onParentChange"
+            class="form-select w-auto d-inline-block"
+          >
+            <option selected value="all">시/도 선택</option>
+            <option
+              v-for="parent in addressCdList"
+              :key="parent.areaCodeSq"
+              :value="parent.areaCodeSq"
+            >
+              {{ removeAllTxt(parent.areaSigungu) }}
+            </option>
+          </select>
+
+          <!-- 자식 선택 -->
+          <select
+            v-model="addressCd"
+            @change="changeFilter"
+            class="form-select w-auto d-inline-block"
+          >
+            <option :value="selectedParent">전체</option>
+            <option
+              v-for="address in childrenAddressCdList.children"
+              :key="address.areaCodeSq"
+              :value="address.areaCodeSq"
+            >
+              {{ address.areaSigungu }}
+            </option>
+          </select>
+          <select
+            class="form-select w-auto d-inline-block"
+            v-model="sortType"
+            @change="getAfltnList"
+          >
+            <option selected value="latest">최신순</option>
+            <option value="oldest">오래된순</option>
+            <option value="view">조회순</option>
+            <option value="scrap">스크랩순</option>
+            <option value="applicant">지원자순</option>
+          </select>
+        </div>
+      </div>
       <div class="row">
         <div class="col">
           <div class="blog-posts">
-            <div class="row">
+            <div class="row" v-if="afltnList.length > 0">
               <!-- 카드 -->
               <div
-                v-for="afltn in afltnList.slice(
-                  (currentPage - 1) * size,
-                  currentPage * size,
-                )"
+                v-for="afltn in afltnList"
                 :key="afltn"
                 class="col-md-4 col-lg-3"
               >
@@ -35,7 +109,7 @@
                   >
                     <a href="#" class="d-block h-100 w-100 position-relative">
                       <img
-                        :src="`${afltn.company_profile_image_url}`"
+                        :src="`${afltn.profileImg}`"
                         class="img-fluid img-thumbnail img-thumbnail-no-borders rounded-0 h-100 w-100"
                         style="object-fit: cover"
                         alt="기업 이미지"
@@ -49,7 +123,7 @@
                         "
                       >
                         <i class="bi bi-eye"></i>
-                        <span>{{ formatNum(afltn.view_cnt) }}</span>
+                        <span>{{ formatNum(afltn.viewCnt) }}</span>
                       </div>
                     </a>
                   </div>
@@ -63,15 +137,19 @@
                         style="font-size: 1.1rem"
                       >
                         <a href="#" class="text-primary text-decoration-none">{{
-                          afltn.company_nm
+                          afltn.companyNm
                         }}</a>
                       </h2>
                       <a
                         href="#"
                         class="text-muted"
                         style="text-decoration: none"
+                        @click="clickScrap(afltn.sq)"
                       >
-                        <i class="bi bi-heart-fill" style="color: pink"></i>
+                        <i
+                          class="bi bi-heart-fill"
+                          :class="{ active: afltn.isScrap }"
+                        ></i>
                       </a>
                     </div>
                     <!-- 키워드 태그 뱃지 -->
@@ -92,7 +170,7 @@
                         class="small mb-0 text-dark"
                         style="font-size: 0.85rem"
                       >
-                        {{ afltn.company_greeting_txt }}
+                        {{ afltn.greeting }}
                       </p>
                     </div>
                     <div class="d-grid" @click="clickApplication(afltn)">
@@ -107,6 +185,7 @@
                 </article>
               </div>
             </div>
+            <div v-else>소속 공고가 없습니다.</div>
             <CommonPagination
               :currentPage="currentPage"
               :totalPages="totalPages"
@@ -119,504 +198,20 @@
   </section>
 </template>
 <script setup>
+import { api } from '@/axios'
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 import CommonPagination from '@/fo/components/common/CommonPagination.vue'
-import AffiliationFilter from '@/fo/components/company/AffiliationFilter.vue'
-import AffiliationRecuit from '@/fo/components/company/AffiliationRecruit.vue'
+import AffiliationRecruit from '@/fo/components/company/AffiliationRecruit.vue'
+import { useAffiliationStore } from '@/fo/stores/AffiliationStore'
+import { useAlertStore } from '@/fo/stores/alertStore'
 import { useModalStore } from '@/fo/stores/modalStore'
-import { ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 const modalStore = useModalStore()
+const alertStore = useAlertStore()
+const affiliationStore = useAffiliationStore()
 
-const afltnList = [
-  {
-    company_sq: 1,
-    company_nm: 'EST Soft1',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구ff',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 2,
-    company_nm: 'EST Soft2',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 3,
-    company_nm: 'EST Soft3',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 4,
-    company_nm: 'EST Soft4',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 5,
-    company_nm: 'EST Soft5',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 6,
-    company_nm: 'EST Soft6',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 7,
-    company_nm: 'EST Soft7',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 8,
-    company_nm: 'EST Soft8',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 9,
-    company_nm: 'EST Soft9',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 10,
-    company_nm: 'EST Soft10',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 11,
-    company_nm: 'EST Soft11',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 12,
-    company_nm: 'EST Soft12',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 13,
-    company_nm: 'EST Soft13',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 14,
-    company_nm: 'EST Soft14',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 15,
-    company_nm: 'EST Soft15',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 16,
-    company_nm: 'EST Soft16',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 17,
-    company_nm: 'EST Soft17',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 18,
-    company_nm: 'EST Soft18',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 19,
-    company_nm: 'EST Soft19',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 20,
-    company_nm: 'EST Soft20',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 21,
-    company_nm: 'EST Soft21',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 22,
-    company_nm: 'EST Soft22',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 23,
-    company_nm: 'EST Soft23',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 24,
-    company_nm: 'EST Soft24',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 25,
-    company_nm: 'EST Soft25',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 26,
-    company_nm: 'EST Soft26',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 27,
-    company_nm: 'EST Soft27',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 28,
-    company_nm: 'EST Soft28',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 29,
-    company_nm: 'EST Soft29',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 30,
-    company_nm: 'EST Soft30',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 31,
-    company_nm: 'EST Soft31',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 32,
-    company_nm: 'EST Soft32',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 33,
-    company_nm: 'EST Soft33',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 34,
-    company_nm: 'EST Soft34',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 35,
-    company_nm: 'EST Soft35',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 36,
-    company_nm: 'EST Soft36',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 37,
-    company_nm: 'EST Soft37',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 38,
-    company_nm: 'EST Soft38',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-  {
-    company_sq: 39,
-    company_nm: 'EST Soft39',
-    user_nm: '홍길동',
-    company_adress: '서울시 강남구',
-    company_profile_image_url: 'img/blog/medium/blog-8.jpg',
-    company_greeting_txt:
-      '신입/경력 Java 백엔드 개발자 모집. Spring Boot 기반 API 서버 개발 업무를 담당합니다.',
-    company_open_dt: '2025-04-17',
-    view_cnt: 1200,
-    tags: ['서울', '신입', '학력무관', 'JAVA'],
-  },
-]
-
-const filters = ref({
-  addressCodeSq: null,
-  projectDeveloperGradeCd: null,
-  educationCd: null,
-  jobRoleCd: null,
-  sortBy: '',
-  sortOrder: 'desc',
-  searchKeyword: '',
-  searchType: '프로젝트명',
-  size: 5,
-})
-
-const updateFilters = (updated) => {
-  filters.value = { ...filters.value, ...updated }
-  console.log(filters)
-  currentPage.value = 1 // 필터 바꾸면 1페이지부터
-  // fetchProjects()
-}
+const afltnList = ref([])
 
 const formatNum = (num) => {
   if (num < 1000) {
@@ -629,18 +224,142 @@ const formatNum = (num) => {
 }
 
 // 한 화면에 보일 박스 숫자 설정
-const size = 12
+const size = 4
 
 const currentPage = ref(1)
 
-// [수정] 추후 데이터에 맞게 수정
-const totalPages = Math.ceil(afltnList.length / size)
+const totalPages = ref(1)
+
+// 필터
+const searchType = ref('all')
+const keyword = ref('')
+const sortType = ref('latest')
+
+// 주소 코드 리스트
+const addressCdList = ref([])
+const childrenAddressCdList = ref({})
+const selectedParent = ref('all') // 선택된 부모 코드
+const addressCd = ref('all')
+
+// 부모 변경 시 자식 초기화
+const onParentChange = () => {
+  addressCd.value = 'all' // 자식 초기화
+  childrenAddressCdList.value = {}
+  const parent = addressCdList.value.find(
+    (item) => item.areaCodeSq === selectedParent.value,
+  )
+  childrenAddressCdList.value = parent || {}
+  addressCd.value = selectedParent.value
+  getAfltnList()
+}
+
+// 주소 필터 리스트 불러오기
+const getAllAddress = async () => {
+  try {
+    const res = await api.$get(`/affiliation/address`)
+    if (res.status == 'OK') {
+      addressCdList.value = res.output
+        .filter((tag) => tag.parentAreaCodeSq === null)
+        .map((parent) => {
+          const children = res.output.filter(
+            (cd) => cd.parentAreaCodeSq === parent.areaCodeSq,
+          )
+          return {
+            ...parent,
+            children,
+          }
+        })
+    }
+  } catch (error) {
+    alertStore.show('주소 정보 로드에 실패하였습니다.', 'danger')
+  }
+}
+
+// 공고 목록 가져오기
+const getAfltnList = async () => {
+  try {
+    const searchKeyword = keyword.value.trim()
+    const searchFilter =
+      searchKeyword == null || searchKeyword == ''
+        ? ''
+        : `&searchType=${searchType.value}&keyword=${searchKeyword}`
+
+    const address = addressCd.value
+    const addressFilter =
+      address == null || address == 'all' ? '' : `&addressCd=${addressCd.value}`
+
+    const res = await api.$get(
+      `/affiliation?page=${currentPage.value}&size=${size}&sortType=${sortType.value}${searchFilter}${addressFilter}`,
+    )
+    console.log(res.output)
+    if (res) {
+      if (res.output.totalElements == 0) {
+        totalPages.value = 1
+      } else {
+        totalPages.value = Math.floor(
+          (res.output.totalElements + size - 1) / size,
+        )
+      }
+      afltnList.value = res.output.companies
+      affiliationStore.viewerSq = res.output.viewerSq
+    }
+  } catch (error) {
+    alertStore.show('소속 공고를 불러올 수 없습니다.', 'danger')
+  }
+}
+
+// 스크랩 버튼 클릭
+const clickScrap = async (sq) => {
+  try {
+    const res = await api.$post(`/affiliation/${sq}/scrap`)
+    if (res.status == 'OK') {
+      alertStore.show(res.message, 'success')
+      getAfltnList()
+    } else {
+      alertStore.show('추천 반영에 실패하였습니다.', 'danger')
+    }
+  } catch (error) {
+    alertStore.show('로그인 후 이용해주세요.', 'danger')
+  }
+}
 
 // 소속 신청하기 모달
-const clickApplication = (afltnInfo) => {
-  modalStore.openModal(AffiliationRecuit, {
+const clickApplication = async (afltnInfo) => {
+  await api.$patch(`/affiliation/${afltnInfo.sq}/increment-view`)
+
+  modalStore.openModal(AffiliationRecruit, {
     afltnInfo: afltnInfo,
   })
 }
+
+// 검색 또는 채택 상태 변경 시 전체 페이지 수가 변경되므로 현재 페이지를 1페이지로 초기화 후 리스트 갱신
+const changeFilter = () => {
+  currentPage.value = 1
+  getAfltnList()
+}
+
+// 전체 글자 없애기
+const removeAllTxt = (str) => {
+  if (str.endsWith('전체')) {
+    return str.slice(0, -2)
+  }
+  return str
+}
+
+watch(currentPage, () => {
+  getAfltnList()
+})
+
+onMounted(() => {
+  getAllAddress()
+  getAfltnList()
+})
 </script>
-<style></style>
+<style>
+.bi.bi-heart-fill {
+  color: pink;
+}
+.bi.bi-heart-fill.active {
+  color: red;
+}
+</style>

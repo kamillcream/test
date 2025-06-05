@@ -28,7 +28,7 @@ public interface BoardMapper {
     	        @Param("offset") Long offset);
      void insert(Board board);
      void update(Board board);
-     void delete(@Param("boardSq") Long boardSq);
+     void delete(@Param("userSq") Long userSq, @Param("boardSq") Long boardSq);
      void addViewCnt(@Param("boardSq") Long boardSq);
      void updateCommentCnt(@Param("boardSq") Long boardSq);
      void updateRecommendCnt(@Param("boardSq") Long boardSq);

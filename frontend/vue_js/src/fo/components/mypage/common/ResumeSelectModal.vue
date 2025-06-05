@@ -63,7 +63,7 @@
             </ul>
           </div>
 
-          <!-- 페이지네이션 -->
+          <!-- 페이지네이션  -->
           <ul class="pagination float-end mt-3 mb-0">
             <li class="page-item">
               <a class="page-link" href="#"
@@ -89,7 +89,7 @@
             class="btn btn-primary"
             data-bs-dismiss="modal"
           >
-            지원하기
+            선택완료
           </button>
           <button
             @click="close"
@@ -147,8 +147,8 @@ const confirm = async () => {
   }
 
   try {
-    await api.$post(`/projects/${props.projectSq}/applications`, {
-      resumeSq: selectedResume.value.id,
+    await api.$post(`/projects/applications/${props.projectSq}`, {
+      resumeSq: [selectedResume.value.id],
       projectApplicationTyp: 'PERSONAL',
     })
 

@@ -14,7 +14,7 @@ public interface AnswerMapper {
      Integer findAllCnt(@Param("boardSq") Long boardSq);
      void insert(Answer answer);
      void update(Answer answer);
-     void delete(@Param("answerSq") Long answerSq);
+     void delete(@Param("userSq") Long userSq, @Param("answerSq") Long answerSq);
      void addViewCnt(@Param("answerSq") Long answerSq);
      void updateCommentCnt(@Param("answerSq") Long answerSq);
      void updateRecommendCnt(@Param("answerSq") Long answerSq);
