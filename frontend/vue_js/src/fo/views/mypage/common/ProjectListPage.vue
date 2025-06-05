@@ -44,7 +44,7 @@ const filters = ref({
   sortBy: '',
   sortOrder: 'desc',
   searchKeyword: '',
-  searchType: '프로젝트명',
+  searchType: '제목',
   size: 5,
   page: 1,
 })
