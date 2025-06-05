@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.StructuredTaskScope.Subtask;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -13,8 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.common.ParentCodeEnum;
 import com.example.demo.common.mapper.CommonCodeMapper;
-import com.example.demo.domain.company.dto.request.BaseRequest;
-import com.example.demo.domain.company.mapper.CompanyMapper;
 import com.example.demo.domain.company.service.CompanyService;
 import com.example.demo.domain.project.dto.AddressInsertDto;
 
@@ -40,6 +37,7 @@ import com.example.demo.domain.project.entity.Project;
 import com.example.demo.domain.project.entity.ProjectApplicationEntity;
 import com.example.demo.domain.project.mapper.AddressMapper;
 import com.example.demo.domain.project.mapper.DistrictMapper;
+import com.example.demo.domain.project.mapper.ProjectApplicationMapper;
 import com.example.demo.domain.project.mapper.ProjectMapper;
 import com.example.demo.domain.project.mapper.ScrapMapper;
 import com.example.demo.domain.project.mapper.SkillMapper;
@@ -59,6 +57,7 @@ public class ProjectService {
 	private final ProjectUtil projectUtil;
 	private final SkillMapper skillMapper;
 	private final AddressMapper addressMapper;
+	private final ProjectApplicationMapper projectApplicationMapper;
 	private final ScrapMapper scrapMapper;
 	private final CompanyService companyService;
 	
@@ -176,6 +175,9 @@ public class ProjectService {
 	public ProjectDetailResponse fetchProject(Long projectSq, JwtAuthenticationToken token){
 		Project p = projectMapper.findBySq(projectSq);
 		Long userSq = token.getUserSq();
+		Long userTypeCd = token.getUserTypeCd();
+		
+		
 		if (p.getProjectIsDeletedYn().equals("Y")) {
 			 throw new RuntimeException("이미 삭제된 프로젝트 입니다.");
 		}
@@ -188,20 +190,23 @@ public class ProjectService {
 		
 		Long scrapSq = scrapMapper.findScrapSqByUserSqAndProjectSq(userSq, projectSq);
 		int hasScrapped = (scrapSq != null) ? 1 : 0;
+		int hasApplied;
 		
-		// TODO: mapper로 지원 여부 확인
-		int hasApplied = 1; 
+		if (userTypeCd.equals(302)) {
+			Long companySq = companyService.fetchCompanySq(userSq, userTypeCd);
+			hasApplied = projectApplicationMapper.findByProAndCom(projectSq, companySq) != null ? 1 : 0;
+		} else {
+			hasApplied = projectApplicationMapper.findByProAndUser(projectSq, userSq) != null ? 1 : 0;
+		}
 		
-		System.out.println("==============================");
-		System.out.println("BEFORE USERROLE");
-		System.out.println("==============================");
+		
 		UserRole userRole = findUserRole(token, p);
-
-		System.out.println("==============================");
-		System.out.println("AFTER USERROLE : " + userRole.toString());
-		System.out.println("==============================");
 		
 		return ProjectDetailResponse.from(p,projectUtil, reqSkills, preferSkills, projectAddress, hasScrapped, hasApplied, userRole);
+	}
+	
+	public Long fetchScrapCount(Long projectSq) {
+		return projectMapper.findProjectScrapCnt(projectSq);
 	}
 	
 	@Transactional
@@ -273,9 +278,13 @@ public class ProjectService {
 	public void createProjectApplication(long projectSq, ProjectApplyRequest request, Long userSq) {
 		Optional<Long> userCompanySq = Optional.ofNullable(companyService.fetchCompanySq(userSq));
 		
-		ProjectApplicationEntity projectApplicationEntity = ProjectApplicationEntity.from(projectSq, projectMapper, request, commonCodeMapper, userCompanySq);
-		projectMapper.insertProjectApplication(projectApplicationEntity);
-		projectMapper.increaseApplication(projectSq);
+		request.getResumeSq().forEach(
+			rSq -> {
+				ProjectApplicationEntity projectApplicationEntity = ProjectApplicationEntity.from(projectSq, projectMapper, rSq,request.getProjectApplicationTyp(), commonCodeMapper, userCompanySq);
+				projectMapper.insertProjectApplication(projectApplicationEntity);
+				projectMapper.increaseApplication(projectSq);
+			}
+		);
 	}
 	
 	@Transactional
