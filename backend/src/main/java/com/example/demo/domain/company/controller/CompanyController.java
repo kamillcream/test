@@ -1,27 +1,23 @@
 package com.example.demo.domain.company.controller;
 
-import java.util.List;
+
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.ApiResponse;
-import com.example.demo.domain.company.dto.CompanyMemberVo;
-import com.example.demo.domain.company.dto.request.BaseRequest;
 import com.example.demo.domain.company.dto.request.CompanyMemberSearchRequest;
 import com.example.demo.domain.company.dto.request.CompanyStatusRequest;
 import com.example.demo.domain.company.dto.response.CompanyMemberResponse;
 import com.example.demo.domain.company.service.CompanyService;
-import com.example.demo.domain.project.dto.request.ScrapRequest;
+
 
 import lombok.RequiredArgsConstructor;
 
