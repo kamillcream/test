@@ -249,7 +249,12 @@ const selectedInterviewTimes = ref([])
 const modalStore = useModalStore()
 
 const projects = ref([])
-const pagedProjects = computed(() => projects.value)
+const pagedProjects = computed(() =>
+  projects.value.slice(
+    (currentPage.value - 1) * itemsPerPage,
+    currentPage.value * itemsPerPage,
+  ),
+)
 
 const totalPages = ref('')
 const itemsPerPage = 5
@@ -275,8 +280,8 @@ const fetchApplicationList = async () => {
     const response = await api.$get(`/projects/applications`, {
       withCredentials: true,
       params: {
-        offset: 1,
-        size: 5,
+        offset: (currentPage.value - 1) * itemsPerPage,
+        size: itemsPerPage,
         searchType: searchAppliedType.value,
         keyword: searchAppliedKeyword.value,
         status: currentToggle.value === 'all' ? null : currentToggle.value,
@@ -284,10 +289,10 @@ const fetchApplicationList = async () => {
     })
     console.log(response.value)
 
-    projects.value = response.output.projects
+    projects.value = response.output
     totalPages.value = Math.max(
       1,
-      Math.ceil(response.output.totalCount / itemsPerPage),
+      Math.ceil(response.output.length / itemsPerPage),
     )
   } catch (e) {
     console.error('❌ [catch 블록 진입]', e)
