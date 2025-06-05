@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.StructuredTaskScope.Subtask;
 import java.util.stream.Collectors;
 
@@ -26,12 +27,11 @@ import com.example.demo.domain.project.dto.request.ScrapInsertRequest;
 import com.example.demo.domain.project.dto.request.ScrapRequest;
 import com.example.demo.domain.project.dto.request.SkillInsertRequest;
 import com.example.demo.domain.project.dto.response.AreaInfoResponse;
-import com.example.demo.domain.project.dto.response.ExistProjectVo;
 import com.example.demo.domain.project.dto.response.GroupSkillInfoResponse;
+import com.example.demo.domain.project.dto.response.InterviewTimeInfoResponse;
 import com.example.demo.domain.project.dto.response.ProjectDetailResponse;
 import com.example.demo.domain.project.dto.response.ProjectFormDataResponse;
 import com.example.demo.domain.project.dto.response.ProjectListResponse;
-import com.example.demo.domain.project.dto.response.ProjectSummary;
 import com.example.demo.domain.project.dto.response.SingleSkillInfoResponse;
 import com.example.demo.domain.project.entity.Project;
 import com.example.demo.domain.project.entity.ProjectApplicationEntity;
@@ -41,6 +41,8 @@ import com.example.demo.domain.project.mapper.ProjectMapper;
 import com.example.demo.domain.project.mapper.ScrapMapper;
 import com.example.demo.domain.project.mapper.SkillMapper;
 import com.example.demo.domain.project.util.ProjectUtil;
+import com.example.demo.domain.project.vo.ExistProjectVo;
+import com.example.demo.domain.project.vo.ProjectSummary;
 import com.example.demo.domain.user.util.JwtAuthenticationToken;
 
 import lombok.RequiredArgsConstructor;
@@ -209,9 +211,10 @@ public class ProjectService {
 		projectMapper.softDeleteProject(projectSq);
 	}
 
-	public void createProjectApplication(long projectSq, ProjectApplyRequest request) {
-		Project project = projectMapper.findBySq(projectSq);
-		ProjectApplicationEntity projectApplicationEntity = ProjectApplicationEntity.from(projectSq, projectMapper, request, commonCodeMapper);
+	public void createProjectApplication(long projectSq, ProjectApplyRequest request, Long userSq) {
+		Optional<Long> userCompanySq = Optional.ofNullable(companyService.fetchCompanySq(userSq));
+		
+		ProjectApplicationEntity projectApplicationEntity = ProjectApplicationEntity.from(projectSq, projectMapper, request, commonCodeMapper, userCompanySq);
 		projectMapper.insertProjectApplication(projectApplicationEntity);
 		projectMapper.increaseApplication(projectSq);
 	}
@@ -292,7 +295,7 @@ public class ProjectService {
 	}
 	
 	public ProjectFormDataResponse fetchProjectFormDatas(long projectSq) {
-		List<GroupSkillInfoResponse> skills = groupingSkills(projectMapper.findSkillInfoList());
+		List<GroupSkillInfoResponse> skills = groupingSkills(projectMapper.findSkillFormList());
 		if (projectSq != 0L) {
 			Project project = projectMapper.findBySq(projectSq);
 			AreaInfoResponse areaInfoResponse = fetchSubDistrictInfoByProjectSq(project.getAddressSq());
@@ -334,6 +337,10 @@ public class ProjectService {
 		default:
 			throw new IllegalArgumentException("Unexpected value: " + type);
 		}
+	}
+	
+	public List<InterviewTimeInfoResponse> fetchProjectAvailableTimes(Long projectSq){
+		return projectMapper.findInterviewSqTmByProjectSq(projectSq);
 	}
 	
 	public UserRole findUserRole(JwtAuthenticationToken token, Project project) {

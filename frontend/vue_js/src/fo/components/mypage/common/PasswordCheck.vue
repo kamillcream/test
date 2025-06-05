@@ -64,7 +64,7 @@ const handleCheck = async () => {
 
     if (response.status === 'OK' && response.output === true) {
       // 비밀번호 일치
-      console.log('emit confirmed')
+      // console.log('emit confirmed')
       emit('confirmed')
     } else {
       // 비밀번호 불일치 시 메시지 표시

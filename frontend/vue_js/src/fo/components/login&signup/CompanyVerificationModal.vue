@@ -243,6 +243,7 @@ async function handleVerify() {
       b_no: bizNumber.value,
       start_dt: formattedOpenDate,
       p_nm: ceoName.value,
+      b_nm: companyName.value,
     })
 
     if (response.output === true) {

@@ -46,9 +46,17 @@
           <span class="nav-link">회원 정보 관리</span>
           <ul>
             <li class="nav-item">
-              <router-link class="nav-link" to="/mypage/informationEdit"
-                >회원 정보 수정</router-link
+              <router-link
+                class="nav-link"
+                to="/mypage/informationEdit"
+                :class="{
+                  'router-link-exact-active':
+                    $route.path === '/mypage' ||
+                    $route.path === '/mypage/informationEdit',
+                }"
               >
+                회원 정보 수정
+              </router-link>
             </li>
             <li class="nav-item">
               <router-link class="nav-link" to="/mypage/withdraw"
@@ -115,9 +123,17 @@
           <span class="nav-link">회원 정보 관리</span>
           <ul>
             <li class="nav-item">
-              <router-link class="nav-link" to="/mypage/informationEdit"
-                >회원 정보 수정</router-link
+              <router-link
+                class="nav-link"
+                to="/mypage/informationEdit"
+                :class="{
+                  'router-link-exact-active':
+                    $route.path === '/mypage' ||
+                    $route.path === '/mypage/informationEdit',
+                }"
               >
+                회원 정보 수정
+              </router-link>
             </li>
             <li class="nav-item">
               <router-link class="nav-link" to="/mypage/withdraw"

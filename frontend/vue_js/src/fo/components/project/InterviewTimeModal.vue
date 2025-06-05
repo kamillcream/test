@@ -171,14 +171,18 @@ const toggleTime = (time) => {
     selectedTimes.value[date].splice(idx, 1)
   }
 }
+
 function dayClass(d, currentMonth) {
-  const dateString = formatDate(d) // 'YYYY-MM-DD' 형태
+  const dateString = formatDate(d)
   const isSameMonth = d.getMonth() === currentMonth
+  const isPast = d < new Date().setHours(0, 0, 0, 0)
 
   return {
-    available: true,
-    selected: dateString === selectedDate.value && isSameMonth,
-    'has-times': !!selectedTimes.value[dateString]?.length && isSameMonth,
+    available: !isPast,
+    selected: dateString === selectedDate.value && isSameMonth && !isPast,
+    'has-times':
+      !!selectedTimes.value[dateString]?.length && isSameMonth && !isPast,
+    disabled: isPast,
   }
 }
 
@@ -190,10 +194,13 @@ function formatDate(d) {
 }
 
 function selectDate(date) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  if (date < today) return // 지난 날짜는 클릭 무시
+
   const formatted = formatDate(date)
 
   if (selectedDate.value === formatted) {
-    // 같은 날짜를 다시 클릭하면 선택 해제
     selectedDate.value = null
   } else {
     selectedDate.value = formatted
@@ -353,6 +360,13 @@ const confirmSelection = () => {
   font-weight: normal;
   color: #555;
   margin-right: 4px;
+}
+
+td.disabled {
+  background-color: #f0f0f0;
+  color: #aaa;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 td.selected {

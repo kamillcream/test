@@ -69,7 +69,6 @@
                 type="button"
                 class="btn btn-primary"
                 :class="{ active: applicantType === 'personal' }"
-                @click="setApplicantType('personal')"
               >
                 개인
               </button>
@@ -77,7 +76,7 @@
                 type="button"
                 class="btn btn-primary btn-outline"
                 :class="{ active: applicantType === 'company' }"
-                @click="setApplicantType('company')"
+                @click="toggleToCorporate()"
               >
                 기업
               </button>
@@ -96,8 +95,8 @@
           <div class="col">
             <ul class="simple-post-list m-0 position-relative">
               <li
-                v-for="(applicant, index) in applicants"
-                :key="index"
+                v-for="applicant in applicants"
+                :key="applicant.applicationSq"
                 style="border-bottom: 1px rgb(230, 230, 230) solid"
               >
                 <div class="post-info position-relative">
@@ -106,16 +105,41 @@
                     class="d-flex justify-content-between align-items-center gap-2"
                   >
                     <div class="d-flex gap-2">
-                      <a href="#" class="text-6 m-0">{{ applicant.name }} /</a>
-                      <a href="#" class="text-5 m-0">{{ applicant.title }}</a>
+                      <a href="#" class="text-6 m-0"
+                        >{{ applicant.nameTitleVo.resumeNm }} /</a
+                      >
+                      <a href="#" class="text-5 m-0">{{
+                        applicant.nameTitleVo.resumeTtl
+                      }}</a>
                     </div>
                     <div class="d-flex gap-2">
-                      <template v-if="applicant.status === 'pending'">
+                      <template
+                        v-if="applicant.appStatusVo.appStatus === '지원중'"
+                      >
                         <span
-                          class="btn btn-primary btn-outline btn-sm"
-                          @click="handleInterviewRequest(applicant)"
-                          >합격 / 인터뷰 요청</span
+                          @click.prevent="
+                            updateAppStatus(
+                              '인터뷰요청중',
+                              applicant.applicationSq,
+                            )
+                          "
+                          class="btn btn-outline btn-primary btn-sm"
                         >
+                          인터뷰 요청
+                        </span>
+                      </template>
+                      <template
+                        v-else-if="
+                          applicant.appStatusVo.appStatus === '인터뷰 요청 중'
+                        "
+                      >
+                        <span class="btn btn-primary btn-sm"
+                          >인터뷰 요청중</span
+                        >
+                      </template>
+                      <template
+                        v-else-if="applicant.appStatusVo.appStatus === '불합격'"
+                      >
                         <span
                           class="btn btn-primary btn-outline btn-sm"
                           @click="handleReject(applicant)"
@@ -123,30 +147,38 @@
                         >
                       </template>
                       <template
-                        v-else-if="applicant.status === 'interview_requested'"
+                        v-else-if="
+                          applicant.appStatusVo.appStatus === '인터뷰 확정'
+                        "
                       >
-                        <span class="btn btn-primary btn-sm"
-                          >인터뷰 요청중</span
+                        <div
+                          class="interview-wrapper position-relative d-inline-block"
                         >
-                      </template>
-                      <template
-                        v-else-if="applicant.status === 'interview_confirmed'"
-                      >
-                        <div class="position-relative d-inline-block">
+                          <!-- 툴팁 -->
+                          <div
+                            class="interview-tooltip position-absolute bg-white border p-2 rounded shadow-sm text-dark font-weight-semibold"
+                            style="
+                              bottom: 80%;
+                              left: 50%;
+                              transform: translateX(-60%);
+                              white-space: nowrap;
+                            "
+                          >
+                            {{ formatDate(applicant.appStatusVo.interviewDt) }}
+                          </div>
+
+                          <!-- 인터뷰 확정 버튼 -->
                           <span class="btn btn-light btn-sm interview"
                             >인터뷰 확정</span
                           >
-                          <div
-                            class="position-absolute bg-white border p-2 rounded shadow-sm text-dark font-weight-semibold"
-                            style="bottom: 80%; left: 30%; white-space: nowrap"
-                          >
-                            {{ applicant.interviewDate }}
-                          </div>
                         </div>
                       </template>
-                      <template v-else-if="applicant.status === 'rejected'">
-                        <span class="btn btn-light btn-sm">불합격</span>
-                        <span class="btn btn-light btn-sm">지원 취소</span>
+                      <template
+                        v-else-if="
+                          applicant.appStatusVo.appStatus === '지원 취소'
+                        "
+                      >
+                        <span class="btn btn-light btn-sm">지원 취소됨</span>
                       </template>
                     </div>
                   </div>
@@ -160,14 +192,14 @@
                         class="text-dark text-uppercase font-weight-semibold"
                         >경력</span
                       >
-                      | {{ applicant.career }}년차
+                      | {{ applicant.careerYear }}년차
                     </div>
                     <div class="post-meta text-4">
                       <span
                         class="text-dark text-uppercase font-weight-semibold"
                         >열람일자</span
                       >
-                      | {{ applicant.readDate || '미열람' }}
+                      | {{ applicant.appStatusVo.readResumeDt || '미열람' }}
                     </div>
                   </div>
 
@@ -183,12 +215,17 @@
                       >
                       |
                       <div
-                        v-for="skill in applicant.skills"
-                        :key="skill.name"
+                        v-for="skill in applicant.skillNames"
+                        :key="skill"
                         class="btn d-flex align-items-center gap-2 border-0"
                       >
-                        <img :src="skill.icon" :alt="skill.name" width="20" />
-                        {{ skill.name }}
+                        <img
+                          :src="generateIconUrl(skill)"
+                          :alt="skill"
+                          width="24"
+                          height="24"
+                        />
+                        <span>{{ skill }}</span>
                       </div>
                     </div>
                     <div class="post-meta" style="font-size: 16.8px">
@@ -197,7 +234,7 @@
                         style="font-size: 16.8px"
                         >지원일자</span
                       >
-                      | {{ applicant.applyDate }}
+                      | {{ applicant.appStatusVo.appDt }}
                     </div>
                   </div>
                 </div>
@@ -253,8 +290,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, defineProps } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
+
+import { api } from '@/axios.js'
 
 const modalStore = useModalStore()
 
@@ -274,109 +313,38 @@ const filters = ref([
   { type: 'rejected', label: '불합격 / 반려 / 취소', count: 5 },
 ])
 
-// 지원자 데이터
-const applicants = ref([
-  {
-    name: '홍길동',
-    title: '안녕하세요. Java 개발자입니다.',
-    status: 'pending',
-    career: 0,
-    readDate: '미열람',
-    skills: [
-      {
-        name: 'Java',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-      },
-      {
-        name: 'Python',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-      },
-      {
-        name: 'Spring Boot',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
-      },
-    ],
-    applyDate: '2025.04.15',
-  },
-  {
-    name: '홍길동',
-    title: '안녕하세요. Java 개발자입니다.',
-    status: 'interview_requested',
-    career: 0,
-    readDate: '2025.04.30',
-    skills: [
-      {
-        name: 'Java',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-      },
-      {
-        name: 'Python',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-      },
-      {
-        name: 'Spring Boot',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
-      },
-    ],
-    applyDate: '2025.04.15',
-  },
-  {
-    name: '홍길동',
-    title: '안녕하세요. Java 개발자입니다.',
-    status: 'interview_confirmed',
-    career: 0,
-    readDate: '미열람',
-    interviewDate: '2025.05.01 16:00 ~ 17:00',
-    skills: [
-      {
-        name: 'Java',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-      },
-      {
-        name: 'Python',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-      },
-      {
-        name: 'Spring Boot',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
-      },
-    ],
-    applyDate: '2025.04.15',
-  },
-  {
-    name: '홍길동',
-    title: '안녕하세요. Java 개발자입니다.',
-    status: 'rejected',
-    career: 0,
-    readDate: '2025.04.01',
-    skills: [
-      {
-        name: 'Java',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-      },
-      {
-        name: 'Python',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-      },
-      {
-        name: 'Spring Boot',
-        icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
-      },
-    ],
-    applyDate: '2025.03.01',
-  },
-])
+const props = defineProps({
+  applicants: Array,
+  projectSq: Number,
+  onToggle: Function,
+})
+
+const updateAppStatus = async (status, applicationSq) => {
+  try {
+    await api.$patch(
+      `/projects/applications/${applicationSq}`,
+      { status },
+      { withCredentials: true },
+    )
+    const target = props.applicants.find(
+      (app) => app.applicationSq === applicationSq,
+    )
+    if (target) {
+      target.appStatusVo.appStatus = '인터뷰 요청 중'
+    }
+  } catch (e) {
+    console.error('❌ 지원 상태 변경 실패:', e)
+  }
+}
+
+const toggleToCorporate = () => {
+  props.onToggle?.()
+}
 
 // 필터 변경
 const setFilter = (type) => {
   currentFilter.value = type
   // TODO: 필터링 로직 구현
-}
-
-// 지원자 타입 변경
-const setApplicantType = (type) => {
-  applicantType.value = type
-  // TODO: 지원자 타입에 따른 데이터 필터링
 }
 
 // 검색
@@ -392,12 +360,6 @@ const changePage = (page) => {
   // TODO: 페이지 데이터 로드
 }
 
-// 인터뷰 요청
-const handleInterviewRequest = (applicant) => {
-  // TODO: 인터뷰 요청 로직 구현
-  console.log('인터뷰 요청:', applicant)
-}
-
 // 불합격 처리
 const handleReject = (applicant) => {
   // TODO: 불합격 처리 로직 구현
@@ -407,6 +369,35 @@ const handleReject = (applicant) => {
 // 모달 닫기
 const closeModal = () => {
   modalStore.closeModal()
+}
+
+function formatDate(dateString) {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}`
+}
+
+const generateIconUrl = (name) => {
+  const exceptionList = [
+    '전자정부 프레임워크',
+    'myBatis',
+    'Notepad++',
+    'PyCharm',
+    'Sublime Text',
+  ]
+  if (exceptionList.includes(name)) return null
+
+  const processed = name
+    .toLowerCase()
+    .replace('#', 'sharp')
+    .replace('++', 'plusplus')
+
+  return `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${processed}/${processed}-original.svg`
 }
 </script>
 
@@ -433,6 +424,17 @@ const closeModal = () => {
 
 .interview div {
   display: none;
+}
+
+.interview-tooltip {
+  bottom: 80%;
+  left: 30%;
+  white-space: nowrap;
+  display: none;
+}
+
+.interview-wrapper:hover .interview-tooltip {
+  display: block;
 }
 
 .bg-color-grey {

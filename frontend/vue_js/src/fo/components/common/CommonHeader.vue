@@ -34,7 +34,7 @@
                   <li class="dropdown">
                     <a
                       class="dropdown-item dropdown-toggle current-page-active"
-                      href="#"
+                      href="/projectListPage"
                     >
                       프로젝트
                       <i class="fas fa-chevron-down"></i
@@ -207,7 +207,7 @@
                   <li class="dropdown">
                     <a
                       class="dropdown-item dropdown-toggle current-page-active"
-                      href="#"
+                      href="/projectListPage"
                     >
                       프로젝트 <i class="fas fa-chevron-down"></i>
                     </a>
