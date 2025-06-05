@@ -1,5 +1,9 @@
 package com.example.demo.config;
 
+import com.example.demo.domain.user.util.JwtAuthenticationFilter;
+import com.example.demo.domain.user.util.JwtProvider;
+import jakarta.servlet.Filter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -11,14 +15,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.example.demo.domain.user.util.JwtAuthenticationFilter;
-import com.example.demo.domain.user.util.JwtProvider;
-
-import jakarta.servlet.Filter;
-import lombok.RequiredArgsConstructor;
-
 @Configuration
-@Profile("dev") // dev 프로파일일 때만 활성화
+@Profile("dev")
 @RequiredArgsConstructor
 public class SecurityConfigDev {
 
@@ -31,7 +29,7 @@ public class SecurityConfigDev {
         configuration.addAllowedOrigin("http://localhost:3000");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(true); // 쿠키 허용
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -45,9 +43,12 @@ public class SecurityConfigDev {
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .anyRequest().permitAll())
+                        .requestMatchers("/refresh-token").permitAll() // ✅ 토큰 재발급은 인증 없이 허용
+                        .requestMatchers("/me").authenticated() // ✅ 사용자 정보는 인증 필요
+                        .anyRequest().permitAll() // 그 외는 자유 접근 (필요시 조정)
+                )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-                .logout().disable(); // 기존 로그아웃 비활성화;
+                .logout().disable(); // JWT 기반이므로 로그아웃 무효화
 
         return http.build();
     }
