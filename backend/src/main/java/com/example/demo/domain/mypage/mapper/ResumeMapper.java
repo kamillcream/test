@@ -13,9 +13,6 @@ import java.util.Map;
 @Mapper
 public interface ResumeMapper {
 	void insertResume(ResumeRegisterRequest request);
-
-	public ResumeNmTtlVo findResumeNmTtlBySq(Long resumeSq);
-	public ResumeNmTtlVo findRepResumeNmTtlByUserSq(Long userSq);
 	
 	public ResumeNmTtlVo findLatestResumeBySq(Long resumeSq);
 	public List<Long> findResumesByUserSq(Long userSq);
