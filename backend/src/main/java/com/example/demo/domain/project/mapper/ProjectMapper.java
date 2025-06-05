@@ -44,7 +44,7 @@ public interface ProjectMapper {
 	
 	String judgeProjectRecruitStatus(@Param("projectSq") Long projectSq);
 	ProjectRecruitStatus countCompanyProjectsByStatus(@Param("request") CompanyFilterRequest request, @Param("companySq") Long companySq);
-
+	Long findProjectScrapCnt(@Param("projectSq") Long projectSq);
 
 	void insertProject(Project project);
 	void insertProjectApplication(ProjectApplicationEntity entity);
