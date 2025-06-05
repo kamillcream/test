@@ -11,7 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 public class SkillTagDTO {
     private Long skillTagSq;
-    private String skillTagNm;       // 1801 QnA / 1802 Answer
+    private String skillTagNm;
 
     public static SkillTagDTO fromEntity(SkillTag skillTag) {
         return new SkillTagDTO(

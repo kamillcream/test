@@ -13,7 +13,7 @@ import java.util.*;
 public class BoardListDTO{
 	private Long sq;
     private Long userSq;
-//    private String userNm; // 사용자 이름
+    private String userNm; // 사용자 이름
     private String ttl;
     private Integer viewCnt;
     private Integer commentCnt;
@@ -24,10 +24,11 @@ public class BoardListDTO{
     private List<String> normalTags;  // 일반 태그
     private List<SkillTagDTO> skillTags;
 
-    public static BoardListDTO fromEntity(Board board, Integer boardAnswerCnt, List<String> normalTags, List<SkillTagDTO> skillTags) {
+    public static BoardListDTO fromEntity(Board board, String userNm, Integer boardAnswerCnt, List<String> normalTags, List<SkillTagDTO> skillTags) {
         return new BoardListDTO(
 			board.getBoardSq(),
 			board.getUserSq(),
+			userNm,
 			board.getBoardTtl(),
 			board.getBoardViewCnt(),
 			board.getBoardCommentCnt(),

@@ -2,6 +2,7 @@ package com.example.demo.domain.community.controller;
 
 
 import org.springframework.http.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.common.ApiResponse;
@@ -31,7 +32,8 @@ public class ReportController {
     
 //    신고 등록
     @PostMapping
-    public ResponseEntity<ApiResponse<NullType>> createReport(@RequestBody ReportRequest reportRequest){
+    public ResponseEntity<ApiResponse<NullType>> createReport(@AuthenticationPrincipal Long userSq, @RequestBody ReportRequest reportRequest){
+    	reportRequest.setUserSq(userSq);
     	reportService.createReport(reportRequest);
     	return ResponseEntity.ok(ApiResponse.of(HttpStatus.CREATED, "신고 등록이 완료되었습니다.", null));
     	

@@ -14,7 +14,7 @@ public class AnswerListResponse{
 	private Long sq;
     private Long userSq;
     private Long boardSq;
-//    private String userNm; // 사용자 이름
+    private String userNm; // 사용자 이름
     private String ttl;
     private String description;
     private Integer viewCnt;
@@ -25,11 +25,12 @@ public class AnswerListResponse{
     private LocalDateTime createdAt;
 
     
-    public static AnswerListResponse fromEntity(Answer answer) {
+    public static AnswerListResponse fromEntity(Answer answer, String userNm) {
         return new AnswerListResponse(
     		answer.getAnswerSq(),
     		answer.getUserSq(),
     		answer.getBoardSq(),
+    		userNm,
     		answer.getAnswerTtl(),
     		answer.getAnswerDescriptionEdt(),
     		answer.getAnswerViewCnt(),
