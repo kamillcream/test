@@ -77,7 +77,7 @@
 
 
   <!--대표이력서 설정-->
-  <update id="updateAllRepresentativeN" parameterType="long">
+  <update id="updateAllRepresentativeN">
     UPDATE TBL_RESUME_M
     SET resume_is_representative_yn = 'N'
     WHERE user_sq = #{userSq}

@@ -1,17 +1,12 @@
 package com.example.demo.domain.mypage.dto.response;
 
-import java.util.List;
-
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 @Builder
-
 public class ResumeSkillDataResponse {
-    private String parentSkillTagNm;
-    private List<String> childSkills;//
-
+	private Long skillTagSq;
+    private Long parentSkillTagSq;
+    private String skillTagNm;
 }

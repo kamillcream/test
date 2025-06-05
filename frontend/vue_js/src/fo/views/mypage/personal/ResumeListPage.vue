@@ -76,19 +76,19 @@
                     v-if="!resume.isMain"
                     href="#"
                     class="btn btn-outline btn-primary btn-sm"
-                    @click.prevent="setMainResume(resume.id)"
+                    @click.prevent="setMainResume(resume.resumeSq)"
                     >대표이력서 설정</a
                   >
                   <a
                     href="#"
                     class="btn btn-outline btn-primary btn-sm"
-                    @click.prevent="editResume(resume.id)"
+                    @click.prevent="editResume(resume.resumeSq)"
                     >수정하기</a
                   >
                   <a
                     href="#"
                     class="btn btn-outline btn-primary btn-sm"
-                    @click.prevent="copyResume(resume.id)"
+                    @click.prevent="copyResume(resume.resumeSq)"
                     >복사하기</a
                   >
                 </div>
@@ -154,8 +154,9 @@ onMounted(async () => {
   try {
     const res = await api.$get('/mypage/resume/list')
     console.log('이력서 목록 응답:', res)
-    if (Array.isArray(res)) {
-      resumeList.value = res
+    if (Array.isArray(res.output)) {
+      console.log(res.output)
+      resumeList.value = res.output
     } else {
       console.error('이력서 목록이 배열이 아닙니다:', res)
     }

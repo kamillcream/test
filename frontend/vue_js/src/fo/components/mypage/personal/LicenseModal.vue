@@ -5,6 +5,7 @@
         <span class="modal-title">자격증 검색</span>
         <button class="modal-close" @click="close">×</button>
       </div>
+
       <div class="modal-search">
         <input
           v-model="search"
@@ -13,20 +14,34 @@
         />
         <button class="modal-search-btn" @click="fetchLicenses">
           <svg width="18" height="18" fill="none" viewBox="0 0 18 18">
-            <circle cx="8" cy="8" r="7" stroke="#fff" stroke-width="2"/>
-            <path d="M13 13l3 3" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="8" cy="8" r="7" stroke="#fff" stroke-width="2" />
+            <path
+              d="M13 13l3 3"
+              stroke="#fff"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
           </svg>
         </button>
       </div>
+
       <div class="modal-list">
         <div v-if="licenses.length">
-          <div v-for="license in licenses" :key="license.id" class="modal-item">
+          <div
+            v-for="license in licenses"
+            :key="license.id"
+            class="modal-item"
+            @click="selectLicense(license)"
+          >
             <div class="license-name">{{ license.name }}</div>
-            <div class="license-meta">{{ license.level }} | {{ license.org }}</div>
+            <div class="license-meta">
+              {{ license.level }} | {{ license.org }}
+            </div>
           </div>
         </div>
         <div v-else class="modal-empty">검색 결과가 없습니다.</div>
       </div>
+
       <div class="modal-pagination">
         <button :disabled="page === 1" @click="prevPage">&lt;</button>
         <button
@@ -34,9 +49,12 @@
           :key="p"
           :class="{ active: page === p }"
           @click="goPage(p)"
-        >{{ p }}</button>
+        >
+          {{ p }}
+        </button>
         <button :disabled="page === totalPages" @click="nextPage">&gt;</button>
       </div>
+
       <div class="modal-footer">
         <button class="modal-footer-close" @click="close">닫기</button>
       </div>
@@ -44,28 +62,69 @@
   </div>
 </template>
 
-
 <script setup>
-import { ref } from 'vue'
+import { ref, watch, defineEmits } from 'vue'
+import { api } from '@/axios'
 import { useModalStore } from '@/fo/stores/modalStore'
 
+const emit = defineEmits(['license-selected'])
 const modalStore = useModalStore()
-const search = ref('')
-const licenses = ref([
-  { id: 1, name: '자격증 1', level: '1급', org: '한국산업인력공단' },
-  { id: 2, name: '자격증 2', level: '2급', org: '한국산업인력공단' }
-])
-const page = ref(1)
-const totalPages = 3
 
-const fetchLicenses = () => {
-  // 실제 API 연동 필요
-  // 예시: 검색어에 따라 licenses.value를 변경
+const search = ref('')
+const licenses = ref([])
+const page = ref(1)
+const totalPages = ref(1)
+
+const fetchLicenses = async () => {
+  try {
+    const res = await api.$get('/certificates', {
+      params: {
+        keyword: search.value,
+        pageNo: page.value,
+        numOfRows: 10,
+      },
+    })
+
+    const items = res.data.response.body.items?.item || []
+    licenses.value = items.map((item, index) => ({
+      id: item.licensecode || index,
+      name: item.jmfldnm,
+      level: item.seriesnm,
+      org: item.minClassnm,
+    }))
+
+    totalPages.value = Math.ceil((res.data.response.body.totalCount || 1) / 10)
+  } catch (e) {
+    console.error('자격증 API 호출 실패', e)
+  }
 }
-const close = () => modalStore.closeModal()
-const prevPage = () => { if (page.value > 1) page.value-- }
-const nextPage = () => { if (page.value < totalPages) page.value++ }
-const goPage = (p) => { page.value = p }
+
+// 페이지 변경 시 자동 호출
+watch(page, () => {
+  fetchLicenses()
+})
+
+const selectLicense = (license) => {
+  emit('license-selected', license)
+  close()
+}
+
+const close = () => {
+  search.value = ''
+  licenses.value = []
+  page.value = 1
+  modalStore.closeModal()
+}
+
+const prevPage = () => {
+  if (page.value > 1) page.value--
+}
+const nextPage = () => {
+  if (page.value < totalPages.value) page.value++
+}
+const goPage = (p) => {
+  page.value = p
+}
 </script>
 
 <style scoped>
@@ -195,7 +254,9 @@ const goPage = (p) => { page.value = p }
   font-size: 15px;
   cursor: pointer;
   color: #007bff;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 .modal-pagination button.active,
 .modal-pagination button:focus {

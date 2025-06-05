@@ -13,19 +13,19 @@ import java.util.Map;
 @Mapper
 public interface ResumeMapper {
 	void insertResume(ResumeRegisterRequest request);
-	ResumeRegisterRequest selectResumeById(Long resumeSq);
+	ResumeRegisterRequest selectResumeById(@Param("resumeSq") Long resumeSq);
 	Long selectAreaCodeBySigunguAndParent(Map<String, Object> params);
 
 	//전체이력서 조회
-	List<ResumeListResponse> selectAllResumes(Long userSq);
+	List<ResumeListResponse> selectAllResumes(@Param("userSq") Long userSq);
 	
 	//대표이력서 하나만
-	void updateAllRepresentativeN(Long userSq);
-    void updateRepresentativeY(Long resumeSq);
+	void updateAllRepresentativeN(@Param("userSq") Long userSq);
+    void updateRepresentativeY(@Param("resumeSq") Long resumeSq);
 	
     //이력서 삭제.
-	void updateDeleteYn(@Param("resumeSq")Long resumeSq);
+	void updateDeleteYn(@Param("resumeSq") Long resumeSq);
 
-	public List<ResumeVo> findResumeVoByUserSq(Long userSq);
-	public ResumeNmTtlVo findResumeNmTtlBySq(Long resumeSq);
+	public List<ResumeVo> findResumeVoByUserSq(@Param("userSq") Long userSq);
+	public ResumeNmTtlVo findResumeNmTtlBySq(@Param("resumeSq") Long resumeSq);
 }

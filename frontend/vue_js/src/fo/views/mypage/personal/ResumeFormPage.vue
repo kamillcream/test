@@ -527,7 +527,7 @@
                   width="20"
                   height="20"
                 />
-                <span>{{ skill.name }}</span>
+                <span>{{ skill.skillTagNm }}</span>
                 <a
                   href="#"
                   class="position-absolute end-0 me-2 text-grey text-decoration-none"
@@ -606,14 +606,16 @@ import ResumeCompanyModal from '@/fo/components/mypage/personal/ResumeCompanyMod
 import TrainingModal from '@/fo/components/mypage/personal/TrainingModal.vue'
 import ShowProjectFormModal from '@/fo/components/mypage/personal/ShowProjectFormModal.vue'
 import LicenseModal from '@/fo/components/mypage/personal/LicenseModal.vue'
-import SkillSelectModal from '@/fo/components/project/SkillSelectModal.vue'
 import AddressSearchModal from '@/fo/components/mypage/personal/AddressSearchModal.vue'
 import axios from 'axios'
 import { useRoute } from 'vue-router'
+import SkillTagModal from '@/fo/components/community/SkillTagModal.vue'
+import { api } from '@/axios'
 
 const modalStore = useModalStore()
 const route = useRoute()
 const resumeSq = route.params.resumeSq
+const skillList = ref([])
 
 //주소 모달창
 const openAddressSearchModal = () => {
@@ -744,8 +746,10 @@ const showCertificateForm = () => {
 }
 // 기술 입력 폼 표시 로직
 const showSkillsForm = () => {
-  modalStore.openModal(SkillSelectModal, {
-    onComplete: (skills) => {
+  modalStore.openModal(SkillTagModal, {
+    skillTags: resumeData.skills,
+    onConfirm: (skills) => {
+      console.log(skills)
       resumeData.skills = skills
     },
   })
@@ -790,12 +794,6 @@ const collapseAllProjects = () => {
   resumeData.projects.forEach((project) => (project.isExpanded = false))
 }
 
-// 폼 제출
-// const submitResume = () => {
-//   // 폼 제출 로직 구현
-//   console.log('이력서 데이터:', resumeData)
-// }
-
 // 프로젝트가 추가/변경될 때 전체 펼침
 watch(
   () => resumeData.projects.length,
@@ -810,11 +808,19 @@ watch(
 //폼 제출
 // 1. resumeSq가 있을 경우 → 수정 모드 → 데이터 불러오기
 onMounted(async () => {
+  // 기술 목록 가져오기
+  try {
+    const res = await axios.get('/api/mypage/resume/skills')
+    skillList.value = res.data.data || res.data.output || res.data
+  } catch (e) {
+    console.error('[ 기술 목록 조회 실패 ]', e)
+  }
+
   if (resumeSq) {
     try {
       const res = await axios.get(`/api/mypage/resume/detail/${resumeSq}`)
       Object.assign(resumeData, res.data)
-      console.log('[기존 이력서 불러오기 완료]', res.data) // 콘솔 추가
+      console.log('[기존 이력서 불러오기 완료]', res.data)
     } catch (e) {
       console.error('[ 이력서 데이터 조회 실패]', e)
     }
@@ -865,10 +871,10 @@ const submitResume = async () => {
 
   try {
     if (resumeSq) {
-      await axios.put(`/api/mypage/resume/update/${resumeSq}`, payload)
+      await api.$put(`/mypage/resume/update/${resumeSq}`, payload)
       alert('수정 완료!')
     } else {
-      await axios.post('/api/mypage/resume/new', payload)
+      await api.$post('/mypage/resume/new', payload)
       alert('등록 완료!')
     }
   } catch (e) {
@@ -876,24 +882,6 @@ const submitResume = async () => {
     alert('오류 발생')
   }
 }
-
-//폼 등록
-// const submitResume = async () => {
-//   try {
-//     await axios.post('/api/resume', resumeData)
-//     alert('등록 완료!')
-//     modalStore.closeModal()
-//   } catch (error) {
-//     console.error('이력서 등록 실패:', error)
-//     alert('등록 중 오류 발생')
-//   }
-// }
-// TODO 교체 예시:
-// onConfirm: submitResume
-// const submitResume = async () => {
-//   await axios.post('/api/resume', resumeData)
-//   alert('등록 완료!')
-// }
 </script>
 
 <style scoped>
