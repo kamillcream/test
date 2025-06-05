@@ -147,8 +147,8 @@ const confirm = async () => {
   }
 
   try {
-    await api.$post(`/projects/${props.projectSq}/applications`, {
-      resumeSq: selectedResume.value.id,
+    await api.$post(`/projects/applications/${props.projectSq}`, {
+      resumeSq: [selectedResume.value.id],
       projectApplicationTyp: 'PERSONAL',
     })
 
