@@ -67,14 +67,23 @@ public class CompanyService {
 		
 		List<Long> companyUserSqs = companyMapper.findUserSqsByCompanySqAndSearch(companySq, request);
 		List<CompanyMemberVo> responses = new ArrayList<>();
-		
+
 		companyUserSqs.forEach(
 				sq -> {
+					ResumeNmTtlVo resumeNmTtlVo;
 					Long repResumeSq = resumeMapper.findRepResumeByUserSq(sq);
+					if(repResumeSq == null) {
+						repResumeSq = resumeMapper.findLatestResumeSqByUserSq(sq);
+						resumeNmTtlVo = resumeMapper.findLatestResumeBySq(repResumeSq);
+
+						}else {
+
+						resumeNmTtlVo = resumeMapper.findRepResumeNmTtlByUserSq(sq);
+
+					}	
 					List<Long> resumeSqs = resumeMapper.findResumesByUserSq(sq);
 					
-					ResumeNmTtlVo resumeNmTtlVo = resumeMapper.findResumeNmTtlBySq(repResumeSq);
-					
+				
 					LocalDate joinDt = companyMapper.findCompanyJoinDt(sq);
 					LocalDate leaveDt = companyMapper.findCompanyLeaveDt(sq);
 					
