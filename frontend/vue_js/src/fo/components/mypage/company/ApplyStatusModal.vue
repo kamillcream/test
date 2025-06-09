@@ -123,7 +123,7 @@
                   <!-- 지원자 목록 -->
                   <ul class="simple-post-list m-0 position-relative">
                     <li
-                      v-for="applicant in applicants"
+                      v-for="applicant in filteredApplicants"
                       :key="applicant.applicationSq"
                       style="border-bottom: 1px rgb(230, 230, 230) solid"
                     >
@@ -136,9 +136,12 @@
                             <a href="#" class="text-6 m-0"
                               >{{ applicant.nameTitleVo.resumeNm }} /</a
                             >
-                            <a href="#" class="text-5 m-0">{{
-                              applicant.nameTitleVo.resumeTtl
-                            }}</a>
+                            <a
+                              @click="openResumeDetailModal()"
+                              href="#"
+                              class="text-5 m-0"
+                              >{{ applicant.nameTitleVo.resumeTtl }}</a
+                            >
                           </div>
                           <div class="d-flex gap-2">
                             <template
@@ -161,7 +164,7 @@
                               "
                             >
                               <span
-                                class="btn btn-primary btn-outline btn-sm"
+                                class="btn btn-primary btn-sm"
                                 @click="handleReject(applicant)"
                                 >불합격</span
                               >
@@ -174,20 +177,31 @@
                             >
                               <span
                                 @click.prevent="
-                                  updateAppStatus(
-                                    '인터뷰요청중',
+                                  updateStatus(
                                     applicant.applicationSq,
+                                    '인터뷰요청중',
                                   )
                                 "
                                 class="btn btn-outline btn-primary btn-sm"
                               >
                                 인터뷰 요청
                               </span>
+
+                              <span
+                                @click.prevent="
+                                  openStatusFailureModal(
+                                    applicant.applicationSq,
+                                  )
+                                "
+                                class="btn btn-outline btn-primary btn-sm"
+                              >
+                                불합격
+                              </span>
                             </template>
                             <template
                               v-else-if="
                                 applicant.appStatusVo.appStatus ===
-                                '인터뷰 요청 중'
+                                '인터뷰요청중'
                               "
                             >
                               <span class="btn btn-primary btn-sm"
@@ -351,7 +365,10 @@
 <script setup>
 import { ref, defineProps, computed } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
+
 import InterviewTimeModal from '@/fo/components/mypage/common/InterviewSelectModal.vue'
+import ResumeDetailModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
+import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 
 import { api } from '@/axios.js'
 
@@ -384,22 +401,101 @@ const companies = computed(() => {
   }))
 })
 
-// 필터 데이터
-const filters = ref([
-  { type: 'all', label: '전체', count: 15 },
-  { type: 'interview_confirmed', label: '인터뷰 확정', count: 5 },
-  { type: 'interview_requested', label: '인터뷰 요청중', count: 5 },
-  { type: 'rejected', label: '불합격 / 반려 / 취소', count: 5 },
-])
-
 const props = defineProps({
   applicants: Array,
   projectSq: Number,
   onToggle: Function,
 })
 
-console.log('기업')
-console.log(props.applicants)
+const localApplicants = ref([...props.applicants])
+
+const updateStatusLocally = (applicationSq, newStatus) => {
+  const target = localApplicants.value.find(
+    (app) => app.applicationSq === applicationSq,
+  )
+  if (target && target.appStatusVo) {
+    target.appStatusVo.appStatus = newStatus
+  }
+}
+
+const filteredApplicants = computed(() => {
+  return localApplicants.value.filter((applicant) => {
+    const status = applicant.appStatusVo?.appStatus
+    const keyword = searchText.value.toLowerCase()
+
+    const matchesFilter = (() => {
+      switch (currentFilter.value) {
+        case 'interview_confirmed':
+          return status === '인터뷰 확정'
+        case 'interview_requested':
+          return status === '인터뷰요청중'
+        case 'rejected':
+          return ['불합격', '반려', '지원취소'].includes(status)
+        default:
+          return true
+      }
+    })()
+
+    const matchesSearch = (() => {
+      if (!keyword) return true
+      switch (searchType.value) {
+        case 'name':
+          return applicant.nameTitleVo?.resumeNm
+            ?.toLowerCase()
+            .includes(keyword)
+        case 'skills':
+          return applicant.skillNames?.some((s) =>
+            s.toLowerCase().includes(keyword),
+          )
+        case 'all':
+        default:
+          return (
+            applicant.nameTitleVo?.resumeNm?.toLowerCase().includes(keyword) ||
+            applicant.skillNames?.some((s) => s.toLowerCase().includes(keyword))
+          )
+      }
+    })()
+
+    return matchesFilter && matchesSearch
+  })
+})
+
+const filterCounts = computed(() => {
+  const counts = {
+    all: localApplicants.value.length,
+    interview_confirmed: 0,
+    interview_requested: 0,
+    rejected: 0,
+  }
+
+  localApplicants.value.forEach((a) => {
+    const status = a.appStatusVo?.appStatus
+    if (status === '인터뷰 확정') counts.interview_confirmed++
+    else if (status === '인터뷰요청중') counts.interview_requested++
+    else if (['불합격', '반려', '지원취소'].includes(status)) counts.rejected++
+  })
+
+  return counts
+})
+
+const filters = computed(() => [
+  { type: 'all', label: '전체', count: filterCounts.value.all },
+  {
+    type: 'interview_confirmed',
+    label: '인터뷰 확정',
+    count: filterCounts.value.interview_confirmed,
+  },
+  {
+    type: 'interview_requested',
+    label: '인터뷰요청중',
+    count: filterCounts.value.interview_requested,
+  },
+  {
+    type: 'rejected',
+    label: '불합격 / 반려 / 취소',
+    count: filterCounts.value.rejected,
+  },
+])
 
 const toggleToPersonal = () => {
   props.onToggle?.()
@@ -427,22 +523,48 @@ const openInterviewTimeModal = (applicationSq) => {
   })
 }
 
-const updateAppStatus = async (status, applicationSq) => {
+const openResumeDetailModal = () => {
+  modalStore.openModal(ResumeDetailModal, {})
+}
+function getAccessTokenFromCookie() {
+  const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]*)/)
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+const updateStatus = async (applicationSq, status) => {
   try {
-    await api.$patch(
+    const token = getAccessTokenFromCookie()
+    const response = await api.$patch(
       `/projects/applications/${applicationSq}`,
       { status },
-      { withCredentials: true },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      },
     )
-    const target = props.applicants.find(
-      (app) => app.applicationSq === applicationSq,
-    )
-    if (target) {
-      target.appStatusVo.appStatus = '인터뷰 요청 중'
-    }
+    console.log(`✅ ${applicationSq} 지원 상태 변경 성공`, response)
+    updateStatusLocally(applicationSq, status)
   } catch (e) {
-    console.error('❌ 지원 상태 변경 실패:', e)
+    console.error('❌ 지원 상태 변경 실패', e)
   }
+}
+
+const openStatusFailureModal = (applicationSq) => {
+  modalStore.openModal(CommonConfirmModal, {
+    message: '해당 지원자를 불합격 처리하겠습니까?',
+    onConfirm: async () => {
+      try {
+        console.log('삭제 확정됨')
+        updateStatus(applicationSq, '불합격')
+        modalStore.closeModal()
+      } catch (error) {
+        console.error('삭제 실패:', error)
+        alert('삭제 중 오류가 발생했습니다.')
+      }
+    },
+  })
 }
 
 // 필터 변경

@@ -178,9 +178,9 @@ const sendVerification = async () => {
   const email = `${emailId.value}@${domain}`
 
   try {
-    const response = await api.$post('/email/send-code', { email })
+    const response = await api.$post('/email/find/send-code', { email })
     alertStore.show(
-      '인증 코드를 전송했습니다. 인증 코드 : ' + response.code,
+      '인증 코드를 전송했습니다. 인증 코드 : ' + response.output.code,
       'info',
     )
   } catch (error) {

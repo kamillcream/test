@@ -18,9 +18,14 @@ public interface ProjectApplicationMapper {
 	public Long findProjectBySq(Long appSq);
 	public Long findResumeBySq(Long appSq);
 	public Long findCompanyBySq(Long appSq);
+	public Long findByProAndUser(@Param("projectSq") Long projectSq, @Param("userSq") Long userSq);
+	public Long findByProAndCom(@Param("projectSq") Long projectSq, @Param("companySq") Long companySq);
+	
 	public ApplicationStatusVo findStatusVoByAppSq(Long applicationSq);
 	public List<Long> findAllSqByProjectSq(Long projectSq);
 	public String findMmTypStrBySq(Long applicationSq);
+	
+	
 	
 	public void updateApplicationStatus(
 			@Param("newStatusCd") Long newStatusCd,

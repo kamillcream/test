@@ -8,7 +8,21 @@
       >
         <!-- 스크랩 아이콘 (카드 우측 상단 고정) -->
         <div class="position-absolute top-0 end-0 m-3">
-          <a href="#" class="text-muted"><i class="bi bi-heart fs-4"></i></a>
+          <a
+            @click="clickScrap(project)"
+            class="text-decoration-none"
+            style="cursor: pointer"
+          >
+            <i
+              :class="[
+                'bi',
+                project.hasScrapped === 'Y'
+                  ? 'bi-heart-fill text-danger'
+                  : 'bi-heart text-muted',
+                'fs-4',
+              ]"
+            ></i>
+          </a>
         </div>
 
         <!-- 카드 본문 -->
@@ -38,13 +52,22 @@
                   {{ project.projectTtl }}
                 </a>
                 <span
-                  class="btn btn-primary btn-sm d-flex align-items-center ms-2"
+                  :class="[
+                    'btn',
+                    getProjectStatus(project).status === '채용중'
+                      ? 'btn-primary'
+                      : 'btn-light',
+                    'btn-sm',
+                    'ms-3', // 간격 확보
+                  ]"
                 >
-                  채용중
+                  {{ getProjectStatus(project).status }}
                   <span
+                    v-if="getProjectStatus(project).status === '채용중'"
                     class="badge bg-white text-primary fw-bold px-2 py-1 ms-2"
-                    >D-{{ project.remainingDay }}</span
                   >
+                    {{ getProjectStatus(project).dDay }}
+                  </span>
                 </span>
               </h4>
             </div>
@@ -65,18 +88,17 @@
             </div>
             <div class="d-flex flex-wrap gap-2 mt-2">
               <button
-                v-for="skill in project.skills"
+                v-for="skill in project.reqSkills"
                 :key="skill.id"
                 class="btn btn-rounded btn-3d btn-light btn-sm"
               >
                 <img
-                  :src="skill.imageUrl"
-                  @click="goToProjectSpec(project)"
+                  :src="generateIconUrl(skill)"
                   width="16"
                   height="16"
                   :alt="skill.name"
                 />
-                {{ skill.name }}
+                {{ skill }}
               </button>
             </div>
             <div class="text-muted text-end">조회수: {{ project.viewCnt }}</div>
@@ -90,9 +112,12 @@
 <script setup>
 import { defineProps } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAlertStore } from '../../stores/alertStore.js'
+import { api } from '@/axios.js'
 
 const router = useRouter()
 
+const alertStore = useAlertStore()
 const goToProjectSpec = (project) => {
   router.push({
     name: 'CompanyProjectSpec',
@@ -102,10 +127,65 @@ const goToProjectSpec = (project) => {
   })
 }
 
+const generateIconUrl = (name) => {
+  const exceptionList = [
+    '전자정부 프레임워크',
+    'myBatis',
+    'Notepad++',
+    'PyCharm',
+    'Sublime Text',
+  ]
+  if (exceptionList.includes(name)) return null
+
+  const processed = name
+    .toLowerCase()
+    .replace('#', 'sharp')
+    .replace('++', 'plusplus')
+
+  return `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${processed}/${processed}-original.svg`
+}
+
 const props = defineProps({
   projects: {
     type: Array,
     required: true,
   },
 })
+
+const getProjectStatus = (project) => {
+  const today = new Date()
+  const start = new Date(project.recruitStartDt)
+  const end = new Date(project.recruitEndDt)
+
+  if (today < start) {
+    return { status: '채용예정' }
+  } else if (today > end) {
+    return { status: '채용종료' }
+  } else {
+    const diff = Math.ceil((end - today) / (1000 * 60 * 60 * 24))
+    return { status: '채용중', dDay: `D-${diff}` }
+  }
+}
+const clickScrap = async (project) => {
+  try {
+    const isScrapped = project.hasScrapped === 'Y'
+
+    project.hasScrapped = isScrapped ? 'N' : 'Y'
+
+    await api.$post(`/projects/${project.projectSq}/scraps`, {
+      hasScrapped: isScrapped,
+      target: '프로젝트',
+    })
+
+    alertStore.show(
+      isScrapped ? '스크랩 해제에 성공하였습니다.' : '스크랩에 성공하였습니다.',
+    )
+  } catch (error) {
+    project.hasScrapped = project.hasScrapped === 'Y' ? 'N' : 'Y'
+    console.error(error)
+    alertStore.show('스크랩에 실패했습니다.', 'danger')
+  }
+}
+
+console.log('project: ', props)
 </script>

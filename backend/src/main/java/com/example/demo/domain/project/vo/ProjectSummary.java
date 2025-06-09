@@ -1,6 +1,8 @@
 package com.example.demo.domain.project.vo;
 
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.example.demo.domain.project.entity.Project;
@@ -19,27 +21,46 @@ public class ProjectSummary {
 	private String projectTtl;
 	private String companyNm;
 	private String address;
+	private String descrption;
+	private String preferContent;
 	private String imageUrl;
-	private Integer remainingDay;
-	private Integer viewCnt;
 	private String requiredEduLvl;
 	private String devGradeNm;
+	
+	private Integer viewCnt;
+	private Integer applicantCnt;
+	
+	private LocalDate projectCreatedDt;
+	private LocalDate recruitStartDt;
+	private LocalDate recruitEndDt;
+	
+	private String recruitStatus;
+	
 	private Long salary;
 	private List<String> reqSkills;
 	
-	public static ProjectSummary from(Project project, ProjectUtil util, String address) {
+	private String hasScrapped;
+	
+	public static ProjectSummary from(Project project, ProjectUtil util, String address, String status, String hasScrapped) {
 		return ProjectSummary.builder()
 				.projectSq(project.getProjectSq())
 				.address(address)
 				.projectTtl(project.getProjectTtl())
+				.descrption(project.getProjectDescriptionTxt())
+				.preferContent(project.getProjectPreferenceTxt())
 				.imageUrl(project.getProjectImageUrl())
 				.viewCnt(project.getProjectViewCnt())
+				.applicantCnt(project.getProjectCandidateCnt())
 				.salary(project.getProjectSalary())
 				.companyNm(util.convertCompanySqToName(project.getCompanySq()))
-				.remainingDay(project.calcaulateRemainingDay(project.getProjectRecruitEndDt()))
+				.projectCreatedDt(project.getProjectCreatedAtDtm().toLocalDate())
+				.recruitStartDt(project.getProjectRecruitStartDt())
+				.recruitEndDt(project.getProjectRecruitEndDt())
 				.reqSkills(util.fetchReqSkillsByProjectSq(project.getProjectSq()))
 				.devGradeNm(util.convertCommonCodeSqToNm(project.getProjectDeveloperGradeCd()))
 				.requiredEduLvl(util.convertCommonCodeSqToNm(project.getProjectRequiredEducationCd()))
+				.recruitStatus(status)
+				.hasScrapped(hasScrapped)
 				.build();
 	}
 }

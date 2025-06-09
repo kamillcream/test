@@ -1,6 +1,7 @@
 package com.example.demo.domain.user.util;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -18,35 +19,50 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
 
+    private static final List<String> EXCLUDE_URLS = List.of(
+            "/api/login",
+            "/api/refresh-token",
+            "/api/email/send-code",
+            "/api/email/find/send-code",
+            "/api/email/verify-code",
+            "/api/find-id",
+            "/api/reset-password",
+            "/api/reset-password/verify",
+            "/api/signup",
+            "/api/check-id",
+            "/api/company/verify"
+
+    // 여기에 더 추가 가능
+    );
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
         String uri = request.getRequestURI();
 
-        // 로그인, 리프레시 토큰 요청은 필터 제외
-        if (uri.startsWith("/api/login") || uri.startsWith("/api/refresh-token")) {
+        // 인증 제외 경로 처리
+        if (EXCLUDE_URLS.stream().anyMatch(uri::startsWith)) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = resolveToken(request);
-        // System.out.println("토큰값" + token);
+        if (token == null || !jwtProvider.validateToken(token)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            return;
+        }
 
         try {
-            if (token != null && jwtProvider.validateToken(token)) {
-                Long userSq = jwtProvider.getUserSqFromToken(token);
-                Long userTypeCd = jwtProvider.getUserTypeCdFromToken(token);
+            Long userSq = jwtProvider.getUserSqFromToken(token);
+            Long userTypeCd = jwtProvider.getUserTypeCdFromToken(token);
 
-                JwtAuthenticationToken authentication = new JwtAuthenticationToken(
-                        userSq, userTypeCd);
-                System.out.println("authentication" + authentication);
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+            JwtAuthenticationToken authentication = new JwtAuthenticationToken(userSq, userTypeCd);
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (Exception e) {
-            System.out.println("JWT validation failed: " + e.getMessage());
-            // 여기서 응답을 403으로 막을 수도 있으니 참고
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            return;
         }
 
         filterChain.doFilter(request, response);

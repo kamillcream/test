@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import FindIdForm from '@/fo/components/login&signup/FindIdForm.vue'
 import ResetPasswordForm from '@/fo/components/login&signup/ResetPasswordForm.vue'
@@ -50,23 +50,16 @@ import ResetPasswordForm from '@/fo/components/login&signup/ResetPasswordForm.vu
 const route = useRoute()
 const router = useRouter()
 
-const currentTab = ref('findId')
-
-// 초기값 세팅
-if (route.query.tab === 'resetPassword') {
-  currentTab.value = 'resetPassword'
-} else {
-  currentTab.value = 'findId'
-}
+const currentTab = ref(
+  route.query.tab === 'resetPassword' ? 'resetPassword' : 'findId',
+)
 
 // URL 쿼리 파라미터가 바뀌면 탭도 변경
 watch(
   () => route.query.tab,
   (newTab) => {
-    if (newTab === 'resetPassword') {
-      currentTab.value = 'resetPassword'
-    } else {
-      currentTab.value = 'findId'
+    if (newTab === 'resetPassword' || newTab === 'findId') {
+      currentTab.value = newTab
     }
   },
 )
@@ -74,12 +67,6 @@ watch(
 // 탭 변경 시 URL 쿼리도 동기화
 const changeTab = (tabName) => {
   currentTab.value = tabName
-  router.replace({ query: {} })
+  router.replace({ query: { tab: tabName } }) // ✅ 쿼리 유지
 }
-
-onMounted(() => {
-  if (route.query.tab) {
-    router.replace({ query: {} })
-  }
-})
 </script>

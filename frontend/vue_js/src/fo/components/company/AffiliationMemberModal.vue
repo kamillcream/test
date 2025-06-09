@@ -22,16 +22,16 @@
         <div class="row align-items-center mt-3 mb-2">
           <div class="col-md-12 d-flex justify-content-end gap-2">
             <select
-              v-model="searchCategory"
+              v-model="searchType"
               class="form-select form-select-sm w-auto"
               style="font-size: 14px; padding: 4px"
             >
-              <option value="전체">전체</option>
-              <option value="이름">이름</option>
-              <option value="사용 기술">사용 기술</option>
+              <option value="all">전체</option>
+              <option value="name">이름</option>
+              <option value="skill">사용 기술</option>
             </select>
             <input
-              v-model="searchWord"
+              v-model="searchText"
               type="text"
               class="form-control form-control-sm w-auto"
               placeholder="검색어 입력"
@@ -40,7 +40,7 @@
             <button
               class="btn btn-primary btn-sm"
               style="font-size: 14px; padding: 4px"
-              @click="filterResumes"
+              @click="search"
             >
               검색
             </button>
@@ -59,7 +59,7 @@
               <span>{{ member.name }}</span>
               <a
                 href="#"
-                @click.prevent="removeMember(member.id)"
+                @click.prevent="removeMember(member.userSq)"
                 class="position-absolute end-0 me-2 text-grey text-decoration-none"
                 style="top: 50%; transform: translateY(-50%)"
                 title="삭제"
@@ -78,13 +78,13 @@
         <div class="row">
           <div class="col">
             <ul
-              v-if="filteredResumes.length > 0"
+              v-if="members.length > 0"
               class="simple-post-list m-0 position-relative"
               style="padding: 0"
             >
               <li
-                v-for="resume in filteredResumes"
-                :key="resume.id"
+                v-for="member in members"
+                :key="member.userSq"
                 class="d-flex justify-content-between align-items-center"
                 style="
                   border-bottom: 1px rgb(230, 230, 230) solid;
@@ -94,12 +94,30 @@
               >
                 <div class="post-info position-relative">
                   <div class="d-flex gap-2">
-                    <a href="#" class="text-5 m-0" style="font-size: 14px">
-                      {{ resume.name }} /
+                    <a
+                      @click="openResumeModal"
+                      href="#"
+                      class="text-5 m-0"
+                      style="font-size: 14px"
+                    >
+                      {{ member.userNm }}
                     </a>
-                    <span class="text-4 m-0 text-grey" style="font-size: 14px">
-                      {{ resume.greeting }}
-                    </span>
+                    <span> / </span>
+                    <a
+                      @click="openResumeModal"
+                      v-if="member.resumeTtl"
+                      href="#"
+                      class="text-4 m-0"
+                    >
+                      {{ member.resumeTtl }}
+                    </a>
+                    <a
+                      v-else
+                      class="text-4 m-0 text-grey"
+                      style="font-size: 14px"
+                    >
+                      이력서를 선택하세요
+                    </a>
                   </div>
 
                   <div
@@ -115,7 +133,7 @@
                           class="text-dark text-uppercase font-weight-semibold"
                           >경력</span
                         >
-                        | {{ resume.experience }}
+                        | {{ member.careerYr }}년차
                       </div>
                       <span
                         class="text-dark text-uppercase font-weight-semibold"
@@ -124,19 +142,22 @@
                       >
                       |
                       <div
-                        v-for="skill in resume.skills"
-                        :key="skill"
+                        v-for="skill in member.skillTagNms"
+                        :key="skill.name"
                         class="btn d-flex align-items-center gap-2 border-0"
-                        style="padding: 2px 6px; font-size: 14px"
-                      ></div>
+                        style="padding: 2px 6px"
+                      >
+                        <img :src="skill.icon" width="16" />
+                        {{ skill }}
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div class="d-flex gap-2 ms-auto">
                   <button
-                    v-if="isSelected(resume.id)"
-                    @click="toggleSelection(resume.id, resume.name)"
+                    v-if="isSelected(member.userSq)"
+                    @click="toggleSelection(member.userSq, member.userNm)"
                     class="btn btn-primary btn-lg"
                     style="font-size: 14px; padding: 8px 12px"
                   >
@@ -144,14 +165,14 @@
                   </button>
                   <button
                     v-else
-                    @click="toggleSelection(resume.id, resume.name)"
+                    @click="toggleSelection(member.userSq, member.userNm)"
                     class="btn btn-primary btn-outline btn-lg"
                     style="font-size: 14px; padding: 8px 12px"
                   >
                     선택하기
                   </button>
                   <button
-                    @click="openResumeModal(resume.id)"
+                    @click="openResumeSelectModal(member.userSq)"
                     class="btn btn-primary btn-outline btn-lg"
                     style="font-size: 14px; padding: 8px 12px"
                   >
@@ -171,17 +192,31 @@
           <div class="mt-5">
             <ul class="pagination float-end">
               <li class="page-item">
-                <a class="page-link" href="#"
+                <a
+                  class="page-link"
+                  href="#"
+                  @click.prevent="changePage(currentPage - 1)"
                   ><i class="fas fa-angle-left"></i
                 ></a>
               </li>
-              <li class="page-item active">
-                <a class="page-link" href="#">1</a>
+              <li
+                v-for="page in totalPages"
+                :key="page"
+                class="page-item"
+                :class="{ active: currentPage === page }"
+              >
+                <a
+                  class="page-link"
+                  href="#"
+                  @click.prevent="changePage(page)"
+                  >{{ page }}</a
+                >
               </li>
-              <li class="page-item"><a class="page-link" href="#">2</a></li>
-              <li class="page-item"><a class="page-link" href="#">3</a></li>
               <li class="page-item">
-                <a class="page-link" href="#"
+                <a
+                  class="page-link"
+                  href="#"
+                  @click.prevent="changePage(currentPage + 1)"
                   ><i class="fas fa-angle-right"></i
                 ></a>
               </li>
@@ -190,7 +225,12 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+        <button
+          @click="confirmApplication(selectedResumes, projectSq)"
+          type="button"
+          class="btn btn-primary"
+          data-bs-dismiss="modal"
+        >
           선택완료
         </button>
         <button
@@ -206,63 +246,39 @@
   </div>
 </template>
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useModalStore } from '../../stores/modalStore'
-import UserResumeModal from '@/fo/components/mypage/personal/ResumeModal.vue'
+import UserResumeModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
+import ResumeSelectModal from '@/fo/components/mypage/common/ResumeSelectModal.vue'
+import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
+
+import { api } from '@/axios.js'
+import { useRouter, useRoute } from 'vue-router'
 
 const modalStore = useModalStore()
+const router = useRouter()
+const route = useRoute()
 
-const searchWord = ref('')
-const searchCategory = ref('전체') // 기본값이 전체.
-const resumes = ref([
-  {
-    id: 1,
-    name: '홍길동',
-    greeting: '안녕하세요. Java 개발자입니다.',
-    experience: '0년차',
-    skills: ['Java', 'Python', 'Spring Boot'],
-  },
-  {
-    id: 2,
-    name: '홍길동',
-    greeting: '이력서를 선택하세요.',
-    experience: '0년차',
-    skills: ['Java', 'Python', 'Spring Boot'],
-  },
-  {
-    id: 3,
-    name: '홍길동',
-    greeting: '이력서를 선택하세요.',
-    experience: '0년차',
-    skills: ['Java', 'Python', 'Spring Boot'],
-  },
-  {
-    id: 4,
-    name: '홍길동',
-    greeting: '이력서를 선택하세요.',
-    experience: '0년차',
-    skills: ['Java', 'Python', 'Spring Boot'],
-  },
-  {
-    id: 5,
-    name: '홍길동',
-    greeting: '이력서를 선택하세요.',
-    experience: '0년차',
-    skills: ['Java', 'Python', 'Spring Boot'],
-  },
-])
+const projectSq = route.params.project_sq
 
-const filteredResumes = ref([...resumes.value])
+const searchType = ref('all')
+const searchText = ref('')
+const currentPage = ref('1')
+const totalPages = ref('')
+const pageSize = ref(5)
 
-const selectedResumes = ref([
-  { id: 1, name: '홍길동' },
-  { id: 2, name: '김철수' },
-  { id: 3, name: '이영희' },
-])
+const members = ref([])
 
-const removeMember = (id) => {
+const selectedResumes = ref([])
+
+const search = () => {
+  currentPage.value = 1
+  fetchAffiliationMemberList()
+}
+
+const removeMember = (userSq) => {
   selectedResumes.value = selectedResumes.value.filter(
-    (member) => member.id !== id,
+    (member) => member.userSq !== userSq,
   )
 }
 
@@ -270,63 +286,80 @@ const openResumeModal = () => {
   modalStore.openModal(UserResumeModal)
 }
 
-const toggleSelection = (resumeId, name) => {
-  const index = selectedResumes.value.findIndex((r) => r.id === resumeId)
+const openResumeSelectModal = () => {
+  modalStore.openModal(ResumeSelectModal)
+}
+
+const confirmApplication = async (selectedResumes, projectSq) => {
+  modalStore.openModal(CommonConfirmModal, {
+    title: '프로젝트 지원',
+    message: '해당 프로젝트에 지원하시겠습니까?',
+    onConfirm: async () => {
+      try {
+        const res = await api.$post(`/projects/applications/${projectSq}`, {
+          resumeSq: selectedResumes.map((r) => r.userSq),
+          projectApplicationTyp: 'COMPANY',
+        })
+        alert(res.message || '프로젝트 지원에 성공했습니다.')
+        modalStore.closeModal()
+        router.push({ name: 'ProjectListPage' }) // 삭제 후 이동 (예시)
+      } catch (error) {
+        console.error('지원 실패:', error)
+        alert('지원 중 오류가 발생했습니다.')
+      }
+    },
+  })
+}
+
+const toggleSelection = (memberId, name) => {
+  const index = selectedResumes.value.findIndex((r) => r.userSq === memberId)
 
   if (index === -1) {
-    selectedResumes.value.push({ id: resumeId, name })
-    console.log(selectedResumes.value)
+    selectedResumes.value.push({ userSq: memberId, name })
   } else {
     selectedResumes.value.splice(index, 1)
   }
 }
-
-const isSelected = (resumeId) => {
-  return selectedResumes.value.some((r) => r.id === resumeId)
+const isSelected = (memberId) => {
+  return selectedResumes.value.some((r) => r.userSq === memberId)
 }
 
-const filterResumes = () => {
-  const keyword = searchWord.value.toLowerCase().trim()
+const fetchAffiliationMemberList = async () => {
+  try {
+    const response = await api.$get('/companies/6', {
+      params: {
+        page: currentPage.value,
+        size: pageSize.value,
+        searchType: searchType.value === 'all' ? null : searchType.value,
+        keyword: searchText.value.trim() || null,
+      },
+    })
 
-  if (!keyword) {
-    filteredResumes.value = [...resumes.value]
-    return
-  }
-
-  if (searchCategory.value === '이름') {
-    filteredResumes.value = resumes.value.filter((resume) =>
-      resume.name.toLowerCase().includes(keyword),
-    )
-  } else if (searchCategory.value === '사용 기술') {
-    filteredResumes.value = resumes.value.filter((resume) =>
-      resume.skills.some((skill) => skill.toLowerCase().includes(keyword)),
-    )
-  } else if (searchCategory.value === '전체') {
-    filteredResumes.value = resumes.value.filter(
-      (resume) =>
-        resume.name.toLowerCase().includes(keyword) ||
-        resume.skills.some((skill) => skill.toLowerCase().includes(keyword)),
-    )
+    const output = response.output
+    members.value = output.members
+    currentPage.value = output.page
+    totalPages.value = output.totalPages
+  } catch (e) {
+    console.log(e)
   }
 }
-
-watch(searchWord, (newVal, oldVal) => {
-  console.log('변경됨:', oldVal, '→', newVal)
-})
-
-watch(searchCategory, (newVal, oldVal) => {
-  console.log('변경됨:', oldVal, '→', newVal)
-})
 
 onMounted(() => {
   document.body.style.setProperty('overflow', 'hidden', 'important')
   document.documentElement.style.setProperty('overflow', 'hidden', 'important')
+  fetchAffiliationMemberList()
 })
 
 onBeforeUnmount(() => {
   document.body.style.removeProperty('overflow')
   document.documentElement.style.removeProperty('overflow')
 })
+
+function changePage(page) {
+  if (page < 1 || page > totalPages.value) return
+  currentPage.value = page
+  fetchAffiliationMemberList()
+}
 const close = () => {
   modalStore.closeModal()
 }

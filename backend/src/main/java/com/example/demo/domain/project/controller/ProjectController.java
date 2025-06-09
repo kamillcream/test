@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.ApiResponse;
+import com.example.demo.domain.company.dto.request.BaseRequest;
+import com.example.demo.domain.project.dto.request.CompanyFilterRequest;
 import com.example.demo.domain.project.dto.request.ProjectApplyRequest;
 import com.example.demo.domain.project.dto.request.ProjectCreateRequest;
 import com.example.demo.domain.project.dto.request.ProjectSearchRequest;
@@ -28,6 +30,7 @@ import com.example.demo.domain.project.dto.response.GroupSkillInfoResponse;
 import com.example.demo.domain.project.dto.response.ProjectDetailResponse;
 import com.example.demo.domain.project.dto.response.ProjectFormDataResponse;
 import com.example.demo.domain.project.dto.response.ProjectListResponse;
+import com.example.demo.domain.project.dto.response.ProjectRecruitStatus;
 import com.example.demo.domain.project.entity.Project;
 import com.example.demo.domain.project.entity.ProjectApplicationEntity;
 import com.example.demo.domain.project.service.ProjectService;
@@ -53,9 +56,23 @@ public class ProjectController {
 	}
 	
 	@GetMapping
-	public ResponseEntity<ApiResponse<ProjectListResponse>> getProjectList(@ModelAttribute ProjectSearchRequest request){
-		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 목록 조회 성공", projectService.fetchAllProject(request)));
+	public ResponseEntity<ApiResponse<ProjectListResponse>> getProjectList(Authentication authentication, @ModelAttribute ProjectSearchRequest request){
+		JwtAuthenticationToken token = (JwtAuthenticationToken) authentication;
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 목록 조회 성공", projectService.fetchAllProject(token, request)));
 	}
+	
+	@GetMapping("/companies")
+	public ResponseEntity<ApiResponse<ProjectListResponse>> getCompanyProjectList(@ModelAttribute CompanyFilterRequest request, Authentication authentication){
+		JwtAuthenticationToken token = (JwtAuthenticationToken) authentication;
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "기업 프로젝트 목록 조회 성공", projectService.fetchCompanyProject(request, token)));
+	}
+	
+	@GetMapping("/companies/status")
+	public ResponseEntity<ApiResponse<ProjectRecruitStatus>> getCompanyProjectStatusList(@ModelAttribute CompanyFilterRequest request, Authentication authentication){
+		JwtAuthenticationToken token = (JwtAuthenticationToken) authentication;
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "기업 프로젝트 상태 조회 성공", projectService.fetchCompanyProjectCount(request, token)));
+	}
+
 
 	
 	@PatchMapping
@@ -70,20 +87,13 @@ public class ProjectController {
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 삭제 성공", null)); 
 	}
 	
-	@PostMapping("/{projectSq}/applications")
-	public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectSq") Long projectSq
-			, @RequestBody ProjectApplyRequest applyRequest
-			, @AuthenticationPrincipal Long userSq){
-		projectService.createProjectApplication(projectSq, applyRequest, userSq);
-		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 지원 성공", null));
-	}
 	
 	@PostMapping("/{projectSq}/scraps")
-	public ResponseEntity<ApiResponse<Void>> applyProject(@PathVariable("projectSq") Long projectSq
+	public ResponseEntity<ApiResponse<Long>> scrapProject(@PathVariable("projectSq") Long projectSq
 			, @RequestBody ScrapRequest scrapRequest
 			, @AuthenticationPrincipal Long userSq){
 		projectService.toggleProjectScrap(projectSq, scrapRequest, userSq);
-		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 스크랩 토글 성공", null));
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 스크랩 토글 성공", projectService.fetchScrapCount(projectSq)));
 	}
 	
 	@GetMapping("/{projectSq}/details")
@@ -109,6 +119,8 @@ public class ProjectController {
 	public ResponseEntity<ApiResponse<List<?>>> getSearchFilterInfos(@RequestParam("type") String type){
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 필터 내용 반환 성공", projectService.fetchFilterInfos(type)));
 	}
+	
+	
 	
 	
 }

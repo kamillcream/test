@@ -63,9 +63,9 @@
     id="findByRefreshToken" parameterType="string"
     resultType="com.example.demo.domain.user.dto.UserDTO"> SELECT user_sq, address_sq, user_id,
     user_email, user_pw, user_nm, user_gender_cd, user_phone_num, user_birth_dt, user_type_cd,
-    user_signup_type_cd, user_profile_image_url, user_agreed_privacy_policy_yn, user_created_at_dtm,
-    user_modified_at_dtm, user_is_deleted_yn, user_refresh_token FROM TBL_USER_M WHERE
-    user_refresh_token = #{refreshToken} AND user_is_deleted_yn = 'N' </select>
+    user_signup_type_cd, user_agreed_privacy_policy_yn, user_created_at_dtm, user_modified_at_dtm,
+    user_is_deleted_yn, user_refresh_token FROM TBL_USER_M WHERE user_refresh_token =
+    #{refreshToken} AND user_is_deleted_yn = 'N' </select>
 
   <select
     id="findUserInfoByUserSq" parameterType="long"

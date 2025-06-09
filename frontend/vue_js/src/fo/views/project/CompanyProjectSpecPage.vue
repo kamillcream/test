@@ -150,19 +150,40 @@
 
             <div class="d-flex justify-content-center align-items-center gap-3">
               <a
-                v-if="project.userRole === 'COMPANY_EXTERNAL'"
+                v-if="
+                  project.userRole === 'COMPANY_EXTERNAL' &&
+                  project.isApplied === 0
+                "
                 @click="openMemberModal"
                 href="#"
                 class="btn btn-lg btn-rounded btn-primary btn-lg"
               >
                 지원하기
               </a>
+              <span
+                v-if="
+                  project.userRole === 'COMPANY_EXTERNAL' &&
+                  project.isApplied === 1
+                "
+                class="btn btn-lg btn-rounded btn-primary btn-lg"
+              >
+                지원 완료
+              </span>
               <a
                 v-if="project.userRole === 'COMPANY_EXTERNAL'"
+                @click="clickScrap"
                 href="#"
-                class="btn btn-lg btn-rounded btn-light btn-lg"
-              >
-                스크랩
+                class="btn btn-lg btn-rounded d-flex align-items-center gap-2 custom-scrap-btn"
+                ><i
+                  :class="[
+                    'bi',
+                    project.isScrap === 1
+                      ? 'bi-heart-fill text-danger'
+                      : 'bi-heart text-secondary',
+                  ]"
+                ></i>
+                {{ project.isScrap === 1 ? '스크랩 해제' : '스크랩' }}
+                {{ scrapCount }}
               </a>
               <a
                 v-if="project.userRole === 'COMPANY_AUTHOR'"
@@ -199,6 +220,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import AffiliationMemberModal from '@/fo/components/company/AffiliationMemberModal.vue'
 import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 import { useModalStore } from '../../stores/modalStore.js'
+import { useAlertStore } from '../../stores/alertStore.js'
 import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -206,10 +228,13 @@ import { api } from '@/axios.js'
 const router = useRouter()
 const route = useRoute()
 const modalStore = useModalStore()
+const alertStore = useAlertStore()
 
 const projectSq = route.params.project_sq
 
 const project = ref([])
+
+const scrapCount = ref('')
 
 onMounted(async () => {
   try {
@@ -228,6 +253,7 @@ onMounted(async () => {
 
     const response = await api.$get(`/projects/${projectSq}/details`, config)
     project.value = response.output
+    scrapCount.value = response.output.projectScrapCnt
     console.log(project.value)
   } catch (e) {
     console.error('❌ [catch 블록 진입]', e)
@@ -312,7 +338,28 @@ const getSkillIconUrl = (skill) => {
   )
 }
 
-// TODO: 스크랩 토글
+const clickScrap = async () => {
+  try {
+    const hasScrapped = project.value.isScrap === 1
+    const response = await api.$post(`/projects/${projectSq}/scraps`, {
+      hasScrapped,
+      target: '프로젝트',
+    })
+
+    if (hasScrapped) {
+      alertStore.show('스크랩 해제에 성공하였습니다.')
+    } else {
+      alertStore.show('스크랩에 성공하였습니다.')
+    }
+
+    // 상태를 바꿔줘야 버튼 표시도 바뀜
+    project.value.isScrap = hasScrapped ? 0 : 1
+    scrapCount.value = response.output
+  } catch (error) {
+    console.error(error)
+    alertStore.show('스크랩에 실패했습니다.', 'danger')
+  }
+}
 </script>
 <style scoped>
 .child-skill-list {
@@ -326,5 +373,19 @@ const getSkillIconUrl = (skill) => {
 .detail-list li {
   margin-bottom: 12px; /* 또는 16px */
   line-height: 1.6; /* 줄 간 여유 */
+}
+.custom-scrap-btn {
+  background-color: #ffffff !important;
+  border: 1px solid #dee2e6;
+  color: #333;
+  transition: none;
+}
+
+.custom-scrap-btn:hover,
+.custom-scrap-btn:focus,
+.custom-scrap-btn:active {
+  background-color: #ffffff !important;
+  color: #333;
+  box-shadow: none;
 }
 </style>
