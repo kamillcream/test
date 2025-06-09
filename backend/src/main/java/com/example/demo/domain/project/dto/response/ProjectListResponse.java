@@ -10,8 +10,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ProjectListResponse {
-    private Integer page;
+	private Integer page;
     private Integer size;
-    private int totalCount;
+    private Long totalCount;
+    private Integer totalPages; 
     private List<ProjectSummary> projects;
 }

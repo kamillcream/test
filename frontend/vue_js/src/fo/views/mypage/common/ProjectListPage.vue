@@ -33,7 +33,7 @@
 import ProjectFilterBar from '@/fo/components/common/ProjectFilterBar.vue'
 import ProjectCardGroup from '@/fo/components/project/ProjectCardGroup.vue'
 import CommonPagination from '@/fo/components/common/CommonPagination.vue'
-import { ref, watch, onMounted, computed } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 
 import { api } from '@/axios.js'
 const filters = ref({
@@ -44,17 +44,13 @@ const filters = ref({
   sortBy: '',
   sortOrder: 'desc',
   searchKeyword: '',
-  searchType: '프로젝트명',
+  searchType: '제목',
   size: 5,
+  page: 1,
 })
 
 const currentPage = ref(1)
 const totalPages = ref('')
-const offset = computed(() => {
-  const page = parseInt(currentPage.value) || 1
-  return (page - 1) * filters.value.size
-})
-
 const projects = ref([])
 
 onMounted(async () => {
@@ -62,22 +58,23 @@ onMounted(async () => {
 })
 
 watch(currentPage, (newPage) => {
-  filters.value.offset = newPage
+  filters.value.page = newPage
   fetchProjects()
 })
 
 const fetchProjects = async () => {
   try {
-    const params = { ...filters.value, offset: offset.value }
+    const params = { ...filters.value }
     const response = await api.$get('/projects', { params })
     projects.value = response.output.projects
 
-    const totalCount = response.output.totalCount ?? 0 // totalCount가 반드시 있어야 함
+    const totalCount = response.output.totalCount ?? 0
     totalPages.value = Math.max(1, Math.ceil(totalCount / filters.value.size))
   } catch (e) {
     console.error('프로젝트 정보 불러오기 실패', e)
   }
 }
+
 const updateFilters = (updated) => {
   filters.value = { ...filters.value, ...updated }
   console.log(filters)

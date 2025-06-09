@@ -478,16 +478,10 @@ const loadKakao = () => {
 const loadDefaultFormData = async () => {
   try {
     const response = await api.$get('/projects/forms')
-    cities.value = response.output.cities
-      .sort((a, b) => {
-        if (a.areaName === '전국') return -1
-        if (b.areaName === '전국') return 1
-        return 0
-      })
-      .map((city) => ({
-        code: city.areaSq,
-        name: city.areaName,
-      }))
+    cities.value = response.output.cities.map((city) => ({
+      code: city.areaSq,
+      name: city.areaName,
+    }))
     devGrades.value = response.output.devGrades
     educationLevels.value = response.output.educationLevels
     recruitJobs.value = response.output.recruitJobs
@@ -504,16 +498,10 @@ const loadEditFormData = async (projectSq) => {
       params: { projectSq },
     })
     console.log(output)
-    cities.value = output.cities
-      .sort((a, b) => {
-        if (a.areaName === '전국') return -1
-        if (b.areaName === '전국') return 1
-        return 0
-      })
-      .map((city) => ({
-        code: city.areaSq,
-        name: city.areaName,
-      }))
+    cities.value = output.cities.map((city) => ({
+      code: city.areaSq,
+      name: city.areaName,
+    }))
     devGrades.value = output.devGrades
     educationLevels.value = output.educationLevels
     recruitJobs.value = output.recruitJobs
@@ -692,6 +680,7 @@ const submitProject = async () => {
       await api.$post('/projects', requestBody, config)
       alert('등록 성공')
     }
+    router.push({ name: 'ProjectListPage' })
   } catch (error) {
     console.error('프로젝트 등록 실패: ', error)
   }

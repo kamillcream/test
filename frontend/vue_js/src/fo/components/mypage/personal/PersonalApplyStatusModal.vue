@@ -95,7 +95,7 @@
           <div class="col">
             <ul class="simple-post-list m-0 position-relative">
               <li
-                v-for="applicant in applicants"
+                v-for="applicant in filteredApplicants"
                 :key="applicant.applicationSq"
                 style="border-bottom: 1px rgb(230, 230, 230) solid"
               >
@@ -118,19 +118,29 @@
                       >
                         <span
                           @click.prevent="
-                            updateAppStatus(
-                              '인터뷰요청중',
+                            updateStatus(
                               applicant.applicationSq,
+
+                              '인터뷰요청중',
                             )
                           "
                           class="btn btn-outline btn-primary btn-sm"
                         >
                           인터뷰 요청
                         </span>
+
+                        <span
+                          @click.prevent="
+                            openStatusFailureModal(applicant.applicationSq)
+                          "
+                          class="btn btn-outline btn-primary btn-sm"
+                        >
+                          불합격
+                        </span>
                       </template>
                       <template
                         v-else-if="
-                          applicant.appStatusVo.appStatus === '인터뷰 요청 중'
+                          applicant.appStatusVo.appStatus === '인터뷰요청중'
                         "
                       >
                         <span class="btn btn-primary btn-sm"
@@ -140,11 +150,7 @@
                       <template
                         v-else-if="applicant.appStatusVo.appStatus === '불합격'"
                       >
-                        <span
-                          class="btn btn-primary btn-outline btn-sm"
-                          @click="handleReject(applicant)"
-                          >불합격</span
-                        >
+                        <span class="btn btn-primary btn-sm">불합격</span>
                       </template>
                       <template
                         v-else-if="
@@ -290,12 +296,18 @@
 </template>
 
 <script setup>
-import { ref, defineProps } from 'vue'
+import { ref, defineProps, computed } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
+import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 
 import { api } from '@/axios.js'
 
 const modalStore = useModalStore()
+const props = defineProps({
+  applicants: Array,
+  projectSq: Number,
+  onToggle: Function,
+})
 
 // 필터 상태
 const currentFilter = ref('all')
@@ -305,37 +317,95 @@ const applicantType = ref('personal')
 const currentPage = ref(1)
 const totalPages = ref(3)
 
-// 필터 데이터
-const filters = ref([
-  { type: 'all', label: '전체', count: 15 },
-  { type: 'interview_confirmed', label: '인터뷰 확정', count: 5 },
-  { type: 'interview_requested', label: '인터뷰 요청중', count: 5 },
-  { type: 'rejected', label: '불합격 / 반려 / 취소', count: 5 },
-])
+const localApplicants = ref([...props.applicants])
 
-const props = defineProps({
-  applicants: Array,
-  projectSq: Number,
-  onToggle: Function,
-})
-
-const updateAppStatus = async (status, applicationSq) => {
-  try {
-    await api.$patch(
-      `/projects/applications/${applicationSq}`,
-      { status },
-      { withCredentials: true },
-    )
-    const target = props.applicants.find(
-      (app) => app.applicationSq === applicationSq,
-    )
-    if (target) {
-      target.appStatusVo.appStatus = '인터뷰 요청 중'
-    }
-  } catch (e) {
-    console.error('❌ 지원 상태 변경 실패:', e)
+const updateStatusLocally = (applicationSq, newStatus) => {
+  const target = localApplicants.value.find(
+    (app) => app.applicationSq === applicationSq,
+  )
+  if (target && target.appStatusVo) {
+    target.appStatusVo.appStatus = newStatus
   }
 }
+
+const filteredApplicants = computed(() => {
+  return localApplicants.value.filter((applicant) => {
+    const status = applicant.appStatusVo?.appStatus
+    const keyword = searchText.value.toLowerCase()
+
+    const matchesFilter = (() => {
+      switch (currentFilter.value) {
+        case 'interview_confirmed':
+          return status === '인터뷰 확정'
+        case 'interview_requested':
+          return status === '인터뷰요청중'
+        case 'rejected':
+          return ['불합격', '반려', '지원 취소'].includes(status)
+        default:
+          return true
+      }
+    })()
+
+    const matchesSearch = (() => {
+      if (!keyword) return true
+      switch (searchType.value) {
+        case 'name':
+          return applicant.nameTitleVo?.resumeNm
+            ?.toLowerCase()
+            .includes(keyword)
+        case 'skills':
+          return applicant.skillNames?.some((s) =>
+            s.toLowerCase().includes(keyword),
+          )
+        case 'all':
+        default:
+          return (
+            applicant.nameTitleVo?.resumeNm?.toLowerCase().includes(keyword) ||
+            applicant.skillNames?.some((s) => s.toLowerCase().includes(keyword))
+          )
+      }
+    })()
+
+    return matchesFilter && matchesSearch
+  })
+})
+
+const filterCounts = computed(() => {
+  const counts = {
+    all: localApplicants.value.length,
+    interview_confirmed: 0,
+    interview_requested: 0,
+    rejected: 0,
+  }
+
+  localApplicants.value.forEach((a) => {
+    const status = a.appStatusVo?.appStatus
+    if (status === '인터뷰 확정') counts.interview_confirmed++
+    else if (status === '인터뷰요청중') counts.interview_requested++
+    else if (['불합격', '반려', '지원 취소'].includes(status)) counts.rejected++
+  })
+
+  return counts
+})
+
+const filters = computed(() => [
+  { type: 'all', label: '전체', count: filterCounts.value.all },
+  {
+    type: 'interview_confirmed',
+    label: '인터뷰 확정',
+    count: filterCounts.value.interview_confirmed,
+  },
+  {
+    type: 'interview_requested',
+    label: '인터뷰요청중',
+    count: filterCounts.value.interview_requested,
+  },
+  {
+    type: 'rejected',
+    label: '불합격 / 반려 / 취소',
+    count: filterCounts.value.rejected,
+  },
+])
 
 const toggleToCorporate = () => {
   props.onToggle?.()
@@ -360,12 +430,6 @@ const changePage = (page) => {
   // TODO: 페이지 데이터 로드
 }
 
-// 불합격 처리
-const handleReject = (applicant) => {
-  // TODO: 불합격 처리 로직 구현
-  console.log('불합격 처리:', applicant)
-}
-
 // 모달 닫기
 const closeModal = () => {
   modalStore.closeModal()
@@ -380,6 +444,50 @@ function formatDate(dateString) {
   const hours = String(date.getHours()).padStart(2, '0')
   const minutes = String(date.getMinutes()).padStart(2, '0')
   return `${year}-${month}-${day} ${hours}:${minutes}`
+}
+
+function getAccessTokenFromCookie() {
+  const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]*)/)
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+const updateStatus = async (applicationSq, status) => {
+  try {
+    const token = getAccessTokenFromCookie()
+    const response = await api.$patch(
+      `/projects/applications/${applicationSq}`,
+      { status },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      },
+    )
+    console.log(`✅ ${applicationSq} 지원 상태 변경 성공`, response)
+
+    updateStatusLocally(applicationSq, status)
+  } catch (e) {
+    console.error('❌ 지원 상태 변경 실패', e)
+  }
+}
+
+const openStatusFailureModal = (applicationSq) => {
+  console.log(localApplicants.value)
+  modalStore.openModal(CommonConfirmModal, {
+    message: '해당 지원자를 불합격 처리하겠습니까?',
+    onConfirm: async () => {
+      try {
+        await updateStatus(applicationSq, '불합격')
+
+        console.log(localApplicants.value)
+        modalStore.closeModal()
+      } catch (error) {
+        console.error('상태 변경 실패:', error)
+        alert('상태 변경 중 오류가 발생했습니다.')
+      }
+    },
+  })
 }
 
 const generateIconUrl = (name) => {

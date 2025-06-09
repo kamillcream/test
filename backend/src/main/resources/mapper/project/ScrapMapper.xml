@@ -7,10 +7,17 @@
 
 	
 	<select id="findScrapSqByUserSq" parameterType="Long" resultType="Long">
+	    SELECT scrap_sq
+	    FROM TBL_SCRAP_S
+	    WHERE user_sq = #{userSq}
+	</select>
+	
+	<select id="findScrapSqByUserSqAndProjectSq" resultType="Long">
     SELECT scrap_sq
     FROM TBL_SCRAP_S
-    WHERE user_sq = #{userSq}
+    WHERE user_sq = #{userSq} and project_sq = #{projectSq}
 	</select>
+	
 	
 	<delete id="deleteScrapByUserSq" parameterType="Long">
     DELETE

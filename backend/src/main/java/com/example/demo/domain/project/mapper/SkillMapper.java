@@ -10,6 +10,10 @@ import com.example.demo.domain.project.dto.request.SkillInsertRequest;
 
 @Mapper
 public interface SkillMapper {
+	
+	List<String> findAllReqSkills();
+	
+	
 	List<String> findAllReqSkillsByProjectSq(@Param("projectSq") Long projectSq);
 	List<String> findAllPreferSkillsByProjectSq(@Param("projectSq") Long projectSq);
 	SkillInsertRequest findSkillTagInfoByName(@Param("name") String name);

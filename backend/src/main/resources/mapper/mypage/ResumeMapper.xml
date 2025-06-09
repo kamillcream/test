@@ -4,6 +4,64 @@
 
 <mapper namespace="com.example.demo.domain.mypage.mapper.ResumeMapper">
 
+  
+  <select id="findResumeVoByUserSq" resultType="com.example.demo.domain.mypage.vo.ResumeVo">
+    SELECT
+      RESUME_SQ AS resumeSq,
+      RESUME_TTL as resumeTitle
+    FROM TBL_RESUME_M
+    WHERE USER_SQ = #{userSq}
+  </select>
+  
+   <select id="findResumeNmTtlBySq" resultType="com.example.demo.domain.project.vo.ResumeNmTtlVo">
+    SELECT
+      RESUME_NM AS resumeNM,
+      RESUME_TTL as resumeTtl
+    FROM TBL_RESUME_M
+    WHERE RESUME_SQ = #{resumeSq}
+  </select>
+  
+  <select id="findRepResumeNmTtlByUserSq" resultType="com.example.demo.domain.project.vo.ResumeNmTtlVo">
+    SELECT
+      RESUME_NM AS resumeNM,
+      RESUME_TTL as resumeTtl
+    FROM TBL_RESUME_M
+    WHERE USER_SQ = #{userSq} AND resume_is_representative_yn = 'Y'
+  </select>
+  
+ 
+  
+  <select id="findResumesByUserSq" resultType="Long">
+    SELECT
+      RESUME_SQ
+    FROM TBL_RESUME_M
+    WHERE USER_SQ = #{userSq}
+  </select>
+  
+  <select id="findRepResumeByUserSq" resultType="Long">
+    SELECT
+      RESUME_SQ
+    FROM TBL_RESUME_M
+    WHERE USER_SQ = #{userSq} AND resume_is_representative_yn = 'Y'
+  </select>
+  
+  <select id="findLatestResumeSqByUserSq" resultType="Long">
+	  SELECT resume_sq
+	  FROM TBL_RESUME_M
+	  WHERE user_sq = #{userSq}
+	  ORDER BY resume_created_at_dtm DESC
+	  LIMIT 1
+  </select>
+  
+   <select id= "findLatestResumeBySq" resultType="com.example.demo.domain.project.vo.ResumeNmTtlVo">
+    SELECT
+      RESUME_NM AS resumeNM,
+      null as resumeTtl
+    FROM TBL_RESUME_M
+    WHERE RESUME_SQ = #{resumeSq}
+  </select>
+  
+  
   <!-- 이력서 등록. -->
 	<insert id="insertResume"
 	        parameterType="com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest"
@@ -39,6 +97,7 @@
 	        NOW()
 	    )
 	</insert>
+
 
 
   <!-- 이력서 전체 조회 (userSq 기준) -->

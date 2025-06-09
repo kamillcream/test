@@ -13,6 +13,14 @@ import java.util.Map;
 @Mapper
 public interface ResumeMapper {
 	void insertResume(ResumeRegisterRequest request);
+	
+	public ResumeNmTtlVo findLatestResumeBySq(Long resumeSq);
+	public ResumeNmTtlVo findRepResumeNmTtlByUserSq(Long userSq);
+	
+	public List<Long> findResumesByUserSq(Long userSq);
+	public Long findRepResumeByUserSq(Long userSq);
+	public Long findLatestResumeSqByUserSq(Long userSq);
+
 	ResumeRegisterRequest selectResumeById(@Param("resumeSq") Long resumeSq);
 	Long selectAreaCodeBySigunguAndParent(Map<String, Object> params);
 

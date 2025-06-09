@@ -45,6 +45,19 @@
 	    WHERE project_application_sq = #{appSq}
 	</select>
 	
+	<select id="findByProAndUser" resultType="Long">
+	    SELECT pa.project_application_sq
+	    FROM TBL_PROJECT_APPLICATION_H pa
+	    JOIN TBL_RESUME_M m on pa.resume_sq = m.resume_sq 
+	    WHERE pa.project_sq = #{projectSq} AND m.user_sq = #{userSq}
+	</select>
+	
+	<select id="findByProAndCom" resultType="Long">
+	    SELECT project_application_sq
+	    FROM TBL_PROJECT_APPLICATION_H
+	    WHERE project_sq = #{projectSq} and company_sq = #{companySq}
+	</select>
+	
 	<select id="findResumeBySq" resultType="Long">
 	    SELECT resume_sq
 	    FROM TBL_PROJECT_APPLICATION_H
@@ -82,9 +95,9 @@
 	        WHEN 801 THEN '지원중'
 	        WHEN 802 THEN '불합격'
 	        WHEN 803 THEN '합격'
-	        WHEN 804 THEN '인터뷰 요청 중'
-	        WHEN 805 THEN '인터뷰 확정'
-	        WHEN 806 THEN '지원 취소'
+	        WHEN 804 THEN '인터뷰요청중'
+	        WHEN 805 THEN '인터뷰확정'
+	        WHEN 806 THEN '지원취소'
 	        ELSE 'UNKNOWN'
 	      END AS appStatus
 	    FROM TBL_PROJECT_APPLICATION_H
