@@ -144,13 +144,13 @@ const routes = [
   },
 
   {
-    path: '/myPage',
+    path: '/mypage',
     component: MyPageLayout,
     children: [
       // 기본 화면 설정
       {
         path: '', // 여기! 기본 자식 경로
-        name: 'MyPageDefault',
+        name: 'MypageDefault',
         component: InformationEditPage,
       },
       //common
@@ -182,8 +182,13 @@ const routes = [
         component: ResumeListPage,
       },
       {
-        path: 'resumeForm',
-        name: 'ResumeForm',
+        path: 'resumeform', //등록하기
+        name: 'ResumeFormNew',
+        component: ResumeFormPage,
+      },
+      {
+        path: 'resumeform/:resumeSq', //수정하기
+        name: 'ResumeFormEdit',
         component: ResumeFormPage,
       },
       {
