@@ -43,8 +43,6 @@ public class SecurityConfigDev {
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/refresh-token").permitAll() // ✅ 토큰 재발급은 인증 없이 허용
-                        .requestMatchers("/email/send-code").permitAll() // ✅ 토큰 재발급은 인증 없이 허용
                         .requestMatchers("/me").authenticated() // ✅ 사용자 정보는 인증 필요
                         .anyRequest().permitAll() // 그 외는 자유 접근 (필요시 조정)
                 )

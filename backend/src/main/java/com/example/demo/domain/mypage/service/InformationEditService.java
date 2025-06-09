@@ -141,14 +141,8 @@ public class InformationEditService {
         UserInfoDTO userInfo = informationEditRepository.getUserInfo(userSq);
         AddressDTO addressInfo = informationEditRepository.getAddressInfo(companyInfo.getAddressSq());
         List<String> tagList = informationEditRepository.getCompanyTags(companyInfo.getCompanySq());
-
         Long fileSq = informationEditRepository.findFileSqByCompanySq(companyInfo.getCompanySq());
-        if (fileSq == null)
-            return null;
-
         UploadedFileDTO file = informationEditRepository.findByFileSq(fileSq);
-        if (file == null)
-            return null;
 
         String imageUrl = (file != null) ? amazonS3.getUrl(bucket, file.getSavedName()).toString() : null;
 
