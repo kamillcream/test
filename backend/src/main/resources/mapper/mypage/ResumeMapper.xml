@@ -118,8 +118,9 @@
   </select>
 
   <!-- 이력서 상세 조회 -->
-	<select id="selectResumeById" resultMap="ResumeDetailMap" parameterType="long">
-	  SELECT
+	<select id="selectResumeById" parameterType="long"
+          resultType="com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest">
+        SELECT
 	    r.resume_sq AS resumeSq,
 	    r.user_sq AS userSq,
 	    r.address_sq AS addressSq,
