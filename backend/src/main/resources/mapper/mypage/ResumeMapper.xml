@@ -4,6 +4,18 @@
 
 <mapper namespace="com.example.demo.domain.mypage.mapper.ResumeMapper">
 
+  <!-- resultMap 정의 (여기에 추가) -->
+  <resultMap id="ResumeDetailMap" type="com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest">
+    <id property="resumeSq" column="resumeSq"/>
+    <result property="userSq" column="userSq"/>
+    <!-- ... 단일 필드 ... -->
+    <collection property="education"
+                ofType="com.example.demo.domain.mypage.dto.request.ResumeEducationRequest"
+                select="selectEducationByResumeSq"
+                column="resumeSq"/>
+    <!-- ... 나머지 collection ... -->
+  </resultMap>
+
   <!-- 이력서 등록. -->
 	<insert id="insertResume"
 	        parameterType="com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest"
@@ -60,21 +72,35 @@
   </select>
 
   <!-- 이력서 상세 조회 -->
-  <select id="selectResumeById" parameterType="long"
-          resultType="com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest">
-    SELECT
-      resume_sq AS resumeSq,
-      resume_ttl AS resumeTtl,
-      resume_nm AS resumeNm,
-      resume_email AS resumeEmail,
-      resume_greeting_txt AS resumeGreetingTxt,
-      resume_is_representative_yn AS resumeIsRepresentativeYn,
-      resume_created_at_dtm AS resumeCreatedAtDtm
-    FROM TBL_RESUME_M
-    WHERE user_sq = #{userSq}
-    ORDER BY resume_sq DESC
-  </select>
+	<select id="selectResumeById" resultMap="ResumeDetailMap" parameterType="long">
+	  SELECT
+	    r.resume_sq AS resumeSq,
+	    r.user_sq AS userSq,
+	    r.address_sq AS addressSq,
+	    r.resume_ttl AS resumeTtl,
+	    r.resume_photo_url AS resumePhotoUrl,
+	    r.resume_nm AS resumeNm,
+	    r.resume_birth_dt AS resumeBirthDt,
+	    r.resume_phone_num AS resumePhoneNum,
+	    r.resume_email AS resumeEmail,
+	    r.resume_greeting_txt AS resumeGreetingTxt,
+	    r.resume_is_representative_yn AS resumeIsRepresentativeYn,
+	    r.resume_is_notification_yn AS resumeIsNotificationYn,
+	    r.resume_created_at_dtm AS resumeCreatedAtDtm,
+	    a.zonecode AS zonecode,
+	    a.address AS address,
+	    a.detail_address AS detailAddress,
+	    a.sigungu AS sigungu,
+	    a.latitude AS latitude,
+	    a.longitude AS longitude
+	  FROM TBL_RESUME_M r
+	  LEFT JOIN TBL_ADDRESS_S a ON r.address_sq = a.address_sq
+	  WHERE r.resume_sq = #{resumeSq}
+	</select>
 
+  <select id="selectEducationByResumeSq" parameterType="long" resultType="com.example.demo.domain.mypage.dto.request.ResumeEducationRequest">
+    SELECT * FROM TBL_RESUME_EDUCATION_S WHERE resume_sq = #{resumeSq}
+  </select>
 
   <!--대표이력서 설정-->
   <update id="updateAllRepresentativeN">

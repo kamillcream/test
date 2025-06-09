@@ -141,6 +141,7 @@
                     style="border: none"
                     placeholder="010-xxxx-xxxx"
                     required
+                    @input="formatPhoneNumber"
                   />
                 </div>
 
@@ -607,24 +608,56 @@ import TrainingModal from '@/fo/components/mypage/personal/TrainingModal.vue'
 import ShowProjectFormModal from '@/fo/components/mypage/personal/ShowProjectFormModal.vue'
 import LicenseModal from '@/fo/components/mypage/personal/LicenseModal.vue'
 import AddressSearchModal from '@/fo/components/mypage/personal/AddressSearchModal.vue'
-import axios from 'axios'
+
+// import axios from 'axios'
 import { useRoute } from 'vue-router'
 import SkillTagModal from '@/fo/components/community/SkillTagModal.vue'
 import { api } from '@/axios'
+import router from '@/fo/router'
 
 const modalStore = useModalStore()
 const route = useRoute()
 const resumeSq = route.params.resumeSq
 const skillList = ref([])
+console.log('resumeSq:', resumeSq) // 값이 잘 들어오는지 확인
+
+// 이력서 데이터
+const resumeData = reactive({
+  addressSq: '',
+  resumeTtl: '',
+  resumeNm: '',
+  resumeBirthDt: '',
+  resumePhoneNum: '',
+  resumeEmail: '',
+  emailId: '',
+  emailDomain: '',
+  customDomain: '',
+  address: '',
+  detailAddress: '',
+  zonecode: '',
+  sido: '',
+  sigungu: '',
+  latitude: '',
+  longitude: '',
+  education: [],
+  career: [],
+  trainingHistories: [],
+  projects: [],
+  certificates: [],
+  skills: [],
+  resumeGreetingTxt: '',
+  resumeIsNotificationYn: false,
+  attachments: [],
+})
 
 //주소 모달창
 const openAddressSearchModal = () => {
   modalStore.openModal(AddressSearchModal, {
     onComplete: (data) => {
-      if (!data.sido || !data.sigungu) {
-        alert('주소 선택에 실패했습니다. 다시 시도해주세요.')
-        return
-      }
+      // if (!data.sido || !data.sigungu) {
+      //   alert('주소 선택에 실패했습니다. 다시 시도해주세요.')
+      //   return
+      //}
       Object.assign(resumeData, data)
     },
   })
@@ -644,31 +677,6 @@ const emailDomains = ['naver.com', 'gmail.com', 'daum.net', 'hanmail.net']
 
 // 사진 미리보기
 const photoPreview = ref(null)
-
-// 이력서 데이터
-const resumeData = reactive({
-  resumeTtl: '',
-  resumeNm: '',
-  resumeBirthDt: '',
-  resumePhoneNum: '',
-  resumeEmail: '',
-  emailDomain: '',
-  customDomain: '',
-  address: '',
-  addressDetail: '',
-  postcode: '',
-  sigungu: '',
-  latitude: '',
-  longitude: '',
-  education: [],
-  career: [],
-  trainingHistories: [],
-  projects: [],
-  certificates: [],
-  skills: [],
-  resumeGreetingTxt: '',
-  resumeIsNotificationYn: false,
-})
 
 // 사진 업로드 처리
 const handlePhotoUpload = (event) => {
@@ -692,6 +700,21 @@ const handleFileUpload = (event) => {
   const file = event.target.files[0]
   // 파일 처리 로직 구현
   console.log(file)
+}
+
+const formatPhoneNumber = (event) => {
+  //1. 숫자만, 숫자 제한
+  let value = event.target.value.replace(/[^0-9]/g, '')
+  value = value.slice(0, 11)
+
+  //2.하이픈 자동 삽입
+  if (value.length >= 4 && value.length < 8) {
+    value = value.replace(/(\d{3})(\d{1,4})/, '$1-$2')
+  } else if (value.length >= 8) {
+    value = value.replace(/(\d{3})(\d{4})(\d{1,4})/, '$1-$2-$3')
+  }
+  // 3. v-model 값 갱신
+  resumeData.resumePhoneNum = value
 }
 
 // 폼 표시 관련 메서드
@@ -810,19 +833,57 @@ watch(
 onMounted(async () => {
   // 기술 목록 가져오기
   try {
-    const res = await axios.get('/api/mypage/resume/skills')
+    const res = await api.$get('/mypage/resume/skills')
     skillList.value = res.data.data || res.data.output || res.data
   } catch (e) {
     console.error('[ 기술 목록 조회 실패 ]', e)
   }
-
+  //이력서 상세정보 불러오기(수정모드)
   if (resumeSq) {
     try {
-      const res = await axios.get(`/api/mypage/resume/detail/${resumeSq}`)
-      Object.assign(resumeData, res.data)
-      console.log('[기존 이력서 불러오기 완료]', res.data)
+      const res = await api.$get(`/mypage/resume/detail/${resumeSq}`)
+      const data = res.data?.output
+      console.log('이력서 상세 응답:', data)
+
+      // 1. 각 필드를 직접 할당 (반응형 보장)
+      if (data) {
+        resumeData.addressSq = data.addressSq ?? ''
+        resumeData.resumeTtl = data.resumeTtl ?? ''
+        resumeData.resumeNm = data.resumeNm ?? ''
+        resumeData.resumeBirthDt = data.resumeBirthDt ?? ''
+        resumeData.resumePhoneNum = data.resumePhoneNum ?? ''
+        resumeData.resumeEmail = data.resumeEmail ?? ''
+        resumeData.address = data.address ?? ''
+        resumeData.detailAddress = data.detailAddress ?? ''
+        resumeData.zonecode = data.zonecode ?? ''
+        resumeData.sigungu = data.sigungu ?? ''
+        resumeData.latitude = data.latitude ?? ''
+        resumeData.longitude = data.longitude ?? ''
+        resumeData.resumeGreetingTxt = data.resumeGreetingTxt ?? ''
+        resumeData.resumeIsNotificationYn = data.resumeIsNotificationYn === 'Y'
+        resumeData.education = data.education || []
+        resumeData.career = data.career || []
+        resumeData.trainingHistories = data.trainingHistories || []
+        resumeData.projects = data.projects || []
+        resumeData.certificates = data.certificates || []
+        resumeData.skills = data.skills || []
+        resumeData.attachments = data.attachments || []
+        // 이메일 분리
+        if (data.resumeEmail) {
+          const [id, domain] = data.resumeEmail.split('@')
+          resumeData.emailId = id
+          if (emailDomains.includes(domain)) {
+            resumeData.emailDomain = domain
+            resumeData.customDomain = ''
+          } else {
+            resumeData.emailDomain = 'custom'
+            resumeData.customDomain = domain
+          }
+        }
+      }
+      console.log('폼에 할당된 resumeData:', resumeData)
     } catch (e) {
-      console.error('[ 이력서 데이터 조회 실패]', e)
+      console.log('이력서 상세 불러오기 실패:', e)
     }
   }
 })
@@ -844,15 +905,16 @@ const submitResume = async () => {
 
   // 3. 전송용 객체 생성
   const payload = {
-    userSq: 18,
+    addressSq: resumeData.addressSq,
     resumeTtl: resumeData.resumeTtl,
     resumeNm: resumeData.resumeNm,
     resumeBirthDt: resumeData.resumeBirthDt,
     resumePhoneNum: resumeData.resumePhoneNum,
     resumeEmail: email,
     address: resumeData.address,
-    detailAddress: resumeData.addressDetail,
+    detailAddress: resumeData.detailAddress,
     zonecode: resumeData.zonecode,
+    sido: resumeData.sido,
     sigungu: resumeData.sigungu,
     latitude: resumeData.latitude,
     longitude: resumeData.longitude,
@@ -871,11 +933,15 @@ const submitResume = async () => {
 
   try {
     if (resumeSq) {
-      await api.$put(`/mypage/resume/update/${resumeSq}`, payload)
+      await api.$put(`/mypage/resume/update/${resumeSq}`, payload, {
+        withCredentials: true,
+      })
       alert('수정 완료!')
+      router.push(`/mypage/resumelist`) // 리스트 페이지로 이동
     } else {
-      await api.$post('/mypage/resume/new', payload)
+      await api.$post('/mypage/resume/new', payload, { withCredentials: true })
       alert('등록 완료!')
+      router.push('/mypage/resumelist') // 리스트 페이지로 이동
     }
   } catch (e) {
     console.error('[ 이력서 등록/수정 실패 ]', e)
