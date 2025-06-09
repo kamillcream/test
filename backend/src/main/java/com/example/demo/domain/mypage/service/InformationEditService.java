@@ -2,6 +2,7 @@ package com.example.demo.domain.mypage.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -200,8 +201,11 @@ public class InformationEditService {
     // 프로필 이미지
 
     private final AmazonS3 amazonS3;
-    private final String bucket = "freelancer-service";
+
     private final AmazonS3Service amazonS3Service;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     public String getProfileImageUrl(Long userSq) {
         Long fileSq = informationEditRepository.findFileSqByUserSq(userSq);

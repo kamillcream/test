@@ -1,7 +1,7 @@
 <template>
   <div class="modal-content">
     <div class="modal-header">
-      <h4 class="modal-title">이력서 상세</h4>
+      <h4 class="modal-title">{{ title }}</h4>
       <button
         type="button"
         class="btn-close"
@@ -204,7 +204,7 @@
 
                   <div class="row mb-2">
                     <div class="col-sm-12">
-                      <strong style="margin-right: 8px;">TOOL:</strong>
+                      <strong style="margin-right: 8px">TOOL:</strong>
                       <button
                         v-for="tool in project.tools"
                         :key="tool"
@@ -217,7 +217,7 @@
 
                   <div class="row mb-2">
                     <div class="col-sm-12">
-                      <strong style="margin-right: 8px;">FW:</strong>
+                      <strong style="margin-right: 8px">FW:</strong>
                       <button
                         v-for="fw in project.frameworks"
                         :key="fw"
@@ -237,7 +237,7 @@
 
                   <div class="row mb-3">
                     <div class="col-sm-12">
-                      <strong style="margin-right: 8px;">기타:</strong>
+                      <strong style="margin-right: 8px">기타:</strong>
                       <button
                         v-for="etc in project.etc"
                         :key="etc"

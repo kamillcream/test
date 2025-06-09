@@ -30,7 +30,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/reset-password/verify",
             "/api/signup",
             "/api/check-id",
-            "/api/company/verify"
+            "/api/company/verify",
+            "/api/mypage/resume/" // 이력서 연동 이후 지워야함 (인증 필요한 페이지)
 
     // 여기에 더 추가 가능
     );
