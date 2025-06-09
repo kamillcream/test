@@ -704,6 +704,8 @@ const validateVerifycode = () => {
   verifycodeError.value = ''
   if (!form.verificationCode) {
     verifycodeError.value = '인증번호를 입력하세요.'
+  } else if (!verifyCodeValid.value) {
+    verifycodeError.value = '인증을 진행해주세요.'
   }
   // 인증번호 유효성 여부는 서버 검증 결과에 따라 판단 → 여기서는 설정하지 않음
 }
