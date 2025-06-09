@@ -312,7 +312,7 @@ const socialProviders = [
 ]
 
 const handleSocialLogin = (provider) => {
-  alert(`${provider} 로그인은 준비 중입니다.`)
+  alertStore.show(`${provider} 로그인은 준비 중입니다.`, 'danger')
 }
 </script>
 

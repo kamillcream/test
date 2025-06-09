@@ -2,7 +2,7 @@ package com.example.demo.domain.user.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +28,7 @@ public class FindController {
 
     private final UserService userService;
     private final JwtProvider jwtProvider;
+    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/find-id")
     public ApiResponse<FindIdResponseDTO> findUserId(@RequestBody FindIdRequestDTO request) {
@@ -86,7 +87,7 @@ public class FindController {
 
         String currentPassword = userService.findCurrentPassword(userSq);
 
-        if (currentPassword != null && currentPassword.equals(dto.getNewPassword())) {
+        if (currentPassword != null && passwordEncoder.matches(dto.getNewPassword(), currentPassword)) {
             return ApiResponse.error(HttpStatus.BAD_REQUEST, "기존 비밀번호와 일치합니다.");
         }
 

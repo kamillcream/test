@@ -1,6 +1,7 @@
 package com.example.demo.domain.user.util;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -18,19 +19,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
 
+    private static final List<String> EXCLUDE_URLS = List.of(
+            "/api/login",
+            "/api/refresh-token",
+            "/api/email/send-code",
+            "/api/email/find/send-code",
+            "/api/email/verify-code",
+            "/api/find-id",
+            "/api/reset-password",
+            "/api/reset-password/verify",
+            "/api/signup",
+            "/api/check-id",
+            "/api/company/verify"
+
+    // 여기에 더 추가 가능
+    );
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
         String uri = request.getRequestURI();
 
-        if (uri.startsWith("/api/login") || uri.startsWith("/api/refresh-token")) {
+        // 인증 제외 경로 처리
+        if (EXCLUDE_URLS.stream().anyMatch(uri::startsWith)) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = resolveToken(request);
-
         if (token == null || !jwtProvider.validateToken(token)) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
             return;
@@ -44,7 +61,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (Exception e) {
-            System.out.println("JWT validation failed: " + e.getMessage());
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
             return;
         }
