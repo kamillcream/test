@@ -1,7 +1,7 @@
 <template>
   <div class="modal-content">
     <div class="modal-header">
-      <h4 class="modal-title">이력서 상세</h4>
+      <h4 class="modal-title">{{ resumeInfo.title }}</h4>
       <button
         type="button"
         class="btn-close"
@@ -24,7 +24,7 @@
               <h5 class="mb-1 text-primary" style="font-weight: bold">
                 이력서 제목
               </h5>
-              <p class="mb-0 text-dark">{{ resumeInfo.title }}</p>
+              <p class="mb-0 text-dark">{{ resumeInfo.resumeTtl }}</p>
             </div>
 
             <!-- 사진 -->
@@ -42,7 +42,7 @@
                 "
               >
                 <img
-                  :src="resumeInfo.photo || 'img/placeholders/user.png'"
+                  :src="resumeInfo.resumePhotoUrl || null"
                   alt="사진"
                   class="img-fluid rounded"
                   style="max-height: 100%; object-fit: cover"
@@ -54,23 +54,25 @@
             <div class="col-lg-9">
               <p>
                 <strong class="text-primary">이름 :</strong>
-                <span class="text-dark">{{ resumeInfo.name }}</span>
+                <span class="text-dark"> {{ resumeInfo.resumeNm }}</span>
               </p>
               <p>
                 <strong class="text-primary">생년월일 :</strong>
-                <span class="text-dark">{{ resumeInfo.birthDate }}</span>
+                <span class="text-dark"> {{ resumeInfo.resumeBirthDt }}</span>
               </p>
               <p>
                 <strong class="text-primary">전화번호 :</strong>
-                <span class="text-dark">{{ resumeInfo.phone }}</span>
+                <span class="text-dark"> {{ resumeInfo.resumePhoneNum }}</span>
               </p>
               <p>
                 <strong class="text-primary">이메일 :</strong>
-                <span class="text-dark">{{ resumeInfo.email }}</span>
+                <span class="text-dark"> {{ resumeInfo.resumeEmail }}</span>
               </p>
               <p>
                 <strong class="text-primary">주소 :</strong>
-                <span class="text-dark">{{ resumeInfo.address }}</span>
+                <span class="text-dark">
+                  {{ resumeInfo.address.addressFull }}</span
+                >
               </p>
             </div>
           </div>
@@ -80,29 +82,39 @@
           <!-- 학력 -->
           <h5 class="text-primary">학력</h5>
           <ul class="list-unstyled">
-            <li v-for="(education, index) in resumeInfo.education" :key="index">
-              {{ education.school }} {{ education.major }} ({{
-                education.period
-              }})
+            <li
+              v-for="(education, index) in resumeInfo.educationList"
+              :key="index"
+            >
+              {{ education.educationSchoolNm }}
+              {{ education.educationMajorNm }}
+              {{ education.educationStatusNm }} ({{
+                education.educationAdmissionDt
+              }}
+              ~ {{ education.educationGraduationDt }})
             </li>
           </ul>
 
           <!-- 경력 -->
           <h5 class="text-primary">회사 이력</h5>
           <ul class="list-unstyled">
-            <li v-for="(career, index) in resumeInfo.career" :key="index">
-              {{ career.company }} {{ career.department }} -
-              {{ career.position }} ({{ career.period }})
+            <li v-for="(career, index) in resumeInfo.careerList" :key="index">
+              {{ career.careerCompanyNm }} {{ career.careerDepartmentNm }} -
+              {{ career.careerPositionNm }} ({{ career.careerStartDt }} ~
+              {{ career.careerEndDt }})
             </li>
           </ul>
 
           <!-- 교육 이력 -->
           <h5 class="text-primary">교육 이력</h5>
           <ul class="list-unstyled">
-            <li v-for="(training, index) in resumeInfo.training" :key="index">
-              {{ training.name }} - {{ training.institution }} ({{
-                training.period
-              }})
+            <li
+              v-for="(training, index) in resumeInfo.trainingList"
+              :key="index"
+            >
+              {{ training.trainingInstitutionNm }} -
+              {{ training.trainingProgramNm }} ({{ training.trainingStartDt }} ~
+              {{ training.trainingEndDt }})
             </li>
           </ul>
 
@@ -131,7 +143,7 @@
 
           <ul class="list-unstyled">
             <li
-              v-for="(project, index) in resumeInfo.projects"
+              v-for="(project, index) in resumeInfo.projectList"
               :key="index"
               class="d-flex flex-wrap align-items-center gap-2"
             >
@@ -152,106 +164,144 @@
                       { 'rotate-90': project.isExpanded },
                     ]"
                   ></i>
-                  <span>{{ project.name }} ({{ project.period }})</span>
+                  <span
+                    >{{ project.projectHistoryClient }}
+                    {{ project.projectHistoryTask }} ({{
+                      project.projectHistoryStartDt
+                    }}
+                    ~ {{ project.projectHistoryEndDt }})</span
+                  >
                 </div>
               </div>
 
-              <div v-show="project.isExpanded" class="collapse show mb-3">
+              <div v-show="project.isExpanded" class="collapse show mb-3 w-100">
                 <div class="bg-light rounded p-3 border">
                   <div class="row mb-2">
                     <div class="col-sm-4">
-                      <strong>고객사:</strong> {{ project.client }}
+                      <strong>고객사:</strong>
+                      {{ project.projectHistoryClient }}
                     </div>
                     <div class="col-sm-4">
-                      <strong>업무단:</strong> {{ project.workType }}
+                      <strong>업무단:</strong>
+                      {{ project.projectHistoryJobPositionTypeNm }}
                     </div>
                     <div class="col-sm-4">
-                      <strong>역할:</strong> {{ project.role }}
+                      <strong>역할:</strong> {{ project.projectHistoryTypeNm }}
                     </div>
                   </div>
-
                   <div class="row mb-2">
                     <div class="col-sm-4">
-                      <strong>기종:</strong> {{ project.platform }}
+                      <strong style="margin-right: 8px">기종:</strong>
+                      <button
+                        v-for="device in getTagsByCategory(project, 'Device')"
+                        :key="device"
+                        class="btn btn-rounded btn-3d btn-light btn-sm me-2"
+                      >
+                        <img
+                          v-if="generateIconUrl(device)"
+                          :src="generateIconUrl(device)"
+                          width="16"
+                          height="16"
+                        />
+                        {{ device }}
+                      </button>
                     </div>
-                    <div class="col-sm-4">
-                      <strong>OS:</strong> {{ project.os }}
-                    </div>
-                    <div class="col-sm-4">
-                      <strong>DBMS:</strong> {{ project.dbms }}
+                    <div class="col-sm-8">
+                      <strong style="margin-right: 8px">OS:</strong>
+                      <button
+                        v-for="os in getTagsByCategory(project, 'OS')"
+                        :key="os"
+                        class="btn btn-rounded btn-3d btn-light btn-sm me-2"
+                      >
+                        <img
+                          v-if="generateIconUrl(os)"
+                          :src="generateIconUrl(os)"
+                          width="16"
+                          height="16"
+                        />
+                        {{ os }}
+                      </button>
                     </div>
                   </div>
-
                   <div class="row mb-2">
                     <div class="col-sm-12">
-                      <strong>언어:</strong>
+                      <strong style="margin-right: 8px">DBMS:</strong>
                       <button
-                        v-for="lang in project.languages"
+                        v-for="dbms in getTagsByCategory(project, 'DBMS')"
+                        :key="dbms"
+                        class="btn btn-rounded btn-3d btn-light btn-sm me-2"
+                      >
+                        <img
+                          v-if="generateIconUrl(dbms)"
+                          :src="generateIconUrl(dbms)"
+                          width="16"
+                          height="16"
+                        />
+                        {{ dbms }}
+                      </button>
+                    </div>
+                  </div>
+                  <div class="row mb-2">
+                    <div class="col-sm-12">
+                      <strong style="margin-right: 8px">언어:</strong>
+                      <button
+                        v-for="lang in getTagsByCategory(project, 'Language')"
                         :key="lang"
                         class="btn btn-rounded btn-3d btn-light btn-sm me-2"
                       >
                         <img
-                          v-if="lang.icon"
-                          :src="lang.icon"
-                          :alt="lang.name"
+                          v-if="generateIconUrl(lang)"
+                          :src="generateIconUrl(lang)"
                           width="16"
                           height="16"
                         />
-                        {{ lang.name }}
+                        {{ lang }}
                       </button>
                     </div>
                   </div>
-
                   <div class="row mb-2">
                     <div class="col-sm-12">
                       <strong style="margin-right: 8px">TOOL:</strong>
                       <button
-                        v-for="tool in project.tools"
+                        v-for="tool in getTagsByCategory(project, 'Tool')"
                         :key="tool"
                         class="btn btn-rounded btn-3d btn-light btn-sm me-2"
                       >
+                        <img
+                          v-if="generateIconUrl(tool)"
+                          :src="generateIconUrl(tool)"
+                          width="16"
+                          height="16"
+                        />
                         {{ tool }}
                       </button>
                     </div>
                   </div>
-
                   <div class="row mb-2">
                     <div class="col-sm-12">
                       <strong style="margin-right: 8px">FW:</strong>
                       <button
-                        v-for="fw in project.frameworks"
-                        :key="fw"
+                        v-for="framework in getTagsByCategory(
+                          project,
+                          'FrameWork',
+                        )"
+                        :key="framework"
                         class="btn btn-rounded btn-3d btn-light btn-sm me-2"
                       >
                         <img
-                          v-if="fw.icon"
-                          :src="fw.icon"
-                          :alt="fw.name"
+                          v-if="generateIconUrl(framework)"
+                          :src="generateIconUrl(framework)"
                           width="16"
                           height="16"
                         />
-                        {{ fw.name }}
+                        {{ framework }}
                       </button>
                     </div>
                   </div>
-
                   <div class="row mb-3">
                     <div class="col-sm-12">
                       <strong style="margin-right: 8px">기타:</strong>
-                      <button
-                        v-for="etc in project.etc"
-                        :key="etc"
-                        class="btn btn-rounded btn-3d btn-light btn-sm me-2"
-                      >
-                        <img
-                          v-if="etc.icon"
-                          :src="etc.icon"
-                          :alt="etc"
-                          width="16"
-                          height="16"
-                        />
-                        {{ etc }}
-                      </button>
+                      <!-- 추후 예정 -->
                     </div>
                   </div>
                 </div>
@@ -259,14 +309,14 @@
             </li>
           </ul>
 
-          <!-- 자격증  -->
+          <!-- 자격증 -->
           <h5 class="text-primary">자격증</h5>
           <ul class="list-unstyled">
             <li
-              v-for="(certificate, index) in resumeInfo.certificates"
+              v-for="(certificate, index) in resumeInfo.certificationList"
               :key="index"
             >
-              {{ certificate }}
+              {{ certificate.certificationNm }}
             </li>
           </ul>
 
@@ -274,24 +324,28 @@
           <h5 class="text-primary">보유 기술</h5>
           <div class="d-flex gap-2 flex-wrap mb-3">
             <div
-              v-for="(skill, index) in resumeInfo.skills"
+              v-for="(skill, index) in resumeInfo.skillTagList"
               :key="index"
               class="btn d-flex align-items-center gap-2 border-0"
             >
-              <img v-if="skill.icon" :src="skill.icon" width="20" />
-              {{ skill.name }}
+              <img
+                v-if="generateIconUrl(skill)"
+                :src="generateIconUrl(skill)"
+                width="20"
+              />
+              {{ skill }}
             </div>
           </div>
 
           <!-- 자기소개 -->
           <h5 class="text-primary">자기소개</h5>
           <p class="border p-3 bg-white rounded text-dark">
-            {{ resumeInfo.introduction }}
+            {{ resumeInfo.resumeGreetingTxt }}
           </p>
 
           <!-- 첨부파일 -->
           <h5 class="text-primary">첨부 파일</h5>
-          <p v-for="(file, index) in resumeInfo.attachments" :key="index">
+          <p v-for="(file, index) in resumeInfo.attachmentList" :key="index">
             <a :href="file.url" target="_blank">{{ file.name }}</a>
           </p>
         </div>
@@ -307,150 +361,108 @@
 </template>
 
 <script setup>
-import { ref, defineProps, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { api } from '@/axios'
 
 const modalStore = useModalStore()
 
-const props = defineProps({ sq: Number })
-
-// 이력서 정보 데이터
 const resumeInfo = ref({
-  title: '백엔드 개발자 이력서',
-  name: '홍길동',
-  birthDate: '1990-01-01',
-  phone: '010-1234-5678',
-  email: 'example@naver.com',
-  address: '서울특별시 강남구 역삼동',
-  photo: 'img/placeholders/user.png',
-  education: [
-    { school: '00고등학교', major: '', period: '2011.03 ~ 2014.02' },
-    { school: '00대학교', major: '000과', period: '2014.03 ~ 2018.02' },
-  ],
-  career: [
-    {
-      company: '00회사',
-      department: '000부서',
-      position: '프로그램 개발 및 운영',
-      period: '2025.04 ~ 2025.10',
-    },
-  ],
-  training: [
-    {
-      name: 'Public Cloud 활용 자바 웹 애플리케이션 개발자 양성 과정',
-      institution: '중앙에이치티에이㈜',
-      period: '2011.03 ~ 2014.02',
-    },
-  ],
-  projects: [
-    {
-      name: '자사 쇼핑몰 구축',
-      period: '2023.07 ~ 2024.02',
-      client: '코코마랑',
-      workType: '사용자 단 화면 개발',
-      role: '개발',
-      platform: 'Win',
-      os: 'Java',
-      dbms: 'MySQL',
-      languages: [
-        {
-          name: 'Java',
-          icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-        },
-        {
-          name: 'JavaScript',
-          icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
-        },
-      ],
-      tools: ['Eclipse', 'VScode', 'WorkBench'],
-      frameworks: [
-        {
-          name: 'SpringBoot',
-          icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
-        },
-        {
-          name: 'MyBatis',
-          icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mybatis/mybatis-original.svg',
-        },
-        {
-          name: 'Vue.js',
-          icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg',
-        },
-      ],
-      etc: ['Git'],
-      isExpanded: false,
-    },
-  ],
-  certificates: ['정보처리기사', 'SQL 전문가'],
-  skills: [
-    {
-      name: 'Java',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-    },
-    {
-      name: 'Python',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-    },
-    {
-      name: 'Spring Boot',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
-    },
-  ],
-  introduction:
-    '책임감 있게 업무를 수행하며 팀워크를 중요시합니다. 성장하는 개발자가 되기 위해 끊임없이 배우고 있습니다.',
-  attachments: [
-    { name: '홍길동_포트폴리오.pdf', url: 'uploads/홍길동_포트폴리오.pdf' },
-    {
-      name: '홍길동_개인 이력 카드.docx',
-      url: 'uploads/홍길동_개인 이력 카드.docx',
-    },
-  ],
+  resumeTtl: '',
+  resumePhotoUrl: '',
+  resumeNm: '',
+  resumeBirthDt: '',
+  resumePhoneNum: '',
+  resumeEmail: '',
+  address: '',
+  photo: '',
+  educationList: [],
+  careerList: [],
+  trainingList: [],
+  projectList: [],
+  certificationList: [],
+  skillTagList: [],
+  resumeGreetingTxt: '',
+  attachmentList: [],
 })
 
-const getResume = async () => {
-  try {
-    const res = await api.$get(`/api/mypage/resume/detail/${props.sq}`)
-    console.log('[기존 이력서 불러오기 완료]', res.data)
-  } catch (e) {
-    console.error('[ 이력서 데이터 조회 실패]', e)
-  }
+function getTagsByCategory(project, category) {
+  const found = project.groupedSkillTags.find((item) => item[category])
+  return found ? found[category] : []
 }
 
-// 프로젝트 토글 함수
 const toggleProject = (index) => {
-  resumeInfo.value.projects[index].isExpanded =
-    !resumeInfo.value.projects[index].isExpanded
+  resumeInfo.value.projectList[index].isExpanded =
+    !resumeInfo.value.projectList[index].isExpanded
 }
 
-// 전체 프로젝트 펼치기
 const expandAllProjects = () => {
-  resumeInfo.value.projects.forEach((project) => {
+  resumeInfo.value.projectList.forEach((project) => {
     project.isExpanded = true
   })
 }
 
-// 전체 프로젝트 접기
 const collapseAllProjects = () => {
-  resumeInfo.value.projects.forEach((project) => {
+  resumeInfo.value.projectList.forEach((project) => {
     project.isExpanded = false
   })
 }
 
-// 모달 닫기
 const closeModal = () => {
   modalStore.closeModal()
 }
 
-// 이력서 선택
 const handleSelect = () => {
-  // TODO: 이력서 선택 로직 구현
   console.log('이력서 선택')
   closeModal()
 }
 
+// 이력서 상세조회
+const fetchResume = async () => {
+  try {
+    const res = await api.$get('/mypage/resume/29')
+    // 프로젝트에 isExpanded 추가
+    res.output.projectList = res.output.projectList.map((project) => ({
+      ...project,
+      isExpanded: true,
+    }))
+    resumeInfo.value = res.output
+  } catch (err) {
+    console.error('이력서 조회 실패:', err)
+  }
+}
+
+const generateIconUrl = (name) => {
+  const supportedIcons = {
+    Java: 'java',
+    Python: 'python',
+    'Spring Boot': 'spring',
+    Django: 'django',
+    React: 'react',
+    'Vue.js': 'vuejs',
+    Docker: 'docker',
+    Git: 'git',
+    Windows: 'windows8',
+    MacOS: 'apple',
+    Linux: 'linux',
+    MySQL: 'mysql',
+    OracleDB: 'oracle',
+    MongoDB: 'mongodb',
+    MariaDB: 'mariadb',
+    Redis: 'redis',
+  }
+
+  const mapped = supportedIcons[name]
+  if (!mapped) return null
+
+  const fileName =
+    name === 'Django' ? `${mapped}-plain.svg` : `${mapped}-original.svg`
+
+  return `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${mapped}/${fileName}`
+}
+
 onMounted(() => {
-  getResume()
+  fetchResume()
 })
 </script>
 

@@ -9,6 +9,8 @@
     <button @click="openConfirm">Confirm 열기 / 성공 Alert</button>
     <button @click="openConfirmLarge">Confirm (large) 열기 / 실패 Alert</button>
 
+    <button @click="openResumeDetailModal">이력서 상세보기 모달창 샘플</button>
+
     <CommonPagination
       :currentPage="1"
       :totalPages="10"
@@ -23,6 +25,7 @@ import CommonConfirmModal from '../components/common/CommonConfirmModal.vue'
 import CommonPageHeader from '../components/common/CommonPageHeader.vue'
 import { useModalStore } from '../stores/modalStore'
 import { useAlertStore } from '../stores/alertStore'
+import ResumeDetailModal from '../components/mypage/common/ResumeDetailModal.vue'
 
 const alertStore = useAlertStore()
 
@@ -44,6 +47,20 @@ function openConfirmLarge() {
     title: '기본 모달창 (Large)',
     message: '정말 삭제하시겠습니까?',
     size: 'modal-lg', // 큰 모달
+    onConfirm: () => {
+      alertStore.show('삭제에 실패하였습니다.', 'danger')
+      modalStore.closeModal()
+    },
+  })
+}
+
+function openResumeDetailModal() {
+  modalStore.openModal(ResumeDetailModal, {
+    title: '이력서 상세보기',
+    size: 'modal-lg',
+    props: {
+      resumeSq: 1234, // 여기에 실제 이력서 번호 넘김
+    },
     onConfirm: () => {
       alertStore.show('삭제에 실패하였습니다.', 'danger')
       modalStore.closeModal()
