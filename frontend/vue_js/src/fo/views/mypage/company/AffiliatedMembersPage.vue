@@ -38,6 +38,13 @@ ew
 
     <div class="row">
       <div class="col">
+        <div
+          v-if="members.length === 0"
+          class="text-muted py-3"
+          style="font-size: 14px"
+        >
+          소속 인원이 없습니다.
+        </div>
         <ul class="simple-post-list m-0 position-relative" style="padding: 0">
           <li
             v-for="member in members"
@@ -178,7 +185,8 @@ const search = () => {
 
 const fetchAffiliationMemberList = async () => {
   try {
-    const response = await api.$get('/companies/6', {
+    const response = await api.$get('/companies', {
+      withCredentials: true,
       params: {
         page: currentPage.value,
         size: pageSize.value,
