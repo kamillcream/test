@@ -136,13 +136,20 @@ public class ResumeService {
 	public List<ResumeListResponse> getAllResumes(Long userSq) {
 	    return resumeMapper.selectAllResumes(userSq);
 	}
-	//삭제
+	
+	//이력서 수정
+	@Transactional
+	public void updateResume(ResumeRegisterRequest request) {
+	    resumeMapper.updateResume(request);
+	    // education, career 등 리스트도 별도 매퍼/쿼리로 처리 필요
+	}
+	
+	//이력서 삭제
 	public void softDeleteResume(Long resumeSq) {
 		resumeMapper.updateDeleteYn(resumeSq);
 	}
 	
 	//기술
-	
 	@Transactional(readOnly = true)
 	public List<ResumeSkillDataResponse> getAllSkillTags() {
 	    return resumeSkillMapper.findAllSkillTags();

@@ -216,7 +216,7 @@
                     >상세 주소</label
                   >
                   <input
-                    v-model="resumeData.addressDetail"
+                    v-model="resumeData.detailAddress"
                     type="text"
                     class="form-control text-3 h-auto py-2"
                     style="border: none"
@@ -589,7 +589,7 @@
               class="btn btn-primary px-4 py-2"
               @click="openDetailModal"
             >
-              이력서 등록
+              {{ resumeSq ? '이력서 수정' : '이력서 등록' }}
             </button>
           </div>
         </form>
@@ -842,8 +842,10 @@ onMounted(async () => {
   if (resumeSq) {
     try {
       const res = await api.$get(`/mypage/resume/detail/${resumeSq}`)
-      const data = res.data?.output
-      console.log('이력서 상세 응답:', data)
+      console.log('api 응답:', res)
+
+      const data = res.output
+      console.log('data:', data)
 
       // 1. 각 필드를 직접 할당 (반응형 보장)
       if (data) {
@@ -861,6 +863,8 @@ onMounted(async () => {
         resumeData.longitude = data.longitude ?? ''
         resumeData.resumeGreetingTxt = data.resumeGreetingTxt ?? ''
         resumeData.resumeIsNotificationYn = data.resumeIsNotificationYn === 'Y'
+        resumeData.resumeIsRepresentativeYn =
+          data.resumeIsRepresentativeYn === 'Y'
         resumeData.education = data.education || []
         resumeData.career = data.career || []
         resumeData.trainingHistories = data.trainingHistories || []
@@ -927,6 +931,7 @@ const submitResume = async () => {
     certificates: resumeData.certificates,
     skills: resumeData.skills,
     attachments: resumeData.attachments,
+    resumeIsRepresentativeYn: resumeData.resumeIsRepresentativeYn ? 'Y' : 'N',
   }
 
   console.log('[최종 전송 데이터]', payload)

@@ -1,6 +1,7 @@
 package com.example.demo.domain.mypage.controller;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -92,6 +93,19 @@ public class ResumeController {
         }
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "이력서 상세 조회가 완료되었습니다.", resume));
 	}
+	
+	//이력서 수정
+	@PutMapping("/update/{resumeSq}")
+	public ResponseEntity<ApiResponse<String>> updateResume(
+	    @PathVariable("resumeSq") Long resumeSq,
+	    @RequestBody ResumeRegisterRequest request
+	) {
+	    request.setResumeSq(resumeSq);
+	    resumeService.updateResume(request);
+	    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "이력서 수정 완료", "success"));
+	}
+	
+	
 	//이력서 삭제
 	@PatchMapping("/{resumeSq}/delete")
 	public ResponseEntity<ApiResponse<String>> deleteResume(@PathVariable("resumeSq") Long resumeSq){
