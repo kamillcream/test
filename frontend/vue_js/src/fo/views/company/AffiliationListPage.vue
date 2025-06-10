@@ -35,16 +35,6 @@
           </form>
         </div>
         <div class="col text-end">
-          <!-- <select
-            v-model="addressCd"
-            @change="changeFilter"
-            class="form-select w-auto d-inline-block me-2"
-          >
-            <option selected value="all">주소</option>
-            <option v-for="cd in addressCdList" :key="cd" :value="cd.areaCodeSq">
-              {{ areaSigungu }}
-            </option>
-          </select> -->
           <!-- 부모 선택 -->
           <select
             v-model="selectedParent"
