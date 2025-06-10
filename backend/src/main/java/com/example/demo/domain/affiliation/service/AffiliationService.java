@@ -103,6 +103,13 @@ public class AffiliationService {
     	if(companyApplication.getUserSq() == null) {
     		throw new IllegalArgumentException("사용자 정보가 없습니다.");
     	}
+    	
+    	Long isApply = affiliationMapper.findIsApply(companyApplication.getUserSq(), companyApplication.getCompanySq());
+    	
+    	if(isApply > 0) {
+    		throw new IllegalArgumentException("이미 신청한 공고입니다.");
+    	}
+    	
     	affiliationMapper.insertApplication(companyApplication);
     	return;
     }
@@ -226,7 +233,7 @@ public class AffiliationService {
     				
     			}).collect(Collectors.toList());
     	
-    	return AffiliationListResponse.builder().totalElements(totalElements).page(page).size(size).companies(affiliations).build();
+    	return AffiliationListResponse.builder().totalElements(totalElements).page(page).size(size).companies(affiliations).viewerSq(userSq).build();
     }
     
 

@@ -159,12 +159,13 @@
       </button>
 
       <!-- [추가] 답변글인 경우에만 && 원 QnA 게시글의 작성자 본인일 경우에만 -->
-      <a
-        v-if="boardType == 'answer' && boardInfo.userSq == viewerSq"
-        href="#"
+      <button
+        v-if="boardType == 'answer' && parentUserSq == viewerSq"
         class="btn btn-primary"
-        >답변 채택하기</a
+        @click="clickAdopt"
       >
+        답변 채택하기
+      </button>
     </div>
   </div>
 </template>
@@ -204,6 +205,7 @@ const props = defineProps({
     }),
   },
   boardType: { type: String, default: '' },
+  parentUserSq: { type: Number, default: 0 },
   getBoard: { type: Function, default: () => {} },
 })
 
@@ -305,10 +307,6 @@ const openConfirm = () => {
         alertStore.show('채택 상태 변경에 실패하였습니다.', 'danger')
       }
       modalStore.closeModal()
-      // 성공
-      alertStore.show('삭제하였습니다.', 'success')
-      // 실패
-      // alertStore.show('삭제에 실패하였습니다.', 'danger')
       modalStore.closeModal()
     },
   })
@@ -332,6 +330,28 @@ const clickReportApplication = () => {
   modalStore.openModal(ReportModal, {
     reportTypeCd: boardType.value == 'answer' ? 2002 : 2001,
     sq: boardInfo.value.sq,
+  })
+}
+
+// 답변 채택
+const clickAdopt = () => {
+  modalStore.openModal(CommonConfirmModal, {
+    title: '답변 채택',
+    message: '채택 이후 변경 불가합니다. 답변을 채택 하시겠습니까?',
+    onConfirm: async () => {
+      try {
+        const res = await api.$patch(`/answer/${boardInfo.value.sq}/adopt`)
+        console.log(res)
+        if (res.status == 'OK') {
+          alertStore.show(res.message, 'success')
+        } else {
+          alertStore.show(res.message, 'danger')
+        }
+        modalStore.closeModal()
+      } catch (error) {
+        alertStore.show('답변 채택에 실패했습니다.', 'danger')
+      }
+    },
   })
 }
 

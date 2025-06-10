@@ -204,7 +204,7 @@
 
                   <div class="row mb-2">
                     <div class="col-sm-12">
-                      <strong style="margin-right: 8px;">TOOL:</strong>
+                      <strong style="margin-right: 8px">TOOL:</strong>
                       <button
                         v-for="tool in project.tools"
                         :key="tool"
@@ -217,7 +217,7 @@
 
                   <div class="row mb-2">
                     <div class="col-sm-12">
-                      <strong style="margin-right: 8px;">FW:</strong>
+                      <strong style="margin-right: 8px">FW:</strong>
                       <button
                         v-for="fw in project.frameworks"
                         :key="fw"
@@ -237,7 +237,7 @@
 
                   <div class="row mb-3">
                     <div class="col-sm-12">
-                      <strong style="margin-right: 8px;">기타:</strong>
+                      <strong style="margin-right: 8px">기타:</strong>
                       <button
                         v-for="etc in project.etc"
                         :key="etc"
@@ -307,10 +307,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, defineProps, onMounted } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
+import { api } from '@/axios'
 
 const modalStore = useModalStore()
+
+const props = defineProps({ sq: Number })
 
 // 이력서 정보 데이터
 const resumeInfo = ref({
@@ -405,6 +408,15 @@ const resumeInfo = ref({
   ],
 })
 
+const getResume = async () => {
+  try {
+    const res = await api.$get(`/api/mypage/resume/detail/${props.sq}`)
+    console.log('[기존 이력서 불러오기 완료]', res.data)
+  } catch (e) {
+    console.error('[ 이력서 데이터 조회 실패]', e)
+  }
+}
+
 // 프로젝트 토글 함수
 const toggleProject = (index) => {
   resumeInfo.value.projects[index].isExpanded =
@@ -436,6 +448,10 @@ const handleSelect = () => {
   console.log('이력서 선택')
   closeModal()
 }
+
+onMounted(() => {
+  getResume()
+})
 </script>
 
 <style scoped>

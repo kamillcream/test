@@ -30,7 +30,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/reset-password/verify",
             "/api/signup",
             "/api/check-id",
-            "/api/company/verify"
+            "/api/company/verify",
+            "/api/board",
+            "/api/board/{boardSq}/increment-view",
+            "/api/answer/{answerSq}",
+            "/api/answer/{answerSq}/increment-view"
 
     // 여기에 더 추가 가능
     );

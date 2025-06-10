@@ -27,6 +27,7 @@ public class AnswerService {
     private final SkillTagConverter skillTagConverter;
     private final RecommendationMapper recommendationMapper;
     private final CommunityUserMapper communityUserMapper;
+    private final BoardMapper boardMapper;
 
 //    답변 리스트
     @Transactional
@@ -193,6 +194,36 @@ public class AnswerService {
         
         
     }
+
+	//  답변 채택
+	  @Transactional
+	  public void adoptAnswer(Long userSq, Long answerSq) {
+		  System.out.println("채택");
+		  
+	      Answer answer = answerMapper.findById(answerSq);
+	      System.out.println(answer.getBoardSq());
+		  
+		  Board board = boardMapper.findByIdBoard(answer.getBoardSq(), 1402L);
+		  System.out.println(board.getUserSq());
+		  
+		  if(board.getUserSq() != userSq) {
+			  System.out.println("유효하지 않은 접근입니다.");
+			  throw new IllegalArgumentException("유효하지 않은 접근입니다.");
+		  }
+		  if(board.getBoardAdoptStatusCd() == 1502L) {
+			  System.out.println("이미 채택된 답변이 있습니다.");
+			  throw new IllegalArgumentException("이미 채택된 답변이 있습니다.");
+		  }
+		  
+		  board.setBoardAdoptStatusCd(1502L);
+		  boardMapper.update(board);
+	
+	      answer.setAnswerIsAdoptedYn("Y");
+	      
+	      answerMapper.update(answer);
+	
+	      return;
+	  }
 
 
 }
