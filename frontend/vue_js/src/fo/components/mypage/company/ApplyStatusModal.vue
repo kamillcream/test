@@ -94,6 +94,13 @@
         <div class="row">
           <div class="col">
             <div
+              v-if="companies.length === 0"
+              class="text-muted py-3"
+              style="font-size: 14px"
+            >
+              지원한 기업 지원자가 없습니다.
+            </div>
+            <div
               v-for="(company, index) in companies"
               :key="index"
               class="row mb-3"
