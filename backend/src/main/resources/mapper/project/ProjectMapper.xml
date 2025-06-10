@@ -608,6 +608,12 @@
 	  	WHERE project_sq = #{projectSq} AND interview_is_selected_yn = 'N'
   	</select>
   	
+  	<select id="findAllInterviewTimesByProjectSq" resultType="java.time.LocalDateTime" parameterType="Long">
+	    SELECT interview_available_dtm
+	  	FROM TBL_PROJECT_INTERVIEW_TIME_SLOT_S
+	  	WHERE project_sq = #{projectSq}
+  	</select>
+  	
   	<select id="findInterviewSqTmByProjectSq"
         resultType="com.example.demo.domain.project.dto.response.InterviewTimeInfoResponse"
         parameterType="Long">
