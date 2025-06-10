@@ -516,6 +516,14 @@
 		SET project_candidate_cnt = project_candidate_cnt + 1
 		WHERE project_sq = #{projectSq}
 	</update>
+	
+	<update id="decreaseApplication" parameterType="long">
+		UPDATE TBL_PROJECT_M
+		SET project_candidate_cnt = project_candidate_cnt - 1
+		WHERE project_sq = #{projectSq}
+	</update>
+	
+
 
 	<update id="increaseScrap" parameterType="long">
 		UPDATE TBL_PROJECT_M
@@ -538,7 +546,7 @@
 	    FROM TBL_SKILL_TAG_C p
 	    JOIN TBL_SKILL_TAG_C c ON p.skill_tag_sq = c.parent_skill_tag_sq
 	    WHERE p.skill_tag_is_deleted_yn = 'N' AND c.skill_tag_is_deleted_yn = 'N'
-	    AND p.skill_tag_nm IN ('언어', '프레임워크', '툴')
+	    AND p.skill_tag_nm IN ('Language', 'FrameWork', 'Tool')
 	    ORDER BY p.skill_tag_sq, c.skill_tag_sq
   	</select>
 	
@@ -561,6 +569,7 @@
 	    JOIN TBL_SKILL_TAG_C p ON c.parent_skill_tag_sq = p.skill_tag_sq
 	    WHERE c.skill_tag_is_deleted_yn = 'N'
 	      AND p.skill_tag_is_deleted_yn = 'N'
+	      AND r.project_sq = #{projectSq}
 	    ORDER BY p.skill_tag_nm, c.skill_tag_nm
   	</select>
   	
@@ -573,6 +582,7 @@
 	    JOIN TBL_SKILL_TAG_C p ON c.parent_skill_tag_sq = p.skill_tag_sq
 	    WHERE c.skill_tag_is_deleted_yn = 'N'
 	      AND p.skill_tag_is_deleted_yn = 'N'
+	      AND r.project_sq = #{projectSq}
 	    ORDER BY p.skill_tag_nm, c.skill_tag_nm
   	</select>
   
