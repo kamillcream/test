@@ -21,7 +21,7 @@ import com.example.demo.domain.project.dto.response.ApplicationStatusList;
 import com.example.demo.domain.project.dto.response.ApplicationStatusResponse;
 
 import com.example.demo.domain.project.mapper.ProjectApplicationMapper;
-
+import com.example.demo.domain.project.mapper.ProjectMapper;
 import com.example.demo.domain.project.vo.ApplicationStatusVo;
 import com.example.demo.domain.project.vo.ApplicationSummary;
 import com.example.demo.domain.project.vo.ResumeNmTtlVo;
@@ -31,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ProjectApplicationService {
+	private final ProjectMapper projectMapper;
 	private final ProjectApplicationMapper applicationMapper;
 	private final CommonCodeMapper commonCodeMapper;
 	private final ResumeMapper resumeMapper;
@@ -49,6 +50,11 @@ public class ProjectApplicationService {
 	public void updateApplicantResult(ApplicationStatusRequest request, Long applicationSq) {
 		Long statusCd = commonCodeMapper.findCommonCodeSqByName(request.getStatus(), ParentCodeEnum.PRO_APPLICATION.getCode());
 		applicationMapper.updateApplicationStatus(statusCd, applicationSq);
+		
+		if (statusCd.equals(806L)) {
+			Long projectSq = applicationMapper.findProjectBySq(applicationSq);
+			projectMapper.decreaseApplication(projectSq);
+		}
 	}
 	
 	public void updateInterviewTimeSelected(Long interviewTimeSq, ApplicationSqRequest request) {

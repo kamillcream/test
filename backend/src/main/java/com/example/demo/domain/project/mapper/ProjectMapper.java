@@ -58,6 +58,7 @@ public interface ProjectMapper {
 	void insertInterviewTimes(@Param("projectSq") Long projectSq, @Param("interviewTimes") List<LocalDateTime> interviewTimes);
 	void insertScrap(ScrapInsertRequest scrapInsertRequest);
 	void increaseApplication(@Param("projectSq")  Long projectSq);
+	void decreaseApplication(@Param("projectSq")  Long projectSq);
 	void increaseScrap(@Param("projectSq")  Long projectSq);
 	void decreaseScrap(@Param("projectSq")  Long projectSq);
 	
