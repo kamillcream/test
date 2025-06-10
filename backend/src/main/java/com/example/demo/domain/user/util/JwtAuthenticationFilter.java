@@ -33,8 +33,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/company/verify",
             "/api/board",
             "/api/board/{boardSq}/increment-view",
+            "/api/qna",
+            "/api/qna/{boardSq}/increment-view",
             "/api/answer/{answerSq}",
-            "/api/answer/{answerSq}/increment-view"
+            "/api/answer/{answerSq}/increment-view",
+            "/api/affiliation",
+            "/api/affiliation/{answerSq}/increment-view",
+            "/api/affiliation/address"
 
     // 여기에 더 추가 가능
     );
