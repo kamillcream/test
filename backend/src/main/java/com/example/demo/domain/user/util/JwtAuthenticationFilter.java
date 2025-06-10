@@ -31,15 +31,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/signup",
             "/api/check-id",
             "/api/company/verify",
-            "/api/board",
-            "/api/board/{boardSq}/increment-view",
-            "/api/qna",
-            "/api/qna/{boardSq}/increment-view",
-            "/api/answer/{answerSq}",
-            "/api/answer/{answerSq}/increment-view",
-            "/api/affiliation/guest",
-            "/api/affiliation/{answerSq}/increment-view",
-            "/api/affiliation/address",
+            // "/api/board",
+            // "/api/board/{boardSq}/increment-view",
+            // "/api/qna",
+            // "/api/qna/{boardSq}/increment-view",
+            // "/api/answer/{answerSq}",
+            // "/api/answer/{answerSq}/increment-view",
+            // "/api/affiliation/guest",
+            // "/api/affiliation/{answerSq}/increment-view",
+            // "/api/affiliation/address",
             "/api/projects/interviews",
             "/api/projects/forms",
             "/api/projects/*/districts",
@@ -54,13 +54,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
         String uri = request.getRequestURI();
 
+        String token = resolveToken(request);
+
         // 인증 제외 경로 처리
         if (EXCLUDE_URLS.stream().anyMatch(uri::startsWith)) {
+            if (token != null && jwtProvider.validateToken(token)) {
+                try {
+                    Long userSq = jwtProvider.getUserSqFromToken(token);
+                    Long userTypeCd = jwtProvider.getUserTypeCdFromToken(token);
+
+                    JwtAuthenticationToken authentication = new JwtAuthenticationToken(userSq, userTypeCd);
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } catch (Exception e) {
+                    // 토큰 오류 무시하고 통과 (로그 남기고 싶으면 여기서 처리)
+                }
+            }
+
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = resolveToken(request);
+        // 인증 필수 경로
         if (token == null || !jwtProvider.validateToken(token)) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
             return;
