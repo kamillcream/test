@@ -305,12 +305,15 @@
 <script setup>
 import { ref, defineProps, computed } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
+import { useAlertStore } from '@/fo/stores/alertStore'
+
 import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 import ResumeDetailModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
 
 import { api } from '@/axios.js'
 
 const modalStore = useModalStore()
+const alertStore = useAlertStore()
 const props = defineProps({
   applicants: Array,
   projectSq: Number,
@@ -513,12 +516,11 @@ const openStatusFailureModal = (applicationSq) => {
     onConfirm: async () => {
       try {
         await updateStatus(applicationSq, '불합격')
-
-        console.log(localApplicants.value)
+        alertStore.show('불합격 처리가 정상적으로 이루어졌습니다.')
         modalStore.closeModal()
       } catch (error) {
         console.error('상태 변경 실패:', error)
-        alert('상태 변경 중 오류가 발생했습니다.')
+        alertStore.show('상태 변경 중 오류가 발생했습니다.', 'danger')
       }
     },
   })

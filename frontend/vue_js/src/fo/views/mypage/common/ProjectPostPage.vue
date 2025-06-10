@@ -383,6 +383,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ref, computed, watch, onMounted, reactive } from 'vue'
 
 import { api } from '@/axios.js'
+import { useAlertStore } from '../../../stores/alertStore.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -430,6 +431,7 @@ const description = ref('')
 const notifyEnabled = ref(false)
 
 const modalStore = useModalStore()
+const alertStore = useAlertStore()
 
 // 모달 열려있는 동안 부모 페이지 스크롤 비활성화, 닫히면 다시 활성화
 const isOpen = computed(() => modalStore.isOpen)
@@ -546,7 +548,7 @@ const loadEditFormData = async (projectSq) => {
 
     let message = '프로젝트 정보를 불러오는 중 오류가 발생했습니다.'
 
-    alert(message)
+    alertStore.show(message, 'danger')
     router.push({ name: 'ProjectListPage' })
   }
 }
@@ -617,7 +619,7 @@ watch(selectedCity, async (newCityCode) => {
 })
 const submitProject = async () => {
   if (preferList.value.length === 0 && preferContent.value.trim() === '') {
-    alert('우대 사항을 한 개 이상 입력해주세요.')
+    alertStore.show('우대 사항을 한 개 이상 입력해주세요.', 'danger')
     return
   }
   const requestBody = {
@@ -675,10 +677,10 @@ const submitProject = async () => {
     }
     if (projectSq) {
       await api.$patch('/projects', requestBody, config)
-      alert('수정 성공')
+      alertStore.show('수정 성공')
     } else {
       await api.$post('/projects', requestBody, config)
-      alert('등록 성공')
+      alertStore.show('등록 성공')
     }
     router.push({ name: 'ProjectListPage' })
   } catch (error) {
