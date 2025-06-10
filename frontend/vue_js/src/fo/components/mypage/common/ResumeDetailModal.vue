@@ -354,7 +354,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-primary" @click="handleSelect">선택하기</button>
+      <!-- <button class="btn btn-primary" @click="handleSelect">선택하기</button> -->
       <button class="btn btn-outline-secondary" @click="closeModal">
         닫기
       </button>
@@ -414,10 +414,10 @@ const closeModal = () => {
   modalStore.closeModal()
 }
 
-const handleSelect = () => {
-  console.log('이력서 선택')
-  closeModal()
-}
+// const handleSelect = () => {
+//   console.log('이력서 선택')
+//   closeModal()
+// }
 
 // 이력서 상세조회
 const fetchResume = async () => {
