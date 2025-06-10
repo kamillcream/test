@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import com.example.demo.common.AmazonS3.UploadedFileDTO;
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
+import com.example.demo.domain.mypage.dto.InformationEditAddressDTO;
 import com.example.demo.domain.mypage.dto.ProfileImageInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
 import com.example.demo.domain.mypage.dto.request.AffiliationInfoUpdateRequestDTO;
@@ -28,7 +29,7 @@ public class InformationEditRepository {
         return informationEditMapper.findUserInfoByUserSq(userSq);
     }
 
-    public AddressDTO findAddress(Long addressSq) {
+    public InformationEditAddressDTO findAddress(Long addressSq) {
         return informationEditMapper.findAddressByAddressSq(addressSq);
     }
 

@@ -13,6 +13,7 @@ import com.example.demo.common.AmazonS3.AmazonS3Service;
 import com.example.demo.common.AmazonS3.UploadedFileDTO;
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
+import com.example.demo.domain.mypage.dto.InformationEditAddressDTO;
 import com.example.demo.domain.mypage.dto.ProfileImageInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
 import com.example.demo.domain.mypage.dto.request.AffiliationInfoUpdateRequestDTO;
@@ -44,7 +45,7 @@ public class InformationEditService {
         return informationEditRepository.findUser(userSq);
     }
 
-    public AddressDTO getAddress(Long addressSq) {
+    public InformationEditAddressDTO getAddress(Long addressSq) {
         return informationEditRepository.findAddress(addressSq);
     }
 
