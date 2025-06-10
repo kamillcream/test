@@ -4,6 +4,13 @@
 
 <mapper namespace="com.example.demo.domain.mypage.mapper.ResumeSkillMapper">
     
+    <!-- 이력서 내 기술 태그 목록 조회 -->
+    <select id="findAllNmBySq" resultType="String">
+	    SELECT skill_tag_nm
+	    FROM TBL_RESUME_SKILL_TAG_S
+	    WHERE resume_sq = #{resumeSq}
+  	</select>
+    
     <!-- 이전 프로젝트 등록기술 조회 -->
      <select id="findSkillsByResumeProjectSq" parameterType="Long" resultType="String">
     SELECT skill_tag_nm

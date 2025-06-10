@@ -108,7 +108,7 @@
                       <a href="#" class="text-6 m-0"
                         >{{ applicant.nameTitleVo.resumeNm }} /</a
                       >
-                      <a href="#" class="text-5 m-0">{{
+                      <a @click="openResumeDetailModal" class="text-5 m-0">{{
                         applicant.nameTitleVo.resumeTtl
                       }}</a>
                     </div>
@@ -154,7 +154,7 @@
                       </template>
                       <template
                         v-else-if="
-                          applicant.appStatusVo.appStatus === '인터뷰 확정'
+                          applicant.appStatusVo.appStatus === '인터뷰확정'
                         "
                       >
                         <div
@@ -299,6 +299,7 @@
 import { ref, defineProps, computed } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
+import ResumeDetailModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
 
 import { api } from '@/axios.js'
 
@@ -487,6 +488,12 @@ const openStatusFailureModal = (applicationSq) => {
         alert('상태 변경 중 오류가 발생했습니다.')
       }
     },
+  })
+}
+
+const openResumeDetailModal = () => {
+  modalStore.openModal(ResumeDetailModal, {
+    size: 'modal-xl',
   })
 }
 

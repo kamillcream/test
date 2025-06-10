@@ -64,7 +64,7 @@ public class ProjectUtil {
 	}
 	
 	public Map<String, List<String>> fetchAndConvertTimeSlots(Long projectSq){
-		List<LocalDateTime> rawInterviewTimes = projectMapper.findInterviewTimesByProjectSq(projectSq);
+		List<LocalDateTime> rawInterviewTimes = projectMapper.findAllInterviewTimesByProjectSq(projectSq);
 		Map<String, List<String>> timeSlots = new HashMap<>();
 		
 		rawInterviewTimes.forEach(

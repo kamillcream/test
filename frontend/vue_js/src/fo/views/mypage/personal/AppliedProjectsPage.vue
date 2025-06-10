@@ -167,7 +167,7 @@
                   >
                   |
                   <span
-                    @click="openResumeDetailModal()"
+                    @click="openResumeDetailModal"
                     class="text-muted resume-hover"
                   >
                     {{ item.resumeTitle }}
