@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.common.ApiResponse;
 import com.example.demo.domain.mypage.dto.AddressDTO;
+import com.example.demo.domain.mypage.dto.InformationEditAddressDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
 import com.example.demo.domain.mypage.dto.request.AffiliationInfoUpdateRequestDTO;
 import com.example.demo.domain.mypage.dto.request.PasswordCheckRequestDTO;
@@ -54,7 +55,7 @@ public class InformationEditController {
 
         if (user.getUserTypeCd().equals(301L)) {
             // 개인 회원
-            AddressDTO address = user.getAddressSq() != null
+            InformationEditAddressDTO address = user.getAddressSq() != null
                     ? informationEditService.getAddress(user.getAddressSq())
                     : null;
 
@@ -82,7 +83,7 @@ public class InformationEditController {
 
             return ApiResponse.of(HttpStatus.OK, "개인정보 조회 완료", response);
         } else if (user.getUserTypeCd().equals(302L)) {
-            AddressDTO address = user.getAddressSq() != null
+            InformationEditAddressDTO address = user.getAddressSq() != null
                     ? informationEditService.getAddress(user.getAddressSq())
                     : null;
 

@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import com.example.demo.common.AmazonS3.UploadedFileDTO;
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
+import com.example.demo.domain.mypage.dto.InformationEditAddressDTO;
 import com.example.demo.domain.mypage.dto.ProfileImageInfoDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
 
@@ -17,7 +18,7 @@ public interface InformationEditMapper {
 
         UserInfoDTO findUserInfoByUserSq(@Param("userSq") Long userSq);
 
-        AddressDTO findAddressByAddressSq(@Param("addressSq") Long addressSq);
+        InformationEditAddressDTO findAddressByAddressSq(@Param("addressSq") Long addressSq);
 
         String findCommonCodeNameByGenderCd(@Param("codeSq") Long codeSq);
 
@@ -66,7 +67,7 @@ public interface InformationEditMapper {
 
         UserInfoDTO selectUserInfo(@Param("userSq") Long userSq);
 
-        AddressDTO selectAddressInfo(@Param("addressSq") Long addressSq);
+        InformationEditAddressDTO selectAddressInfo(@Param("addressSq") Long addressSq);
 
         List<String> selectAffiliationTags(@Param("companySq") Long companySq);
 

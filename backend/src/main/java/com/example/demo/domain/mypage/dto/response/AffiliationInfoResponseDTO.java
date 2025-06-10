@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
+import com.example.demo.domain.mypage.dto.InformationEditAddressDTO;
 import com.example.demo.domain.mypage.dto.UserInfoDTO;
 
 import lombok.Builder;
@@ -32,7 +33,7 @@ public class AffiliationInfoResponseDTO {
     public static AffiliationInfoResponseDTO of(
             CompanyInfoDTO company,
             UserInfoDTO user,
-            AddressDTO address,
+            InformationEditAddressDTO address,
             List<String> tags,
             String companyProfileImageUrl) {
         return AffiliationInfoResponseDTO.builder()
