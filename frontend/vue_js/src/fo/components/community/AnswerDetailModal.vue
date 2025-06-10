@@ -17,6 +17,7 @@
         <BoardPost
           boardType="answer"
           :boardInfo="boardInfo"
+          :parentUserSq="boardUserSq"
           :getBoard="getBoard"
         />
 
@@ -50,6 +51,10 @@ const modalStore = useModalStore()
 
 const props = defineProps({
   answerSq: {
+    type: Number,
+    default: 0,
+  },
+  boardUserSq: {
     type: Number,
     default: 0,
   },

@@ -65,5 +65,12 @@ public class AnswerController {
 		answerService.updateAnswerRecommend(userSq, answerSq);
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "추천 반영이 완료되었습니다.", null));
 	}
+    
+//  답변 채택
+	@PatchMapping("/{answerSq}/adopt")
+	public ResponseEntity<ApiResponse<NullType>> adoptAnswer(@AuthenticationPrincipal Long userSq, @PathVariable("answerSq") Long answerSq){
+		answerService.adoptAnswer(userSq, answerSq);
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "답변 채택이 완료되었습니다.", null));
+	}
 
 }

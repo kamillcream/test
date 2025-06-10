@@ -92,7 +92,11 @@ const clickApplication = (sq) => {
   if (sq == null) {
     return
   }
-  modalStore.openModal(AnswerDetailModal, { size: 'modal-lg', answerSq: sq })
+  modalStore.openModal(AnswerDetailModal, {
+    size: 'modal-lg',
+    answerSq: sq,
+    boardUserSq: boardInfo.value.userSq,
+  })
 }
 
 // 게시글 불러오기

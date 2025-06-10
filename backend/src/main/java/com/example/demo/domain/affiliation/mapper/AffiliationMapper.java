@@ -42,6 +42,9 @@ public interface AffiliationMapper {
 	// 소속 신청 내역 상세 조회
 	CompanyApplication findApplication(@Param("companyApplicationSq") Long companyApplicationSq);
 	
+	// 해당 소속에 신청했는지 여부
+	Long findIsApply(@Param("userSq") Long userSq, @Param("companySq") Long companySq);
+	
 	// 소속 신청 열람 상태 변경
 	void updateReadAt(@Param("companyApplicationSq") Long companyApplicationSq);
 	

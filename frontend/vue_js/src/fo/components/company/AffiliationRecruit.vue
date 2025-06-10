@@ -92,8 +92,15 @@
         <!-- [추가] 선택한 이력서로 이력서 이름 변경 -->
         <div class="text-dark" id="resume">
           선택한 이력서:
-          <a href="#" class="text-primary" @click="openResumeModal"
-            >이력서를 선택하세요.</a
+          <a href="#" class="text-primary" @click="openResumeModal">
+            <span
+              v-if="
+                affiliationStore.resume.resumeTtl != null &&
+                affiliationStore.resume.resumeTtl != ''
+              "
+              >{{ affiliationStore.resume.resumeTtl }}</span
+            >
+            <span v-else>이력서를 선택하세요.</span></a
           >
         </div>
       </div>
@@ -133,8 +140,8 @@ import { useAffiliationStore } from '@/fo/stores/AffiliationStore'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { computed, defineProps } from 'vue'
-import ResumeSelectModal from '../mypage/common/ResumeSelectModal.vue'
 import CommonConfirmModal from '../common/CommonConfirmModal.vue'
+import ResumeListModal from '../mypage/common/ResumeListModal.vue'
 
 const props = defineProps({ afltnInfo: Array })
 const afltnInfo = computed(() => props.afltnInfo)
@@ -146,6 +153,7 @@ const affiliationStore = useAffiliationStore()
 
 const closeModal = () => {
   affiliationStore.resetGreeting()
+  affiliationStore.resetResume()
   modalStore.closeModal()
 }
 
@@ -153,32 +161,52 @@ const closeModal = () => {
 const clickRecruit = async () => {
   if (affiliationStore.viewerSq == null) {
     alertStore.show('로그인 후 이용해주세요.', 'danger')
+    return
   }
   modalStore.openModal(CommonConfirmModal, {
     title: '소속 신청',
     message: `${afltnInfo.value.companyNm} 소속 신청하시겠습니까?`,
     onConfirm: async () => {
+      //  기업 회원 지원 불가
+      if (localStorage.getItem('userType') == 'COMPANY') {
+        alertStore.show('기업 회원은 소속 신청할 수 없습니다.', 'danger')
+        closeModal()
+        return
+      }
       // [추가] 이력서 미선택시 리턴
+      if (
+        affiliationStore.resume.resumeSq == null ||
+        affiliationStore.resume.resumeSq == 0
+      ) {
+        alertStore.show('이력서를 선택해주세요.', 'danger')
+        closeModal()
+        return
+      }
       try {
         const res = await api.$post(`/affiliation/apply`, {
           companySq: afltnInfo.value.sq,
-          resumeSq: 1,
+          resumeSq: affiliationStore.resume.resumeSq,
           companyApplicationGreetingTxt: affiliationStore.greeting,
         })
+        console.log(res)
         if (res.status == 'CREATED') {
           alertStore.show(res.message, 'success')
           closeModal()
+        } else {
+          console.log(res)
+          alertStore.show(res.message, 'danger')
         }
       } catch (error) {
         alertStore.show('소속 신청에 실패했습니다.', 'danger')
       }
+      closeModal()
     },
   })
 }
 
 // 이력서 선택
 const openResumeModal = () => {
-  modalStore.openModal(ResumeSelectModal)
+  modalStore.openModal(ResumeListModal)
 }
 </script>
 <style>

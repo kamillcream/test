@@ -98,11 +98,16 @@
           for="resume"
           class="form-label text-primary"
           style="font-weight: bold"
-          >소속 신청할 이력서</label
+          >소속 신청한 이력서</label
         >
         <div class="text-dark" id="resume">
           선택한 이력서:
-          <a href="#" class="text-primary">{{ props.apply.resumeTtl }}</a>
+          <a
+            href="#"
+            class="text-primary"
+            @click="openResumeModal(apply.resumeSq)"
+            >{{ props.apply.resumeTtl }}</a
+          >
         </div>
       </div>
 
@@ -135,6 +140,7 @@ import { ref, defineProps, onMounted } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { api } from '@/axios'
 import { useAlertStore } from '@/fo/stores/alertStore'
+import ResumeDetailModal from '../common/ResumeDetailModal.vue'
 
 const modalStore = useModalStore()
 const alertStore = useAlertStore()
@@ -164,6 +170,14 @@ const getCompanyInfo = async () => {
   } catch (error) {
     alertStore.show('소속 정보를 불러올 수 없습니다.', 'danger')
   }
+}
+
+// 이력서 모달창 열기
+const openResumeModal = (sq) => {
+  modalStore.openModal(ResumeDetailModal, {
+    size: 'modal-lg',
+    sq,
+  })
 }
 
 // 모달 닫기
