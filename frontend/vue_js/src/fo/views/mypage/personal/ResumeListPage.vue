@@ -96,12 +96,6 @@
             </div>
           </li>
         </ul>
-        <!-- 이력서 상세 모달 -->
-        <ResumeDetailModal
-          v-if="showDetailModal"
-          :resume="selectedResume"
-          @close="closeResumeDetail"
-        />
         <!-- 이력서 등록하기 버튼 -->
         <div class="d-flex justify-content-end mt-4 mb-5">
           <a
@@ -133,8 +127,6 @@ import { useRouter } from 'vue-router'
 import { useModalStore } from '@/fo/stores/modalStore'
 
 const resumeList = ref([])
-const showDetailModal = ref(false)
-const selectedResume = ref(null)
 // const mypageStore = useMypageStore()
 const modalStore = useModalStore()
 const isDeleting = ref(false) // 삭제 중 상태 추가
@@ -206,21 +198,15 @@ function setMainResume(resumeSq) {
 }
 
 function openResumeDetail(resumeSq) {
+  console.log('resumeSq', resumeSq)
   modalStore.openModal(ResumeDetailModal, {
     title: '이력서 상세보기',
     size: 'modal-lg',
-    props: {
-      resumeSq: resumeSq, // 여기에 실제 이력서 번호 넘김
-    },
+    resumeSq: resumeSq,
     onConfirm: () => {
       modalStore.closeModal()
     },
   })
-}
-
-function closeResumeDetail() {
-  selectedResume.value = null
-  showDetailModal.value = false
 }
 
 //수정하기
