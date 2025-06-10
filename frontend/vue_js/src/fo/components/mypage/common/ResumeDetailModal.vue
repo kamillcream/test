@@ -363,9 +363,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watchEffect, defineProps } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { api } from '@/axios'
+
+const props = defineProps({
+  resumeSq: {
+    type: Number,
+    required: true,
+  },
+})
 
 const modalStore = useModalStore()
 
@@ -420,10 +427,11 @@ const closeModal = () => {
 // }
 
 // 이력서 상세조회
-const fetchResume = async () => {
+watchEffect(async () => {
+  console.log('props.resumeSq', props.resumeSq)
+  if (!props.resumeSq) return
   try {
-    const res = await api.$get('/mypage/resume/29')
-    // 프로젝트에 isExpanded 추가
+    const res = await api.$get(`/mypage/resume/${props.resumeSq}`)
     res.output.projectList = res.output.projectList.map((project) => ({
       ...project,
       isExpanded: true,
@@ -432,7 +440,7 @@ const fetchResume = async () => {
   } catch (err) {
     console.error('이력서 조회 실패:', err)
   }
-}
+})
 
 const generateIconUrl = (name) => {
   const supportedIcons = {
@@ -462,10 +470,6 @@ const generateIconUrl = (name) => {
 
   return `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${mapped}/${fileName}`
 }
-
-onMounted(() => {
-  fetchResume()
-})
 </script>
 
 <style scoped>
