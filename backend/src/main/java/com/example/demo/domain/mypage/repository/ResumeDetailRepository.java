@@ -59,4 +59,9 @@ public class ResumeDetailRepository {
     public String findCommonCodeName(Long codeSq) {
         return mapper.selectCommonCodeName(codeSq);
     }
+
+    public List<Map<String, Object>> selectGroupedSkillTagsByProjectHistorySq(Long projectHistorySq) {
+        return mapper.selectGroupedSkillTagsByProjectHistorySq(projectHistorySq);
+    }
+
 }

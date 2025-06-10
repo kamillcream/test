@@ -1,6 +1,7 @@
 package com.example.demo.domain.mypage.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -32,4 +33,7 @@ public interface ResumeDetailMapper {
 
     // ← 공통 코드 이름 조회 추가
     String selectCommonCodeName(Long codeSq);
+
+    List<Map<String, Object>> selectGroupedSkillTagsByProjectHistorySq(Long projectHistorySq);
+
 }

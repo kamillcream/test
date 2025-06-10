@@ -2,6 +2,7 @@ package com.example.demo.domain.mypage.dto.response;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Data;
 
@@ -64,7 +65,7 @@ public class ResumeDetailResponseDTO {
         private String projectHistoryTask;
         private LocalDate projectHistoryStartDt;
         private LocalDate projectHistoryEndDt;
-        private List<String> skillTags;
+        private List<Map<String, List<String>>> groupedSkillTags;
     }
 
     @Data

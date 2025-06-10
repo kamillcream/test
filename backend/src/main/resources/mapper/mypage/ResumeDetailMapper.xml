@@ -50,8 +50,10 @@
     project_history_end_dt FROM TBL_RESUME_PROJECT_HISTORY_S WHERE resume_sq = #{resumeSq} </select>
 
   <select id="selectSkillTagNamesByProjectHistorySq" parameterType="long" resultType="string">
-    SELECT st.skill_tag_nm FROM TBL_RESUME_PROJECT_HISTORY_SKILL_TAG_S phst JOIN TBL_SKILL_TAG_C st
-    ON phst.skill_tag_sq = st.skill_tag_sq WHERE phst.project_history_sq = #{projectHistorySq} </select>
+    SELECT s.skill_tag_nm, p.skill_tag_nm AS parent_skill_tag_nm FROM
+    TBL_RESUME_PROJECT_HISTORY_SKILL_TAG_S phs JOIN TBL_SKILL_TAG_C s ON phs.skill_tag_sq =
+    s.skill_tag_sq LEFT JOIN TBL_SKILL_TAG_C p ON s.parent_skill_tag_sq = p.skill_tag_sq WHERE
+    phs.project_history_sq = #{projectHistorySq} </select>
 
   <select id="selectSkillTagNamesByResumeSq" parameterType="long" resultType="string"> SELECT
     DISTINCT st.skill_tag_nm FROM TBL_RESUME_SKILL_TAG_S rst JOIN TBL_SKILL_TAG_C st ON
@@ -74,5 +76,12 @@
 
   <select id="selectCommonCodeName" parameterType="long" resultType="string"> SELECT common_code_nm
     FROM TBL_COMMON_CODE_C WHERE common_code_sq = #{codeSq} </select>
+
+  <select id="selectGroupedSkillTagsByProjectHistorySq" resultType="map"> SELECT parent.skill_tag_nm
+    AS parentSkillTagName, child.skill_tag_nm AS skillTagName FROM
+    TBL_RESUME_PROJECT_HISTORY_SKILL_TAG_S child LEFT JOIN TBL_SKILL_TAG_C parent ON
+    child.parent_skill_tag_sq = parent.skill_tag_sq WHERE child.project_history_sq =
+    #{projectHistorySq} </select>
+
 
 </mapper>
