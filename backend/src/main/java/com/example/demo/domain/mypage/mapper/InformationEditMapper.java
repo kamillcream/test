@@ -67,7 +67,7 @@ public interface InformationEditMapper {
 
         UserInfoDTO selectUserInfo(@Param("userSq") Long userSq);
 
-        AddressDTO selectAddressInfo(@Param("addressSq") Long addressSq);
+        InformationEditAddressDTO selectAddressInfo(@Param("addressSq") Long addressSq);
 
         List<String> selectAffiliationTags(@Param("companySq") Long companySq);
 

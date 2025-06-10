@@ -90,7 +90,7 @@ public class InformationEditRepository {
         return informationEditMapper.selectUserInfo(userSq);
     }
 
-    public AddressDTO getAddressInfo(Long addressSq) {
+    public InformationEditAddressDTO getAddressInfo(Long addressSq) {
         return informationEditMapper.selectAddressInfo(addressSq);
     }
 

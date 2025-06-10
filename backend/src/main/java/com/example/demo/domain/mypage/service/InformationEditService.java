@@ -11,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.amazonaws.services.s3.AmazonS3;
 import com.example.demo.common.AmazonS3.AmazonS3Service;
 import com.example.demo.common.AmazonS3.UploadedFileDTO;
-import com.example.demo.domain.mypage.dto.AddressDTO;
 import com.example.demo.domain.mypage.dto.CompanyInfoDTO;
 import com.example.demo.domain.mypage.dto.InformationEditAddressDTO;
 import com.example.demo.domain.mypage.dto.ProfileImageInfoDTO;
@@ -141,7 +140,7 @@ public class InformationEditService {
         }
 
         UserInfoDTO userInfo = informationEditRepository.getUserInfo(userSq);
-        AddressDTO addressInfo = informationEditRepository.getAddressInfo(companyInfo.getAddressSq());
+        InformationEditAddressDTO addressInfo = informationEditRepository.getAddressInfo(companyInfo.getAddressSq());
         List<String> tagList = informationEditRepository.getCompanyTags(companyInfo.getCompanySq());
         Long fileSq = informationEditRepository.findFileSqByCompanySq(companyInfo.getCompanySq());
         UploadedFileDTO file = informationEditRepository.findByFileSq(fileSq);
