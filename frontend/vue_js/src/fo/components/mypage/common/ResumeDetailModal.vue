@@ -346,7 +346,9 @@
           <!-- 첨부파일 -->
           <h5 class="text-primary">첨부 파일</h5>
           <p v-for="(file, index) in resumeInfo.attachmentList" :key="index">
-            <a :href="file.url" target="_blank">{{ file.name }}</a>
+            <a :href="file.attachmentFileUrl" target="_blank">{{
+              file.attachmentOriginFileNm
+            }}</a>
           </p>
         </div>
       </div>

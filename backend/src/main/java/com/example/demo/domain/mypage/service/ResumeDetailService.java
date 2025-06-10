@@ -31,8 +31,15 @@ public class ResumeDetailService {
         ResumeDetailResponseDTO resume = repository.getResumeBasic(resumeSq);
         if (resume == null) {
             return null;
+
         }
 
+        // 프로필 이미지
+        String photoSaveName = repository.getResumePhotoSaveName(resumeSq);
+        if (photoSaveName != null) {
+            String s3Url = amazonS3.getUrl(bucket, photoSaveName).toString();
+            resume.setResumePhotoUrl(s3Url);
+        }
         // 주소
         resume.setAddress(repository.getAddress(resumeSq));
 

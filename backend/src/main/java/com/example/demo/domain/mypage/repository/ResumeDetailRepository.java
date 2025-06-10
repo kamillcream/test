@@ -64,4 +64,8 @@ public class ResumeDetailRepository {
         return mapper.selectGroupedSkillTagsByProjectHistorySq(projectHistorySq);
     }
 
+    public String getResumePhotoSaveName(Long resumeSq) {
+        return mapper.selectResumePhotoSaveName(resumeSq);
+    }
+
 }
