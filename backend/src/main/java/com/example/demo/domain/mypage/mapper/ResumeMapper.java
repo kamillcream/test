@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import com.example.demo.domain.mypage.vo.ResumeVo;
 import com.example.demo.domain.project.vo.ResumeNmTtlVo;
+import com.example.demo.domain.project.vo.ResumeSummaryVo;
 
 import java.util.List;
 import java.util.Map;
@@ -14,9 +15,11 @@ import java.util.Map;
 public interface ResumeMapper {
 	void insertResume(ResumeRegisterRequest request);
 	
-	public ResumeNmTtlVo findLatestResumeBySq(Long resumeSq);
-	public ResumeNmTtlVo findRepResumeNmTtlByUserSq(Long userSq);
+	public ResumeSummaryVo findLatestResumeBySq(Long resumeSq);
+	public ResumeSummaryVo findRepResumeNmTtlByUserSq(Long userSq);
 	
+	
+
 	public List<Long> findResumesByUserSq(Long userSq);
 	public Long findRepResumeByUserSq(Long userSq);
 	public Long findLatestResumeSqByUserSq(Long userSq);

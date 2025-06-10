@@ -157,7 +157,13 @@
                 <div class="d-flex gap-2 ms-auto">
                   <button
                     v-if="isSelected(member.userSq)"
-                    @click="toggleSelection(member.userSq, member.userNm)"
+                    @click="
+                      toggleSelection(
+                        member.userSq,
+                        member.userNm,
+                        member.resumeSq,
+                      )
+                    "
                     class="btn btn-primary btn-lg"
                     style="font-size: 14px; padding: 8px 12px"
                   >
@@ -165,7 +171,13 @@
                   </button>
                   <button
                     v-else
-                    @click="toggleSelection(member.userSq, member.userNm)"
+                    @click="
+                      toggleSelection(
+                        member.userSq,
+                        member.userNm,
+                        member.resumeSq,
+                      )
+                    "
                     class="btn btn-primary btn-outline btn-lg"
                     style="font-size: 14px; padding: 8px 12px"
                   >
@@ -297,7 +309,7 @@ const confirmApplication = async (selectedResumes, projectSq) => {
     onConfirm: async () => {
       try {
         const res = await api.$post(`/projects/applications/${projectSq}`, {
-          resumeSq: selectedResumes.map((r) => r.userSq),
+          resumeSq: selectedResumes.map((r) => r.resumeSq),
           projectApplicationTyp: 'COMPANY',
         })
         alert(res.message || '프로젝트 지원에 성공했습니다.')
@@ -311,11 +323,11 @@ const confirmApplication = async (selectedResumes, projectSq) => {
   })
 }
 
-const toggleSelection = (memberId, name) => {
+const toggleSelection = (memberId, name, resumeSq) => {
   const index = selectedResumes.value.findIndex((r) => r.userSq === memberId)
 
   if (index === -1) {
-    selectedResumes.value.push({ userSq: memberId, name })
+    selectedResumes.value.push({ userSq: memberId, name, resumeSq })
   } else {
     selectedResumes.value.splice(index, 1)
   }
@@ -326,7 +338,8 @@ const isSelected = (memberId) => {
 
 const fetchAffiliationMemberList = async () => {
   try {
-    const response = await api.$get('/companies/6', {
+    const response = await api.$get('/companies', {
+      withCredentials: true,
       params: {
         page: currentPage.value,
         size: pageSize.value,
