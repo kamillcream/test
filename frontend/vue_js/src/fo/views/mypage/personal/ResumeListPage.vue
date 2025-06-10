@@ -47,7 +47,7 @@
                 <a
                   href="#"
                   class="text-6 m-0"
-                  @click.prevent="openResumeDetail(resume)"
+                  @click.prevent="openResumeDetail(resume.resumeSq)"
                 >
                   {{ resume.resumeTtl }}
                 </a>
@@ -125,16 +125,18 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { api } from '@/axios.js'
-import { useMypageStore } from '@/fo/stores/mypageStore'
+// import { useMypageStore } from '@/fo/stores/mypageStore'
 import ResumeDetailModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
 import CommonPagination from '@/fo/components/common/CommonPagination.vue'
 import { watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useModalStore } from '@/fo/stores/modalStore'
 
 const resumeList = ref([])
 const showDetailModal = ref(false)
 const selectedResume = ref(null)
-const mypageStore = useMypageStore()
+// const mypageStore = useMypageStore()
+const modalStore = useModalStore()
 const isDeleting = ref(false) // 삭제 중 상태 추가
 const router = useRouter()
 
@@ -203,13 +205,17 @@ function setMainResume(resumeSq) {
     })
 }
 
-function openResumeDetail(resume) {
-  mypageStore.modalStack.push({
-    component: ResumeDetailModal,
-    props: { resume },
-    type: 'resumeDetail',
+function openResumeDetail(resumeSq) {
+  modalStore.openModal(ResumeDetailModal, {
+    title: '이력서 상세보기',
+    size: 'modal-lg',
+    props: {
+      resumeSq: resumeSq, // 여기에 실제 이력서 번호 넘김
+    },
+    onConfirm: () => {
+      modalStore.closeModal()
+    },
   })
-  mypageStore.isOpen = true
 }
 
 function closeResumeDetail() {

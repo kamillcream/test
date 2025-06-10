@@ -346,13 +346,15 @@
           <!-- 첨부파일 -->
           <h5 class="text-primary">첨부 파일</h5>
           <p v-for="(file, index) in resumeInfo.attachmentList" :key="index">
-            <a :href="file.url" target="_blank">{{ file.name }}</a>
+            <a :href="file.attachmentFileUrl" target="_blank">{{
+              file.attachmentOriginFileNm
+            }}</a>
           </p>
         </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-primary" @click="handleSelect">선택하기</button>
+      <!-- <button class="btn btn-primary" @click="handleSelect">선택하기</button> -->
       <button class="btn btn-outline-secondary" @click="closeModal">
         닫기
       </button>
@@ -412,10 +414,10 @@ const closeModal = () => {
   modalStore.closeModal()
 }
 
-const handleSelect = () => {
-  console.log('이력서 선택')
-  closeModal()
-}
+// const handleSelect = () => {
+//   console.log('이력서 선택')
+//   closeModal()
+// }
 
 // 이력서 상세조회
 const fetchResume = async () => {
