@@ -406,7 +406,9 @@ function resetModal(component, props = {}) {
 }
 
 const openUserApplyModal = async (projectSq) => {
-  const data = await api.$get(`/projects/applications/${projectSq}`)
+  const data = await api.$get(`/projects/applications/${projectSq}`, {
+    withCredentials: true,
+  })
 
   const allApplicants = data.output
 
