@@ -93,6 +93,13 @@
         <!-- 지원자 목록 -->
         <div class="row">
           <div class="col">
+            <div
+              v-if="filteredApplicants.length === 0"
+              class="text-muted py-3"
+              style="font-size: 14px"
+            >
+              지원한 개인 지원자가 없습니다.
+            </div>
             <ul class="simple-post-list m-0 position-relative">
               <li
                 v-for="applicant in filteredApplicants"
