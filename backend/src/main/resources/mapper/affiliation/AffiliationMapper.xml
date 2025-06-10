@@ -259,6 +259,7 @@
         WHERE company_sq = #{companySq}
         AND user_sq = #{userSq}
         AND company_application_status_cd = 501
+        AND company_application_is_deleted_yn = 'N'
     </select>
     
     <update id="updateReadAt">

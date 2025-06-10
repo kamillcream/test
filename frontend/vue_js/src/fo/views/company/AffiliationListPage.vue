@@ -5,12 +5,6 @@
       strongText="소속 모집 공고"
       :breadcrumbs="[{ text: 'Home', link: '/' }, { text: '소속' }]"
     />
-    <!-- <AffiliationFilter
-      :localFilters="['서울', '부산', '대구']"
-      :careerFilters="['신입', '경력']"
-      :jobTypeFilters="['백엔드', '프론트엔드', 'PM', '디자이너']"
-      @update="updateFilters"
-    /> -->
     <div class="container py-4">
       <!-- 검색창 및 필터 영역 -->
       <div
@@ -278,20 +272,40 @@ const getAfltnList = async () => {
     const addressFilter =
       address == null || address == 'all' ? '' : `&addressCd=${addressCd.value}`
 
-    const res = await api.$get(
-      `/affiliation?page=${currentPage.value}&size=${size}&sortType=${sortType.value}${searchFilter}${addressFilter}`,
-    )
-    console.log(res.output)
-    if (res) {
-      if (res.output.totalElements == 0) {
-        totalPages.value = 1
-      } else {
-        totalPages.value = Math.floor(
-          (res.output.totalElements + size - 1) / size,
-        )
+    if (localStorage.getItem('userNm')) {
+      const res = await api.$get(
+        `/affiliation?page=${currentPage.value}&size=${size}&sortType=${sortType.value}${searchFilter}${addressFilter}`,
+      )
+      console.log(res.output)
+      if (res) {
+        if (res.output.totalElements == 0) {
+          totalPages.value = 1
+        } else {
+          totalPages.value = Math.floor(
+            (res.output.totalElements + size - 1) / size,
+          )
+        }
+        if (!res.output.viewerSq) {
+          window.location.href = '/login'
+        }
+        afltnList.value = res.output.companies
+        affiliationStore.viewerSq = res.output.viewerSq
       }
-      afltnList.value = res.output.companies
-      affiliationStore.viewerSq = res.output.viewerSq
+    } else {
+      const res = await api.$get(
+        `/affiliation/guest?page=${currentPage.value}&size=${size}&sortType=${sortType.value}${searchFilter}${addressFilter}`,
+      )
+      console.log(res.output)
+      if (res) {
+        if (res.output.totalElements == 0) {
+          totalPages.value = 1
+        } else {
+          totalPages.value = Math.floor(
+            (res.output.totalElements + size - 1) / size,
+          )
+        }
+        afltnList.value = res.output.companies
+      }
     }
   } catch (error) {
     alertStore.show('소속 공고를 불러올 수 없습니다.', 'danger')
@@ -300,6 +314,9 @@ const getAfltnList = async () => {
 
 // 스크랩 버튼 클릭
 const clickScrap = async (sq) => {
+  if (!affiliationStore.viewerSq) {
+    alertStore.show('로그인 후 이용해주세요.', 'danger')
+  }
   try {
     const res = await api.$post(`/affiliation/${sq}/scrap`)
     if (res.status == 'OK') {
