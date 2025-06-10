@@ -1,5 +1,6 @@
 package com.example.demo.domain.mypage.mapper;
 
+import com.example.demo.domain.mypage.dto.request.ResumeEducationRequest;
 import com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest;
 import com.example.demo.domain.mypage.dto.response.ResumeListResponse;
 import org.apache.ibatis.annotations.Mapper;
@@ -34,9 +35,17 @@ public interface ResumeMapper {
 	void updateAllRepresentativeN(@Param("userSq") Long userSq);
     void updateRepresentativeY(@Param("resumeSq") Long resumeSq);
 	
-    //이력서 삭제.
+    //이력서 수정
+    void updateResume(ResumeRegisterRequest request);
+    
+    //이력서 삭제
 	void updateDeleteYn(@Param("resumeSq") Long resumeSq);
 
+	
+	//학력
+	void insertEducation(ResumeEducationRequest request);
+	void deleteEducationByResumeSq(Long resumeSq);
+	
 	public List<ResumeVo> findResumeVoByUserSq(@Param("userSq") Long userSq);
 	public ResumeNmTtlVo findResumeNmTtlBySq(@Param("resumeSq") Long resumeSq);
 }

@@ -63,6 +63,8 @@ public class ResumeService {
 
 	    // 이력서 등록
 	    resumeMapper.insertResume(request);
+	    System.out.println("✅ 최종 addressSq = " + request.getAddressSq());
+
 
 	    return createResponse(request);
 	}
@@ -80,14 +82,14 @@ public class ResumeService {
 	}
 
 	private void processAddress(ResumeRegisterRequest request) {
-	    // 시군구 기준으로 지역코드 조회
-		 System.out.println("request.getSigungu() = " + request.getSigungu());
-		    Long areaCodeSq = addressMapper.selectAreaCodeSqBySigungu(request.getSigungu());
-		    System.out.println("조회된 areaCodeSq = " + areaCodeSq);
-
+	    // 시/도와 시/군/구 기준으로 지역코드 조회
+		 Long areaCodeSq = addressMapper.selectAreaCodeBySigungu(request.getSigungu());
 		    if (areaCodeSq == null) {
-		        throw new IllegalArgumentException("[" + request.getSigungu() + "]에 해당하는 지역 코드가 존재하지 않습니다.");
+		        throw new IllegalArgumentException("해당 시/군/구에 대한 지역 코드가 없습니다.");
 		    }
+		    
+	    System.out.println("✅ DB 기준 sigungu = " + request.getSigungu());
+	  
 
 	    // 주소 객체 생성 및 저장
 	    AddressDTO addressDTO = AddressDTO.builder()
@@ -101,18 +103,20 @@ public class ResumeService {
 	        .build();
 
 	    addressRepository.insertAddress(addressDTO);
+
+	    Long addressSq = addressDTO.getAddressSq();
+
 	    request.setAddressSq(addressDTO.getAddressSq());
 	}
-
+	
 	private ResumeRegisterResponse createResponse(ResumeRegisterRequest request) {
 	    return ResumeRegisterResponse.builder()
-	        .resumeSq(request.getResumeSq())
+	    	.userSq(request.getUserSq())
+	    	.resumeSq(request.getResumeSq())
 	        .resumeTtl(request.getResumeTtl())
 	        .representative("Y".equals(request.getResumeIsRepresentativeYn()))
 	        .build();
 	}
-	
-	
 	//대표 이력서 설정
 	@Transactional
 	public void setMainResume(Long resumeSq, Long userSq) {
@@ -123,20 +127,29 @@ public class ResumeService {
 
 	//이력서 상세조회
 	public ResumeRegisterRequest getResumeById(Long resumeSq) {
-	    return resumeMapper.selectResumeById(resumeSq);
+	       ResumeRegisterRequest result = resumeMapper.selectResumeById(resumeSq);
+	       System.out.println("selectResumeById result: " + result);
+	       return result;
 	}
 
 	//이력서 전체 조회
 	public List<ResumeListResponse> getAllResumes(Long userSq) {
 	    return resumeMapper.selectAllResumes(userSq);
 	}
-	//삭제
+	
+	//이력서 수정
+	@Transactional
+	public void updateResume(ResumeRegisterRequest request) {
+	    resumeMapper.updateResume(request);
+	    // education, career 등 리스트도 별도 매퍼/쿼리로 처리 필요
+	}
+	
+	//이력서 삭제
 	public void softDeleteResume(Long resumeSq) {
 		resumeMapper.updateDeleteYn(resumeSq);
 	}
 	
 	//기술
-	
 	@Transactional(readOnly = true)
 	public List<ResumeSkillDataResponse> getAllSkillTags() {
 	    return resumeSkillMapper.findAllSkillTags();

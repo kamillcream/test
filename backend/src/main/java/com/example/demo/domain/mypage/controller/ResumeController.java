@@ -1,6 +1,7 @@
 package com.example.demo.domain.mypage.controller;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,9 +40,20 @@ public class ResumeController {
     
     //이력서 등록
     @PostMapping("/new")
-            public ResponseEntity<ApiResponse<ResumeRegisterResponse>> registerResume(@AuthenticationPrincipal Long userSq, @RequestBody ResumeRegisterRequest request) {
-    			request.setUserSq(userSq);
-                System.out.println("받은 이력서 등록 요청: " + request);
+            public ResponseEntity<ApiResponse<ResumeRegisterResponse>> registerResume(
+                @AuthenticationPrincipal Long userSq, @RequestBody ResumeRegisterRequest request
+	) {
+                System.out.println("userSq = " + userSq);
+
+                if (userSq == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.of(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.", null));
+                }
+                
+                request.setUserSq(userSq);
+                System.out.println("📥 받은 이력서 등록 요청:" + request);
+                System.out.println("✅ DTO 내부 userSq = " + request.getUserSq()); 
+
             	try {
                     ResumeRegisterResponse response = resumeService.registerResume(request);
                     return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "이력서 등록 성공", response));
@@ -58,9 +70,9 @@ public class ResumeController {
 
 	//대표 이력서 설정
 	@PatchMapping("/representative/{resumeSq}")
-	public ResponseEntity<String> setMainResume(@AuthenticationPrincipal Long userSq, @PathVariable("resumeSq") Long resumeSq) {
+	public ResponseEntity<ApiResponse<String>>setMainResume (@AuthenticationPrincipal Long userSq, @PathVariable("resumeSq") Long resumeSq) {
 		resumeService.setMainResume(resumeSq, userSq);
-	    return ResponseEntity.ok("대표 이력서 설정 완료");
+	    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "대표 이력서 설정 완료", "success"));
 	}
 	
 	//이력서 조회
@@ -74,18 +86,36 @@ public class ResumeController {
 	@GetMapping("/detail/{resumeSq}")
 	 public ResponseEntity<ApiResponse<ResumeRegisterRequest>> getResumeById(@PathVariable("resumeSq") Long resumeSq) {
         ResumeRegisterRequest resume = resumeService.getResumeById(resumeSq);
+        if (resume == null) {
+            System.out.println("resume is null for resumeSq=" + resumeSq);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.of(HttpStatus.NOT_FOUND, "이력서가 없습니다.", null));
+        }
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "이력서 상세 조회가 완료되었습니다.", resume));
 	}
+	
+	//이력서 수정
+	@PutMapping("/update/{resumeSq}")
+	public ResponseEntity<ApiResponse<String>> updateResume(
+	    @PathVariable("resumeSq") Long resumeSq,
+	    @RequestBody ResumeRegisterRequest request
+	) {
+	    request.setResumeSq(resumeSq);
+	    resumeService.updateResume(request);
+	    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "이력서 수정 완료", "success"));
+	}
+	
+	
 	//이력서 삭제
 	@PatchMapping("/{resumeSq}/delete")
-	public ResponseEntity<String> deleteResume(@PathVariable("resumeSq") Long resumeSq){
+	public ResponseEntity<ApiResponse<String>> deleteResume(@PathVariable("resumeSq") Long resumeSq){
 		resumeService.softDeleteResume(resumeSq);
-		return ResponseEntity.ok("이력서 삭제 완료");
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "이력서 삭제 완료", "success"));
 	}
 	//이력서 기술 태그
 	@GetMapping("/skills")
-	public ResponseEntity<List<ResumeSkillDataResponse>> getAllSkillTags() {
+	public ResponseEntity<ApiResponse<List<ResumeSkillDataResponse>>> getAllSkillTags() {
 	    List<ResumeSkillDataResponse> skills = resumeService.getAllSkillTags();
-	    return ResponseEntity.ok(skills);
+	    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, " ", skills));
 	}
 }

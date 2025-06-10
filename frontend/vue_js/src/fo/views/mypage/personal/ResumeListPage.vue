@@ -73,7 +73,7 @@
                 </div>
                 <div class="d-flex gap-2">
                   <a
-                    v-if="!resume.isMain"
+                    v-if="resume.resumeIsRepresentativeYn !== 'Y'"
                     href="#"
                     class="btn btn-outline btn-primary btn-sm"
                     @click.prevent="setMainResume(resume.resumeSq)"
@@ -111,26 +111,12 @@
             >이력서 등록하기</a
           >
         </div>
-        <!-- 페이징 -->
-        <div class="mt-5 py-5">
-          <ul class="pagination float-end">
-            <li class="page-item">
-              <a class="page-link" href="#"
-                ><i class="fas fa-angle-left"></i
-              ></a>
-            </li>
-            <li class="page-item active">
-              <a class="page-link" href="#">1</a>
-            </li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item">
-              <a class="page-link" href="#"
-                ><i class="fas fa-angle-right"></i
-              ></a>
-            </li>
-          </ul>
-        </div>
+        <!-- 페이지네이션: 우측 하단 정렬 -->
+        <CommonPagination
+          :currentPage="currentPage"
+          :totalPages="totalPages"
+          @update:currentPage="currentPage = $event"
+        />
       </div>
     </div>
   </div>
@@ -141,28 +127,45 @@ import { ref, onMounted } from 'vue'
 import { api } from '@/axios.js'
 import { useMypageStore } from '@/fo/stores/mypageStore'
 import ResumeDetailModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
-//import { useRouter } from 'vue-router'
+import CommonPagination from '@/fo/components/common/CommonPagination.vue'
+import { watch } from 'vue'
+import { useRouter } from 'vue-router'
 
 const resumeList = ref([])
 const showDetailModal = ref(false)
 const selectedResume = ref(null)
 const mypageStore = useMypageStore()
 const isDeleting = ref(false) // 삭제 중 상태 추가
-//const router = useRouter()
+const router = useRouter()
 
-onMounted(async () => {
-  try {
-    const res = await api.$get('/mypage/resume/list')
-    console.log('이력서 목록 응답:', res)
-    if (Array.isArray(res.output)) {
-      console.log(res.output)
-      resumeList.value = res.output
-    } else {
-      console.error('이력서 목록이 배열이 아닙니다:', res)
+// 페이지네이션 설정
+const size = 5
+const currentPage = ref(1)
+const totalPages = ref(1)
+
+//목록 불러오기
+const getResume = async () => {
+  const res = await api.$get(
+    `/mypage/resume/list?currentPage=${currentPage.value}&size=${size}`,
+  )
+  console.log('이력서 목록 응답:', res)
+  if (Array.isArray(res.output)) {
+    console.log(res.output)
+    resumeList.value = res.output
+    if (res.totalCount) {
+      totalPages.value = Math.ceil(res.totalCount / size)
     }
-  } catch (error) {
-    console.error('이력서 목록 조회 실패:', error)
+  } else {
+    console.error('이력서 목록을 불러올 수 없습니다.', res)
   }
+}
+
+onMounted(() => {
+  getResume()
+})
+
+watch(currentPage, () => {
+  getResume()
 })
 
 function removeResume(resumeSq) {
@@ -170,8 +173,7 @@ function removeResume(resumeSq) {
   api
     .$patch(`/mypage/resume/${resumeSq}/delete`)
     .then(() => {
-      // 삭제 후 목록에서 제거
-      resumeList.value = resumeList.value.filter((r) => r.resumeSq !== resumeSq)
+      getResume()
     })
     .catch((err) => {
       alert('삭제 실패: ' + (err?.response?.data?.message || err.message))
@@ -188,10 +190,8 @@ function setMainResume(resumeSq) {
 
   api
     .$patch(`/mypage/resume/representative/${resumeSq}`)
-    .then(() => {
-      // 반드시 목록 새로고침으로만 대표 상태를 반영!
-      fetchResumeList()
-    })
+
+    .then(() => getResume())
     .catch((err) => {
       alert(
         '대표 이력서 설정 실패: ' +
@@ -201,18 +201,6 @@ function setMainResume(resumeSq) {
     .finally(() => {
       setMainResume.loading = false
     })
-}
-
-// 목록 새로고침 함수
-async function fetchResumeList() {
-  try {
-    const res = await api.$get('/mypage/resume/list')
-    if (Array.isArray(res)) {
-      resumeList.value = res
-    }
-  } catch (error) {
-    console.error('이력서 목록 조회 실패:', error)
-  }
 }
 
 function openResumeDetail(resume) {
@@ -229,17 +217,17 @@ function closeResumeDetail() {
   showDetailModal.value = false
 }
 
-function editResume(/*id*/) {
-  // 수정 페이지 이동
+//수정하기
+function editResume(resumeSq) {
+  router.push({ name: 'ResumeFormEdit', params: { resumeSq } })
 }
 
-function copyResume(/*id*/) {
-  // 복사 기능
-}
+// 복사 기능
+function copyResume(/*id*/) {}
 
 function registerResume() {
-  // router.push('/mypage/resumeform').then(() => {
-  //   window.scrollTo({ top: 0, behavior: 'auto' })
-  // })
+  router.push('/mypage/resumeform').then(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  })
 }
 </script>

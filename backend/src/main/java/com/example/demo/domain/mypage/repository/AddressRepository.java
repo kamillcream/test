@@ -13,5 +13,6 @@ public class AddressRepository {
     public void insertAddress(com.example.demo.domain.mypage.dto.AddressDTO addressDTO) {
         addressMapper.insertAddress(addressDTO);
     }
+ 
 }
 

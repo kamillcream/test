@@ -29,9 +29,7 @@
     FROM TBL_RESUME_M
     WHERE USER_SQ = #{userSq} AND resume_is_representative_yn = 'Y'
   </select>
-  
- 
-  
+    
   <select id="findResumesByUserSq" resultType="Long">
     SELECT
       RESUME_SQ
@@ -63,8 +61,7 @@
     WHERE RESUME_SQ = #{resumeSq}
   </select>
   
-  
-  <!-- 이력서 등록. -->
+    <!-- 이력서 등록 -->
 	<insert id="insertResume"
 	        parameterType="com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest"
 	        useGeneratedKeys="true"
@@ -100,10 +97,8 @@
 	    )
 	</insert>
 
-
-
-  <!-- 이력서 전체 조회 (userSq 기준) -->
-  <select id="selectAllResumes"
+	<!-- 이력서 전체 조회 (userSq 기준) -->
+	<select id="selectAllResumes"
           parameterType="long"
           resultType="com.example.demo.domain.mypage.dto.response.ResumeListResponse">
     SELECT
@@ -118,24 +113,49 @@
     WHERE user_sq = #{userSq}
       AND resume_is_deleted_yn = 'N'
     ORDER BY resume_sq DESC
-  </select>
+	</select>
 
   <!-- 이력서 상세 조회 -->
-  <select id="selectResumeById" parameterType="long"
+	<select id="selectResumeById" parameterType="long"
           resultType="com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest">
-    SELECT
-      resume_sq AS resumeSq,
-      resume_ttl AS resumeTtl,
-      resume_nm AS resumeNm,
-      resume_email AS resumeEmail,
-      resume_greeting_txt AS resumeGreetingTxt,
-      resume_is_representative_yn AS resumeIsRepresentativeYn,
-      resume_created_at_dtm AS resumeCreatedAtDtm
-    FROM TBL_RESUME_M
-    WHERE user_sq = #{userSq}
-    ORDER BY resume_sq DESC
-  </select>
+        SELECT
+	    r.resume_sq AS resumeSq,
+	    r.user_sq AS userSq,
+	    r.address_sq AS addressSq,
+	    r.resume_ttl AS resumeTtl,
+	    r.resume_photo_url AS resumePhotoUrl,
+	    r.resume_nm AS resumeNm,
+	    r.resume_birth_dt AS resumeBirthDt,
+	    r.resume_phone_num AS resumePhoneNum,
+	    r.resume_email AS resumeEmail,
+	    r.resume_greeting_txt AS resumeGreetingTxt,
+	    r.resume_is_representative_yn AS resumeIsRepresentativeYn,
+	    r.resume_is_notification_yn AS resumeIsNotificationYn,
+	    r.resume_created_at_dtm AS resumeCreatedAtDtm,
+	    a.zonecode AS zonecode,
+	    a.address AS address,
+	    a.detail_address AS detailAddress,
+	    a.sigungu AS sigungu,
+	    a.latitude AS latitude,
+	    a.longitude AS longitude
+	  FROM TBL_RESUME_M r
+	  LEFT JOIN TBL_ADDRESS_S a ON r.address_sq = a.address_sq
+	  WHERE r.resume_sq = #{resumeSq}
+	</select>
 
+<!--학력 추가-->
+  <insert id="insertEducation" parameterType="com.example.demo.domain.mypage.dto.request.ResumeEducationRequest">
+  INSERT INTO TBL_RESUME_EDUCATION_S (resume_sq, school, major, status, period)
+  VALUES (#{resumeSq}, #{school}, #{major}, #{status}, #{period})
+  </insert>
+<!--학력 삭제-->
+  <delete id="deleteEducationByResumeSq" parameterType="long">
+  DELETE FROM TBL_RESUME_EDUCATION_S WHERE resume_sq = #{resumeSq}
+  </delete>
+
+  <select id="selectEducationByResumeSq" parameterType="long" resultType="com.example.demo.domain.mypage.dto.request.ResumeEducationRequest">
+    SELECT * FROM TBL_RESUME_EDUCATION_S WHERE resume_sq = #{resumeSq}
+  </select>
 
   <!--대표이력서 설정-->
   <update id="updateAllRepresentativeN">
@@ -149,6 +169,23 @@
 	SET resume_is_representative_yn = 'Y'
 	WHERE resume_sq = #{resumeSq}
   </update>
+
+	<!--이력서 수정-->
+  <update id="updateResume" parameterType="com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest">
+  UPDATE TBL_RESUME_M
+  SET
+    resume_ttl = #{resumeTtl},
+    resume_photo_url = #{resumePhotoUrl},
+    resume_nm = #{resumeNm},
+    resume_birth_dt = #{resumeBirthDt},
+    resume_phone_num = #{resumePhoneNum},
+    resume_email = #{resumeEmail},
+    resume_greeting_txt = #{resumeGreetingTxt},
+    resume_is_representative_yn = #{resumeIsRepresentativeYn},
+    resume_is_notification_yn = #{resumeIsNotificationYn}
+  WHERE resume_sq = #{resumeSq}
+  </update>
+	
 	
 	<!--이력서 삭제(softDelete)-->
   <update id="updateDeleteYn" parameterType="long">
