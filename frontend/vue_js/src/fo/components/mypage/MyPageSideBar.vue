@@ -30,15 +30,19 @@
           <span class="nav-link">프로젝트 관리</span>
           <ul>
             <li class="nav-item">
-              <router-link class="nav-link" to="/mypage/projectListPage"
+              <router-link class="nav-link" to="/mypage/affiliationProjectList"
                 >프로젝트 공고 목록</router-link
               >
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="#">지원 내역</router-link>
+              <router-link class="nav-link" to="/mypage/appliedProjects"
+                >지원 내역</router-link
+              >
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="#">스크랩 내역</router-link>
+              <router-link class="nav-link" to="/mypage/projectScrap"
+                >스크랩 내역</router-link
+              >
             </li>
           </ul>
         </li>
