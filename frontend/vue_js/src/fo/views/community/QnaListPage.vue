@@ -83,7 +83,7 @@ const alertStore = useAlertStore()
 
 const boardList = ref([])
 // 한 화면에 보일 박스 숫자 설정
-const size = 2
+const size = 10
 
 const currentPage = ref(1)
 

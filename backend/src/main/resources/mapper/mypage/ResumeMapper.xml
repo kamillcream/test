@@ -21,8 +21,9 @@
     WHERE RESUME_SQ = #{resumeSq}
   </select>
   
-  <select id="findRepResumeNmTtlByUserSq" resultType="com.example.demo.domain.project.vo.ResumeNmTtlVo">
+  <select id="findRepResumeNmTtlByUserSq" resultType="com.example.demo.domain.project.vo.ResumeSummaryVo">
     SELECT
+      RESUME_SQ AS resumeSq,
       RESUME_NM AS resumeNM,
       RESUME_TTL as resumeTtl
     FROM TBL_RESUME_M
@@ -53,10 +54,11 @@
 	  LIMIT 1
   </select>
   
-   <select id= "findLatestResumeBySq" resultType="com.example.demo.domain.project.vo.ResumeNmTtlVo">
+   <select id= "findLatestResumeBySq" resultType="com.example.demo.domain.project.vo.ResumeSummaryVo">
     SELECT
-      RESUME_NM AS resumeNM,
-      null as resumeTtl
+      RESUME_NM AS resumeNm,
+      null as resumeTtl,
+      null as resumeSq
     FROM TBL_RESUME_M
     WHERE RESUME_SQ = #{resumeSq}
   </select>

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.example.demo.domain.project.vo.ResumeNmTtlVo;
+import com.example.demo.domain.project.vo.ResumeSummaryVo;
 
 import lombok.*;
 
@@ -12,6 +13,7 @@ import lombok.*;
 @Builder
 public class CompanyMemberVo {
 	private final Long userSq;
+	private final Long resumeSq;
 	private final String userNm;
 	private final String resumeTtl;
 	private final Long leavedYn;
@@ -25,13 +27,14 @@ public class CompanyMemberVo {
 	
 	
 	
-	public static CompanyMemberVo from(Long userSq, ResumeNmTtlVo resumeNmTtlVo, LocalDate careerStart, LocalDate careerEnd
+	public static CompanyMemberVo from(Long userSq, ResumeSummaryVo resumeSummaryVo, LocalDate careerStart, LocalDate careerEnd
 			, List<String> skillTags, Integer careerYr, Long leavedYn) {
 		return CompanyMemberVo.builder()
 				.userSq(userSq)
-				.userNm(resumeNmTtlVo.getResumeNm())
+				.resumeSq(resumeSummaryVo.getResumeSq())
+				.userNm(resumeSummaryVo.getResumeNm())
 				.leavedYn(leavedYn)
-				.resumeTtl(resumeNmTtlVo.getResumeTtl())
+				.resumeTtl(resumeSummaryVo.getResumeTtl())
 				.careerStartDt(careerStart)
 				.careerEndDt(careerEnd)
 				.skillTagNms(skillTags)

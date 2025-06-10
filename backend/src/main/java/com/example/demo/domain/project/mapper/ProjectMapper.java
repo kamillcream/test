@@ -38,6 +38,9 @@ public interface ProjectMapper {
 	Long countProjectsBySearch(ProjectSearchRequest request);
 	Long countCompanyProjectsBySearch(@Param("request") BaseRequest request);
 	List<LocalDateTime> findInterviewTimesByProjectSq(@Param("projectSq") Long projectSq);
+
+	List<LocalDateTime> findAllInterviewTimesByProjectSq(@Param("projectSq") Long projectSq);
+	
 	List<InterviewTimeInfoResponse> findInterviewSqTmByProjectSq (Long projectSq);
 	Project findBySq(@Param("projectSq") Long projectSq);
 	Long findAddressSqByProjectSq(@Param("projectSq") Long projectSq);

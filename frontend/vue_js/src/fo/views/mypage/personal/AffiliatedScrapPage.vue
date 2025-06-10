@@ -123,6 +123,7 @@ import { api } from '@/axios'
 import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 import CommonPagination from '@/fo/components/common/CommonPagination.vue'
 import AffiliationRecruit from '@/fo/components/company/AffiliationRecruit.vue'
+import { useAffiliationStore } from '@/fo/stores/AffiliationStore'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { useModalStore } from '@/fo/stores/modalStore'
 import { onMounted, ref } from 'vue'
@@ -136,44 +137,12 @@ const totalElements = ref(1)
 
 const alertStore = useAlertStore()
 const modalStore = useModalStore()
+const affiliationStore = useAffiliationStore()
 const closeModal = () => {
   modalStore.closeModal()
 }
 
-const scraps = ref([
-  {
-    id: 1,
-    company: 'EST Soft',
-    status: '모집중',
-    employeeCount: 50,
-    qualification: '서울 / 신입 / 학력무관 / JAVA',
-    openDate: '2025.04.30',
-  },
-  {
-    id: 2,
-    company: 'EST Soft',
-    status: '모집중',
-    employeeCount: 50,
-    qualification: '서울 / 신입 / 학력무관 / JAVA',
-    openDate: '2025.04.30',
-  },
-  {
-    id: 3,
-    company: 'EST Soft',
-    status: '모집중',
-    employeeCount: 50,
-    qualification: '서울 / 신입 / 학력무관 / JAVA',
-    openDate: '2025.04.30',
-  },
-  {
-    id: 4,
-    company: 'EST Soft',
-    status: '모집 마감',
-    employeeCount: 50,
-    qualification: '서울 / 신입 / 학력무관 / JAVA',
-    openDate: '2025.04.30',
-  },
-])
+const scraps = ref([])
 
 const getScrapList = async () => {
   try {
@@ -190,6 +159,7 @@ const getScrapList = async () => {
       console.log(res)
       scraps.value = res.output.companies
       totalElements.value = totalCnt
+      affiliationStore.viewerSq = res.output.viewerSq
 
       if (totalCnt == 0) {
         totalPages.value = 1
@@ -198,7 +168,7 @@ const getScrapList = async () => {
       }
     }
   } catch (error) {
-    alertStore.show('지원자를 불러올 수 없습니다.', 'danger')
+    alertStore.show('스크랩 내역을 불러올 수 없습니다.', 'danger')
   }
 }
 

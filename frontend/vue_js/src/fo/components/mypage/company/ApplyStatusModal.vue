@@ -210,8 +210,7 @@
                             </template>
                             <template
                               v-else-if="
-                                applicant.appStatusVo.appStatus ===
-                                '인터뷰 확정'
+                                applicant.appStatusVo.appStatus === '인터뷰확정'
                               "
                             >
                               <div

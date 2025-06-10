@@ -21,7 +21,9 @@ import com.example.demo.domain.mypage.mapper.ResumeMapper;
 import com.example.demo.domain.mypage.mapper.ResumeSkillMapper;
 import com.example.demo.domain.project.util.ProjectUtil;
 import com.example.demo.domain.project.vo.ResumeNmTtlVo;
+import com.example.demo.domain.project.vo.ResumeSummaryVo;
 import com.example.demo.domain.user.mapper.UserMapper;
+import com.example.demo.domain.user.util.JwtAuthenticationToken;
 
 import lombok.RequiredArgsConstructor;
 
@@ -61,7 +63,9 @@ public class CompanyService {
 		return companyMapper.findBizNumByCompanySq(companySq);
 	}
 	
-	public CompanyMemberResponse fetchMemberList(Long companySq, CompanyMemberSearchRequest request) {
+	public CompanyMemberResponse fetchMemberList(JwtAuthenticationToken token, CompanyMemberSearchRequest request) {
+		Long companySq = fetchCompanySq(token.getUserSq(), token.getUserTypeCd());
+		
 		Long totalCount = companyMapper.countUsersBySearch(companySq, request);
 
 		
@@ -70,15 +74,15 @@ public class CompanyService {
 
 		companyUserSqs.forEach(
 				sq -> {
-					ResumeNmTtlVo resumeNmTtlVo;
+					ResumeSummaryVo resumeSummaryVo;
 					Long repResumeSq = resumeMapper.findRepResumeByUserSq(sq);
 					if(repResumeSq == null) {
 						repResumeSq = resumeMapper.findLatestResumeSqByUserSq(sq);
-						resumeNmTtlVo = resumeMapper.findLatestResumeBySq(repResumeSq);
+						resumeSummaryVo = resumeMapper.findLatestResumeBySq(repResumeSq);
 
 						}else {
 
-						resumeNmTtlVo = resumeMapper.findRepResumeNmTtlByUserSq(sq);
+						resumeSummaryVo = resumeMapper.findRepResumeNmTtlByUserSq(sq);
 
 					}	
 					List<Long> resumeSqs = resumeMapper.findResumesByUserSq(sq);
@@ -93,7 +97,7 @@ public class CompanyService {
 					
 					Long leavedYn = companyMapper.findCompanyMemberStatus(sq);
 					
-					responses.add(CompanyMemberVo.from(sq, resumeNmTtlVo, joinDt, leaveDt, skillTags, careerYr, leavedYn));
+					responses.add(CompanyMemberVo.from(sq, resumeSummaryVo, joinDt, leaveDt, skillTags, careerYr, leavedYn));
 					
 				}
 		);
