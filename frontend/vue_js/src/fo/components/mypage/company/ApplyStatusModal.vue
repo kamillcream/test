@@ -371,6 +371,7 @@
 <script setup>
 import { ref, defineProps, computed } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
+import { useAlertStore } from '@/fo/stores/alertStore'
 
 import InterviewTimeModal from '@/fo/components/mypage/common/InterviewSelectModal.vue'
 import ResumeDetailModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
@@ -379,6 +380,7 @@ import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 import { api } from '@/axios.js'
 
 const modalStore = useModalStore()
+const alertStore = useAlertStore()
 
 // 필터 상태
 const currentFilter = ref('all')
@@ -586,10 +588,11 @@ const openStatusFailureModal = (applicationSq) => {
       try {
         console.log('삭제 확정됨')
         updateStatus(applicationSq, '불합격')
+        alertStore.show('불합격 처리가 정상적으로 이루어졌습니다.')
         modalStore.closeModal()
       } catch (error) {
         console.error('삭제 실패:', error)
-        alert('삭제 중 오류가 발생했습니다.')
+        alertStore.show('삭제 중 오류가 발생했습니다.', 'danger')
       }
     },
   })

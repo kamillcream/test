@@ -260,6 +260,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useModalStore } from '../../stores/modalStore'
+import { useAlertStore } from '../../stores/alertStore'
 import UserResumeModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
 import ResumeSelectModal from '@/fo/components/mypage/common/ResumeSelectModal.vue'
 import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
@@ -268,6 +269,7 @@ import { api } from '@/axios.js'
 import { useRouter, useRoute } from 'vue-router'
 
 const modalStore = useModalStore()
+const alertStore = useAlertStore()
 const router = useRouter()
 const route = useRoute()
 
@@ -312,12 +314,13 @@ const confirmApplication = async (selectedResumes, projectSq) => {
           resumeSq: selectedResumes.map((r) => r.resumeSq),
           projectApplicationTyp: 'COMPANY',
         })
-        alert(res.message || '프로젝트 지원에 성공했습니다.')
+        alertStore.show(res.message || '프로젝트 지원에 성공했습니다.')
         modalStore.closeModal()
+        close()
         router.push({ name: 'ProjectListPage' }) // 삭제 후 이동 (예시)
       } catch (error) {
         console.error('지원 실패:', error)
-        alert('지원 중 오류가 발생했습니다.')
+        alertStore.show('지원 중 오류가 발생했습니다.', 'danger')
       }
     },
   })
