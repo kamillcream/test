@@ -829,7 +829,11 @@ const removeSkill = (name) => {
 
 const removePreferSkill = (name) => {
   selectedPreferSkills.value = selectedPreferSkills.value.filter(
-    (preferSkill) => preferSkill.name !== name,
+    (preferSkill) => {
+      const skillName =
+        typeof preferSkill === 'string' ? preferSkill : preferSkill.name
+      return skillName !== name
+    },
   )
 }
 
