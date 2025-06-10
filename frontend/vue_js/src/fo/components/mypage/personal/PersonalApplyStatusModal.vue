@@ -94,15 +94,15 @@
         <div class="row">
           <div class="col">
             <div
-              v-if="filteredApplicants.length === 0"
+              v-if="paginatedApplicants.length === 0"
               class="text-muted py-3"
               style="font-size: 14px"
             >
-              지원한 개인 지원자가 없습니다.
+              조건에 해당하는 개인 지원자가 없습니다.
             </div>
             <ul class="simple-post-list m-0 position-relative">
               <li
-                v-for="applicant in filteredApplicants"
+                v-for="applicant in paginatedApplicants"
                 :key="applicant.applicationSq"
                 style="border-bottom: 1px rgb(230, 230, 230) solid"
               >
@@ -188,7 +188,7 @@
                       </template>
                       <template
                         v-else-if="
-                          applicant.appStatusVo.appStatus === '지원 취소'
+                          applicant.appStatusVo.appStatus === '지원취소'
                         "
                       >
                         <span class="btn btn-light btn-sm">지원 취소됨</span>
@@ -323,7 +323,10 @@ const searchType = ref('all')
 const searchText = ref('')
 const applicantType = ref('personal')
 const currentPage = ref(1)
-const totalPages = ref(3)
+const pageSize = ref(5)
+const totalPages = computed(() =>
+  Math.ceil(filteredApplicants.value.length / pageSize.value),
+)
 
 const localApplicants = ref([...props.applicants])
 
@@ -339,16 +342,21 @@ const updateStatusLocally = (applicationSq, newStatus) => {
 const filteredApplicants = computed(() => {
   return localApplicants.value.filter((applicant) => {
     const status = applicant.appStatusVo?.appStatus
+    console.log
     const keyword = searchText.value.toLowerCase()
 
     const matchesFilter = (() => {
       switch (currentFilter.value) {
+        case 'passed':
+          return status === '합격'
+        case 'in_progress':
+          return status === '지원중'
         case 'interview_confirmed':
-          return status === '인터뷰 확정'
+          return status === '인터뷰확정'
         case 'interview_requested':
           return status === '인터뷰요청중'
         case 'rejected':
-          return ['불합격', '반려', '지원 취소'].includes(status)
+          return ['불합격', '지원취소'].includes(status)
         default:
           return true
       }
@@ -378,29 +386,48 @@ const filteredApplicants = computed(() => {
   })
 })
 
+const paginatedApplicants = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredApplicants.value.slice(start, end)
+})
+
 const filterCounts = computed(() => {
   const counts = {
-    all: localApplicants.value.length,
+    all: filteredApplicants.value.length,
+    passed: 0,
+    in_progress: 0,
     interview_confirmed: 0,
     interview_requested: 0,
     rejected: 0,
   }
 
-  localApplicants.value.forEach((a) => {
+  filteredApplicants.value.forEach((a) => {
     const status = a.appStatusVo?.appStatus
-    if (status === '인터뷰 확정') counts.interview_confirmed++
+    if (status === '지원중') counts.in_progress++
+    else if (status === '합격') counts.passed++
+    else if (status === '인터뷰확정') counts.interview_confirmed++
     else if (status === '인터뷰요청중') counts.interview_requested++
-    else if (['불합격', '반려', '지원 취소'].includes(status)) counts.rejected++
+    else if (['불합격', '반려', '지원취소'].includes(status)) counts.rejected++
   })
-
   return counts
 })
 
 const filters = computed(() => [
   { type: 'all', label: '전체', count: filterCounts.value.all },
   {
+    type: 'passed',
+    label: '합격',
+    count: filterCounts.value.passed,
+  },
+  {
+    type: 'in_progress',
+    label: '지원중',
+    count: filterCounts.value.in_progress,
+  },
+  {
     type: 'interview_confirmed',
-    label: '인터뷰 확정',
+    label: '인터뷰확정',
     count: filterCounts.value.interview_confirmed,
   },
   {
@@ -410,7 +437,7 @@ const filters = computed(() => [
   },
   {
     type: 'rejected',
-    label: '불합격 / 반려 / 취소',
+    label: '불합격',
     count: filterCounts.value.rejected,
   },
 ])
@@ -435,7 +462,6 @@ const search = () => {
 const changePage = (page) => {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
-  // TODO: 페이지 데이터 로드
 }
 
 // 모달 닫기
