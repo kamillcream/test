@@ -1,18 +1,27 @@
 <template>
-  <header
+  <!-- <header
     id="header"
     class="header-effect-shrink header-spacing"
     data-plugin-options='{"stickyEnabled": true}'
+  > -->
+  <header
+    id="header"
+    class="header-effect-shrink"
+    data-plugin-options="{'stickyEnabled': true, 'stickyEffect': 'shrink', 'stickyEnableOnBoxed': true, 'stickyEnableOnMobile': false, 'stickyChangeLogo': true, 'stickyStartAt': 30, 'stickyHeaderContainerHeight': 70}"
+    style="height: 103.2px"
   >
     <!-- 로그인 상태 -->
     <div v-if="isLoggedIn" class="header-body border-0">
       <div class="header-container container">
         <div class="header-row">
           <div class="header-left d-flex align-items-center order-0 order-lg-0">
-            <a href="/" class="text-primary fs-3 text-decoration-none home">
+            <router-link
+              to="/"
+              class="text-primary fs-3 text-decoration-none home"
+            >
               Freelancer<br />
               Service
-            </a>
+            </router-link>
           </div>
           <div
             class="header-nav header-nav-line header-nav-top-line header-nav-top-line-with-border order-2 order-lg-1"
@@ -23,37 +32,53 @@
               <nav class="collapse">
                 <ul class="nav nav-pills" id="mainNav">
                   <li class="dropdown">
-                    <a
-                      class="dropdown-item dropdown-toggle active current-page-active"
-                      href="/affiliation"
+                    <router-link
+                      class="dropdown-item dropdown-toggle"
+                      :class="{
+                        active: isAffiliationActive,
+                        'current-page-active': true,
+                      }"
+                      to="/affiliation"
                     >
                       소속
                       <i class="fas fa-chevron-down"></i
-                    ></a>
+                    ></router-link>
                   </li>
                   <li class="dropdown">
-                    <a
-                      class="dropdown-item dropdown-toggle current-page-active"
-                      href="/projectListPage"
+                    <router-link
+                      class="dropdown-item dropdown-toggle"
+                      :class="{
+                        active: isProjectActive,
+                        'current-page-active': true,
+                      }"
+                      to="/projectListPage"
                     >
                       프로젝트
                       <i class="fas fa-chevron-down"></i
-                    ></a>
+                    ></router-link>
                   </li>
                   <li class="dropdown">
-                    <a
-                      class="dropdown-item dropdown-toggle current-page-active"
-                      href="#"
+                    <router-link
+                      class="dropdown-item dropdown-toggle"
+                      :class="{
+                        active: isCommunityActive,
+                        'current-page-active': true,
+                      }"
+                      to="/board"
                     >
                       커뮤니티
                       <i class="fas fa-chevron-down"></i
-                    ></a>
+                    ></router-link>
                     <ul class="dropdown-menu">
                       <li>
-                        <a class="dropdown-item" href="/board">일반 게시판 </a>
+                        <router-link class="dropdown-item" to="/board"
+                          >일반 게시판
+                        </router-link>
                       </li>
                       <li>
-                        <a class="dropdown-item" href="/qna">Q&A 게시판 </a>
+                        <router-link class="dropdown-item" to="/qna"
+                          >Q&A 게시판
+                        </router-link>
                       </li>
                     </ul>
                   </li>
@@ -181,10 +206,13 @@
       <div class="header-container container">
         <div class="header-row">
           <div class="header-left d-flex align-items-center order-0 order-lg-0">
-            <a href="/" class="text-primary fs-3 text-decoration-none home">
+            <router-link
+              to="/"
+              class="text-primary fs-3 text-decoration-none home"
+            >
               Freelancer<br />
               Service
-            </a>
+            </router-link>
           </div>
 
           <!-- 네비게이션 메뉴 -->
@@ -197,34 +225,53 @@
               <nav class="collapse">
                 <ul class="nav nav-pills" id="mainNav">
                   <li class="dropdown">
-                    <a
-                      class="dropdown-item dropdown-toggle active current-page-active"
-                      href="/affiliation"
+                    <router-link
+                      class="dropdown-item dropdown-toggle"
+                      :class="{
+                        active: isAffiliationActive,
+                        'current-page-active': true,
+                      }"
+                      to="/affiliation"
                     >
-                      소속 <i class="fas fa-chevron-down"></i>
-                    </a>
+                      소속
+                      <i class="fas fa-chevron-down"></i>
+                    </router-link>
                   </li>
                   <li class="dropdown">
-                    <a
-                      class="dropdown-item dropdown-toggle current-page-active"
-                      href="/projectListPage"
+                    <router-link
+                      class="dropdown-item dropdown-toggle"
+                      :class="{
+                        active: isProjectActive,
+                        'current-page-active': true,
+                      }"
+                      to="/projectListPage"
                     >
-                      프로젝트 <i class="fas fa-chevron-down"></i>
-                    </a>
+                      프로젝트
+                      <i class="fas fa-chevron-down"></i>
+                    </router-link>
                   </li>
                   <li class="dropdown">
-                    <a
-                      class="dropdown-item dropdown-toggle current-page-active"
-                      href="#"
+                    <router-link
+                      class="dropdown-item dropdown-toggle"
+                      :class="{
+                        active: isCommunityActive,
+                        'current-page-active': true,
+                      }"
+                      to="/board"
                     >
-                      커뮤니티 <i class="fas fa-chevron-down"></i>
-                    </a>
+                      커뮤니티
+                      <i class="fas fa-chevron-down"></i>
+                    </router-link>
                     <ul class="dropdown-menu">
                       <li>
-                        <a class="dropdown-item" href="/board">일반 게시판</a>
+                        <router-link class="dropdown-item" to="/board"
+                          >일반 게시판</router-link
+                        >
                       </li>
                       <li>
-                        <a class="dropdown-item" href="/qna">Q&A 게시판</a>
+                        <router-link class="dropdown-item" to="/qna"
+                          >Q&A 게시판</router-link
+                        >
                       </li>
                     </ul>
                   </li>
@@ -245,8 +292,8 @@
             class="header-nav-features header-nav-features-no-border header-nav-features-lg-show-border order-1 order-lg-2"
           >
             <div class="header-nav-feature d-inline-flex">
-              <a href="/login" class="text-muted text-decoration-none"
-                >로그인</a
+              <router-link to="/login" class="text-muted text-decoration-none"
+                >로그인</router-link
               >
             </div>
           </div>
@@ -262,10 +309,26 @@ import { useUserStore } from '@/fo/stores/userStore'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import router from '@/fo/router'
 import { api } from '@/axios'
+import { useRoute } from 'vue-router'
 
 const alertStore = useAlertStore()
 const userStore = useUserStore()
 const isLoggedIn = computed(() => userStore.isLoggedIn)
+const route = useRoute()
+
+// 현재 경로
+const currentPath = computed(() => route.path)
+
+// 각 메뉴의 활성 여부 판별
+const isAffiliationActive = computed(() =>
+  currentPath.value.startsWith('/affiliation'),
+)
+const isProjectActive = computed(() =>
+  currentPath.value.startsWith('/projectListPage'),
+)
+const isCommunityActive = computed(() =>
+  ['/board', '/qna'].some((path) => currentPath.value.startsWith(path)),
+)
 
 const logout = async () => {
   await api.$post('/logout', {}) // 서버 로그아웃 API 호출
@@ -301,6 +364,7 @@ const handleScroll = () => {
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
+  console.log('currentPath', currentPath.value)
 })
 
 onBeforeUnmount(() => {
@@ -325,7 +389,6 @@ onBeforeUnmount(() => {
   transition:
     height 0.3s ease,
     box-shadow 0.3s ease; /* transition을 height와 box-shadow에만 적용 */
-  margin-top: 2px; /* 상단 여백 추가 */
 }
 
 .header-body.shrink {
