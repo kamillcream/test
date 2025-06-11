@@ -47,7 +47,7 @@
                 <a
                   href="#"
                   class="text-6 m-0"
-                  @click.prevent="openResumeDetail(resume)"
+                  @click.prevent="openResumeDetail(resume.resumeSq)"
                 >
                   {{ resume.resumeTtl }}
                 </a>
@@ -96,12 +96,6 @@
             </div>
           </li>
         </ul>
-        <!-- 이력서 상세 모달 -->
-        <ResumeDetailModal
-          v-if="showDetailModal"
-          :resume="selectedResume"
-          @close="closeResumeDetail"
-        />
         <!-- 이력서 등록하기 버튼 -->
         <div class="d-flex justify-content-end mt-4 mb-5">
           <a
@@ -125,16 +119,16 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { api } from '@/axios.js'
-import { useMypageStore } from '@/fo/stores/mypageStore'
+// import { useMypageStore } from '@/fo/stores/mypageStore'
 import ResumeDetailModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
 import CommonPagination from '@/fo/components/common/CommonPagination.vue'
 import { watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useModalStore } from '@/fo/stores/modalStore'
 
 const resumeList = ref([])
-const showDetailModal = ref(false)
-const selectedResume = ref(null)
-const mypageStore = useMypageStore()
+// const mypageStore = useMypageStore()
+const modalStore = useModalStore()
 const isDeleting = ref(false) // 삭제 중 상태 추가
 const router = useRouter()
 
@@ -203,18 +197,16 @@ function setMainResume(resumeSq) {
     })
 }
 
-function openResumeDetail(resume) {
-  mypageStore.modalStack.push({
-    component: ResumeDetailModal,
-    props: { resume },
-    type: 'resumeDetail',
+function openResumeDetail(resumeSq) {
+  console.log('resumeSq', resumeSq)
+  modalStore.openModal(ResumeDetailModal, {
+    title: '이력서 상세보기',
+    size: 'modal-lg',
+    resumeSq: resumeSq,
+    onConfirm: () => {
+      modalStore.closeModal()
+    },
   })
-  mypageStore.isOpen = true
-}
-
-function closeResumeDetail() {
-  selectedResume.value = null
-  showDetailModal.value = false
 }
 
 //수정하기

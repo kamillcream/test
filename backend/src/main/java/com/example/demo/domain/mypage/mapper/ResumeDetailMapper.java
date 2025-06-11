@@ -36,4 +36,6 @@ public interface ResumeDetailMapper {
 
     List<Map<String, Object>> selectGroupedSkillTagsByProjectHistorySq(Long projectHistorySq);
 
+    String selectResumePhotoSaveName(Long resumeSq);
+
 }

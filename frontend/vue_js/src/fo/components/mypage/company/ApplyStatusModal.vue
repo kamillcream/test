@@ -94,14 +94,14 @@
         <div class="row">
           <div class="col">
             <div
-              v-if="companies.length === 0"
+              v-if="groupedPaginatedApplicants.length === 0"
               class="text-muted py-3"
               style="font-size: 14px"
             >
               지원한 기업 지원자가 없습니다.
             </div>
             <div
-              v-for="(company, index) in companies"
+              v-for="(company, index) in groupedPaginatedApplicants"
               :key="index"
               class="row mb-3"
             >
@@ -130,7 +130,7 @@
                   <!-- 지원자 목록 -->
                   <ul class="simple-post-list m-0 position-relative">
                     <li
-                      v-for="applicant in filteredApplicants"
+                      v-for="applicant in company.applicants"
                       :key="applicant.applicationSq"
                       style="border-bottom: 1px rgb(230, 230, 230) solid"
                     >
@@ -371,6 +371,7 @@
 <script setup>
 import { ref, defineProps, computed } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
+import { useAlertStore } from '@/fo/stores/alertStore'
 
 import InterviewTimeModal from '@/fo/components/mypage/common/InterviewSelectModal.vue'
 import ResumeDetailModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
@@ -379,6 +380,7 @@ import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 import { api } from '@/axios.js'
 
 const modalStore = useModalStore()
+const alertStore = useAlertStore()
 
 // 필터 상태
 const currentFilter = ref('all')
@@ -386,27 +388,33 @@ const searchType = ref('all')
 const searchText = ref('')
 const applicantType = ref('company')
 const currentPage = ref(1)
-const totalPages = ref(3)
+const pageSize = ref(5)
+const totalPages = computed(() =>
+  Math.ceil(filteredApplicants.value.length / pageSize.value),
+)
 
 const selectedInterviewTimes = ref([])
 
-const companies = computed(() => {
-  const grouped = {}
+const paginatedApplicants = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredApplicants.value.slice(start, end)
+})
 
-  props.applicants.forEach((applicant) => {
+const groupedPaginatedApplicants = computed(() => {
+  const grouped = {}
+  paginatedApplicants.value.forEach((applicant) => {
     const name = applicant.companyNm || '미정'
     if (!grouped[name]) {
       grouped[name] = []
     }
     grouped[name].push(applicant)
   })
-
   return Object.entries(grouped).map(([name, applicants]) => ({
     name,
     applicants,
   }))
 })
-
 const props = defineProps({
   applicants: Array,
   projectSq: Number,
@@ -431,12 +439,16 @@ const filteredApplicants = computed(() => {
 
     const matchesFilter = (() => {
       switch (currentFilter.value) {
+        case 'passed':
+          return status === '합격'
+        case 'in_progress':
+          return status === '지원중'
         case 'interview_confirmed':
-          return status === '인터뷰 확정'
+          return status === '인터뷰확정'
         case 'interview_requested':
           return status === '인터뷰요청중'
         case 'rejected':
-          return ['불합격', '반려', '지원취소'].includes(status)
+          return ['불합격', '지원취소'].includes(status)
         default:
           return true
       }
@@ -465,30 +477,42 @@ const filteredApplicants = computed(() => {
     return matchesFilter && matchesSearch
   })
 })
-
 const filterCounts = computed(() => {
   const counts = {
-    all: localApplicants.value.length,
+    all: filteredApplicants.value.length,
+    passed: 0,
+    in_progress: 0,
     interview_confirmed: 0,
     interview_requested: 0,
     rejected: 0,
   }
 
-  localApplicants.value.forEach((a) => {
+  filteredApplicants.value.forEach((a) => {
     const status = a.appStatusVo?.appStatus
-    if (status === '인터뷰 확정') counts.interview_confirmed++
+    if (status === '지원중') counts.in_progress++
+    else if (status === '합격') counts.passed++
+    else if (status === '인터뷰확정') counts.interview_confirmed++
     else if (status === '인터뷰요청중') counts.interview_requested++
     else if (['불합격', '반려', '지원취소'].includes(status)) counts.rejected++
   })
-
   return counts
 })
 
 const filters = computed(() => [
   { type: 'all', label: '전체', count: filterCounts.value.all },
   {
+    type: 'passed',
+    label: '합격',
+    count: filterCounts.value.passed,
+  },
+  {
+    type: 'in_progress',
+    label: '지원중',
+    count: filterCounts.value.in_progress,
+  },
+  {
     type: 'interview_confirmed',
-    label: '인터뷰 확정',
+    label: '인터뷰확정',
     count: filterCounts.value.interview_confirmed,
   },
   {
@@ -564,10 +588,11 @@ const openStatusFailureModal = (applicationSq) => {
       try {
         console.log('삭제 확정됨')
         updateStatus(applicationSq, '불합격')
+        alertStore.show('불합격 처리가 정상적으로 이루어졌습니다.')
         modalStore.closeModal()
       } catch (error) {
         console.error('삭제 실패:', error)
-        alert('삭제 중 오류가 발생했습니다.')
+        alertStore.show('삭제 중 오류가 발생했습니다.', 'danger')
       }
     },
   })
@@ -589,7 +614,6 @@ const search = () => {
 const changePage = (page) => {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
-  // TODO: 페이지 데이터 로드
 }
 
 // 불합격 처리

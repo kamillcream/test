@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.common.ApiResponse;
-
 import com.example.demo.domain.project.dto.request.ApplicationSqRequest;
 import com.example.demo.domain.project.dto.request.ApplicationStatusRequest;
 import com.example.demo.domain.project.dto.request.ProjectApplyRequest;
@@ -27,6 +26,7 @@ import com.example.demo.domain.project.service.ProjectApplicationService;
 import com.example.demo.domain.project.service.ProjectService;
 
 import com.example.demo.domain.project.vo.ApplicationSummary;
+import com.example.demo.domain.user.util.JwtAuthenticationToken;
 
 import lombok.RequiredArgsConstructor;
 
@@ -54,10 +54,12 @@ public class ProjectApplicationController {
 
 	@GetMapping("/{projectSq}")
 	public ResponseEntity<ApiResponse<List<ApplicationStatusList>>> getProjectApplicationsByCompanies(
+			Authentication authentication,
 			@PathVariable("projectSq") Long projectSq) {
+		
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 공고 지원자 목록 반환 성공",
 				projectApplicationService.fetchProjectApplicationsByProject(projectSq)));
-	}
+	}	
 
 	@PatchMapping("/{applicationSq}")
 	public ResponseEntity<ApiResponse<Void>> patchApplicationStatus(@PathVariable("applicationSq") Long applicationSq,
