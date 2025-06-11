@@ -25,7 +25,10 @@
                     :class="{ selected: isSelected(skill) }"
                     @click="toggleSkill(skill)"
                   >
-                    <img :src="getSkillIcon(skill.skillTagNm)" :alt="skill" />
+                    <img
+                      :src="getSkillIcon(skill.skillTagNm)"
+                      :alt="skill.skillTagNm"
+                    />
                     <span>{{ skill.skillTagNm }}</span>
                   </button>
                 </div>

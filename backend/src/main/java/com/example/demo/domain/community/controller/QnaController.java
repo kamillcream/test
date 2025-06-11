@@ -4,10 +4,15 @@ package com.example.demo.domain.community.controller;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.common.ApiResponse;
+import com.example.demo.domain.community.dto.SkillTagDTO;
 import com.example.demo.domain.community.dto.request.*;
 import com.example.demo.domain.community.service.BoardService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.demo.domain.community.dto.response.*;
 
 import lombok.RequiredArgsConstructor;
@@ -43,7 +48,19 @@ public class QnaController {
     
 //    QnA 등록
     @PostMapping
-    public ResponseEntity<ApiResponse<NullType>> createQna(@AuthenticationPrincipal Long userSq, @RequestBody BoardRequest boardRequest){
+    public ResponseEntity<ApiResponse<NullType>> createQna(@AuthenticationPrincipal Long userSq, 
+    		@ModelAttribute BoardRequest boardRequest,
+    		@RequestParam("skillTagsJson") String skillTagsJson){
+    	ObjectMapper objectMapper = new ObjectMapper();
+    	List<SkillTagDTO> skillTags;
+    	if(skillTagsJson != null && !skillTagsJson.isBlank()) {
+        	try {
+                skillTags = objectMapper.readValue(skillTagsJson, new TypeReference<List<SkillTagDTO>>() {});
+            } catch (JsonProcessingException e) {
+                return ResponseEntity.badRequest().body(ApiResponse.of(HttpStatus.BAD_REQUEST, "skillTags 변환 실패", null));
+            }
+        	boardRequest.setSkillTags(skillTags);	
+    	}
     	boardRequest.setUserSq(userSq);
     	boardService.createBoard(boardRequest, 1402L);
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.CREATED, "게시글 등록이 완료되었습니다.", null));
@@ -51,7 +68,19 @@ public class QnaController {
     
 //    QnA 수정
     @PutMapping("/{boardSq}")
-    public ResponseEntity<ApiResponse<NullType>> updateQna(@AuthenticationPrincipal Long userSq, @RequestBody BoardRequest boardRequest, @PathVariable("boardSq") Long boardSq){
+    public ResponseEntity<ApiResponse<NullType>> updateQna(@AuthenticationPrincipal Long userSq, @PathVariable("boardSq") Long boardSq, 
+    		@ModelAttribute BoardRequest boardRequest,
+    		@RequestParam("skillTagsJson") String skillTagsJson){
+    	ObjectMapper objectMapper = new ObjectMapper();
+    	List<SkillTagDTO> skillTags;
+    	if(skillTagsJson != null && !skillTagsJson.isBlank()) {
+        	try {
+                skillTags = objectMapper.readValue(skillTagsJson, new TypeReference<List<SkillTagDTO>>() {});
+            } catch (JsonProcessingException e) {
+                return ResponseEntity.badRequest().body(ApiResponse.of(HttpStatus.BAD_REQUEST, "skillTags 변환 실패", null));
+            }
+        	boardRequest.setSkillTags(skillTags);	
+    	}
     	boardRequest.setUserSq(userSq);
     	boardService.updateBoard(boardRequest, boardSq, 1402L);
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "게시글 수정이 완료되었습니다.", null));

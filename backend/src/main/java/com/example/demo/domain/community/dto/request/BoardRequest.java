@@ -2,6 +2,7 @@ package com.example.demo.domain.community.dto.request;
 
 import com.example.demo.domain.community.dto.*;
 
+import org.springframework.web.multipart.MultipartFile;
 import lombok.*;
 import java.util.*;
 
@@ -15,5 +16,7 @@ public class BoardRequest{
     private Long boardAdoptStatusCd;
     private List<String> normalTags;
     private List<SkillTagDTO> skillTags;
+    private List<Long> attachments;
+    private List<MultipartFile> files;
 	
 }

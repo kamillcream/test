@@ -43,7 +43,7 @@ export const useBoardStore = defineStore('board', {
         description: payload.description,
         normalTags: [...payload.normalTags],
         skillTags: [...payload.skillTags],
-        attachments: [],
+        attachments: [...payload.attachments],
       }
       this.editSq = payload.sq
     },

@@ -162,7 +162,9 @@
                         href="#"
                         class="btn btn-light btn-sm text-primary"
                         style="font-size: 0.85rem"
-                        >소속 신청하기</a
+                        >{{
+                          afltn.isApply ? '소속 신청 완료' : '소속 신청하기'
+                        }}</a
                       >
                     </div>
                   </div>

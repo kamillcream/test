@@ -75,10 +75,11 @@ const isHtmlEmpty = (htmlString) => {
 const insertBoard = async () => {
   try {
     const reqData = registerRef.value.sendData()
-    if (reqData.ttl == null || reqData.ttl.trim() == '') {
+    console.log(reqData)
+    if (reqData.get('ttl') == null || reqData.get('ttl').trim() == '') {
       alertStore.show('제목을 입력해주세요.', 'danger')
       return
-    } else if (isHtmlEmpty(reqData.description)) {
+    } else if (isHtmlEmpty(reqData.get('description'))) {
       alertStore.show('내용을 입력해주세요.', 'danger')
       return
     }
