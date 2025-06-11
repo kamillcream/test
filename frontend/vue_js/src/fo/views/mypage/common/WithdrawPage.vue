@@ -113,17 +113,20 @@
 
 <script setup>
 import PasswordCheck from '@/fo/components/mypage/common/PasswordCheck.vue'
+import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '@/axios'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { useUserStore } from '@/fo/stores/userStore'
+import { useModalStore } from '@/fo/stores/modalStore'
 
 const isConfirmed = ref(false)
 
 const router = useRouter()
 const alertStore = useAlertStore()
 const userStore = useUserStore()
+const modalStore = useModalStore()
 
 const userId = ref('')
 const applicantName = ref('')
@@ -148,25 +151,36 @@ const handleSubmit = async (event) => {
     return
   }
 
-  try {
-    const response = await api.$post('/mypage/withdraw', {
-      userId: userId.value,
-      userNm: applicantName.value,
-    })
+  modalStore.openModal(CommonConfirmModal, {
+    title: '회원 탈퇴 확인',
+    message: '정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
+    onConfirm: async () => {
+      try {
+        const response = await api.$post('/mypage/withdraw', {
+          userId: userId.value,
+          userNm: applicantName.value,
+        })
 
-    if (response.status === 'OK') {
-      localStorage.clear()
-      userStore.$reset()
-      alertStore.show(
-        response.message || '회원 탈퇴가 완료되었습니다.',
-        'success',
-      )
-      router.push('/')
-    } else {
-      alertStore.show(response.message || '회원 탈퇴에 실패했습니다.', 'danger')
-    }
-  } catch (error) {
-    alertStore.show('서버 오류로 인해 탈퇴 처리에 실패했습니다.', 'danger')
-  }
+        if (response.status === 'OK') {
+          localStorage.clear()
+          userStore.$reset()
+          alertStore.show(
+            response.message || '회원 탈퇴가 완료되었습니다.',
+            'success',
+          )
+          router.push('/')
+        } else {
+          alertStore.show(
+            response.message || '회원 탈퇴에 실패했습니다.',
+            'danger',
+          )
+        }
+      } catch (error) {
+        alertStore.show('서버 오류로 인해 탈퇴 처리에 실패했습니다.', 'danger')
+      } finally {
+        modalStore.closeModal() // 모달 닫기
+      }
+    },
+  })
 }
 </script>
