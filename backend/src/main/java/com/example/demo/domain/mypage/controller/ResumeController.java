@@ -75,6 +75,14 @@ public class ResumeController {
 	    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "대표 이력서 설정 완료", "success"));
 	}
 	
+	@PatchMapping("/representative/{resumeSq}/others")
+	public ResponseEntity<ApiResponse<String>>setMainResume (@AuthenticationPrincipal Long userSq, 
+			@PathVariable("resumeSq") Long resumeSq) {
+		resumeService.setOthersMainResume(resumeSq);
+	    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "소속 인원 대표 이력서 설정 완료", "success"));
+	}
+	
+	
 	//이력서 조회
 	@GetMapping("/list")
 	public ResponseEntity<ApiResponse<List<ResumeListResponse>>> getAllResumes(@AuthenticationPrincipal Long userSq) {
