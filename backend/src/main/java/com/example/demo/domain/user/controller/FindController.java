@@ -42,31 +42,23 @@ public class FindController {
     }
 
     @PostMapping("/reset-password/verify")
-    public ResponseEntity<?> verifyUserForReset(@RequestBody ResetPasswordVerifyRequestDTO dto,
+    public ApiResponse<?> verifyUserForReset(@RequestBody ResetPasswordVerifyRequestDTO dto,
             HttpServletResponse response) {
         UserDTO user = userService.findUserByInfo(dto.getUserId(), dto.getName(), dto.getEmail());
+
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("회원 정보가 일치하지 않습니다.");
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, "일치하는 회원 정보를 찾을 수 없습니다.");
         }
 
         String resetToken = jwtProvider.createResetToken(user.getUserSq());
 
-        // HttpOnly 쿠키로 설정
         Cookie cookie = new Cookie("RESET_TOKEN", resetToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge(300); // 5분
+        cookie.setMaxAge(300);
         response.addCookie(cookie);
 
-        if (cookie != null) {
-            // 쿠키는 Set-Cookie로 내려주고, 바디는 공백 대신 ApiResponse로 통일
-            return ResponseEntity
-                    .ok(ApiResponse.of(HttpStatus.OK, "인증 성공", null));
-        } else {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(HttpStatus.BAD_REQUEST, "일치하는 회원 정보를 찾을 수 없습니다."));
-        }
+        return ApiResponse.of(HttpStatus.OK, "인증 성공", null);
     }
 
     @PostMapping("/reset-password")

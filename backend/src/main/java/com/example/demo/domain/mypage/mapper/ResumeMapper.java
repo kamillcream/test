@@ -63,4 +63,6 @@ public interface ResumeMapper {
 	public List<ResumeVo> findResumeVoByUserSq(@Param("userSq") Long userSq);
 	public ResumeNmTtlVo findResumeNmTtlBySq(@Param("resumeSq") Long resumeSq);
 
+	
+	public Long findUserByResumeSq(@Param("resumeSq") Long resumeSq);
 }

@@ -142,6 +142,16 @@
 	  LEFT JOIN TBL_ADDRESS_S a ON r.address_sq = a.address_sq
 	  WHERE r.resume_sq = #{resumeSq}
 	</select>
+	
+	<select id="findUserByResumeSq" 
+          resultType="Long">
+        SELECT user_sq
+	  FROM TBL_RESUME_M 
+	  WHERE resume_sq = #{resumeSq}
+	</select>
+	
+	
+	
 
 
   <!--대표이력서 설정-->

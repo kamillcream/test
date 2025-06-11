@@ -1,13 +1,20 @@
 package com.example.demo.domain.community.service;
 
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.domain.community.dto.*;
 import com.example.demo.domain.community.dto.request.*;
 import com.example.demo.domain.community.entity.*;
 import com.example.demo.domain.community.mapper.*;
+import com.example.demo.domain.mypage.dto.ProfileImageInfoDTO;
+import com.example.demo.domain.mypage.repository.InformationEditRepository;
 import com.example.demo.domain.community.dto.response.*;
+import com.amazonaws.services.s3.AmazonS3;
+import com.example.demo.common.AmazonS3.AmazonS3Service;
+import com.example.demo.common.AmazonS3.UploadedFileDTO;
 import com.example.demo.domain.community.converter.*;
 import com.example.demo.domain.user.dto.UserDTO;
 
@@ -29,6 +36,12 @@ public class BoardService {
     private final RecommendationMapper recommendationMapper;
     private final CommunityUserMapper communityUserMapper;
     private final AnswerService answerService;
+    private final AmazonS3 amazonS3;
+    private final AmazonS3Service amazonS3Service;
+    private final InformationEditRepository informationEditRepository;
+    
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     @Transactional
     public BoardListResponse getAllBoards(Long boardTypeCd, Long boardAdoptStatusCd, String searchType, String keyword, List<Long> searchSkillTags, String sortType, Long page, Long size) {
@@ -78,7 +91,7 @@ public class BoardService {
     	List<String> normalTags = normalTagConverter.convertNormalTagsToStrings(cmntTagMapper.findNT(boardSq, null));
     	List<SkillTagDTO> skillTags = skillTagConverter.convertSkillTagsToStrings(cmntTagMapper.findST(boardSq, null));
     	
-    	// 각 게시글의 작성자 조회
+    	// 게시글의 작성자 조회
     	UserDTO userInfo = communityUserMapper.findById(board.getUserSq());
     	String userNm = Optional.ofNullable(userInfo)
     			.map(UserDTO::getUserNm)
@@ -86,7 +99,7 @@ public class BoardService {
     	
     	List<AnswerListResponse> answerListResponses = answerService.getAllAnswers(board.getBoardSq());
     	
-    	// 각 게시글의 댓글 조회
+    	// 게시글의 댓글 조회
     	List<CommentResponse> comments = commentMapper.findByBoardSq(boardSq).stream()
     		    .filter(Objects::nonNull)
     		    .map(comment -> {
@@ -94,9 +107,20 @@ public class BoardService {
     		        return CommentResponse.fromEntity(comment, userDto);
     		    })
     		    .collect(Collectors.toList());
+    	
+    	// 게시글의 첨부파일 조회
+    	List<Long> fileSqs = boardMapper.findFiles(boardSq);
+    	List<BoardAttachmentResponse> files = fileSqs.stream().filter(Objects::nonNull).map(fileSq -> {
+    		BoardAttachment attachment = boardMapper.findFile(fileSq);
+    		BoardAttachmentResponse file = BoardAttachmentResponse.builder().fileSq(attachment.getFileSq())
+    				.fileOriginalNm(attachment.getFileOriginalNm())
+    				.fileSaveNm(attachment.getFileSaveNm())
+    				.build();
+    		return file;
+    	}).collect(Collectors.toList());
     			
     	
-        return BoardResponse.fromEntity(board, userNm, normalTags, skillTags, answerListResponses, comments, userSq);
+        return BoardResponse.fromEntity(board, userNm, normalTags, skillTags, answerListResponses, comments, userSq, files);
     }
     
     @Transactional
@@ -126,8 +150,26 @@ public class BoardService {
         }
     	
 //    	스킬태그 추가
-    	if(board.getBoardTypeCd() == 1402 && boardRequest.getSkillTags().size() > 0) {
+    	if(board.getBoardTypeCd() == 1402 && boardRequest.getSkillTags() != null && boardRequest.getSkillTags().size() > 0) {
     		cmntTagMapper.insertST(skillTagConverter.convertStringsToSkillTags(board.getBoardSq(), null, boardRequest.getSkillTags()));
+    	}
+    	
+    	// 첨부파일 업로드
+    	if(boardRequest.getFiles() != null) {
+    		for (MultipartFile file : boardRequest.getFiles()) {
+    			
+        		UploadedFileDTO uploaded = amazonS3Service.uploadFile(file);
+
+                ProfileImageInfoDTO fileInfo = ProfileImageInfoDTO.builder()
+                        .originalName(uploaded.getOriginalName())
+                        .savedName(uploaded.getSavedName())
+                        .contentType(uploaded.getContentType())
+                        .size(uploaded.getSize())
+                        .build();
+
+                informationEditRepository.saveFile(fileInfo);
+                boardMapper.insertFile(board.getBoardSq(), fileInfo.getFileSq());
+    	    }
     	}
         
         
@@ -172,6 +214,39 @@ public class BoardService {
 	  	if(board.getBoardTypeCd() == 1402 && boardRequest.getSkillTags().size() > 0) {
 	  		cmntTagMapper.insertST(skillTagConverter.convertStringsToSkillTags(board.getBoardSq(), null, boardRequest.getSkillTags()));
 	  	}
+	  	
+	  	// 첨부파일
+	  	// 기존 첨부파일 변동 여부 확인
+	  	List<Long> fileSqs = boardMapper.findFiles(boardSq);
+	  	List<Long> clientFileSqs = boardRequest.getAttachments();
+	  	Set<Long> clientFileSqSet = new HashSet<>(clientFileSqs);
+	  	List<Long> deletedFileSqs = fileSqs.stream()
+	  	        .filter(fileSq -> !clientFileSqSet.contains(fileSq))
+	  	        .collect(Collectors.toList());
+	  	for (Long fileSq : deletedFileSqs) {
+	  		deleteFile(board.getBoardSq(), fileSq);
+	    }
+	  	
+	  	
+	  	// 새로운 첨부파일 추가
+	  	// 첨부파일 업로드
+    	if(boardRequest.getFiles() != null) {
+    		for (MultipartFile file : boardRequest.getFiles()) {
+    			
+        		UploadedFileDTO uploaded = amazonS3Service.uploadFile(file);
+
+                ProfileImageInfoDTO fileInfo = ProfileImageInfoDTO.builder()
+                        .originalName(uploaded.getOriginalName())
+                        .savedName(uploaded.getSavedName())
+                        .contentType(uploaded.getContentType())
+                        .size(uploaded.getSize())
+                        .build();
+
+                informationEditRepository.saveFile(fileInfo);
+                boardMapper.insertFile(board.getBoardSq(), fileInfo.getFileSq());
+    	    }
+    	}
+	  	
 	        
 
         return;
@@ -227,6 +302,14 @@ public class BoardService {
     	
     	return allTags;
     	
+    }
+    
+    // 첨부파일 삭제
+    @Transactional
+    public void deleteFile(Long boardSq, Long fileSq) {
+    	boardMapper.deleteBoardFile(boardSq, fileSq);
+    	boardMapper.deleteFile(fileSq);
+    	return;
     }
 
 

@@ -284,7 +284,7 @@ const handleSubmit = async () => {
     if (response.status === 'OK') {
       alertStore.show('비밀번호 재설정 페이지로 이동합니다.', 'success')
       router.push({ name: 'ResetPassword' })
-    } else {
+    } else if (response.status === 'BAD_REQUEST') {
       alertStore.show('일치하는 회원 정보를 찾을 수 없습니다.', 'danger')
     }
   } catch (error) {

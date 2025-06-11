@@ -32,5 +32,10 @@ public interface BoardMapper {
      void addViewCnt(@Param("boardSq") Long boardSq);
      void updateCommentCnt(@Param("boardSq") Long boardSq);
      void updateRecommendCnt(@Param("boardSq") Long boardSq);
+     void insertFile(@Param("boardSq") Long boardSq, @Param("fileSq") Long fileSq);
+     List<Long> findFiles(@Param("boardSq") Long boardSq);
+     BoardAttachment findFile(@Param("fileSq") Long fileSq);
+     void deleteBoardFile(@Param("boardSq") Long boardSq, @Param("fileSq") Long fileSq);
+     void deleteFile(@Param("fileSq") Long fileSq);
      
 }

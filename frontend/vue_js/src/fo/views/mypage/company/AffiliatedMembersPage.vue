@@ -59,7 +59,10 @@ ew
             <!-- 상단: 이름/소개 + 퇴사처리 버튼 -->
             <div class="d-flex justify-content-between align-items-center">
               <div class="d-flex gap-2 align-items-center">
-                <a href="#" class="text-5 m-0" style="font-size: 14px"
+                <a
+                  @click="openResumeSelectModal(member.userSq)"
+                  class="text-5 m-0"
+                  style="font-size: 14px; cursor: pointer"
                   >{{ member.userNm }} /</a
                 >
                 <a href="#" class="text-4 m-0" style="font-size: 14px">{{
@@ -67,7 +70,7 @@ ew
                 }}</a>
               </div>
               <span
-                v-if="!member.careerEndDt"
+                v-if="member.leavedYn === 401"
                 class="btn btn-primary btn-outline btn-lg"
                 style="font-size: 14px; padding: 8px 12px"
                 @click="confirmFire(6, member.userSq)"
@@ -163,6 +166,7 @@ import { api } from '@/axios.js'
 
 import { useModalStore } from '../../../stores/modalStore.js'
 import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
+import ResumeSelectModal from '@/fo/components/mypage/common/ResumeSelectModal.vue'
 
 const searchType = ref('all')
 const searchText = ref('')
@@ -204,9 +208,18 @@ const fetchAffiliationMemberList = async () => {
   }
 }
 
+const openResumeSelectModal = (memberSq) => {
+  modalStore.openModal(ResumeSelectModal, {
+    size: 'modal-lg',
+    userSq: memberSq,
+    role: 'COMPANY',
+  })
+}
+
 const fireMember = async (companySq, userSq) => {
   try {
     await api.$patch(`/companies/${companySq}`, {
+      withCredentials: true,
       userSq: userSq,
       newStatus: '퇴사',
     })

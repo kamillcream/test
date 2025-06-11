@@ -13,12 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.example.demo.common.ApiResponse;
-import com.example.demo.domain.mypage.dto.AddressDTO;
+import com.example.demo.domain.mypage.dto.RepResumeSwitchRequest;
 import com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest;
 import com.example.demo.domain.mypage.dto.response.ResumeListResponse;
 import com.example.demo.domain.mypage.dto.response.ResumeRegisterResponse;
 import com.example.demo.domain.mypage.dto.response.ResumeSkillDataResponse;
-import com.example.demo.domain.mypage.dto.response.ResumeSkillPairResponse;
 import com.example.demo.domain.mypage.mapper.MypageAddressMapper;
 import com.example.demo.domain.mypage.service.ResumeService;
 
@@ -36,7 +35,6 @@ import lombok.RequiredArgsConstructor;
 public class ResumeController {
 
     private final ResumeService resumeService;
-    private final MypageAddressMapper addressMapper;
     
     //이력서 등록
     @PostMapping("/new")
@@ -70,15 +68,32 @@ public class ResumeController {
 
 	//대표 이력서 설정
 	@PatchMapping("/representative/{resumeSq}")
-	public ResponseEntity<ApiResponse<String>>setMainResume (@AuthenticationPrincipal Long userSq, @PathVariable("resumeSq") Long resumeSq) {
-		resumeService.setMainResume(resumeSq, userSq);
+	public ResponseEntity<ApiResponse<String>>setMainResume (@AuthenticationPrincipal Long userSq, 
+			@PathVariable("resumeSq") Long resumeSq,
+			@RequestBody(required = false) RepResumeSwitchRequest request) {
+		resumeService.setMainResume(resumeSq, request.getMemberSq());
 	    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "대표 이력서 설정 완료", "success"));
 	}
+	
+	@PatchMapping("/representative/{resumeSq}/others")
+	public ResponseEntity<ApiResponse<String>>setMainResume (@AuthenticationPrincipal Long userSq, 
+			@PathVariable("resumeSq") Long resumeSq) {
+		resumeService.setOthersMainResume(resumeSq);
+	    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "소속 인원 대표 이력서 설정 완료", "success"));
+	}
+	
 	
 	//이력서 조회
 	@GetMapping("/list")
 	public ResponseEntity<ApiResponse<List<ResumeListResponse>>> getAllResumes(@AuthenticationPrincipal Long userSq) {
 	    List<ResumeListResponse> resumes = resumeService.getAllResumes(userSq);
+	    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "이력서 조회가 완료되었습니다.", resumes));
+	}
+	
+	@GetMapping("/list/{memberSq}")
+	public ResponseEntity<ApiResponse<List<ResumeListResponse>>> getAllResumes(@AuthenticationPrincipal Long userSq, 
+			@PathVariable("memberSq") Long memberSq) {
+	    List<ResumeListResponse> resumes = resumeService.getAllResumes(memberSq);
 	    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "이력서 조회가 완료되었습니다.", resumes));
 	}
 	

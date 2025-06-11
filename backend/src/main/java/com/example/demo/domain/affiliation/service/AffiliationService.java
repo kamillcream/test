@@ -34,7 +34,7 @@ public class AffiliationService {
 		Address address = affiliationMapper.findAddress(company.getAddressSq());
 		List<String> tags = affiliationMapper.findTags(company.getCompanySq());
 		
-    	return AffiliationResponse.fromEntity(company, address, tags, null, null);
+    	return AffiliationResponse.fromEntity(company, address, tags, null, null, null);
     }
     
     
@@ -51,6 +51,12 @@ public class AffiliationService {
     				Address address = affiliationMapper.findAddress(company.getAddressSq());
     				List<String> tags = affiliationMapper.findTags(company.getCompanySq());
     				Long scrapCnt = affiliationMapper.findScrapCnt(company.getCompanySq());
+    				
+    				Long applyCnt = affiliationMapper.findIsApply(userSq, company.getCompanySq());
+    				Boolean isApply = false;
+    				if(applyCnt > 0) {
+    					isApply = true;
+    				}
 
     		    	Boolean isScrap = false;
     		    	if(userSq != null) {
@@ -60,7 +66,7 @@ public class AffiliationService {
     		    		}    		    		
     		    	}
     				
-    				return AffiliationResponse.fromEntity(company, address, tags, scrapCnt, isScrap);
+    				return AffiliationResponse.fromEntity(company, address, tags, scrapCnt, isScrap, isApply);
     				
     			}).collect(Collectors.toList());
     	
@@ -229,7 +235,13 @@ public class AffiliationService {
     				List<String> tags = affiliationMapper.findTags(company.getCompanySq());
     				Long memberCnt = affiliationMapper.findAffiliationMemberCnt(company.getCompanySq());
     				
-    				return AffiliationResponse.fromEntityScrap(company, address, tags, memberCnt);
+    				Long applyCnt = affiliationMapper.findIsApply(userSq, company.getCompanySq());
+    				Boolean isApply = false;
+    				if(applyCnt > 0) {
+    					isApply = true;
+    				}
+    				
+    				return AffiliationResponse.fromEntityScrap(company, address, tags, memberCnt, isApply);
     				
     			}).collect(Collectors.toList());
     	

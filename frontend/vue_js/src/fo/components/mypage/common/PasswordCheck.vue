@@ -1,7 +1,8 @@
 <template>
   <div>
     <div class="overflow-hidden mb-3">
-      <h2 class="font-weight-normal text-7 mb-0">회원 정보 수정</h2>
+      <slot />
+      <!-- <h2 class="font-weight-normal text-7 mb-0">회원 정보 수정</h2> -->
     </div>
     <div class="overflow-hidden mb-4 pb-3">
       <p class="mb-0">비밀번호 확인</p>

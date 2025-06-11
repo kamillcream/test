@@ -23,12 +23,13 @@ public class AffiliationResponse{
     private Long viewCnt; // 조회수 (기업 테이블)
     private Long scrapCnt; // 스크랩 수 (스크랩 테이블)
     private Boolean isScrap; // 스크랩 여부
+    private Boolean isApply; // 지원 여부
     private Long memberCnt; // 소속 직원 수
     private String isRecruitingYn;
     
 
 
-    public static AffiliationResponse fromEntity(Company company, Address adress, List<String> tags, Long scrapCnt, Boolean isScrap) {
+    public static AffiliationResponse fromEntity(Company company, Address adress, List<String> tags, Long scrapCnt, Boolean isScrap, Boolean isApply) {
     	LocalDate today = LocalDate.now();
         Period period = Period.between(company.getCompanyOpenDt(), today);
     	Integer openYear = period.getYears();
@@ -45,13 +46,14 @@ public class AffiliationResponse{
         		company.getCompanyViewCnt(),
         		scrapCnt,
         		isScrap,
+        		isApply,
         		null,
         		null
         		
         );
     }
     
-    public static AffiliationResponse fromEntityScrap(Company company, Address adress, List<String> tags, Long memberCnt) {
+    public static AffiliationResponse fromEntityScrap(Company company, Address adress, List<String> tags, Long memberCnt, Boolean isApply) {
     	LocalDate today = LocalDate.now();
         Period period = Period.between(company.getCompanyOpenDt(), today);
     	Integer openYear = period.getYears();
@@ -68,6 +70,7 @@ public class AffiliationResponse{
         		company.getCompanyViewCnt(),
         		null,
         		null,
+        		isApply,
         		memberCnt,
         		company.getCompanyIsRecruitingYn()
         		

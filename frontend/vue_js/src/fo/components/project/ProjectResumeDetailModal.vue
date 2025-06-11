@@ -355,6 +355,10 @@
     </div>
     <div class="modal-footer">
       <!-- <button class="btn btn-primary" @click="handleSelect">선택하기</button> -->
+      <button class="btn btn-outline-primary" @click="handleSelect">
+        선택하기
+      </button>
+
       <button class="btn btn-outline-secondary" @click="closeModal">
         닫기
       </button>
@@ -371,6 +375,10 @@ const props = defineProps({
   resumeSq: {
     type: Number,
     required: true,
+  },
+  onConfirm: {
+    type: Function,
+    required: false,
   },
 })
 
@@ -442,6 +450,19 @@ watchEffect(async () => {
     console.error('이력서 조회 실패:', err)
   }
 })
+
+const handleSelect = async () => {
+  try {
+    await api.$patch(`/mypage/resume/representative/${props.resumeSq}/others`, {
+      withCredentials: true,
+    })
+
+    props.onConfirm?.()
+    modalStore.closeModal()
+  } catch (error) {
+    console.error(error)
+  }
+}
 
 const generateIconUrl = (name) => {
   const supportedIcons = {

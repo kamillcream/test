@@ -1,6 +1,8 @@
 <template>
   <section>
-    <PasswordCheck v-if="!isConfirmed" @confirmed="isConfirmed = true" />
+    <PasswordCheck v-if="!isConfirmed" @confirmed="isConfirmed = true">
+      <h2 class="font-weight-normal text-7 mb-0">회원 정보 수정</h2>
+    </PasswordCheck>
     <div v-else>
       <div class="overflow-hidden mb-3">
         <h2 class="font-weight-normal text-7 mb-0">회원 정보 수정</h2>

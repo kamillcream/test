@@ -125,6 +125,13 @@ public class ResumeService {
 		resumeMapper.updateRepresentativeY(resumeSq);
 	}
 	
+	@Transactional
+	public void setOthersMainResume(Long resumeSq) {
+		Long memberSq = resumeMapper.findUserByResumeSq(resumeSq);
+		resumeMapper.updateAllRepresentativeN(memberSq);
+		resumeMapper.updateRepresentativeY(resumeSq);
+	}
+	
 
 	//이력서 상세조회
 	public ResumeRegisterResponse getResumeById(Long resumeSq) {

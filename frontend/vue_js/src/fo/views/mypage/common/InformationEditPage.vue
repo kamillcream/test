@@ -58,9 +58,12 @@ input:focus {
 .add:hover {
   cursor: pointer;
 }
+#profileImage:hover {
+  cursor: pointer;
+}
 
 input[type='file']:hover {
-  cursor: pointer;
+  cursor: pointer !important;
 }
 .add i {
   pointer-events: none; /* 아이콘이 클릭 방해 안 하게 */
@@ -105,7 +108,7 @@ input[type='file']:hover {
   font-weight: 500;
 }
 
-.btn.btn-light.btn-outline {
+.btn.btn-light {
   border-color: #d9d9d9;
 }
 

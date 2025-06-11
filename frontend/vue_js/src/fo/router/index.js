@@ -259,6 +259,16 @@ router.beforeEach((to, from, next) => {
     'BoardResisterPage' /* ... 로그인 필요 페이지들 */,
   ]
 
+  const userRolePages = ['UserProjectSpec']
+
+  const companyRolePages = [
+    'CompanyProjectSpec',
+    'AffiliationProjectList',
+    'AffiliatedMembers',
+    'ProjectPostPage',
+    'ProjectPostPageWithId',
+  ]
+
   // 로그인 중인데 로그인/회원가입 페이지 접근 시 메인으로 리다이렉트
   if (userStore.isLoggedIn && publicPages.includes(to.name)) {
     return next({ name: 'Main' })
@@ -267,6 +277,22 @@ router.beforeEach((to, from, next) => {
   // 로그인 안 된 상태에서 로그인 필요 페이지 접근 시 로그인 페이지로 리다이렉트
   if (!userStore.isLoggedIn && authRequiredPages.includes(to.name)) {
     return next({ name: 'Login' })
+  }
+
+  // PERSONAL 페이지에 COMPANY나 비로그인 유저가 접근하면 메인으로 리다이렉트
+  if (
+    (userStore.getUserType === 'PERSONAL' || userStore.getUserType === '') &&
+    companyRolePages.includes(to.name)
+  ) {
+    return next({ name: 'Main' })
+  }
+
+  // COMPANY 페이지에 PERSONAL이나 비로그인 유저가 접근하면 메인으로 리다이렉트
+  if (
+    (userStore.getUserType === 'COMPANY' || userStore.getUserType === '') &&
+    userRolePages.includes(to.name)
+  ) {
+    return next({ name: 'Main' })
   }
 
   next()

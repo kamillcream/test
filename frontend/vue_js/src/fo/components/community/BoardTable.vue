@@ -3,6 +3,7 @@
     <table class="table table-hover table-bordered align-middle text-center">
       <thead class="table-light">
         <tr>
+          <th class="th-ws">순번</th>
           <th class="th-ttl">제목</th>
           <th class="th-wm">작성자</th>
           <th class="th-wl">등록일</th>
@@ -14,6 +15,7 @@
       </thead>
       <tbody v-if="boardList.length > 0">
         <tr v-for="board in boardList" :key="board.sq">
+          <td>{{ board.sq }}</td>
           <td class="text-start px-3">
             <a :href="`/${isQna ? 'qna' : 'board'}/${board.sq}`"
               >{{ board.ttl

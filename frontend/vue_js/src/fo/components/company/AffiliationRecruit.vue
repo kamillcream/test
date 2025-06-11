@@ -120,7 +120,12 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-primary" @click="clickRecruit">
+      <button
+        v-if="!afltnInfo.isApply"
+        type="button"
+        class="btn btn-primary"
+        @click="clickRecruit"
+      >
         소속 신청하기
       </button>
       <button

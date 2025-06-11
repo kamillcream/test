@@ -95,7 +95,7 @@
                 <div class="post-info position-relative">
                   <div class="d-flex gap-2">
                     <a
-                      @click="openResumeModal"
+                      @click="openResumeDetailModal(member.resumeSq)"
                       href="#"
                       class="text-5 m-0"
                       style="font-size: 14px"
@@ -261,7 +261,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useModalStore } from '../../stores/modalStore'
 import { useAlertStore } from '../../stores/alertStore'
-import UserResumeModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
+import ResumeDetailModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
 import ResumeSelectModal from '@/fo/components/mypage/common/ResumeSelectModal.vue'
 import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 
@@ -283,6 +283,7 @@ const pageSize = ref(5)
 
 const members = ref([])
 
+// const resumes = ref([])
 const selectedResumes = ref([])
 
 const search = () => {
@@ -296,12 +297,37 @@ const removeMember = (userSq) => {
   )
 }
 
-const openResumeModal = () => {
-  modalStore.openModal(UserResumeModal)
+// const selectResume = (resume) => {
+//   // 1. 기존 대표 이력서 뱃지 제거
+//   resumes.value = resumes.value.map((r) => ({
+//     ...r,
+//     resumeIsRepresentativeYn: 'N',
+//   }))
+
+//   // 2. 선택된 이력서에 대표 뱃지 부여
+//   const selected = resumes.value.find((r) => r.resumeSq === resume.resumeSq)
+//   if (selected) {
+//     selected.resumeIsRepresentativeYn = 'Y'
+//   }
+
+//   // 3. selectedResume 업데이트 (배열이므로 비우고 다시 push)
+//   selectedResumes.splice(0, selectedResumes.length, resume)
+// }
+
+const openResumeDetailModal = (resumeSq) => {
+  modalStore.openModal(ResumeDetailModal, {
+    title: '이력서 상세보기',
+    size: 'modal-lg',
+    resumeSq: resumeSq,
+  })
 }
 
-const openResumeSelectModal = () => {
-  modalStore.openModal(ResumeSelectModal)
+const openResumeSelectModal = (memberSq) => {
+  modalStore.openModal(ResumeSelectModal, {
+    size: 'modal-lg',
+    userSq: memberSq,
+    role: 'COMPANY',
+  })
 }
 
 const confirmApplication = async (selectedResumes, projectSq) => {

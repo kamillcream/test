@@ -229,15 +229,17 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useModalStore } from '../../../stores/modalStore.js'
+import { useUserStore } from '../../../stores/userStore.js'
 import PersonalApplyStatusModal from '@/fo/components/mypage/personal/PersonalApplyStatusModal.vue'
 import CompanyApplyStatusModal from '@/fo/components/mypage/company/ApplyStatusModal.vue'
 import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
+import { navigateCompanyPageWithProjectSq } from '@/fo/router/userTypeRouter.js'
 
 import { api } from '@/axios.js'
-import { useRouter } from 'vue-router'
 
 const modalStore = useModalStore()
-const router = useRouter()
+const userStore = useUserStore()
+const userType = userStore.getUserType
 
 const currentPage = ref(1)
 const totalPages = ref(1)
@@ -392,12 +394,7 @@ const changePage = (page) => {
   fetchCompanyProjectList()
 }
 const goToProjectSpec = (project) => {
-  router.push({
-    name: 'CompanyProjectSpec',
-    params: {
-      project_sq: project.projectSq,
-    },
-  })
+  navigateCompanyPageWithProjectSq(userType, project.projectSq)
 }
 
 function resetModal(component, props = {}) {

@@ -106,7 +106,7 @@ const getBoard = async () => {
     if (res) {
       boardInfo.value = res.output
       boardStore.viewerSq = res.output.viewerSq
-      console.log(boardStore.viewerSq)
+      console.log(res)
     }
   } catch (error) {
     alertStore.show('게시글을 불러올 수 없습니다.', 'danger')

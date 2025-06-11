@@ -111,20 +111,17 @@
 
 <script setup>
 import { defineProps } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAlertStore } from '../../stores/alertStore.js'
+import { useUserStore } from '../../stores/userStore.js'
+import { navigateByUserTypeAndProjectSq } from '@/fo/router/userTypeRouter.js'
 import { api } from '@/axios.js'
 
-const router = useRouter()
-
 const alertStore = useAlertStore()
+const userStore = useUserStore()
+const userType = userStore.getUserType
+
 const goToProjectSpec = (project) => {
-  router.push({
-    name: 'CompanyProjectSpec',
-    params: {
-      project_sq: project.projectSq,
-    },
-  })
+  navigateByUserTypeAndProjectSq(userType, project.projectSq)
 }
 
 const generateIconUrl = (name) => {
@@ -173,6 +170,7 @@ const clickScrap = async (project) => {
     project.hasScrapped = isScrapped ? 'N' : 'Y'
 
     await api.$post(`/projects/${project.projectSq}/scraps`, {
+      withCredentials: true,
       hasScrapped: isScrapped,
       target: '프로젝트',
     })

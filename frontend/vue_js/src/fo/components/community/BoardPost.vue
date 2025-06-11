@@ -88,7 +88,9 @@
       <h5 class="font-weight-bold text-grey">첨부파일</h5>
       <ul class="list-unstyled">
         <li v-for="attachment in boardInfo.attachments" :key="attachment">
-          <a :href="`files/${attachment}`" download>{{ attachment }}</a>
+          <a :href="`/api/board/download/${attachment.fileSq}`" download>{{
+            attachment.fileOriginalNm
+          }}</a>
         </li>
       </ul>
     </div>
@@ -105,7 +107,11 @@
         :key="skill_tag"
         href="#"
         class="btn btn-rounded btn-primary me-2"
-        >{{ skill_tag.skillTagNm }}</a
+        ><img
+          :src="getSkillIcon(skill_tag.skillTagNm)"
+          :alt="skill_tag.skillTagNm"
+          class="skill-icon"
+        />{{ skill_tag.skillTagNm }}</a
       >
       <a
         v-for="normal_tag in boardInfo.normalTags"
@@ -179,6 +185,7 @@ import ReportModal from './ReportModal.vue'
 import { useBoardStore } from '@/fo/stores/boardStore'
 import { useRouter } from 'vue-router'
 import { api } from '@/axios'
+import skillIconMap from '@/assets/skillIconMap.js'
 
 const alertStore = useAlertStore()
 const modalStore = useModalStore()
@@ -355,6 +362,14 @@ const clickAdopt = () => {
   })
 }
 
+// 기술태그 아이콘
+const getSkillIcon = (name) => {
+  const key = name.toLowerCase().replace(/[\s.]+/g, '')
+  return skillIconMap[key] || skillIconMap.default
+}
+
+// 파일 url
+
 watch(
   () => boardStore.viewerSq,
   (newVal) => {
@@ -393,5 +408,10 @@ button {
 }
 .ttl-icon-area {
   margin-left: auto;
+}
+.skill-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
 }
 </style>

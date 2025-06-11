@@ -242,7 +242,9 @@ onMounted(async () => {
 
     const projectSq = route.params.project_sq
 
-    const response = await api.$get(`/projects/${projectSq}/details`)
+    const response = await api.$get(`/projects/${projectSq}/details`, {
+      withCredentials: true,
+    })
     project.value = response.output
     scrapCount.value = project.value.projectScrapCnt
   } catch (e) {
@@ -253,7 +255,7 @@ onMounted(async () => {
     // message fallback 처리
     let message = '프로젝트 정보를 불러오는 중 오류가 발생했습니다.'
 
-    alertStore.show(message)
+    alertStore.show(message, 'danger')
     router.push({ name: 'ProjectListPage' })
   }
 })
@@ -268,8 +270,9 @@ const applyCheck = () => {
     alertStore.show('이미 지원한 프로젝트입니다.', 'danger')
   } else {
     modalStore.openModal(UserResumeModal, {
-      size: 'modal-md',
+      size: 'modal-lg',
       projectSq: projectSq,
+      role: 'PERSONAL',
     })
   }
 }
