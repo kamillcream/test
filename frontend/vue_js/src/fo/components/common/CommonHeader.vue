@@ -33,7 +33,11 @@
                 <ul class="nav nav-pills" id="mainNav">
                   <li class="dropdown">
                     <router-link
-                      class="dropdown-item dropdown-toggle active current-page-active"
+                      class="dropdown-item dropdown-toggle"
+                      :class="{
+                        active: isAffiliationActive,
+                        'current-page-active': true,
+                      }"
                       to="/affiliation"
                     >
                       소속
@@ -42,7 +46,11 @@
                   </li>
                   <li class="dropdown">
                     <router-link
-                      class="dropdown-item dropdown-toggle current-page-active"
+                      class="dropdown-item dropdown-toggle"
+                      :class="{
+                        active: isProjectActive,
+                        'current-page-active': true,
+                      }"
                       to="/projectListPage"
                     >
                       프로젝트
@@ -51,7 +59,11 @@
                   </li>
                   <li class="dropdown">
                     <router-link
-                      class="dropdown-item dropdown-toggle current-page-active"
+                      class="dropdown-item dropdown-toggle"
+                      :class="{
+                        active: isCommunityActive,
+                        'current-page-active': true,
+                      }"
                       to="/board"
                     >
                       커뮤니티
