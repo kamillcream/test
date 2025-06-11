@@ -1,15 +1,15 @@
 <template>
-  <!-- <header
+  <header
     id="header"
     class="header-effect-shrink header-spacing"
     data-plugin-options='{"stickyEnabled": true}'
-  > -->
-  <header
+  >
+    <!-- <header
     id="header"
     class="header-effect-shrink"
     data-plugin-options="{'stickyEnabled': true, 'stickyEffect': 'shrink', 'stickyEnableOnBoxed': true, 'stickyEnableOnMobile': false, 'stickyChangeLogo': true, 'stickyStartAt': 30, 'stickyHeaderContainerHeight': 70}"
     style="height: 103.2px"
-  >
+  > -->
     <!-- 로그인 상태 -->
     <div v-if="isLoggedIn" class="header-body border-0">
       <div class="header-container container">
