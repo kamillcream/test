@@ -19,21 +19,19 @@ public class CommentResponse {
     private LocalDateTime createdAt;
     private Integer recommendCnt;
 
-    public static CommentResponse fromEntity(Comment comment, UserDTO userDto) {
+    public static CommentResponse fromEntity(Comment comment, UserDTO userDto, String profileImageUrl) {
         String userNm = "존재하지 않는 사용자";
-        String userProfileImageUrl = null;
 
         if (userDto != null) {
             if (userDto.getUserNm() != null) {
                 userNm = userDto.getUserNm();
             }
-            userProfileImageUrl = null; // null 허용
         }
 
         return new CommentResponse(
                 comment.getCommentSq(),
                 comment.getUserSq(),
-                userProfileImageUrl,
+                profileImageUrl,
                 userNm,
                 comment.getCommentDescriptionTxt(),
                 comment.getCommentCreatedAtDtm(),

@@ -145,7 +145,6 @@ const options = {
 }
 
 const openSkillModal = async () => {
-  console.log(skillTags.value)
   modalStore.openModal(SkillTagModal, {
     skillTags: [...skillTags.value],
     onConfirm: onSkillsConfirmed,
@@ -169,7 +168,6 @@ const removeNTag = (tag) => {
 const removeSTag = (tag) => {
   let filtered = skillTags.value.filter((el) => el != tag)
   skillTags.value = filtered
-  console.log(skillTags.value)
 }
 
 // 전달 데이터

@@ -46,7 +46,6 @@ const boardInfo = ref({
 const getBoard = async () => {
   try {
     const res = await api.$get(`/board/${props.board_sq}`)
-    console.log(res)
     if (res) {
       boardInfo.value = res.output
       boardStore.viewerSq = res.output.viewerSq
@@ -57,11 +56,7 @@ const getBoard = async () => {
 }
 
 const addViewCnt = async () => {
-  try {
-    await api.$patch(`/board/${props.board_sq}/increment-view`)
-  } catch (error) {
-    console.error
-  }
+  await api.$patch(`/board/${props.board_sq}/increment-view`)
 }
 
 onMounted(() => {

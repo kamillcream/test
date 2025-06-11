@@ -24,7 +24,10 @@
             >미해결</span
           >
         </div>
-        <div v-if="isAdopted" class="d-flex flex-wrap gap-2 mb-2">
+        <div
+          v-if="boardInfo.isAdoptedYn == 'Y'"
+          class="d-flex flex-wrap gap-2 mb-2"
+        >
           <span class="badge bg-primary badge-xs font-size-l">채택 답변</span>
         </div>
         <!-- 제목 + 오른쪽 아이콘들 -->
@@ -71,7 +74,9 @@
         </span>
         <span
           ><i class="far fa-calendar-alt me-1"></i>
-          <a href="#"> {{ formatTime(boardInfo.createdAt) }}</a></span
+          <span class="text-primary">{{
+            formatTime(boardInfo.createdAt)
+          }}</span></span
         >
       </div>
     </div>
@@ -133,7 +138,11 @@
         답변 작성
       </button>
       <button
-        v-if="boardType == 'qna' && boardInfo.userSq == viewerSq"
+        v-if="
+          boardType == 'qna' &&
+          boardInfo.userSq == viewerSq &&
+          boardInfo.boardAdoptStatusCd == 1501
+        "
         type="button"
         class="btn btn-primary me-2"
         @click="updateStatus(1503)"
@@ -141,7 +150,11 @@
         자체 해결
       </button>
       <button
-        v-if="boardType == 'qna' && boardInfo.userSq == viewerSq"
+        v-if="
+          boardType == 'qna' &&
+          boardInfo.userSq == viewerSq &&
+          boardInfo.boardAdoptStatusCd == 1501
+        "
         type="button"
         class="btn btn-primary me-2"
         @click="updateStatus(1504)"
@@ -166,7 +179,11 @@
 
       <!-- [추가] 답변글인 경우에만 && 원 QnA 게시글의 작성자 본인일 경우에만 -->
       <button
-        v-if="boardType == 'answer' && parentUserSq == viewerSq"
+        v-if="
+          boardType == 'answer' &&
+          parentUserSq == viewerSq &&
+          adoptStatusCd == 1501
+        "
         class="btn btn-primary"
         @click="clickAdopt"
       >
@@ -196,28 +213,18 @@ const router = useRouter()
 const props = defineProps({
   boardInfo: {
     type: Object,
-    default: () => ({
-      sq: 0,
-      ttl: '',
-      userSq: 0,
-      userNm: '',
-      createdAt: new Date(),
-      viewCnt: 0,
-      recommendCnt: 0,
-      description: '',
-      attachments: [],
-      normalTags: [],
-      skillTags: [],
-      comments: [],
-    }),
+    default: () => ({}),
   },
   boardType: { type: String, default: '' },
   parentUserSq: { type: Number, default: 0 },
   getBoard: { type: Function, default: () => {} },
+  adoptStatusCd: { type: Number, default: 0 },
 })
 
 const boardInfo = computed(() => props.boardInfo)
 const boardType = computed(() => props.boardType)
+const parentUserSq = computed(() => props.parentUserSq)
+const adoptStatusCd = computed(() => props.adoptStatusCd)
 
 const formatTime = (createdAt) => {
   const date = new Date(createdAt)
@@ -239,20 +246,13 @@ const updateStatus = (cd) => {
     title: '채택 상태 변경',
     message: `${cd == 1503 ? '자체해결' : '미해결'} 상태로 변경하시겠습니까?`,
     onConfirm: async () => {
-      const res = await api.$put(`/${boardType.value}/${boardInfo.value.sq}`, {
-        ttl: boardInfo.value.ttl,
-        description: boardInfo.value.description,
-        skillTags: [...boardInfo.value.skillTags],
-        normalTags: [...boardInfo.value.normalTags],
-        // attachments: [...boardInfo.value.attachments]
-        boardAdoptStatusCd: cd,
-      })
+      const res = await api.$put(`/qna/${boardInfo.value.sq}/status/${cd}`)
       if (res.status == 'OK') {
         alertStore.show(
           `${cd == 1503 ? '자체해결' : '미해결'} 상태로 변경되었습니다.`,
           'success',
         )
-        router.push(`/${boardType.value}/${boardInfo.value.sq}`)
+        props.getBoard()
       } else {
         alertStore.show('채택 상태 변경에 실패하였습니다.', 'danger')
       }
@@ -263,8 +263,6 @@ const updateStatus = (cd) => {
 
 // 추천
 const rcmndBoard = async () => {
-  console.log(`/${boardType.value}/${boardInfo.value.sq}/recommend`)
-  console.log(viewerSq.value)
   if (viewerSq.value == null) {
     alertStore.show('로그인 후 이용해주세요.', 'danger')
     return
@@ -272,7 +270,6 @@ const rcmndBoard = async () => {
   const res = await api.$post(
     `/${boardType.value}/${boardInfo.value.sq}/recommend`,
   )
-  console.log(res)
   if (res.status == 'OK') {
     alertStore.show(res.message, 'success')
     props.getBoard()
@@ -348,7 +345,6 @@ const clickAdopt = () => {
     onConfirm: async () => {
       try {
         const res = await api.$patch(`/answer/${boardInfo.value.sq}/adopt`)
-        console.log(res)
         if (res.status == 'OK') {
           alertStore.show(res.message, 'success')
         } else {

@@ -14,11 +14,13 @@
         tagInfo.type == 'skill' ? tagInfo.tag_nm.skillTagNm : tagInfo.tag_nm
       }}</span
     >
-    <span
+    <button
       v-if="hiddenCount > 0"
       class="more-tag btn btn-light btn-rounded btn-3d py-0 px-2 tag-btn"
-      >+{{ hiddenCount }}</span
+      @click="clickHiddenToggle"
     >
+      {{ buttonMsg }}
+    </button>
   </div>
 </template>
 <script setup>
@@ -42,6 +44,7 @@ const containerRef = ref(null)
 const tagRefs = ref([])
 const visibleTags = ref([])
 const hiddenCount = ref(0)
+const buttonMsg = ref(+0)
 
 const calculateVisibleTags = async () => {
   await nextTick()
@@ -61,6 +64,16 @@ const calculateVisibleTags = async () => {
 
   visibleTags.value = totalTags.value.slice(0, count)
   hiddenCount.value = totalTags.value.length - count
+  buttonMsg.value = `+${hiddenCount.value}`
+}
+
+const clickHiddenToggle = () => {
+  if (buttonMsg.value == '접기') {
+    calculateVisibleTags()
+  } else {
+    buttonMsg.value = '접기'
+    visibleTags.value = totalTags.value
+  }
 }
 
 onMounted(() => {
@@ -80,5 +93,9 @@ watch(() => props.normalTags, calculateVisibleTags)
 <style>
 .tag-btn {
   font-size: 12px;
+}
+button:focus {
+  background-color: inherit !important;
+  filter: none !important;
 }
 </style>

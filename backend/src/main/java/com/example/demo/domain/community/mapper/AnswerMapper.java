@@ -18,5 +18,8 @@ public interface AnswerMapper {
      void addViewCnt(@Param("answerSq") Long answerSq);
      void updateCommentCnt(@Param("answerSq") Long answerSq);
      void updateRecommendCnt(@Param("answerSq") Long answerSq);
+     void insertFile(@Param("answerSq") Long answerSq, @Param("fileSq") Long fileSq);
+     List<Long> findFiles(@Param("answerSq") Long answerSq);
+     void deleteAnswerFile(@Param("answerSq") Long answerSq, @Param("fileSq") Long fileSq);
      
 }

@@ -23,13 +23,13 @@ public class AnswerResponse{
     private Integer recommendCnt;
     private String isAdoptedYn;
     private LocalDateTime createdAt;
-//    private List<Attachment> attachments; // 첨부파일
+    private List<BoardAttachmentResponse> attachments; // 첨부파일
     private List<String> normalTags;
     private List<SkillTagDTO> skillTags;
     private List<CommentResponse> comments;
 
     
-    public static AnswerResponse fromEntity(Answer answer, String userNm, List<String> normalTags, List<SkillTagDTO> skillTags, List<CommentResponse> comments) {
+    public static AnswerResponse fromEntity(Answer answer, String userNm, List<String> normalTags, List<SkillTagDTO> skillTags, List<CommentResponse> comments, List<BoardAttachmentResponse> files) {
         return new AnswerResponse(
     		answer.getAnswerSq(),
     		answer.getUserSq(),
@@ -42,6 +42,7 @@ public class AnswerResponse{
     		answer.getAnswerRecommendCnt(),
     		answer.getAnswerIsAdoptedYn(),
     		answer.getAnswerCreatedAtDtm(),
+    		files,
 			normalTags,
 			skillTags,
 			comments

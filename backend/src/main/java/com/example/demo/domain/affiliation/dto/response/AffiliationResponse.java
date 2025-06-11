@@ -29,7 +29,7 @@ public class AffiliationResponse{
     
 
 
-    public static AffiliationResponse fromEntity(Company company, Address adress, List<String> tags, Long scrapCnt, Boolean isScrap, Boolean isApply) {
+    public static AffiliationResponse fromEntity(Company company, Address adress, List<String> tags, Long scrapCnt, Boolean isScrap, Boolean isApply, String imgUrl) {
     	LocalDate today = LocalDate.now();
         Period period = Period.between(company.getCompanyOpenDt(), today);
     	Integer openYear = period.getYears();
@@ -37,7 +37,7 @@ public class AffiliationResponse{
         		company.getCompanySq(),
         		company.getCompanyNm(),
         		company.getCompanyCeoNm(),
-        		company.getCompanyProfileImageUrl(),
+        		imgUrl,
         		adress.getAddress(),
         		company.getCompanyOpenDt(),
         		openYear,

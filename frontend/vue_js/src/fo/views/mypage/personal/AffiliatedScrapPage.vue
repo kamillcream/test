@@ -156,7 +156,6 @@ const getScrapList = async () => {
     if (res.status == 'OK') {
       const totalCnt = res.output.totalElements
 
-      console.log(res)
       scraps.value = res.output.companies
       totalElements.value = totalCnt
       affiliationStore.viewerSq = res.output.viewerSq

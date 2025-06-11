@@ -131,15 +131,12 @@ public class BoardController {
 	// 첨부파일 다운로드
 	@GetMapping("/download/{fileSq}")
 	public ResponseEntity<byte[]> downloadFile(@PathVariable("fileSq") Long fileSq) {
-		System.out.println("조회 실행");
 		
 		BoardAttachment attachment = boardMapper.findFile(fileSq);
 		
 		if(attachment == null) {
-			System.out.println("ㅠㅏ일 없음");
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다.");
 		}
-		System.out.println(attachment.getFileSaveNm());
 		
 	    // S3에서 파일 불러오기
 	    S3Object s3Object = amazonS3.getObject(bucket, attachment.getFileSaveNm());
@@ -149,7 +146,6 @@ public class BoardController {
 	    try {
 	        content = IOUtils.toByteArray(inputStream);
 	    } catch (IOException e) {
-	    	System.out.println("다운 실패");
 	        throw new RuntimeException("파일 다운로드 실패", e);
 	    }
 	    

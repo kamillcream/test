@@ -1,14 +1,21 @@
 package com.example.demo.domain.community.service;
 
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.domain.community.dto.*;
 import com.example.demo.domain.community.dto.request.*;
 import com.example.demo.domain.community.entity.*;
 import com.example.demo.domain.community.mapper.*;
+import com.example.demo.domain.mypage.dto.ProfileImageInfoDTO;
+import com.example.demo.domain.mypage.repository.InformationEditRepository;
+import com.example.demo.domain.mypage.service.InformationEditService;
 import com.example.demo.domain.user.dto.UserDTO;
 import com.example.demo.domain.community.dto.response.*;
+import com.example.demo.common.AmazonS3.AmazonS3Service;
+import com.example.demo.common.AmazonS3.UploadedFileDTO;
 import com.example.demo.domain.community.converter.*;
 
 import jakarta.transaction.Transactional;
@@ -28,6 +35,12 @@ public class AnswerService {
     private final RecommendationMapper recommendationMapper;
     private final CommunityUserMapper communityUserMapper;
     private final BoardMapper boardMapper;
+    private final AmazonS3Service amazonS3Service;
+    private final InformationEditRepository informationEditRepository;
+    private final InformationEditService informationEditService;
+    
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
 //    답변 리스트
     @Transactional
@@ -77,12 +90,24 @@ public class AnswerService {
     		    .filter(Objects::nonNull)
     		    .map(comment -> {
     		        UserDTO userDto = communityUserMapper.findById(comment.getUserSq());
-    		        return CommentResponse.fromEntity(comment, userDto);
+    		        String profileImageUrl = informationEditService.getProfileImageUrl(userDto.getUserSq());
+    		        return CommentResponse.fromEntity(comment, userDto, profileImageUrl);
     		    })
     		    .collect(Collectors.toList());
+    	
+    	// 게시글의 첨부파일 조회
+    	List<Long> fileSqs = answerMapper.findFiles(answerSq);
+    	List<BoardAttachmentResponse> files = fileSqs.stream().filter(Objects::nonNull).map(fileSq -> {
+    		BoardAttachment attachment = boardMapper.findFile(fileSq);
+    		BoardAttachmentResponse file = BoardAttachmentResponse.builder().fileSq(attachment.getFileSq())
+    				.fileOriginalNm(attachment.getFileOriginalNm())
+    				.fileSaveNm(attachment.getFileSaveNm())
+    				.build();
+    		return file;
+    	}).collect(Collectors.toList());
     			
     	
-        return AnswerResponse.fromEntity(answer, userNm, normalTags, skillTags, comments);
+        return AnswerResponse.fromEntity(answer, userNm, normalTags, skillTags, comments, files);
     }
     
 //    답변 등록
@@ -115,6 +140,24 @@ public class AnswerService {
         if(answerRequest.getSkillTags().size() > 0) {
         	cmntTagMapper.insertST(skillTagConverter.convertStringsToSkillTags(null, answer.getAnswerSq(), answerRequest.getSkillTags()));        	
         }
+    	
+    	// 첨부파일 업로드
+    	if(answerRequest.getFiles() != null) {
+    		for (MultipartFile file : answerRequest.getFiles()) {
+    			
+        		UploadedFileDTO uploaded = amazonS3Service.uploadFile(file);
+
+                ProfileImageInfoDTO fileInfo = ProfileImageInfoDTO.builder()
+                        .originalName(uploaded.getOriginalName())
+                        .savedName(uploaded.getSavedName())
+                        .contentType(uploaded.getContentType())
+                        .size(uploaded.getSize())
+                        .build();
+
+                informationEditRepository.saveFile(fileInfo);
+                answerMapper.insertFile(answer.getAnswerSq(), fileInfo.getFileSq());
+    	    }
+    	}
         
         
 		return;
@@ -153,6 +196,40 @@ public class AnswerService {
       if(answerRequest.getSkillTags().size() > 0) {
       	cmntTagMapper.insertST(skillTagConverter.convertStringsToSkillTags(null, answer.getAnswerSq(), answerRequest.getSkillTags()));        	
       }
+      
+
+	  	
+	  	// 첨부파일
+	  	// 기존 첨부파일 변동 여부 확인
+	  	List<Long> fileSqs = answerMapper.findFiles(answer.getAnswerSq());
+	  	List<Long> clientFileSqs = answerRequest.getAttachments();
+	  	Set<Long> clientFileSqSet = new HashSet<>(clientFileSqs);
+	  	List<Long> deletedFileSqs = fileSqs.stream()
+	  	        .filter(fileSq -> !clientFileSqSet.contains(fileSq))
+	  	        .collect(Collectors.toList());
+	  	for (Long fileSq : deletedFileSqs) {
+	  		deleteFile(answer.getAnswerSq(), fileSq);
+	    }
+	  	
+	  	
+	  	// 새로운 첨부파일 추가
+	  	// 첨부파일 업로드
+  	if(answerRequest.getFiles() != null) {
+  		for (MultipartFile file : answerRequest.getFiles()) {
+  			
+      		UploadedFileDTO uploaded = amazonS3Service.uploadFile(file);
+
+              ProfileImageInfoDTO fileInfo = ProfileImageInfoDTO.builder()
+                      .originalName(uploaded.getOriginalName())
+                      .savedName(uploaded.getSavedName())
+                      .contentType(uploaded.getContentType())
+                      .size(uploaded.getSize())
+                      .build();
+
+              informationEditRepository.saveFile(fileInfo);
+              answerMapper.insertFile(answer.getAnswerSq(), fileInfo.getFileSq());
+  	    }
+  	}
         
 
         return;
@@ -198,20 +275,14 @@ public class AnswerService {
 	//  답변 채택
 	  @Transactional
 	  public void adoptAnswer(Long userSq, Long answerSq) {
-		  System.out.println("채택");
 		  
 	      Answer answer = answerMapper.findById(answerSq);
-	      System.out.println(answer.getBoardSq());
-		  
 		  Board board = boardMapper.findByIdBoard(answer.getBoardSq(), 1402L);
-		  System.out.println(board.getUserSq());
 		  
 		  if(board.getUserSq() != userSq) {
-			  System.out.println("유효하지 않은 접근입니다.");
 			  throw new IllegalArgumentException("유효하지 않은 접근입니다.");
 		  }
 		  if(board.getBoardAdoptStatusCd() == 1502L) {
-			  System.out.println("이미 채택된 답변이 있습니다.");
 			  throw new IllegalArgumentException("이미 채택된 답변이 있습니다.");
 		  }
 		  
@@ -223,6 +294,14 @@ public class AnswerService {
 	      answerMapper.update(answer);
 	
 	      return;
+	  }
+	  
+	  // 첨부파일 삭제
+	  @Transactional
+	  public void deleteFile(Long answerSq, Long fileSq) {
+		  answerMapper.deleteAnswerFile(answerSq, fileSq);
+		  boardMapper.deleteFile(fileSq);
+		  return;
 	  }
 
 

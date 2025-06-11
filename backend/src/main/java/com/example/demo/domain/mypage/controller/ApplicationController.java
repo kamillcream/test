@@ -7,15 +7,12 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.common.ApiResponse;
 import com.example.demo.domain.affiliation.service.AffiliationService;
-import com.example.demo.domain.user.service.UserService;
 import com.example.demo.domain.affiliation.dto.response.*;
-import com.example.demo.domain.affiliation.dto.request.*;
 import com.example.demo.domain.affiliation.entity.*;
 
 import lombok.RequiredArgsConstructor;
 
 import javax.lang.model.type.NullType;
-import java.util.*;
 
 
 @RestController
@@ -25,10 +22,10 @@ public class ApplicationController {
 
     private final AffiliationService affiliationService;
     
-    // 소속 공고 하나 조회
-    @GetMapping("/{companySq}")
-    public ResponseEntity<ApiResponse<AffiliationResponse>> getAffiliation(@PathVariable("companySq") Long companySq) {
-    	return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "소속 지원 상태 수정이 완료되었습니다.", affiliationService.getAffiliaion(companySq)));
+    // 소속 신청 내역 하나 조회
+    @GetMapping("/{applicationSq}")
+    public ResponseEntity<ApiResponse<ApplyResponse>> getAffiliation(@PathVariable("applicationSq") Long applicationSq) {
+    	return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "소속 공고 조회가 완료되었습니다.", affiliationService.getAffiliaion(applicationSq)));
     }
     
     
@@ -70,7 +67,6 @@ public class ApplicationController {
     		@RequestParam(value = "readType", required = false) String readType,
     		@RequestParam(value = "page", defaultValue = "1") Long page,
     		@RequestParam(value = "size", defaultValue = "10") Long size) {
-    	System.out.println(userSq);
     	return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "소속 공고 지원 현황 목록 조회가 완료되었습니다.", affiliationService.getAppliesByUserSq(userSq, searchType, keyword, readType, page, size)));
     }
     
@@ -90,13 +86,6 @@ public class ApplicationController {
     		@RequestParam(value = "page", defaultValue = "1") Long page,
     		@RequestParam(value = "size", defaultValue = "10") Long size) {
     	return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "소속 공고 스크랩 리스트 조회가 완료되었습니다.", affiliationService.getScraps(userSq, searchType, keyword, page, size)));
-    }
-    
-    // 소속 공고 신청 내역 상세
-    @GetMapping("/detail/{companyApplicationSq}")
-    public ResponseEntity<ApiResponse<NullType>> getApply(@PathVariable("companyApplicationSq") Long companyApplicationSq) {
-    	affiliationService.getApply(companyApplicationSq);
-    	return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "소속 공고 지원 현황 상세 조회가 완료되었습니다.", null));
     }
     
 

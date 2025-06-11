@@ -9,12 +9,10 @@ import org.springframework.web.bind.annotation.*;
 import com.example.demo.common.ApiResponse;
 import com.example.demo.domain.community.dto.request.*;
 import com.example.demo.domain.community.service.*;
-import com.example.demo.domain.community.dto.response.*;
 
 import lombok.RequiredArgsConstructor;
 
 import javax.lang.model.type.NullType;
-import java.util.*;
 
 
 

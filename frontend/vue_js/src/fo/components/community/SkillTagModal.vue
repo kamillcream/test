@@ -91,7 +91,6 @@ const syncSelectedSkills = () => {
 const getSkills = async () => {
   try {
     const res = await api.$get(`/board/skill-tags`)
-    console.log(res)
     if (res.status == 'OK') {
       skillList.value = [...res.output]
 

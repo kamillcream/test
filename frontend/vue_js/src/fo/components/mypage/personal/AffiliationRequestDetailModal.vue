@@ -102,12 +102,9 @@
         >
         <div class="text-dark" id="resume">
           선택한 이력서:
-          <a
-            href="#"
-            class="text-primary"
-            @click="openResumeModal(apply.resumeSq)"
-            >{{ props.apply.resumeTtl }}</a
-          >
+          <button type="button" class="text-primary" @click="openResumeModal">
+            {{ applyInfo.resumeTtl }}
+          </button>
         </div>
       </div>
 
@@ -120,7 +117,7 @@
           >간단한 자기소개</label
         >
         <div class="text-dark" id="introduce">
-          {{ props.apply.greeting }}
+          {{ applyInfo.greeting }}
         </div>
       </div>
     </div>
@@ -146,37 +143,33 @@ const modalStore = useModalStore()
 const alertStore = useAlertStore()
 
 const props = defineProps({
-  apply: {
-    type: Object,
+  applicationSq: {
+    type: Number,
     required: true,
+    default: 0,
   },
 })
 
-const companyInfo = ref({
-  name: '회사명',
-  ceoName: '홍길동', // 실제 있으면 넣고, 없으면 더미
-  yearsInBusiness: 10, // 실제 있으면 props에서 가져오기
-  location: '서울시 강남구', // 실제 있으면 props에서 가져오기
-  description:
-    'EST Soft는 기술 혁신과 뛰어난 팀워크로 다양한 산업에 최적화된 솔루션을 제공합니다.',
-  tags: ['서울', '신입', '학력무관', 'JAVA'], // 태그 있으면 넘기고, 없으면 기본
-})
+const companyInfo = ref({})
+const applyInfo = ref({})
 
 const getCompanyInfo = async () => {
   try {
-    const res = await api.$get(`/mypage/applications/${props.apply.companySq}`)
-    companyInfo.value = res.output
-    console.log(res)
+    const res = await api.$get(`/mypage/applications/${props.applicationSq}`)
+    companyInfo.value = res.output.affiliation
+    applyInfo.value = res.output.apply
   } catch (error) {
     alertStore.show('소속 정보를 불러올 수 없습니다.', 'danger')
   }
 }
 
 // 이력서 모달창 열기
-const openResumeModal = (sq) => {
+const openResumeModal = () => {
   modalStore.openModal(ResumeDetailModal, {
+    title: '이력서 상세보기',
     size: 'modal-lg',
-    resumeSq: sq,
+    resumeSq: applyInfo.value.resumeSq,
+    onConfirm: () => {},
   })
 }
 
@@ -184,13 +177,6 @@ const openResumeModal = (sq) => {
 const closeModal = () => {
   modalStore.closeModal()
 }
-
-// 소속 신청 제출
-// const handleSubmit = () => {
-//   // TODO: 소속 신청 로직 구현
-//   console.log('소속 신청 제출')
-//   closeModal()
-// }
 
 onMounted(() => {
   getCompanyInfo()

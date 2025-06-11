@@ -75,7 +75,6 @@ const isHtmlEmpty = (htmlString) => {
 const insertBoard = async () => {
   try {
     const reqData = registerRef.value.sendData()
-    console.log(reqData)
     if (reqData.get('ttl') == null || reqData.get('ttl').trim() == '') {
       alertStore.show('제목을 입력해주세요.', 'danger')
       return

@@ -89,15 +89,22 @@
                   <!-- 이미지 영역 -->
                   <div
                     class="post-image position-relative"
-                    style="height: 180px"
+                    style="height: 160px"
                   >
-                    <a href="#" class="d-block h-100 w-100 position-relative">
+                    <div class="d-block h-100 w-100 position-relative">
                       <img
+                        v-if="afltn.profileImg"
                         :src="`${afltn.profileImg}`"
                         class="img-fluid img-thumbnail img-thumbnail-no-borders rounded-0 h-100 w-100"
                         style="object-fit: cover"
                         alt="기업 이미지"
                       />
+                      <div
+                        v-else
+                        class="h-100 w-100 bg-color-grey text-primary text-center d-flex justify-content-center align-items-center"
+                      >
+                        이미지가 없습니다
+                      </div>
                       <!-- 조회수 뱃지 -->
                       <div
                         class="position-absolute top-0 end-0 m-2 px-2 py-1 text-white rounded d-flex align-items-center gap-1"
@@ -109,7 +116,7 @@
                         <i class="bi bi-eye"></i>
                         <span>{{ formatNum(afltn.viewCnt) }}</span>
                       </div>
-                    </a>
+                    </div>
                   </div>
                   <!-- 내용 영역 -->
                   <div class="post-content p-3 bg-white">
@@ -120,12 +127,16 @@
                         class="font-weight-semibold text-5 line-height-6 mb-0"
                         style="font-size: 1.1rem"
                       >
-                        <a href="#" class="text-primary text-decoration-none">{{
-                          afltn.companyNm
-                        }}</a>
+                        <button
+                          type="button"
+                          class="text-primary fw-bold text-decoration-none"
+                          @click="clickApplication(afltn)"
+                        >
+                          {{ afltn.companyNm }}
+                        </button>
                       </h2>
-                      <a
-                        href="#"
+                      <button
+                        type="button"
                         class="text-muted"
                         style="text-decoration: none"
                         @click="clickScrap(afltn.sq)"
@@ -134,7 +145,7 @@
                           class="bi bi-heart-fill"
                           :class="{ active: afltn.isScrap }"
                         ></i>
-                      </a>
+                      </button>
                     </div>
                     <!-- 키워드 태그 뱃지 -->
                     <div class="d-flex flex-wrap gap-2 mb-3">
@@ -147,25 +158,22 @@
                     </div>
                     <!-- 설명 영역 -->
                     <div
-                      class="description p-3 mb-3 rounded"
-                      style="background-color: #f5f5f5"
+                      class="description p-3 mb-3 rounded bg-color-grey"
+                      v-if="afltn.greeting && afltn.greeting.trim() != ''"
                     >
-                      <p
-                        class="small mb-0 text-dark"
-                        style="font-size: 0.85rem"
-                      >
+                      <p class="mb-0 text-dark">
                         {{ afltn.greeting }}
                       </p>
                     </div>
-                    <div class="d-grid" @click="clickApplication(afltn)">
-                      <a
-                        href="#"
-                        class="btn btn-light btn-sm text-primary"
-                        style="font-size: 0.85rem"
-                        >{{
-                          afltn.isApply ? '소속 신청 완료' : '소속 신청하기'
-                        }}</a
+                    <div class="d-grid">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-light"
+                        :class="{ 'text-primary': !afltn.isApply }"
+                        @click="clickApplication(afltn)"
                       >
+                        {{ afltn.isApply ? '소속 신청 완료' : '소속 신청하기' }}
+                      </button>
                     </div>
                   </div>
                 </article>
@@ -210,7 +218,7 @@ const formatNum = (num) => {
 }
 
 // 한 화면에 보일 박스 숫자 설정
-const size = 4
+const size = 8
 
 const currentPage = ref(1)
 
@@ -274,40 +282,20 @@ const getAfltnList = async () => {
     const addressFilter =
       address == null || address == 'all' ? '' : `&addressCd=${addressCd.value}`
 
-    if (localStorage.getItem('userNm')) {
-      const res = await api.$get(
-        `/affiliation?page=${currentPage.value}&size=${size}&sortType=${sortType.value}${searchFilter}${addressFilter}`,
-      )
-      console.log(res.output)
-      if (res) {
-        if (res.output.totalElements == 0) {
-          totalPages.value = 1
-        } else {
-          totalPages.value = Math.floor(
-            (res.output.totalElements + size - 1) / size,
-          )
-        }
-        if (!res.output.viewerSq) {
-          window.location.href = '/login'
-        }
-        afltnList.value = res.output.companies
-        affiliationStore.viewerSq = res.output.viewerSq
+    const res = await api.$get(
+      `/affiliation?page=${currentPage.value}&size=${size}&sortType=${sortType.value}${searchFilter}${addressFilter}`,
+    )
+    console.log(res.output)
+    if (res) {
+      if (res.output.totalElements == 0) {
+        totalPages.value = 1
+      } else {
+        totalPages.value = Math.floor(
+          (res.output.totalElements + size - 1) / size,
+        )
       }
-    } else {
-      const res = await api.$get(
-        `/affiliation/guest?page=${currentPage.value}&size=${size}&sortType=${sortType.value}${searchFilter}${addressFilter}`,
-      )
-      console.log(res.output)
-      if (res) {
-        if (res.output.totalElements == 0) {
-          totalPages.value = 1
-        } else {
-          totalPages.value = Math.floor(
-            (res.output.totalElements + size - 1) / size,
-          )
-        }
-        afltnList.value = res.output.companies
-      }
+      afltnList.value = res.output.companies
+      affiliationStore.viewerSq = res.output.viewerSq
     }
   } catch (error) {
     alertStore.show('소속 공고를 불러올 수 없습니다.', 'danger')
@@ -338,6 +326,7 @@ const clickApplication = async (afltnInfo) => {
 
   modalStore.openModal(AffiliationRecruit, {
     afltnInfo: afltnInfo,
+    onConfirm: getAfltnList,
   })
 }
 

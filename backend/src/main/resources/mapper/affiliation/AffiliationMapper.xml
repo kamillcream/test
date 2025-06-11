@@ -135,6 +135,13 @@
         SELECT COUNT(*) FROM TBL_SCRAP_S WHERE company_sq = #{companySq}
     </select>
 
+    <select id="findProfileImg" resultType="String">
+        SELECT file_save_nm FROM TBL_COMMON_FILE_S 
+        WHERE file_sq = 
+        	(SELECT file_sq FROM TBL_COMPANY_PROFILE_IMAGE_S
+        	WHERE company_sq = #{companySq})
+    </select>
+
     <select id="findScrapAffiliations" resultType="com.example.demo.domain.affiliation.entity.Company">
         SELECT * FROM TBL_COMPANY_S
         WHERE company_sq IN (
@@ -406,8 +413,8 @@
     </select>
 
     <select id="findUserNm" resultType="String">
-        SELECT user_nm FROM TBL_USER_M
-        WHERE user_sq = #{userSq}
+        SELECT resume_nm FROM TBL_RESUME_M
+        WHERE resume_sq = #{resumeSq}
     </select>
 
     <select id="findCareers" resultType="com.example.demo.domain.affiliation.entity.Career">

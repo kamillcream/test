@@ -20,6 +20,7 @@ public class ApplicationResponse{
 	private Long sq; // 지원 순번
     private Long companySq; // 회사 순번
     private String companyNm; // 회사명
+    private Long resumeSq; // 이력서 순번
     private String resumeTtl; // 이력서 제목
     private Long applicationSq; // 지원 순번
     private LocalDateTime createdAt; // 지원 일자
@@ -34,6 +35,7 @@ public class ApplicationResponse{
 			companyApplication.getCompanyApplicationSq(),
 			company.getCompanySq(),
 			company.getCompanyNm(),
+			companyApplication.getResumeSq(),
 			resumeTtl,
 			companyApplication.getCompanyApplicationSq(),
 			companyApplication.getCompanyApplicationCreatedAtDtm(),

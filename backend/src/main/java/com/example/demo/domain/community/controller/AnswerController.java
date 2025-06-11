@@ -6,11 +6,17 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.example.demo.common.ApiResponse;
+import com.example.demo.domain.community.dto.SkillTagDTO;
 import com.example.demo.domain.community.dto.request.*;
 import com.example.demo.domain.community.service.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.demo.domain.community.dto.response.*;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 import javax.lang.model.type.NullType;
 
@@ -30,8 +36,19 @@ public class AnswerController {
     
 //    답변 등록
     @PostMapping
-    public ResponseEntity<ApiResponse<NullType>> createAnswer(@AuthenticationPrincipal Long userSq, @RequestBody AnswerRequest answerRequest){
-    	System.out.println("답변 등록");
+    public ResponseEntity<ApiResponse<NullType>> createAnswer(@AuthenticationPrincipal Long userSq,
+    		@ModelAttribute AnswerRequest answerRequest,
+    		@RequestParam("skillTagsJson") String skillTagsJson){
+    	ObjectMapper objectMapper = new ObjectMapper();
+    	List<SkillTagDTO> skillTags;
+    	if(skillTagsJson != null && !skillTagsJson.isBlank()) {
+        	try {
+                skillTags = objectMapper.readValue(skillTagsJson, new TypeReference<List<SkillTagDTO>>() {});
+            } catch (JsonProcessingException e) {
+                return ResponseEntity.badRequest().body(ApiResponse.of(HttpStatus.BAD_REQUEST, "skillTags 변환 실패", null));
+            }
+        	answerRequest.setSkillTags(skillTags);	
+    	}
     	answerRequest.setUserSq(userSq);
     	answerService.createAnswer(answerRequest);
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.CREATED, "답변 등록이 완료되었습니다.", null));
@@ -39,7 +56,19 @@ public class AnswerController {
     
 //    답변 수정
     @PutMapping("/{answerSq}")
-    public ResponseEntity<ApiResponse<NullType>> updateAnswer(@AuthenticationPrincipal Long userSq, @RequestBody AnswerRequest answerRequest, @PathVariable("answerSq") Long answerSq){
+    public ResponseEntity<ApiResponse<NullType>> updateAnswer(@AuthenticationPrincipal Long userSq, @PathVariable("answerSq") Long answerSq,
+    		@ModelAttribute AnswerRequest answerRequest,
+    		@RequestParam("skillTagsJson") String skillTagsJson){
+    	ObjectMapper objectMapper = new ObjectMapper();
+    	List<SkillTagDTO> skillTags;
+    	if(skillTagsJson != null && !skillTagsJson.isBlank()) {
+        	try {
+                skillTags = objectMapper.readValue(skillTagsJson, new TypeReference<List<SkillTagDTO>>() {});
+            } catch (JsonProcessingException e) {
+                return ResponseEntity.badRequest().body(ApiResponse.of(HttpStatus.BAD_REQUEST, "skillTags 변환 실패", null));
+            }
+        	answerRequest.setSkillTags(skillTags);	
+    	}
     	answerRequest.setUserSq(userSq);
     	answerService.updateAnswer(answerRequest, answerSq);
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "답변 수정이 완료되었습니다.", null));

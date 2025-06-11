@@ -10,7 +10,7 @@
             >
               <img
                 v-if="comment.userProfileImgUrl != null"
-                class="avatar"
+                class="avatar object-fit-cover"
                 alt=""
                 :src="`${comment.userProfileImgUrl}`"
               />
@@ -190,20 +190,17 @@ const props = defineProps({
     default: () => {},
   },
 })
-console.log(props.comments)
 
 const description = ref('')
 const editdescription = ref('')
 
 // 추천
 const rcmndComment = async (sq) => {
-  console.log(`/comment/${sq}/recommend`)
   if (viewerSq.value == null) {
     alertStore.show('로그인 후 이용해주세요.', 'danger')
     return
   }
   const res = await api.$post(`/comment/${sq}/recommend`)
-  console.log(res)
 
   if (res.status == 'OK') {
     alertStore.show(res.message, 'success')

@@ -18,6 +18,7 @@ public interface AffiliationMapper {
 	Address findAddress(@Param("addressSq") Long addressSq);
 	List<String> findTags(@Param("companySq") Long companySq);
 	Long findScrapCnt(@Param("companySq") Long companySq);
+	String findProfileImg(@Param("companySq") Long companySq);
 	
 	//스크랩 리스트
 	List<Company> findScrapAffiliations(@Param("userSq") Long userSq, @Param("searchType") String searchType, @Param("keyword") String keyword, 
@@ -53,7 +54,7 @@ public interface AffiliationMapper {
 			@Param("readType") String readType, @Param("page") Long page, @Param("size") Long size, @Param("offset") Long offset);
 	Long findApplicantsCnt(@Param("userSq") Long userSq, @Param("searchType") String searchType, @Param("keyword") String keyword);
 	Long findApplicantsReadCnt(@Param("userSq") Long userSq, @Param("searchType") String searchType, @Param("keyword") String keyword);
-	String findUserNm(@Param("userSq") Long userSq); // 이름 조회
+	String findUserNm(@Param("resumeSq") Long resumeSq); // 이름 조회
 	List<Career> findCareers(@Param("resumeSq") Long resumeSq); // 경력 조회
 	
 	// 회원별 소속 신청 내역 전체 조회

@@ -1,6 +1,5 @@
 package com.example.demo.domain.affiliation.dto.response;
 
-import com.example.demo.domain.user.dto.UserDTO;
 import com.example.demo.domain.affiliation.entity.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -14,7 +13,6 @@ import java.time.*;
 @AllArgsConstructor
 public class ApplicantResponse{
 //	소속 지원자 정보 (기업)
-    private Long userSq; // 순번
     private String userNm; // 이름
     private Long career; // 경력
     private List<ResumeSkillResponse> skills; // 사용 기슐
@@ -23,7 +21,7 @@ public class ApplicantResponse{
     private LocalDateTime readAt; // 열람 일자
     private Long statusCd; // 지원 상태 코드
     
-    public static ApplicantResponse fromEntity(UserDTO userInfo, List<Career> careers, CompanyApplication companyApplication, List<ResumeSkillTag> skillTags) {
+    public static ApplicantResponse fromEntity(String userNm, List<Career> careers, CompanyApplication companyApplication, List<ResumeSkillTag> skillTags) {
     	Long month = careers.stream().filter(career -> career.getCareerStartDt() != null && career.getCareerEndDt() != null)
                 .mapToLong(career -> {
                 	LocalDate start = career.getCareerStartDt();
@@ -37,8 +35,7 @@ public class ApplicantResponse{
                 .sum();
     	List<ResumeSkillResponse> skills = skillTags.stream().filter(tag -> tag != null).map(tag -> ResumeSkillResponse.fromEntity(tag)).collect(java.util.stream.Collectors.toList());
     	return new ApplicantResponse(
-			userInfo.getUserSq(),
-			userInfo.getUserNm(),
+			userNm,
 			month,
 			skills,
 			companyApplication.getCompanyApplicationSq(),
