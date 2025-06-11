@@ -9,7 +9,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ScrapInsertRequest {
     private Long userSq;
-    private Long companySq;
     private Long projectSq;
     private Long scrapTypeCd;
 }

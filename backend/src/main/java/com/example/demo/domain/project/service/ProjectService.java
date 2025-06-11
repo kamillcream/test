@@ -133,6 +133,8 @@ public class ProjectService {
 		);
 		
 		int page = (request.getOffset() / request.getSize()) + 1;
+		
+		// TODO: 기본값 1로 수정해야 함.
 	    int totalPages = (int) Math.ceil((double) totalCount / request.getSize());
 		
 		return new ProjectListResponse(page, request.getSize(), totalCount, totalPages, responses);	
@@ -164,6 +166,8 @@ public class ProjectService {
 		);
 		
 		int page = (request.getOffset() / request.getSize()) + 1;
+		
+		// TODO: 기본값 1로 수정해야 함.
 	    int totalPages = (int) Math.ceil((double) totalCount / request.getSize());
 		
 		return new ProjectListResponse(page, request.getSize(), totalCount, totalPages, responses);	
@@ -299,9 +303,8 @@ public class ProjectService {
 	public void toggleProjectScrap(long projectSq, ScrapRequest scrapRequest, Long userSq) {
 		boolean hasScrapped = scrapRequest.isHasScrapped();
 		if(!hasScrapped) { 
-			long companySq = projectMapper.findCompanySqFromProjectSq(projectSq);
 			long scrapTypeCd = commonCodeMapper.findCommonCodeSqByName(scrapRequest.getTarget(), ParentCodeEnum.SCRAP_TYPE.getCode());
-			ScrapInsertRequest scrapInsertRequest = new ScrapInsertRequest(userSq, companySq, projectSq, scrapTypeCd);
+			ScrapInsertRequest scrapInsertRequest = new ScrapInsertRequest(userSq, projectSq, scrapTypeCd);
 			projectMapper.insertScrap(scrapInsertRequest);
 			projectMapper.increaseScrap(projectSq);
 

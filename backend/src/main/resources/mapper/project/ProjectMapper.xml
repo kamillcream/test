@@ -424,8 +424,8 @@
 	</insert>
 	
 	<insert id="insertScrap" parameterType="com.example.demo.domain.project.dto.request.ScrapInsertRequest">
-    INSERT INTO TBL_SCRAP_S (user_sq, company_sq, project_sq, scrap_type_cd)
-    VALUES (#{userSq}, #{companySq}, #{projectSq}, #{scrapTypeCd})
+    INSERT INTO TBL_SCRAP_S (user_sq, project_sq, scrap_type_cd)
+    VALUES (#{userSq}, #{projectSq}, #{scrapTypeCd})
 	</insert>
 	
 	<insert id="insertContracts" parameterType="map">
