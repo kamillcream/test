@@ -36,7 +36,7 @@ public interface ProjectMapper {
 	List<String> findJobsByProjectSq(@Param("projectSq") Long projectSq);
 	Map<String, LocalDateTime> findInterviewTimeMinMaxBySq(@Param("projectSq") Long projectSq);
 	Long countProjectsBySearch(ProjectSearchRequest request);
-	Long countCompanyProjectsBySearch(@Param("request") BaseRequest request);
+	Long countCompanyProjectsBySearch(@Param("request") BaseRequest request, @Param("companySq") Long companySq);
 	List<LocalDateTime> findInterviewTimesByProjectSq(@Param("projectSq") Long projectSq);
 
 	List<LocalDateTime> findAllInterviewTimesByProjectSq(@Param("projectSq") Long projectSq);

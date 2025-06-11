@@ -411,7 +411,7 @@ const filterCounts = computed(() => {
     else if (status === '합격') counts.passed++
     else if (status === '인터뷰확정') counts.interview_confirmed++
     else if (status === '인터뷰요청중') counts.interview_requested++
-    else if (['불합격', '반려', '지원취소'].includes(status)) counts.rejected++
+    else if (['불합격', '지원취소'].includes(status)) counts.rejected++
   })
   return counts
 })
@@ -440,7 +440,7 @@ const filters = computed(() => [
   },
   {
     type: 'rejected',
-    label: '불합격',
+    label: '불합격 / 취소',
     count: filterCounts.value.rejected,
   },
 ])
@@ -483,22 +483,13 @@ function formatDate(dateString) {
   return `${year}-${month}-${day} ${hours}:${minutes}`
 }
 
-function getAccessTokenFromCookie() {
-  const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]*)/)
-  return match ? decodeURIComponent(match[1]) : null
-}
-
 const updateStatus = async (applicationSq, status) => {
   try {
-    const token = getAccessTokenFromCookie()
     const response = await api.$patch(
       `/projects/applications/${applicationSq}`,
-      { status },
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         withCredentials: true,
+        status,
       },
     )
     console.log(`✅ ${applicationSq} 지원 상태 변경 성공`, response)
@@ -553,9 +544,14 @@ const generateIconUrl = (name) => {
 
 <style scoped>
 .modal-content {
-  border-radius: 8px;
+  max-height: 90vh;
+  overflow: hidden; /* 전체 모달에 스크롤 생기지 않도록 */
 }
 
+.modal-body {
+  overflow-y: auto;
+  max-height: calc(90vh - 120px); /* 헤더+푸터 제외한 높이, 상황에 따라 조정 */
+}
 .btn-rounded {
   border-radius: 20px;
 }

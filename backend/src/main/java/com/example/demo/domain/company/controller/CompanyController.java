@@ -38,7 +38,9 @@ public class CompanyController {
 	}
 	
 	@PatchMapping("/{companySq}")
-	public ResponseEntity<ApiResponse<Void>> patchMemberStatus(@PathVariable("companySq") Long companySq
+	public ResponseEntity<ApiResponse<Void>> patchMemberStatus(
+			Authentication authentication,
+			@PathVariable("companySq") Long companySq
 			, @RequestBody CompanyStatusRequest request){
 		companyService.updateMemberStatus(companySq, request);
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "소속 인원 상태 변경 성공", null));

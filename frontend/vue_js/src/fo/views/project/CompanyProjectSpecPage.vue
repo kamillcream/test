@@ -300,7 +300,9 @@ const deleteProject = () => {
     onConfirm: async () => {
       try {
         console.log('삭제 확정됨')
-        const res = await api.$delete(`/projects/${projectSq}`)
+        const res = await api.$delete(`/projects/${projectSq}`, {
+          withCredentials: true,
+        })
         alertStore.show(res.message || '삭제되었습니다.')
         modalStore.closeModal()
         router.push({ name: 'ProjectListPage' }) // 삭제 후 이동 (예시)

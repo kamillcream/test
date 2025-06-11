@@ -62,7 +62,9 @@ public class ProjectApplicationController {
 	}	
 
 	@PatchMapping("/{applicationSq}")
-	public ResponseEntity<ApiResponse<Void>> patchApplicationStatus(@PathVariable("applicationSq") Long applicationSq,
+	public ResponseEntity<ApiResponse<Void>> patchApplicationStatus(
+			Authentication authentication, 
+			@PathVariable("applicationSq") Long applicationSq,
 			@RequestBody ApplicationStatusRequest request) {
 		projectApplicationService.updateApplicantResult(request, applicationSq);
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "프로젝트 지원 상태 변경 성공", null));

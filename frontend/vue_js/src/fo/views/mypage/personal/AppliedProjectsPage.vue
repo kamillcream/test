@@ -235,15 +235,17 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useModalStore } from '../../../stores/modalStore.js'
+import { useUserStore } from '../../../stores/userStore.js'
+import { navigateByUserTypeAndProjectSq } from '@/fo/router/userTypeRouter.js'
 import InterviewTimeModal from '@/fo/components/mypage/common/InterviewSelectModal.vue'
 import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
 import ResumeDetailModal from '@/fo/components/mypage/common/ResumeDetailModal.vue'
 
 import { api } from '@/axios.js'
 
-import { useRouter } from 'vue-router'
+const userStore = useUserStore()
+const userType = userStore.getUserType
 
-const router = useRouter()
 const searchType = ref('all')
 const searchAppliedType = ref('')
 const searchKeyword = ref('')
@@ -320,12 +322,7 @@ const updateAppStatus = async (status, applicationSq) => {
 }
 
 const goToProjectSpec = (project) => {
-  router.push({
-    name: 'UserProjectSpec',
-    params: {
-      project_sq: project.projectSq,
-    },
-  })
+  navigateByUserTypeAndProjectSq(userType, project.projectSq)
 }
 
 const cancelApplication = (status, applicationSq) => {
