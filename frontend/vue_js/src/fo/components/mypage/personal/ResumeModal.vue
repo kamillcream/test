@@ -12,7 +12,9 @@
       </button>
     </div>
     <div class="modal-body">
-      <p>등록하시겠습니까 ?</p>
+      <p>
+        {{ props.resumeSq ? '수정하겠습니까?' : '등록하시겠습니까?' }}
+      </p>
     </div>
     <div class="modal-footer">
       <button type="submit" class="btn btn-primary" @click="confirm">
@@ -27,18 +29,21 @@
 
 <script setup>
 import { useModalStore } from '@/fo/stores/modalStore'
-import { defineEmits } from 'vue'
+import { defineProps, defineEmits } from 'vue'
 
-//  나중에 API 호출 함수 연결될 emit
+const props = defineProps({
+  resumeSq: {
+    type: [String, Number],
+    default: null,
+  },
+})
 const emit = defineEmits(['confirm'])
-
 const modalStore = useModalStore()
 
 const confirm = () => {
-  emit('confirm') // TODO: 여기에 API 연동 함수가 연결될 예정
+  emit('confirm')
   modalStore.closeModal()
 }
-
 const closeModal = () => {
   modalStore.closeModal()
 }

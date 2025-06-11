@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.example.demo.domain.mypage.dto.request.ResumeCertificateRequest;
+import com.example.demo.domain.mypage.dto.request.ResumeEducationRequest;
 import com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest;
 import com.example.demo.domain.mypage.dto.request.ResumeSkillRequest;
 import com.example.demo.domain.mypage.mapper.ResumeMapper;
@@ -65,8 +66,18 @@ public class ResumeService {
 	    resumeMapper.insertResume(request);
 	    System.out.println("✅ 최종 addressSq = " + request.getAddressSq());
 
-
+	    // 학력 리스트 저장
+	    if (request.getEducation() != null) {
+	        for (ResumeEducationRequest edu : request.getEducation()) {
+	            edu.setResumeSq(request.getResumeSq()); // FK 세팅
+	            resumeMapper.insertEducation(edu);      // insert 쿼리 호출
+	        }
+	    }
+	    
+	   
 	    return createResponse(request);
+	    
+	    
 	}
 
 	private void setDefaultValues(ResumeRegisterRequest request) {
@@ -141,8 +152,17 @@ public class ResumeService {
 	@Transactional
 	public void updateResume(ResumeRegisterRequest request) {
 	    resumeMapper.updateResume(request);
-	    // education, career 등 리스트도 별도 매퍼/쿼리로 처리 필요
-	}
+	    // 기존 학력 삭제
+	    resumeMapper.deleteEducationByResumeSq(request.getResumeSq());
+
+	    //새 학력 insert
+	    if (request.getEducation() != null) {
+	        for (ResumeEducationRequest edu : request.getEducation()) {
+	            edu.setResumeSq(request.getResumeSq());
+	            resumeMapper.insertEducation(edu);
+	        }
+	    }
+    }
 	
 	//이력서 삭제
 	public void softDeleteResume(Long resumeSq) {

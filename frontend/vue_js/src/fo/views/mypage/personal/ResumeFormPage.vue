@@ -245,8 +245,20 @@
                 class="btn btn-rounded btn-3d btn-light mb-2 position-relative"
                 style="padding-right: 24px"
               >
-                {{ education.school }} {{ education.major }}
-                {{ education.status }} ({{ education.period }})
+                {{ education.educationSchoolNm }}
+                <span v-if="education.educationMajorNm"
+                  >/ {{ education.educationMajorNm }}</span
+                >
+                <span>
+                  (
+                  {{
+                    formatPeriod(
+                      education.educationAdmissionDt,
+                      education.educationGraduationDt,
+                    )
+                  }}
+                  )
+                </span>
                 <span
                   class="text-grey ms-2 position-absolute end-0 me-2"
                   style="top: 50%; transform: translateY(-50%)"
@@ -614,7 +626,9 @@ import { useRoute } from 'vue-router'
 import SkillTagModal from '@/fo/components/community/SkillTagModal.vue'
 import { api } from '@/axios'
 import router from '@/fo/router'
+import { useAlertStore } from '@/fo/stores/alertStore'
 
+const alertStore = useAlertStore()
 const modalStore = useModalStore()
 const route = useRoute()
 const resumeSq = route.params.resumeSq
@@ -663,9 +677,9 @@ const openAddressSearchModal = () => {
   })
 }
 
-const openDetailModal = (resumeParam = null) => {
+const openDetailModal = () => {
   modalStore.openModal(ResumeModal, {
-    resume: resumeParam,
+    resumeSq: resumeSq,
     onConfirm: submitResume,
 
     // 필요하면 다른 props도 여기서 전달 가능
@@ -896,7 +910,10 @@ onMounted(async () => {
 const submitResume = async () => {
   // 1. 좌표 확인
   if (!resumeData.latitude || !resumeData.longitude) {
-    alert('주소 좌표 정보가 없습니다. 주소를 다시 선택해주세요.')
+    alertStore.show(
+      '주소 좌표 정보가 없습니다. 주소를 다시 선택해주세요.',
+      'danger',
+    )
     return
   }
 
@@ -925,7 +942,7 @@ const submitResume = async () => {
     resumeGreetingTxt: resumeData.resumeGreetingTxt,
     resumeIsNotificationYn: resumeData.resumeIsNotificationYn ? 'Y' : 'N',
     resumePhotoUrl: resumeData.resumePhotoUrl || '',
-    education: resumeData.education,
+    education: resumeData.education || [],
     career: resumeData.career,
     projects: resumeData.projects,
     certificates: resumeData.certificates,
@@ -941,17 +958,24 @@ const submitResume = async () => {
       await api.$put(`/mypage/resume/update/${resumeSq}`, payload, {
         withCredentials: true,
       })
-      alert('수정 완료!')
+      alertStore.show('이력서가 성공적으로 수정되었습니다.', 'success')
       router.push(`/mypage/resumelist`) // 리스트 페이지로 이동
     } else {
       await api.$post('/mypage/resume/new', payload, { withCredentials: true })
-      alert('등록 완료!')
+      alertStore.show('이력서가 성공적으로 등록되었습니다.', 'success')
       router.push('/mypage/resumelist') // 리스트 페이지로 이동
     }
   } catch (e) {
     console.error('[ 이력서 등록/수정 실패 ]', e)
-    alert('오류 발생')
+    alertStore.show('이력서 등록/수정 중 오류가 발생했습니다.', 'danger')
   }
+}
+
+function formatPeriod(admission, graduation) {
+  if (!admission) return ''
+  const start = admission.replace('-', '.')
+  if (!graduation) return `${start} ~ 재학중`
+  return `${start} ~ ${graduation.replace('-', '.')}`
 }
 </script>
 

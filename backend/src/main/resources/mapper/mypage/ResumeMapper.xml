@@ -70,7 +70,7 @@
 	        user_sq,
 	        address_sq,
 	        resume_ttl,
-	        resume_photo_url,
+	      <!--resume_photo_url,-->
 	        resume_nm,
 	        resume_birth_dt,         
 	        resume_phone_num,         
@@ -84,7 +84,7 @@
 	        #{userSq},
 	        #{addressSq},
 	        #{resumeTtl},
-	        #{resumePhotoUrl},      
+	     <!--#{resumePhotoUrl},-->  
 	        #{resumeNm},
 	        #{resumeBirthDt},         
 	        #{resumePhoneNum},         
@@ -123,7 +123,7 @@
 	    r.user_sq AS userSq,
 	    r.address_sq AS addressSq,
 	    r.resume_ttl AS resumeTtl,
-	    r.resume_photo_url AS resumePhotoUrl,
+	 <!--r.resume_photo_url AS resumePhotoUrl,-->
 	    r.resume_nm AS resumeNm,
 	    r.resume_birth_dt AS resumeBirthDt,
 	    r.resume_phone_num AS resumePhoneNum,
@@ -145,8 +145,21 @@
 
 <!--학력 추가-->
   <insert id="insertEducation" parameterType="com.example.demo.domain.mypage.dto.request.ResumeEducationRequest">
-  INSERT INTO TBL_RESUME_EDUCATION_S (resume_sq, school, major, status, period)
-  VALUES (#{resumeSq}, #{school}, #{major}, #{status}, #{period})
+	  INSERT INTO TBL_RESUME_EDUCATION_S (
+	    resume_sq,
+	    education_school_nm,
+	    education_major_nm,
+	    education_admission_dt,
+	    education_graduation_dt,
+	    education_status_cd
+	  ) VALUES (
+	    #{resumeSq},
+	    #{educationSchoolNm},
+	    #{educationMajorNm},
+	    #{educationAdmissionDt},
+	    #{educationGraduationDt},
+	    #{educationStatusCd}
+	  )
   </insert>
 <!--학력 삭제-->
   <delete id="deleteEducationByResumeSq" parameterType="long">
@@ -175,7 +188,7 @@
   UPDATE TBL_RESUME_M
   SET
     resume_ttl = #{resumeTtl},
-    resume_photo_url = #{resumePhotoUrl},
+   <!--resume_photo_url = #{resumePhotoUrl},-->
     resume_nm = #{resumeNm},
     resume_birth_dt = #{resumeBirthDt},
     resume_phone_num = #{resumePhoneNum},
