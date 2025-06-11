@@ -44,7 +44,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/projects/interviews",
             "/api/projects/forms",
             "/api/projects/*/districts",
-            "/api/projects/filters"
+            "/api/projects/filters",
+            "/api/projects/applications/interviews/*"
 
     // 여기에 더 추가 가능
     );
