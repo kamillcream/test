@@ -90,7 +90,7 @@ onMounted(() => {
 
 watch(() => props.normalTags, calculateVisibleTags)
 </script>
-<style>
+<style scoped>
 .tag-btn {
   font-size: 12px;
 }
