@@ -125,6 +125,7 @@
 <script setup>
 import { ref, computed, defineProps } from 'vue'
 import { useModalStore } from '../../../stores/modalStore.js'
+import { useAlertStore } from '../../../stores/alertStore.js'
 
 import { api } from '@/axios.js'
 
@@ -133,6 +134,8 @@ const props = defineProps({
   interviewTimes: Array,
   applicationSq: Number,
 })
+
+const alertStore = useAlertStore()
 
 const selectedDate = ref(null)
 const selectedTimes = ref({})
@@ -196,7 +199,7 @@ const handleConfirm = () => {
   console.log(interviewTimeSq)
   console.log(props.applicationSq)
   if (!interviewTimeSq || !props.applicationSq) {
-    alert('날짜와 시간을 선택해주세요.')
+    alertStore.show('날짜와 시간을 선택해주세요.', 'danger')
     return
   }
 

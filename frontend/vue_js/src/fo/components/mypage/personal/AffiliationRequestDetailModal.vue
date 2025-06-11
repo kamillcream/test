@@ -176,7 +176,7 @@ const getCompanyInfo = async () => {
 const openResumeModal = (sq) => {
   modalStore.openModal(ResumeDetailModal, {
     size: 'modal-lg',
-    sq,
+    resumeSq: sq,
   })
 }
 

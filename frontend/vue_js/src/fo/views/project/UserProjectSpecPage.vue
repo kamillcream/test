@@ -253,7 +253,7 @@ onMounted(async () => {
     // message fallback 처리
     let message = '프로젝트 정보를 불러오는 중 오류가 발생했습니다.'
 
-    alert(message)
+    alertStore.show(message)
     router.push({ name: 'ProjectListPage' })
   }
 })

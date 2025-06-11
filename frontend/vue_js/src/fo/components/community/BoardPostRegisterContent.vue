@@ -31,11 +31,12 @@
       <div class="d-flex align-items-center mb-2">
         <span class="form-label mb-0 text-2 me-2">태그</span>
         <!-- 기술 태그 모달창 오픈 -->
-        <i
+        <span
           v-if="skillActive"
-          class="fas fa-search text-muted"
+          class="btn btn-light form-label mb-0 text-2 me-2"
           @click.prevent="openSkillModal"
-        ></i>
+          >기술 태그 선택 하기</span
+        >
       </div>
 
       <!-- 입력창 (검색창 스타일) -->
@@ -43,7 +44,7 @@
         type="text"
         id="tagInput"
         class="form-control mb-2"
-        placeholder="태그를 입력하세요."
+        placeholder="태그 입력 후 엔터를 입력해주세요."
         @keyup.enter="
           (addNTag($event.target.value), ($event.target.value = ''))
         "
@@ -57,6 +58,11 @@
           href="#"
           class="btn btn-rounded btn-3d btn-primary btn-sm d-flex align-items-center px-3 py-2"
         >
+          <img
+            :src="getSkillIcon(tag.skillTagNm)"
+            :alt="tag.skillTagNm"
+            class="skill-icon"
+          />
           {{ tag.skillTagNm }}
           <i class="fas fa-times ms-2" @click.prevent="removeSTag(tag)"></i>
         </a>
@@ -80,7 +86,31 @@
         name="attachment"
         class="form-control mb-2"
         accept="image/*, .pdf, .doc, .docx, .zip"
+        multiple
+        @change="handleFileChange"
       />
+      <!-- 파일 목록 -->
+      <ul class="mt-2">
+        <li
+          v-for="(attachment, index) in attachments"
+          :key="index"
+          class="flex justify-between items-center mb-1"
+        >
+          <span>{{ attachment.fileOriginalNm }}</span>
+          <i
+            class="fas fa-times ms-2"
+            @click.prevent="removeAttachment(index)"
+          ></i>
+        </li>
+        <li
+          v-for="(file, index) in files"
+          :key="index"
+          class="flex justify-between items-center mb-1"
+        >
+          <span>{{ file.name }}</span>
+          <i class="fas fa-times ms-2" @click.prevent="removeFile(index)"></i>
+        </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -92,6 +122,7 @@ import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import '@vueup/vue-quill/dist/vue-quill.bubble.css'
 import { useBoardStore } from '@/fo/stores/boardStore'
 import SkillTagModal from './SkillTagModal.vue'
+import skillIconMap from '@/assets/skillIconMap.js'
 
 defineProps({ skillActive: { type: Boolean, default: false } })
 
@@ -104,6 +135,8 @@ const skillTags = ref(boardStore.boardData.skillTags)
 const editorRef = ref(null)
 const description = ref(boardStore.boardData.description)
 const attachments = ref(boardStore.boardData.attachments)
+
+const files = ref([])
 
 const options = {
   placeholder: '내용을 입력해주세요.',
@@ -136,18 +169,45 @@ const removeNTag = (tag) => {
 const removeSTag = (tag) => {
   let filtered = skillTags.value.filter((el) => el != tag)
   skillTags.value = filtered
+  console.log(skillTags.value)
 }
 
 // 전달 데이터
 const sendData = () => {
-  return {
-    userSq: 10,
-    ttl: ttl.value,
-    description: description.value,
-    normalTags: [...normalTags.value],
-    skillTags: [...skillTags.value],
-    attachments: [...attachments.value],
-  }
+  const formData = new FormData()
+  formData.append('ttl', ttl.value)
+  formData.append('description', description.value)
+  formData.append('normalTags', normalTags.value)
+  formData.append('skillTagsJson', JSON.stringify(skillTags.value))
+  const fileSqs = attachments.value.map((att) => att.fileSq)
+  formData.append('attachments', fileSqs)
+  files.value.forEach((file) => {
+    formData.append('files', file)
+  })
+  return formData
+}
+
+// 기술태그 아이콘
+const getSkillIcon = (name) => {
+  const key = name.toLowerCase().replace(/[\s.]+/g, '')
+  return skillIconMap[key] || skillIconMap.default
+}
+
+// 첨부파일
+const handleFileChange = (e) => {
+  const selectedFiles = Array.from(e.target.files)
+  files.value.push(...selectedFiles)
+
+  // input 초기화: 같은 파일 다시 선택해도 이벤트 발생하도록
+  e.target.value = ''
+}
+
+const removeFile = (index) => {
+  files.value.splice(index, 1)
+}
+
+const removeAttachment = (index) => {
+  attachments.value.splice(index, 1)
 }
 
 defineExpose({ sendData })
@@ -165,5 +225,10 @@ watchEffect(() => {
   min-height: 200px;
   background-color: #fff;
   min-height: 200px;
+}
+.skill-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
 }
 </style>

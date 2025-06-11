@@ -22,7 +22,7 @@ public class BoardResponse{
     private Integer recommendCnt;
     private Long boardAdoptStatusCd;
     private LocalDateTime createdAt;
-//    private List<Attachment> attachments; // 첨부파일
+    private List<BoardAttachmentResponse> attachments; // 첨부파일
     private List<String> normalTags;  // 일반 태그
     private List<SkillTagDTO> skillTags;
     private List<AnswerListResponse> answers;
@@ -30,7 +30,7 @@ public class BoardResponse{
     private Long viewerSq;
 
     
-    public static BoardResponse fromEntity(Board board, String userNm, List<String> normalTags, List<SkillTagDTO> skillTags, List<AnswerListResponse> answers, List<CommentResponse> comments, Long viewerSq) {
+    public static BoardResponse fromEntity(Board board, String userNm, List<String> normalTags, List<SkillTagDTO> skillTags, List<AnswerListResponse> answers, List<CommentResponse> comments, Long viewerSq, List<BoardAttachmentResponse> files) {
         return new BoardResponse(
 			board.getBoardSq(),
 			board.getUserSq(),
@@ -42,6 +42,7 @@ public class BoardResponse{
 			board.getBoardRecommendCnt(),
 			board.getBoardAdoptStatusCd(),
 			board.getBoardCreatedAtDtm(),
+			files,
 			normalTags,
 			skillTags,
 			answers,

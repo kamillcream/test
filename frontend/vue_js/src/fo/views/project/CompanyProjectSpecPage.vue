@@ -263,7 +263,7 @@ onMounted(async () => {
     // message fallback 처리
     let message = '프로젝트 정보를 불러오는 중 오류가 발생했습니다.'
 
-    alert(message)
+    alertStore.show(message, 'danger')
     router.push({ name: 'ProjectListPage' })
   }
 })
@@ -301,12 +301,12 @@ const deleteProject = () => {
       try {
         console.log('삭제 확정됨')
         const res = await api.$delete(`/projects/${projectSq}`)
-        alert(res.message || '삭제되었습니다.')
+        alertStore.show(res.message || '삭제되었습니다.')
         modalStore.closeModal()
         router.push({ name: 'ProjectListPage' }) // 삭제 후 이동 (예시)
       } catch (error) {
         console.error('삭제 실패:', error)
-        alert('삭제 중 오류가 발생했습니다.')
+        alertStore.show('삭제 중 오류가 발생했습니다.', 'danger')
       }
     },
   })

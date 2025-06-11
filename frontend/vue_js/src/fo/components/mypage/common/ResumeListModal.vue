@@ -29,7 +29,9 @@
                 :key="resume.resumeSq"
               >
                 <div class="post-info align-items-center gap-2">
-                  <a href="#">{{ resume.resumeTtl }}</a>
+                  <a href="#" @click="openResumeDetailModal(resume)">
+                    {{ resume.resumeTtl }}
+                  </a>
                   <span
                     v-if="resume.resumeIsRepresentativeYn == 'Y'"
                     class="badge bg-primary ms-2 align-middle"
@@ -95,6 +97,7 @@ import { api } from '@/axios.js'
 import CommonPagination from '../../common/CommonPagination.vue'
 import CommonConfirmModal from '../../common/CommonConfirmModal.vue'
 import { useAffiliationStore } from '@/fo/stores/AffiliationStore'
+import ResumeDetailModal from './ResumeDetailModal.vue'
 
 const currentPage = ref(1)
 const totalPages = ref(1)
@@ -107,11 +110,7 @@ const close = () => {
   modalStore.closeModal()
 }
 
-const resumes = ref([
-  { id: 1, title: '대표 이력서', date: '2025.04.03', isMain: false },
-  { id: 2, title: '이력서 제목 2', date: '2025.04.02', isMain: false },
-  { id: 3, title: '이력서 제목 3', date: '2025.04.01', isMain: false },
-])
+const resumes = ref([])
 
 const getResumes = async () => {
   try {
@@ -137,6 +136,19 @@ const selectResume = (resume) => {
       alertStore.show('이력서 선택이 완료되었습니다.', 'success')
       close()
       close()
+    },
+  })
+}
+
+function openResumeDetailModal(resume) {
+  modalStore.openModal(ResumeDetailModal, {
+    title: '이력서 상세보기',
+    size: 'modal-lg',
+    props: {
+      resumeSq: resume.resumeSq, // 여기에 실제 이력서 번호 넘김
+    },
+    onConfirm: () => {
+      selectResume(resume)
     },
   })
 }
