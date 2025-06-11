@@ -94,5 +94,31 @@
 		SET board_recommend_cnt = ( SELECT COUNT(*) FROM TBL_RECOMMENDATION_S WHERE board_sq = #{boardSq} ) 
 		WHERE board_sq = #{boardSq} 
 	</update>
+	
+	<insert id="insertFile"> 
+		INSERT INTO TBL_BOARD_ATTACHMENT_S ( board_sq, file_sq )
+        VALUES ( #{boardSq}, #{fileSq} ) 
+    </insert>
+    
+	<select id="findFiles" resultType="Long">
+		SELECT file_sq FROM TBL_BOARD_ATTACHMENT_S 
+		WHERE board_sq = #{boardSq}
+	</select>
+    
+	<select id="findFile" resultType="com.example.demo.domain.community.entity.BoardAttachment">
+		SELECT * FROM TBL_COMMON_FILE_S 
+		WHERE file_sq = #{fileSq}
+	</select>
+
+    <delete id="deleteBoardFile">
+        DELETE FROM TBL_BOARD_ATTACHMENT_S
+        WHERE board_sq = #{boardSq} AND file_sq = #{fileSq}
+    </delete>
+
+	<update id="deleteFile" parameterType="Long">
+		UPDATE TBL_COMMON_FILE_S 
+		SET file_is_deleted_yn = 'Y'
+		WHERE file_sq = #{fileSq}
+	</update>
 
 </mapper>

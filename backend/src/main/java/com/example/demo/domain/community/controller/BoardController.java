@@ -1,21 +1,35 @@
 package com.example.demo.domain.community.controller;
 
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriUtils;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.*;
+import com.amazonaws.util.*;
 import com.example.demo.common.ApiResponse;
 import com.example.demo.domain.community.dto.request.*;
 import com.example.demo.domain.community.service.BoardService;
 import com.example.demo.domain.community.dto.response.*;
 import com.example.demo.domain.community.entity.*;
+import com.example.demo.domain.community.mapper.BoardMapper;
+import com.example.demo.domain.community.dto.*;
 
 import lombok.RequiredArgsConstructor;
 
 import javax.lang.model.type.NullType;
 
 import java.util.*;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 
@@ -24,6 +38,12 @@ import java.util.*;
 @RequiredArgsConstructor
 public class BoardController {
     private final BoardService boardService;
+    private final BoardMapper boardMapper;
+    private final AmazonS3 amazonS3;
+    
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
+    
 //    전체 게시글 조회
     @GetMapping
     public ResponseEntity<ApiResponse<BoardListResponse>> getAllBoards(
@@ -43,7 +63,19 @@ public class BoardController {
     
 //    게시글 등록
     @PostMapping
-    public ResponseEntity<ApiResponse<NullType>> createBoard(@AuthenticationPrincipal Long userSq, @RequestBody BoardRequest boardRequest){
+    public ResponseEntity<ApiResponse<NullType>> createBoard(@AuthenticationPrincipal Long userSq, 
+    		@ModelAttribute BoardRequest boardRequest,
+    		@RequestParam("skillTagsJson") String skillTagsJson){
+    	ObjectMapper objectMapper = new ObjectMapper();
+    	List<SkillTagDTO> skillTags;
+    	if(skillTagsJson != null && !skillTagsJson.isBlank()) {
+        	try {
+                skillTags = objectMapper.readValue(skillTagsJson, new TypeReference<List<SkillTagDTO>>() {});
+            } catch (JsonProcessingException e) {
+                return ResponseEntity.badRequest().body(ApiResponse.of(HttpStatus.BAD_REQUEST, "skillTags 변환 실패", null));
+            }
+        	boardRequest.setSkillTags(skillTags);	
+    	}
     	boardRequest.setUserSq(userSq);
     	boardService.createBoard(boardRequest, 1401L);
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.CREATED, "게시글 등록이 완료되었습니다.", null));
@@ -51,7 +83,19 @@ public class BoardController {
     
 //    게시글 수정
     @PutMapping("/{boardSq}")
-    public ResponseEntity<ApiResponse<NullType>> updateBoard(@AuthenticationPrincipal Long userSq, @RequestBody BoardRequest boardRequest, @PathVariable("boardSq") Long boardSq){
+    public ResponseEntity<ApiResponse<NullType>> updateBoard(@AuthenticationPrincipal Long userSq, @PathVariable("boardSq") Long boardSq, 
+    		@ModelAttribute BoardRequest boardRequest,
+    		@RequestParam("skillTagsJson") String skillTagsJson){
+    	ObjectMapper objectMapper = new ObjectMapper();
+    	List<SkillTagDTO> skillTags;
+    	if(skillTagsJson != null && !skillTagsJson.isBlank()) {
+        	try {
+                skillTags = objectMapper.readValue(skillTagsJson, new TypeReference<List<SkillTagDTO>>() {});
+            } catch (JsonProcessingException e) {
+                return ResponseEntity.badRequest().body(ApiResponse.of(HttpStatus.BAD_REQUEST, "skillTags 변환 실패", null));
+            }
+        	boardRequest.setSkillTags(skillTags);	
+    	}
     	boardRequest.setUserSq(userSq);
     	boardService.updateBoard(boardRequest, boardSq, 1401L);
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "게시글 수정이 완료되었습니다.", null));
@@ -82,6 +126,40 @@ public class BoardController {
 	@GetMapping("/skill-tags")
 	public ResponseEntity<ApiResponse<List<CommonSkillTag>>> getAllSkills() {
 		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "기술 태그 리스트 조회 완료", boardService.getAllSkillTags()));
+	}
+	
+	// 첨부파일 다운로드
+	@GetMapping("/download/{fileSq}")
+	public ResponseEntity<byte[]> downloadFile(@PathVariable("fileSq") Long fileSq) {
+		System.out.println("조회 실행");
+		
+		BoardAttachment attachment = boardMapper.findFile(fileSq);
+		
+		if(attachment == null) {
+			System.out.println("ㅠㅏ일 없음");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다.");
+		}
+		System.out.println(attachment.getFileSaveNm());
+		
+	    // S3에서 파일 불러오기
+	    S3Object s3Object = amazonS3.getObject(bucket, attachment.getFileSaveNm());
+	    S3ObjectInputStream inputStream = s3Object.getObjectContent();
+	    byte[] content;
+
+	    try {
+	        content = IOUtils.toByteArray(inputStream);
+	    } catch (IOException e) {
+	    	System.out.println("다운 실패");
+	        throw new RuntimeException("파일 다운로드 실패", e);
+	    }
+	    
+	    String encodedFileName = UriUtils.encode(attachment.getFileOriginalNm(), StandardCharsets.UTF_8);
+
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+	    headers.setContentDisposition(ContentDisposition.attachment().filename(encodedFileName).build());
+
+	    return new ResponseEntity<>(content, headers, HttpStatus.OK);
 	}
 
 }
