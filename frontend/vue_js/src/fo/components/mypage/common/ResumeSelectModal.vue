@@ -90,7 +90,8 @@ import { useAlertStore } from '../../../stores/alertStore'
 import { api } from '@/axios.js'
 
 import CommonPagination from '@/fo/components/common/CommonPagination.vue'
-import ResumeDetailModal from './ResumeDetailModal.vue'
+
+import ResumeDetailModal from '@/fo/components/project/ProjectResumeDetailModal.vue'
 
 const props = defineProps({
   userSq: {
@@ -106,6 +107,7 @@ const props = defineProps({
     required: true,
   },
 })
+
 const emit = defineEmits(['confirm'])
 
 const modalStore = useModalStore()
@@ -121,15 +123,30 @@ const close = () => {
 }
 
 const getResumes = async () => {
-  try {
-    const res = await api.$get(`/mypage/resume/list/${props.userSq}`)
-    if (Array.isArray(res.output)) {
-      resumes.value = res.output
-    } else {
-      console.error('이력서 목록이 배열이 아닙니다:', res)
+  if (props.role === 'PERSONAL') {
+    try {
+      const res = await api.$get('/mypage/resume/list')
+      console.log('이력서 목록 응답:', res)
+      if (Array.isArray(res.output)) {
+        console.log(res.output)
+        resumes.value = res.output
+      } else {
+        console.error('이력서 목록이 배열이 아닙니다:', res)
+      }
+    } catch (error) {
+      console.error('이력서 목록 조회 실패:', error)
     }
-  } catch (error) {
-    console.error('이력서 목록 조회 실패:', error)
+  } else if (props.role === 'COMPANY') {
+    try {
+      const res = await api.$get(`/mypage/resume/list/${props.userSq}`)
+      if (Array.isArray(res.output)) {
+        resumes.value = res.output
+      } else {
+        console.error('이력서 목록이 배열이 아닙니다:', res)
+      }
+    } catch (error) {
+      console.error('이력서 목록 조회 실패:', error)
+    }
   }
 }
 
@@ -154,9 +171,7 @@ const openResumeDetailModal = (resume) => {
   modalStore.openModal(ResumeDetailModal, {
     title: '이력서 상세보기',
     size: 'modal-lg',
-    props: {
-      resumeSq: resume.resumeSq,
-    },
+    resumeSq: resume.resumeSq,
     onConfirm: () => selectResume(resume),
   })
 }
@@ -174,6 +189,7 @@ const confirm = async () => {
     alertStore.show('이력서를 선택해주세요.', 'danger')
     return
   }
+
   if (props.role === 'PERSONAL') {
     try {
       await api.$post(`/projects/applications/${props.projectSq}`, {
@@ -193,10 +209,10 @@ const confirm = async () => {
       await api.$patch(
         `/mypage/resume/representative/${selectedResume[0].resumeSq}`,
         {
-          memberSq: props.userSq, // ✅ 최상위로
+          memberSq: props.userSq,
         },
         {
-          withCredentials: true, // ✅ 옵션은 두 번째 인자로
+          withCredentials: true,
         },
       )
       emit('confirm', selectedResume.value)
