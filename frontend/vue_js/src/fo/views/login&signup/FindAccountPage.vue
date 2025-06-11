@@ -46,6 +46,7 @@ import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import FindIdForm from '@/fo/components/login&signup/FindIdForm.vue'
 import ResetPasswordForm from '@/fo/components/login&signup/ResetPasswordForm.vue'
+import CommonPageHeader from '@/fo/components/common/CommonPageHeader.vue'
 
 const route = useRoute()
 const router = useRouter()
