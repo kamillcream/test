@@ -6,12 +6,11 @@ import lombok.Data;
 
 @Data
 public class ResumeCareerResponse {
-	private Long careerSq;           // 경력 순번 (PK)
-    private Long resumeSq;           // 이력서 순번 (FK)
-    private String companyNm;        // 회사명
-    private String departmentNm;     // 부서
-    private String positionNm;       // 직급
-    private LocalDate startDt;       // 입사일자 
-    private String endDt;   
-
+    private Long careerSq;                // 경력 순번(PK)
+    private Long resumeSq;                // 이력서 순번(FK)
+    private String careerCompanyNm;       // 회사명
+    private String careerDepartmentNm;    // 부서
+    private String careerPositionNm;      // 직급
+    private LocalDate careerStartDt;      // 입사일자
+    private LocalDate careerEndDt;        // 퇴사일자 (null)
 }

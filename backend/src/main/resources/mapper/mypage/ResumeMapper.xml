@@ -238,5 +238,55 @@
   WHERE education_sq = #{educationSq}
   </update>
   
+<!--경력 등록-->
+  <insert id="insertCareer" parameterType="com.example.demo.domain.mypage.dto.request.ResumeCareerRequest">
+    INSERT INTO TBL_RESUME_CAREER_S (
+        resume_sq,
+        career_company_nm,
+        career_department_nm,
+        career_position_nm,
+        career_start_dt,
+        career_end_dt
+    ) VALUES (
+        #{resumeSq},
+        #{careerCompanyNm},
+        #{careerDepartmentNm},
+        #{careerPositionNm},
+        #{careerStartDt},
+        #{careerEndDt}
+    )
+</insert>
+
+<!--경력조회-->
+<select id="selectCareerByResumeSq" parameterType="long"
+        resultType="com.example.demo.domain.mypage.dto.response.ResumeCareerResponse">
+    SELECT
+        career_sq AS careerSq,
+        resume_sq AS resumeSq,
+        career_company_nm AS careerCompanyNm,
+        career_department_nm AS careerDepartmentNm,
+        career_position_nm AS careerPositionNm,
+        career_start_dt AS careerStartDt,
+        career_end_dt AS careerEndDt
+    FROM TBL_RESUME_CAREER_S
+    WHERE resume_sq = #{resumeSq}
+</select>
  
+ <!--경력수정-->
+  <update id="updateCareer" parameterType="com.example.demo.domain.mypage.dto.response.ResumeCareerResponse">
+    UPDATE TBL_RESUME_CAREER_S
+    SET
+        career_company_nm = #{careerCompanyNm},
+        career_department_nm = #{careerDepartmentNm},
+        career_position_nm = #{careerPositionNm},
+        career_start_dt = #{careerStartDt},
+        career_end_dt = #{careerEndDt}
+    WHERE career_sq = #{careerSq}
+  </update>
+ 
+ <!--경력 삭제-->
+<delete id="deleteCareerByResumeSq" parameterType="long">
+    DELETE FROM TBL_RESUME_CAREER_S WHERE resume_sq = #{resumeSq}
+</delete>
+
 </mapper>

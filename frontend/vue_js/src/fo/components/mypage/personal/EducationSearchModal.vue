@@ -227,7 +227,7 @@ const completeSelection = () => {
 
   const period = endDate.value
     ? `${formatDate(startDate.value)} ~ ${formatDate(endDate.value)}`
-    : `${formatDate(startDate.value)} ~ 재학중`
+    : `${formatDate(startDate.value)} ~`
 
   const admissionDate = startDate.value + '-01'
   const graduationDate = endDate.value ? endDate.value + '-01' : null

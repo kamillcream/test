@@ -283,12 +283,18 @@
             </label>
             <div class="mb-2">
               <span
-                v-for="(item, idx) in resumeData.career"
-                :key="idx"
+                v-for="career in resumeData.career"
+                :key="career.company + career.startDate"
                 class="company-tag"
               >
-                {{ item.company }}회사 {{ item.department }}부서
-                {{ item.position }} ({{ item.period }})
+                {{ career.company }}회사 {{ career.department }}부서
+                {{ career.position }}
+                <span>
+                  (
+                  {{ careerPeriod(career.startDate, career.endDate) }}
+                  )
+                </span>
+
                 <span
                   class="text-grey ms-2"
                   style="cursor: pointer"
@@ -668,10 +674,6 @@ const resumeData = reactive({
 const openAddressSearchModal = () => {
   modalStore.openModal(AddressSearchModal, {
     onComplete: (data) => {
-      // if (!data.sido || !data.sigungu) {
-      //   alert('주소 선택에 실패했습니다. 다시 시도해주세요.')
-      //   return
-      //}
       Object.assign(resumeData, data)
     },
   })
@@ -749,6 +751,13 @@ const showCareerForm = () => {
       resumeData.career.push(career)
     },
   })
+}
+//경력 날짜 표시 YYYY-MM
+function toYyyyMmDd(dateStr) {
+  if (!dateStr) return null
+  if (/^\d{4}-\d{2}$/.test(dateStr)) return dateStr + '-01'
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr
+  return null
 }
 // 교육 입력 폼 표시 로직
 const showTrainingForm = () => {
@@ -880,7 +889,14 @@ onMounted(async () => {
         resumeData.resumeIsRepresentativeYn =
           data.resumeIsRepresentativeYn === 'Y'
         resumeData.education = data.education || []
-        resumeData.career = data.career || []
+        resumeData.career = (data.career || []).map((e) => ({
+          company: e.careerCompanyNm,
+          department: e.careerDepartmentNm,
+          position: e.careerPositionNm,
+          startDate: e.careerStartDt ? e.careerStartDt.substring(0, 7) : '',
+          endDate: e.careerEndDt ? e.careerEndDt.substring(0, 7) : '',
+          period: e.period,
+        }))
         resumeData.trainingHistories = data.trainingHistories || []
         resumeData.projects = data.projects || []
         resumeData.certificates = data.certificates || []
@@ -949,7 +965,13 @@ const submitResume = async () => {
       educationGraduationDt: e.educationGraduationDt,
       educationStatusCd: e.educationStatusCd,
     })),
-    career: resumeData.career,
+    career: resumeData.career.map((e) => ({
+      careerCompanyNm: e.company,
+      careerDepartmentNm: e.department,
+      careerPositionNm: e.position,
+      careerStartDt: toYyyyMmDd(e.startDate),
+      careerEndDt: toYyyyMmDd(e.endDate),
+    })),
     projects: resumeData.projects,
     certificates: resumeData.certificates,
     skills: resumeData.skills,
@@ -976,12 +998,19 @@ const submitResume = async () => {
     alertStore.show('이력서 등록/수정 중 오류가 발생했습니다.', 'danger')
   }
 }
-
+//학력 날짜 변환
 function formatPeriod(admission, graduation) {
   if (!admission) return ''
   const start = admission.replace('-', '.')
-  if (!graduation) return `${start} ~ 재학중`
+  if (!graduation) return `${start} ~ `
   return `${start} ~ ${graduation.replace('-', '.')}`
+}
+//회사이력 날짜 변환
+function careerPeriod(start, end) {
+  if (!start) return ''
+  const startStr = start.replace('-', '.')
+  if (!end) return `${startStr} ~ `
+  return `${startStr} ~ ${end.replace('-', '.')}`
 }
 </script>
 

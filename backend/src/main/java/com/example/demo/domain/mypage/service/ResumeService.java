@@ -6,10 +6,12 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.demo.domain.mypage.dto.request.ResumeCareerRequest;
 import com.example.demo.domain.mypage.dto.request.ResumeCertificateRequest;
 import com.example.demo.domain.mypage.dto.request.ResumeEducationRequest;
 import com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest;
 import com.example.demo.domain.mypage.dto.request.ResumeSkillRequest;
+import com.example.demo.domain.mypage.dto.request.TrainingHistoryRequest;
 import com.example.demo.domain.mypage.mapper.ResumeMapper;
 import com.example.demo.domain.mypage.mapper.ResumeSkillMapper;
 import com.example.demo.domain.mypage.dto.AddressDTO;
@@ -54,7 +56,15 @@ public class ResumeService {
 	        }
 	    }
 	   
-	   
+	   // 경력
+	    if (request.getCareer() != null) {
+	        for (ResumeCareerRequest career : request.getCareer()) {
+	            career.setResumeSq(request.getResumeSq());
+	            resumeMapper.insertCareer(career);
+	        }
+	    }
+	
+	    
 	    return createResponse(request);
 	    
 	    
@@ -122,9 +132,12 @@ public class ResumeService {
 	    // 학력 리스트 별도 조회 후 세팅
 	    ResumeRegisterResponse result = resumeMapper.selectResumeById(resumeSq);
 	    result.setEducation(resumeMapper.selectEducationByResumeSq(resumeSq));
-	    // ( career, projects, certificates, skills 등도 동일하게 조회 후 set)
-
+	    // 경력 상세 조회
+	    result.setCareer(resumeMapper.selectCareerByResumeSq(resumeSq));
 	       System.out.println("selectResumeById result: " + result);
+	       
+		// ( projects, certificates, skills 등도 동일하게 조회 후 set)
+
 	       return result;
 	}
 
@@ -141,6 +154,7 @@ public class ResumeService {
 
 	    // 2. 기존 학력 모두 삭제
 	    resumeMapper.deleteEducationByResumeSq(request.getResumeSq());
+	    resumeMapper.deleteCareerByResumeSq(request.getResumeSq());
 
 	    // 3. 새 학력 리스트가 있으면 insert
 	    if (request.getEducation() != null) {
@@ -149,6 +163,7 @@ public class ResumeService {
 	            resumeMapper.insertEducation(edu);
 	        }
 	    }
+	    
 	}
 	
 	//이력서 삭제
