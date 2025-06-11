@@ -60,5 +60,20 @@
 	    )
 	    WHERE answer_sq = #{answerSq}
 	</update>
+	
+	<insert id="insertFile"> 
+		INSERT INTO TBL_BOARD_ANSWER_ATTACHMENT_S ( answer_sq, file_sq )
+        VALUES ( #{answerSq}, #{fileSq} ) 
+    </insert>
+    
+	<select id="findFiles" resultType="Long">
+		SELECT file_sq FROM TBL_BOARD_ANSWER_ATTACHMENT_S 
+		WHERE answer_sq = #{answerSq}
+	</select>
+
+    <delete id="deleteAnswerFile">
+        DELETE FROM TBL_BOARD_ANSWER_ATTACHMENT_S
+        WHERE answer_sq = #{answerSq} AND file_sq = #{fileSq}
+    </delete>
 
 </mapper>

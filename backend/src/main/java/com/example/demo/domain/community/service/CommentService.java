@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import com.example.demo.domain.community.dto.request.*;
 import com.example.demo.domain.community.entity.*;
 import com.example.demo.domain.community.mapper.*;
-import com.example.demo.domain.community.dto.response.*;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

@@ -96,6 +96,7 @@ const clickApplication = (sq) => {
     size: 'modal-lg',
     answerSq: sq,
     boardUserSq: boardInfo.value.userSq,
+    adoptStatusCd: boardInfo.value.boardAdoptStatusCd,
   })
 }
 
@@ -106,7 +107,6 @@ const getBoard = async () => {
     if (res) {
       boardInfo.value = res.output
       boardStore.viewerSq = res.output.viewerSq
-      console.log(res)
     }
   } catch (error) {
     alertStore.show('게시글을 불러올 수 없습니다.', 'danger')
@@ -114,11 +114,7 @@ const getBoard = async () => {
 }
 
 const addViewCnt = async () => {
-  try {
-    await api.$patch(`/board/${props.board_sq}/increment-view`)
-  } catch (error) {
-    console.error
-  }
+  await api.$patch(`/board/${props.board_sq}/increment-view`)
 }
 
 const formatTime = (createdAt) => {

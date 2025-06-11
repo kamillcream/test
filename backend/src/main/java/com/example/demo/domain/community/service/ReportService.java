@@ -49,7 +49,6 @@ public class ReportService {
     	
         reportMapper.insert(report);
         
-        System.out.println(report.getReportSq());
         if (report.getReportSq() == null) {
             throw new IllegalStateException("신고 생성 실패: Primary Key가 생성되지 않았습니다.");
         }

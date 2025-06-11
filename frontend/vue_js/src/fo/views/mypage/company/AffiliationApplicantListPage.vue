@@ -67,12 +67,13 @@
                 class="d-flex justify-content-between align-items-center gap-2"
               >
                 <div class="d-flex gap-2">
-                  <a
-                    href="#"
-                    class="text-6 m-0"
+                  <button
+                    type="button"
+                    class="text-6 m-0 text-primary"
                     @click="handleOpenApplicant(applicant.applicationSq)"
-                    >{{ applicant.userNm }}</a
                   >
+                    {{ applicant.userNm }}
+                  </button>
                 </div>
                 <div class="d-flex gap-2">
                   <button
@@ -176,6 +177,7 @@ import { onMounted, ref } from 'vue'
 import skillIconMap from '@/assets/skillIconMap.js'
 import { useModalStore } from '@/fo/stores/modalStore'
 import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
+import AffiliationRequestDetailModal from '@/fo/components/mypage/personal/AffiliationRequestDetailModal.vue'
 
 const readType = ref('all')
 const searchType = ref('all')
@@ -217,7 +219,6 @@ const getApplicants = async () => {
       const unreadCnt = res.output.totalElements - res.output.readElements
       const readCnt = res.output.readElements
 
-      console.log(res)
       applicants.value = res.output.applicants
       totalElements.value = totalCnt
       readElements.value = readCnt
@@ -275,9 +276,16 @@ const handlePassClick = (applicant, cd) => {
   })
 }
 
-const handleOpenApplicant = async (sq) => {
-  await api.$put(`/mypage/applications/read/${sq}`) // 이력서 열람으로 업데이트
+const openDetailModal = (applicationSq) => {
+  modalStore.openModal(AffiliationRequestDetailModal, {
+    applicationSq,
+  })
+}
+
+const handleOpenApplicant = async (applicationSq) => {
+  await api.$put(`/mypage/applications/read/${applicationSq}`) // 이력서 열람으로 업데이트
   // [추가] 이력서 모달 오픈
+  openDetailModal(applicationSq)
 }
 
 const convertCareer = (career) => {

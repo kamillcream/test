@@ -4,7 +4,6 @@ package com.example.demo.domain.community.controller;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.common.ApiResponse;
 import com.example.demo.domain.community.dto.SkillTagDTO;
@@ -106,6 +105,13 @@ public class QnaController {
 		  boardService.updateBoardRecommend(userSq, boardSq);
 		  return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "추천 반영이 완료되었습니다.", null));
     }
+    
+//  답변 채택 상태 변경
+	@PutMapping("/{boardSq}/status/{statusCd}")
+	public ResponseEntity<ApiResponse<NullType>> updateStatusBoard(@AuthenticationPrincipal Long userSq, @PathVariable("boardSq") Long boardSq, @PathVariable("statusCd") Long statusCd){
+		boardService.updateStatusBoard(userSq, boardSq, statusCd);
+		return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "답변 채택 상태 변경이 완료되었습니다.", null));
+	}
 	  
 
 }

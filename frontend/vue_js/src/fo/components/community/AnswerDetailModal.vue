@@ -19,6 +19,7 @@
           :boardInfo="boardInfo"
           :parentUserSq="boardUserSq"
           :getBoard="getBoard"
+          :adoptStatusCd="props.adoptStatusCd"
         />
 
         <BoardComment
@@ -58,6 +59,10 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  adoptStatusCd: {
+    type: Number,
+    default: 1501,
+  },
 })
 
 const closeModal = () => {
@@ -93,11 +98,7 @@ const getBoard = async () => {
 }
 
 const addViewCnt = async () => {
-  try {
-    await api.$patch(`/answer/${props.answerSq}/increment-view`)
-  } catch (error) {
-    console.error
-  }
+  await api.$patch(`/answer/${props.answerSq}/increment-view`)
 }
 
 onMounted(() => {

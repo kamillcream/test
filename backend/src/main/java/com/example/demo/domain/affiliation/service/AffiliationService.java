@@ -1,18 +1,13 @@
 package com.example.demo.domain.affiliation.service;
 
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.domain.affiliation.mapper.*;
-import com.example.demo.domain.community.dto.BoardListDTO;
-import com.example.demo.domain.community.dto.SkillTagDTO;
-import com.example.demo.domain.community.mapper.CommunityUserMapper;
-import com.example.demo.domain.user.dto.UserDTO;
-import com.example.demo.config.SecurityConfigDev;
+import com.amazonaws.services.s3.AmazonS3;
 import com.example.demo.domain.affiliation.dto.response.*;
 import com.example.demo.domain.affiliation.entity.*;
 import com.example.demo.domain.affiliation.dto.request.SearchFilterRequest;
-import com.example.demo.domain.mypage.dto.UserInfoDTO;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,16 +20,29 @@ import java.util.stream.Collectors;
 public class AffiliationService {
 
     private final AffiliationMapper affiliationMapper;
-    private final CommunityUserMapper communityUserMapper;
+    private final AmazonS3 amazonS3;
     
-    // 소속 공고 하나 조회
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
+    
+    // 소속 신청 내역 하나 조회
     @Transactional
-    public AffiliationResponse getAffiliaion(Long companySq) {
-    	Company company = affiliationMapper.findCompany(companySq);
+    public ApplyResponse getAffiliaion(Long applicationSq) {
+    	
+    	CompanyApplication application = getApply(applicationSq);
+    	
+    	Company company = affiliationMapper.findCompany(application.getCompanySq());
+    	String resumeTtl = affiliationMapper.findResumeTtl(application.getResumeSq());
+    	Long applicantCnt = affiliationMapper.findApplicantCnt(application.getCompanySq());
+    				
+    	ApplicationResponse responses = ApplicationResponse.fromEntity(company, resumeTtl, application, applicantCnt);
+    	
+    	
 		Address address = affiliationMapper.findAddress(company.getAddressSq());
 		List<String> tags = affiliationMapper.findTags(company.getCompanySq());
+		AffiliationResponse affiliation = AffiliationResponse.fromEntity(company, address, tags, null, null, null, null);
 		
-    	return AffiliationResponse.fromEntity(company, address, tags, null, null, null);
+    	return ApplyResponse.builder().apply(responses).affiliation(affiliation).build();
     }
     
     
@@ -51,6 +59,8 @@ public class AffiliationService {
     				Address address = affiliationMapper.findAddress(company.getAddressSq());
     				List<String> tags = affiliationMapper.findTags(company.getCompanySq());
     				Long scrapCnt = affiliationMapper.findScrapCnt(company.getCompanySq());
+    				String imgNm = affiliationMapper.findProfileImg(company.getCompanySq());
+    				String imageUrl = (imgNm != null) ? amazonS3.getUrl(bucket, imgNm).toString() : null;
     				
     				Long applyCnt = affiliationMapper.findIsApply(userSq, company.getCompanySq());
     				Boolean isApply = false;
@@ -66,7 +76,7 @@ public class AffiliationService {
     		    		}    		    		
     		    	}
     				
-    				return AffiliationResponse.fromEntity(company, address, tags, scrapCnt, isScrap, isApply);
+    				return AffiliationResponse.fromEntity(company, address, tags, scrapCnt, isScrap, isApply, imageUrl);
     				
     			}).collect(Collectors.toList());
     	
@@ -82,16 +92,12 @@ public class AffiliationService {
     	}
     	
     	Scrap scrap = affiliationMapper.findScrap(userSq, companySq);
-    	System.out.println("스크랩 시도");
     	
     	if(scrap == null) {
-    		System.out.println("스크랩 없음" + userSq);
-    		System.out.println("스크랩 없음" + companySq);
     		scrap = Scrap.builder().userSq(userSq).companySq(companySq).scrapTypeCd(602L).build();
     		affiliationMapper.insertScrap(scrap);
     		
     	} else {
-    		System.out.println("스크랩 있음");
     		affiliationMapper.deleteScrap(scrap.getScrapSq());
     	}
     	
@@ -159,10 +165,10 @@ public class AffiliationService {
 			.filter(Objects::nonNull)
 			.map(application -> { 
 				List<Career> careers = affiliationMapper.findCareers(application.getResumeSq());
-				UserDTO userInfo = communityUserMapper.findById(application.getUserSq());
+				String userNm = affiliationMapper.findUserNm(application.getResumeSq());
 				List<ResumeSkillTag> skillTags = affiliationMapper.findResumeSkills(application.getResumeSq());
 				
-				return ApplicantResponse.fromEntity(userInfo, careers, application, skillTags);
+				return ApplicantResponse.fromEntity(userNm, careers, application, skillTags);
 				
 			}).collect(Collectors.toList());
     	

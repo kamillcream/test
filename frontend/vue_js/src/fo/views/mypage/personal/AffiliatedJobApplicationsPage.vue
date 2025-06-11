@@ -57,7 +57,7 @@
         <ul class="simple-post-list m-0 position-relative">
           <li
             v-for="apply in applies"
-            :key="apply.sq"
+            :key="apply.applicationSq"
             style="border-bottom: 1px rgb(230, 230, 230) solid"
           >
             <div class="post-info position-relative">
@@ -66,12 +66,13 @@
                 class="d-flex justify-content-between align-items-center gap-2"
               >
                 <div class="d-flex gap-2">
-                  <a
-                    href="#"
-                    class="text-6 m-0"
-                    @click.prevent="openDetailModal(apply)"
-                    >{{ apply.companyNm }}</a
+                  <button
+                    type="button"
+                    class="text-6 m-0 text-primary"
+                    @click="openDetailModal(apply.applicationSq)"
                   >
+                    {{ apply.companyNm }}
+                  </button>
                 </div>
                 <div class="d-flex gap-2">
                   <template v-if="apply.isDeleted == 'Y'">
@@ -79,12 +80,13 @@
                   </template>
                   <template v-else-if="apply.statusCd == 501">
                     <span class="btn btn-primary btn-sm">지원중</span>
-                    <a
-                      href="#"
+                    <button
+                      type="button"
                       class="btn btn-outline btn-primary btn-sm"
-                      @click.prevent="cancelApply(apply.sq)"
-                      >지원 취소</a
+                      @click.prevent="cancelApply(apply.applicationSq)"
                     >
+                      지원 취소
+                    </button>
                   </template>
                   <template v-else>
                     <span
@@ -200,8 +202,6 @@ const getApplies = async () => {
       const unreadCnt = res.output.totalElements - res.output.readElements
       const readCnt = res.output.readElements
 
-      console.log(res)
-      console.log(unreadCnt)
       applies.value = res.output.applies
       totalElements.value = totalCnt
       readElements.value = readCnt
@@ -268,9 +268,9 @@ function cancelApply(id) {
   })
 }
 
-function openDetailModal(apply) {
+function openDetailModal(applicationSq) {
   modalStore.openModal(AffiliationRequestDetailModal, {
-    apply,
+    applicationSq,
   })
 }
 

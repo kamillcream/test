@@ -11,8 +11,8 @@ import com.example.demo.domain.community.entity.*;
 import com.example.demo.domain.community.mapper.*;
 import com.example.demo.domain.mypage.dto.ProfileImageInfoDTO;
 import com.example.demo.domain.mypage.repository.InformationEditRepository;
+import com.example.demo.domain.mypage.service.InformationEditService;
 import com.example.demo.domain.community.dto.response.*;
-import com.amazonaws.services.s3.AmazonS3;
 import com.example.demo.common.AmazonS3.AmazonS3Service;
 import com.example.demo.common.AmazonS3.UploadedFileDTO;
 import com.example.demo.domain.community.converter.*;
@@ -36,9 +36,9 @@ public class BoardService {
     private final RecommendationMapper recommendationMapper;
     private final CommunityUserMapper communityUserMapper;
     private final AnswerService answerService;
-    private final AmazonS3 amazonS3;
     private final AmazonS3Service amazonS3Service;
     private final InformationEditRepository informationEditRepository;
+    private final InformationEditService informationEditService;
     
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -104,7 +104,8 @@ public class BoardService {
     		    .filter(Objects::nonNull)
     		    .map(comment -> {
     		        UserDTO userDto = communityUserMapper.findById(comment.getUserSq());
-    		        return CommentResponse.fromEntity(comment, userDto);
+    		        String profileImageUrl = informationEditService.getProfileImageUrl(userDto.getUserSq());
+    		        return CommentResponse.fromEntity(comment, userDto, profileImageUrl);
     		    })
     		    .collect(Collectors.toList());
     	
@@ -311,6 +312,25 @@ public class BoardService {
     	boardMapper.deleteFile(fileSq);
     	return;
     }
+
+	//  채택 상태 변경
+	@Transactional
+	public void updateStatusBoard(Long userSq, Long boardSq, Long statusCd) {
+		  
+		Board board = boardMapper.findByIdBoard(boardSq, 1402L);
+		  
+	    if(board.getUserSq() != userSq) {
+			throw new IllegalArgumentException("유효하지 않은 접근입니다.");
+		}
+		if(board.getBoardAdoptStatusCd() != 1501L) {
+			throw new IllegalArgumentException("채택 상태가 이미 변경되었습니다.");
+		}
+		  
+		board.setBoardAdoptStatusCd(statusCd);
+		boardMapper.update(board);
+	
+	    return;
+	}
 
 
 }

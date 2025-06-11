@@ -6,6 +6,8 @@ import lombok.*;
 
 import java.util.*;
 
+import org.springframework.web.multipart.MultipartFile;
+
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -16,5 +18,7 @@ public class AnswerRequest{
     private String description;
     private List<String> normalTags;
     private List<SkillTagDTO> skillTags;
+    private List<Long> attachments;
+    private List<MultipartFile> files;
 	
 }

@@ -84,12 +84,12 @@ const isHtmlEmpty = (htmlString) => {
 const registerFunc = async () => {
   try {
     const reqData = registerRef.value.sendData()
-    reqData.boardSq = Number(boardSq)
+    reqData.append('boardSq', Number(boardSq))
 
-    if (reqData.ttl == null || reqData.ttl.trim() == '') {
+    if (reqData.get('ttl') == null || reqData.get('ttl').trim() == '') {
       alertStore.show('제목을 입력해주세요.', 'danger')
       return
-    } else if (isHtmlEmpty(reqData.description)) {
+    } else if (isHtmlEmpty(reqData.get('description'))) {
       alertStore.show('내용을 입력해주세요.', 'danger')
       return
     }

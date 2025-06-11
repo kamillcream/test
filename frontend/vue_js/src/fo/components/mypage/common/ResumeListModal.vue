@@ -115,15 +115,11 @@ const resumes = ref([])
 const getResumes = async () => {
   try {
     const res = await api.$get('/mypage/resume/list')
-    console.log('이력서 목록 응답:', res)
     if (Array.isArray(res.output)) {
-      console.log(res.output)
       resumes.value = res.output
-    } else {
-      console.error('이력서 목록이 배열이 아닙니다:', res)
     }
   } catch (error) {
-    console.error('이력서 목록 조회 실패:', error)
+    alertStore.show('이력서 목록 조회에 실패했습니다.', 'danger')
   }
 }
 
@@ -144,9 +140,7 @@ function openResumeDetailModal(resume) {
   modalStore.openModal(ResumeDetailModal, {
     title: '이력서 상세보기',
     size: 'modal-lg',
-    props: {
-      resumeSq: resume.resumeSq, // 여기에 실제 이력서 번호 넘김
-    },
+    resumeSq: resume.resumeSq,
     onConfirm: () => {
       selectResume(resume)
     },

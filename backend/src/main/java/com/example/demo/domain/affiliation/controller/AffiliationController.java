@@ -34,34 +34,15 @@ public class AffiliationController {
     		@RequestParam(value = "addressCd", required = false) Long addressCd,
     		@RequestParam(value = "page", defaultValue = "1") Long page,
     		@RequestParam(value = "size", defaultValue = "10") Long size){
-    	System.out.println(userSq);
-    	System.out.println("소속 공고 조회 실행");
     	if(page < 1) page = 1L;
     	Long offset = (page - 1L) * size;
     	SearchFilterRequest searchFilter = SearchFilterRequest.builder().searchType(searchType).keyword(keyword).sortType(sortType).addressCd(addressCd).page(page).size(size).offset(offset).build();
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "소속 공고 목록 조회 성공", affiliationService.getAllAffiliations(userSq, searchFilter)));
-    } 
-    
-    // 소속 공고 리스트 조회 (비로그인)
-    @GetMapping("/guest")
-    public ResponseEntity<ApiResponse<AffiliationListResponse>> getAllAffiliationsGuest(
-    		@RequestParam(value = "searchType", required = false) String searchType, 
-    		@RequestParam(value = "keyword", required = false) String keyword,
-    		@RequestParam(value = "sortType", defaultValue = "latest") String sortType,
-    		@RequestParam(value = "addressCd", required = false) Long addressCd,
-    		@RequestParam(value = "page", defaultValue = "1") Long page,
-    		@RequestParam(value = "size", defaultValue = "10") Long size){
-    	System.out.println("소속 공고 조회 실행");
-    	if(page < 1) page = 1L;
-    	Long offset = (page - 1L) * size;
-    	SearchFilterRequest searchFilter = SearchFilterRequest.builder().searchType(searchType).keyword(keyword).sortType(sortType).addressCd(addressCd).page(page).size(size).offset(offset).build();
-        return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "소속 공고 목록 조회 성공", affiliationService.getAllAffiliations(null, searchFilter)));
-    } 
+    }
     
     // 소속 공고 스크랩
     @PostMapping("/{companySq}/scrap")
     public ResponseEntity<ApiResponse<NullType>> scrapAffiliation(@AuthenticationPrincipal Long userSq, @PathVariable("companySq") Long companySq) {
-    	System.out.println(userSq);
     	affiliationService.updateCompanyRecommend(userSq, companySq);
     	return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "스크랩 반영이 완료되었습니다.", null));
     }

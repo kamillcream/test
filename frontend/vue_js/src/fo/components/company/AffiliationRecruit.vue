@@ -2,7 +2,7 @@
   <div>
     <div class="modal-header">
       <h4 class="modal-title text-bold" id="schoolSearchModalLabel">
-        소속 신청하기
+        {{ afltnInfo.isApply ? '소속 정보' : '소속 신청하기' }}
       </h4>
       <button
         type="button"
@@ -84,7 +84,7 @@
       </div>
 
       <!-- 이력서 선택 -->
-      <div class="mb-3">
+      <div class="mb-3" v-if="!afltnInfo.isApply">
         <label for="resume" class="form-label text-primary text-bold"
           >소속 신청할 이력서</label
         >
@@ -106,7 +106,7 @@
       </div>
 
       <!-- 간단한 자기소개 -->
-      <div class="mb-3">
+      <div class="mb-3" v-if="!afltnInfo.isApply">
         <label for="selfIntroduction" class="form-label text-primary text-bold"
           >간단한 자기소개</label
         >
@@ -129,6 +129,14 @@
         소속 신청하기
       </button>
       <button
+        v-if="afltnInfo.isApply"
+        type="button"
+        class="btn btn-light"
+        disabled
+      >
+        소속 신청 완료
+      </button>
+      <button
         type="button"
         class="btn btn-light"
         data-bs-dismiss="modal"
@@ -148,9 +156,11 @@ import { computed, defineProps } from 'vue'
 import CommonConfirmModal from '../common/CommonConfirmModal.vue'
 import ResumeListModal from '../mypage/common/ResumeListModal.vue'
 
-const props = defineProps({ afltnInfo: Array })
+const props = defineProps({
+  afltnInfo: { type: Array, default: () => [] },
+  onConfirm: { type: Function, default: () => {} },
+})
 const afltnInfo = computed(() => props.afltnInfo)
-console.log(afltnInfo)
 
 const modalStore = useModalStore()
 const alertStore = useAlertStore()
@@ -193,13 +203,12 @@ const clickRecruit = async () => {
           resumeSq: affiliationStore.resume.resumeSq,
           companyApplicationGreetingTxt: affiliationStore.greeting,
         })
-        console.log(res)
         if (res.status == 'CREATED') {
           alertStore.show(res.message, 'success')
           closeModal()
         } else {
-          console.log(res)
           alertStore.show(res.message, 'danger')
+          props.onConfirm()
         }
       } catch (error) {
         alertStore.show('소속 신청에 실패했습니다.', 'danger')
@@ -211,6 +220,10 @@ const clickRecruit = async () => {
 
 // 이력서 선택
 const openResumeModal = () => {
+  if (affiliationStore.viewerSq == null) {
+    alertStore.show('로그인 후 이용해주세요.', 'danger')
+    return
+  }
   modalStore.openModal(ResumeListModal)
 }
 </script>
