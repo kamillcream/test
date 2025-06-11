@@ -62,7 +62,6 @@ function openResumeDetailModal() {
       resumeSq: 1234, // 여기에 실제 이력서 번호 넘김
     },
     onConfirm: () => {
-      alertStore.show('삭제에 실패하였습니다.', 'danger')
       modalStore.closeModal()
     },
   })
