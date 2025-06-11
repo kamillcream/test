@@ -76,13 +76,17 @@
         </div>
         <div class="date-inputs">
           <div class="date-input-group">
-            <label>입학년월</label>
+            <label>입학년월 <span style="color: red">*</span></label>
             <input type="month" v-model="startDate" />
           </div>
           <div class="date-input-group">
             <label>졸업년월</label>
             <input type="month" v-model="endDate" />
           </div>
+        </div>
+        <div class="date-input-group" style="margin-top: 20px;">
+          <label>전공명 <span style="color: red">*</span></label>
+          <input type="text" v-model="majorName" placeholder="전공명을 입력하세요" required />
         </div>
       </div>
       <div class="modal-footer">
@@ -127,6 +131,7 @@ const isDateSelection = ref(false)
 const selectedSchool = ref(null)
 const startDate = ref('')
 const endDate = ref('')
+const majorName = ref('')
 
 let allContent = ref([])
 
@@ -202,6 +207,7 @@ const backToSearch = () => {
   selectedSchool.value = null
   startDate.value = ''
   endDate.value = ''
+  majorName.value = ''
 }
 
 function formatDate(dateString) {
@@ -212,6 +218,10 @@ function formatDate(dateString) {
 const completeSelection = () => {
   if (!startDate.value) {
     alertStore.show('입학년월을 입력해주세요.', 'danger')
+    return
+  }
+  if (!majorName.value) {
+    alertStore.show('전공명을 입력하세요!', 'danger')
     return
   }
 
@@ -225,7 +235,7 @@ const completeSelection = () => {
   props.onComplete &&
     props.onComplete({
       educationSchoolNm: selectedSchool.value.name,
-      educationMajorNm: '',
+      educationMajorNm: majorName.value,
       educationAdmissionDt: admissionDate,
       educationGraduationDt: graduationDate,
       educationStatusCd: endDate.value ? 1201 : 1202, // 졸업년월 있으면 졸업(1201), 없으면 졸업예정(1202)

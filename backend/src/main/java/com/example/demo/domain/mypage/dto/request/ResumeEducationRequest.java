@@ -6,8 +6,8 @@ import lombok.Data;
 
 @Data
 
-public class ResumeEducationRequest {
-	    private Long resumeSq;
+  public class ResumeEducationRequest {
+		private Long resumeSq;
 	    private String educationSchoolNm;
 	    private String educationMajorNm;
 	    private LocalDate educationAdmissionDt;

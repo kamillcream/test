@@ -84,10 +84,9 @@ public class ResumeController {
 	
 	//이력서 상세조회
 	@GetMapping("/detail/{resumeSq}")
-	 public ResponseEntity<ApiResponse<ResumeRegisterRequest>> getResumeById(@PathVariable("resumeSq") Long resumeSq) {
-        ResumeRegisterRequest resume = resumeService.getResumeById(resumeSq);
+	 public ResponseEntity<ApiResponse<ResumeRegisterResponse>> getResumeById(@PathVariable("resumeSq") Long resumeSq) {
+        ResumeRegisterResponse resume = resumeService.getResumeById(resumeSq);
         if (resume == null) {
-            System.out.println("resume is null for resumeSq=" + resumeSq);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.of(HttpStatus.NOT_FOUND, "이력서가 없습니다.", null));
         }

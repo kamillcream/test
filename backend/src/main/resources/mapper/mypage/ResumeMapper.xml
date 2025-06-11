@@ -117,7 +117,7 @@
 
   <!-- 이력서 상세 조회 -->
 	<select id="selectResumeById" parameterType="long"
-          resultType="com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest">
+          resultType="com.example.demo.domain.mypage.dto.response.ResumeRegisterResponse">
         SELECT
 	    r.resume_sq AS resumeSq,
 	    r.user_sq AS userSq,
@@ -143,32 +143,6 @@
 	  WHERE r.resume_sq = #{resumeSq}
 	</select>
 
-<!--학력 추가-->
-  <insert id="insertEducation" parameterType="com.example.demo.domain.mypage.dto.request.ResumeEducationRequest">
-	  INSERT INTO TBL_RESUME_EDUCATION_S (
-	    resume_sq,
-	    education_school_nm,
-	    education_major_nm,
-	    education_admission_dt,
-	    education_graduation_dt,
-	    education_status_cd
-	  ) VALUES (
-	    #{resumeSq},
-	    #{educationSchoolNm},
-	    #{educationMajorNm},
-	    #{educationAdmissionDt},
-	    #{educationGraduationDt},
-	    #{educationStatusCd}
-	  )
-  </insert>
-<!--학력 삭제-->
-  <delete id="deleteEducationByResumeSq" parameterType="long">
-  DELETE FROM TBL_RESUME_EDUCATION_S WHERE resume_sq = #{resumeSq}
-  </delete>
-
-  <select id="selectEducationByResumeSq" parameterType="long" resultType="com.example.demo.domain.mypage.dto.request.ResumeEducationRequest">
-    SELECT * FROM TBL_RESUME_EDUCATION_S WHERE resume_sq = #{resumeSq}
-  </select>
 
   <!--대표이력서 설정-->
   <update id="updateAllRepresentativeN">
@@ -206,4 +180,63 @@
 	SET resume_is_deleted_yn = 'Y'
 	WHERE resume_sq = #{resumeSq}
   </update>
+  
+  
+  <!--학력 추가-->
+ <insert id="insertEducation" parameterType="com.example.demo.domain.mypage.dto.request.ResumeEducationRequest">
+	  INSERT INTO TBL_RESUME_EDUCATION_S (
+	    resume_sq,
+	    education_school_nm,
+	    education_major_nm,
+	    education_admission_dt,
+	    education_graduation_dt,
+	    education_status_cd
+	  ) VALUES (
+		#{resumeSq},
+		#{educationSchoolNm},
+	    #{educationMajorNm},
+	    #{educationAdmissionDt},
+	    #{educationGraduationDt},
+	    #{educationStatusCd}
+	  )
+</insert>
+ 
+  <!--학력전체조회-->
+  <select id="selectEducationByResumeSq" parameterType="long"
+  resultType="com.example.demo.domain.mypage.dto.response.ResumeEducationResponse">
+	  SELECT
+	    education_sq AS educationSq,
+	    resume_sq AS resumeSq,
+	    education_school_nm AS educationSchoolNm,
+	    education_major_nm AS educationMajorNm,
+	    education_admission_dt AS educationAdmissionDt,
+	    education_graduation_dt AS educationGraduationDt,
+	    education_status_cd AS educationStatusCd
+	  FROM TBL_RESUME_EDUCATION_S
+	  WHERE resume_sq = #{resumeSq}
+  </select>
+
+<!-- 학력 전체 삭제 (이력서 PK 기준) -->
+<delete id="deleteEducationByResumeSq" parameterType="long">
+  DELETE FROM TBL_RESUME_EDUCATION_S WHERE resume_sq = #{resumeSq}
+</delete>
+
+<!-- 학력 단일 삭제 (학력 PK 기준) -->
+<delete id="deleteEducationByEducationSq" parameterType="long">
+  DELETE FROM TBL_RESUME_EDUCATION_S WHERE education_sq = #{educationSq}
+</delete>
+  
+<!--학력 수정-->
+  <update id="updateEducation" parameterType="com.example.demo.domain.mypage.dto.response.ResumeEducationResponse">
+	UPDATE TBL_RESUME_EDUCATION_S
+	 SET
+	 education_school_nm = #{educationSchoolNm},
+    education_major_nm = #{educationMajorNm},
+    education_admission_dt = #{educationAdmissionDt},
+    education_graduation_dt = #{educationGraduationDt},
+    education_status_cd = #{educationStatusCd}
+  WHERE education_sq = #{educationSq}
+  </update>
+  
+ 
 </mapper>
