@@ -248,7 +248,7 @@
                             </template>
                             <template
                               v-else-if="
-                                applicant.appStatusVo.appStatus === '지원 취소'
+                                applicant.appStatusVo.appStatus === '지원취소'
                               "
                             >
                               <span class="btn btn-light btn-sm"
@@ -493,7 +493,7 @@ const filterCounts = computed(() => {
     else if (status === '합격') counts.passed++
     else if (status === '인터뷰확정') counts.interview_confirmed++
     else if (status === '인터뷰요청중') counts.interview_requested++
-    else if (['불합격', '반려', '지원취소'].includes(status)) counts.rejected++
+    else if (['불합격', '지원취소'].includes(status)) counts.rejected++
   })
   return counts
 })
@@ -522,7 +522,7 @@ const filters = computed(() => [
   },
   {
     type: 'rejected',
-    label: '불합격 / 반려 / 취소',
+    label: '불합격 / 취소',
     count: filterCounts.value.rejected,
   },
 ])
@@ -556,22 +556,13 @@ const openInterviewTimeModal = (applicationSq) => {
 const openResumeDetailModal = () => {
   modalStore.openModal(ResumeDetailModal, {})
 }
-function getAccessTokenFromCookie() {
-  const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]*)/)
-  return match ? decodeURIComponent(match[1]) : null
-}
-
 const updateStatus = async (applicationSq, status) => {
   try {
-    const token = getAccessTokenFromCookie()
     const response = await api.$patch(
       `/projects/applications/${applicationSq}`,
-      { status },
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         withCredentials: true,
+        status,
       },
     )
     console.log(`✅ ${applicationSq} 지원 상태 변경 성공`, response)
@@ -614,12 +605,6 @@ const search = () => {
 const changePage = (page) => {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
-}
-
-// 불합격 처리
-const handleReject = (applicant) => {
-  // TODO: 불합격 처리 로직 구현
-  console.log('불합격 처리:', applicant)
 }
 
 // 모달 닫기
