@@ -54,6 +54,13 @@
 
     <div class="row">
       <div class="col">
+        <div
+          v-if="pagedProjects.length === 0"
+          class="text-muted py-3"
+          style="font-size: 14px"
+        >
+          지원한 프로젝트가 없습니다.
+        </div>
         <ul class="simple-post-list m-0 position-relative">
           <li
             v-for="item in pagedProjects"

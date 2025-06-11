@@ -140,38 +140,11 @@
         </ul>
 
         <!-- 페이징 -->
-        <div class="mt-5 py-5">
-          <ul class="pagination float-end">
-            <li class="page-item">
-              <a
-                class="page-link"
-                href="#"
-                @click.prevent="changePage(currentPage - 1)"
-              >
-                <i class="fas fa-angle-left"></i>
-              </a>
-            </li>
-            <li
-              v-for="page in totalPages"
-              :key="page"
-              class="page-item"
-              :class="{ active: currentPage === page }"
-            >
-              <a class="page-link" href="#" @click.prevent="changePage(page)">{{
-                page
-              }}</a>
-            </li>
-            <li class="page-item">
-              <a
-                class="page-link"
-                href="#"
-                @click.prevent="changePage(currentPage + 1)"
-              >
-                <i class="fas fa-angle-right"></i>
-              </a>
-            </li>
-          </ul>
-        </div>
+        <CommonPagination
+          :currentPage="currentPage"
+          :totalPages="totalPages"
+          @update:currentPage="currentPage = $event"
+        />
       </div>
     </div>
   </div>
@@ -184,6 +157,7 @@ import AffiliationRequestDetailModal from '@/fo/components/mypage/personal/Affil
 import { api } from '@/axios'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import CommonConfirmModal from '@/fo/components/common/CommonConfirmModal.vue'
+import CommonPagination from '@/fo/components/common/CommonPagination.vue'
 
 const modalStore = useModalStore()
 
@@ -292,12 +266,6 @@ function cancelApply(id) {
       modalStore.closeModal()
     },
   })
-}
-
-function changePage(page) {
-  if (page < 1 || page > totalPages.value) return
-  currentPage.value = page
-  // 페이지 변경 로직 구현
 }
 
 function openDetailModal(apply) {

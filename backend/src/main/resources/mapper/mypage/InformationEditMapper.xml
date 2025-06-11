@@ -87,9 +87,9 @@
 
 
     <select id="selectAddressInfo" parameterType="long"
-        resultType="com.example.demo.domain.mypage.dto.AddressDTO"> SELECT address_sq, zonecode,
-        address, detail_address, sigungu, latitude, longitude , area_code_sq FROM TBL_ADDRESS_S
-        WHERE address_sq = #{addressSq} </select>
+        resultType="com.example.demo.domain.mypage.dto.InformationEditAddressDTO"> SELECT
+        address_sq, zonecode, address, detail_address, sigungu, latitude, longitude , area_code_sq
+        FROM TBL_ADDRESS_S WHERE address_sq = #{addressSq} </select>
 
     <select id="selectAffiliationTags" parameterType="long" resultType="string"> SELECT tag_nm FROM
         TBL_COMPANY_TAG_S WHERE company_sq = #{companySq} </select>
