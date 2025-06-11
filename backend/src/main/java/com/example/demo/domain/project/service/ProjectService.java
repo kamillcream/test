@@ -133,13 +133,14 @@ public class ProjectService {
 	}
 	
 	public ProjectListResponse fetchCompanyProject(CompanyFilterRequest request, JwtAuthenticationToken jwtAuthenticationToken) {
-
-		Long totalCount = projectMapper.countCompanyProjectsBySearch(request);
 		
 		Long userSq = jwtAuthenticationToken.getUserSq();
 		Long userTypeCd = jwtAuthenticationToken.getUserTypeCd();
 		
 		long companySq = companyService.fetchCompanySq(userSq, userTypeCd);
+		
+		Long totalCount = projectMapper.countCompanyProjectsBySearch(request, companySq);
+		
 		
 		List<Project> projects = projectMapper.findProjectsByCompany(companySq, request);
 		

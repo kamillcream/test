@@ -264,7 +264,7 @@
 	<select id="countCompanyProjectsBySearch" resultType="Long">
   SELECT COUNT(*)
   FROM TBL_PROJECT_M p
-  WHERE project_is_deleted_yn = 'N'
+  WHERE project_is_deleted_yn = 'N' AND company_sq = #{companySq}
   
   <if test="request.keyword != null and request.searchType == 'title'">
     AND p.project_ttl LIKE CONCAT('%', #{request.keyword}, '%')
