@@ -245,8 +245,20 @@
                 class="btn btn-rounded btn-3d btn-light mb-2 position-relative"
                 style="padding-right: 24px"
               >
-                {{ education.school }} {{ education.major }}
-                {{ education.status }} ({{ education.period }})
+                {{ education.educationSchoolNm }}
+                <span v-if="education.educationMajorNm"
+                  >/ {{ education.educationMajorNm }}</span
+                >
+                <span>
+                  (
+                  {{
+                    formatPeriod(
+                      education.educationAdmissionDt,
+                      education.educationGraduationDt,
+                    )
+                  }}
+                  )
+                </span>
                 <span
                   class="text-grey ms-2 position-absolute end-0 me-2"
                   style="top: 50%; transform: translateY(-50%)"
@@ -271,12 +283,18 @@
             </label>
             <div class="mb-2">
               <span
-                v-for="(item, idx) in resumeData.career"
-                :key="idx"
+                v-for="career in resumeData.career"
+                :key="career.company + career.startDate"
                 class="company-tag"
               >
-                {{ item.company }}회사 {{ item.department }}부서
-                {{ item.position }} ({{ item.period }})
+                {{ career.company }}회사 {{ career.department }}부서
+                {{ career.position }}
+                <span>
+                  (
+                  {{ careerPeriod(career.startDate, career.endDate) }}
+                  )
+                </span>
+
                 <span
                   class="text-grey ms-2"
                   style="cursor: pointer"
@@ -614,7 +632,9 @@ import { useRoute } from 'vue-router'
 import SkillTagModal from '@/fo/components/community/SkillTagModal.vue'
 import { api } from '@/axios'
 import router from '@/fo/router'
+import { useAlertStore } from '@/fo/stores/alertStore'
 
+const alertStore = useAlertStore()
 const modalStore = useModalStore()
 const route = useRoute()
 const resumeSq = route.params.resumeSq
@@ -654,18 +674,14 @@ const resumeData = reactive({
 const openAddressSearchModal = () => {
   modalStore.openModal(AddressSearchModal, {
     onComplete: (data) => {
-      // if (!data.sido || !data.sigungu) {
-      //   alert('주소 선택에 실패했습니다. 다시 시도해주세요.')
-      //   return
-      //}
       Object.assign(resumeData, data)
     },
   })
 }
 
-const openDetailModal = (resumeParam = null) => {
+const openDetailModal = () => {
   modalStore.openModal(ResumeModal, {
-    resume: resumeParam,
+    resumeSq: resumeSq,
     onConfirm: submitResume,
 
     // 필요하면 다른 props도 여기서 전달 가능
@@ -735,6 +751,13 @@ const showCareerForm = () => {
       resumeData.career.push(career)
     },
   })
+}
+//경력 날짜 표시 YYYY-MM
+function toYyyyMmDd(dateStr) {
+  if (!dateStr) return null
+  if (/^\d{4}-\d{2}$/.test(dateStr)) return dateStr + '-01'
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr
+  return null
 }
 // 교육 입력 폼 표시 로직
 const showTrainingForm = () => {
@@ -866,7 +889,14 @@ onMounted(async () => {
         resumeData.resumeIsRepresentativeYn =
           data.resumeIsRepresentativeYn === 'Y'
         resumeData.education = data.education || []
-        resumeData.career = data.career || []
+        resumeData.career = (data.career || []).map((e) => ({
+          company: e.careerCompanyNm,
+          department: e.careerDepartmentNm,
+          position: e.careerPositionNm,
+          startDate: e.careerStartDt ? e.careerStartDt.substring(0, 7) : '',
+          endDate: e.careerEndDt ? e.careerEndDt.substring(0, 7) : '',
+          period: e.period,
+        }))
         resumeData.trainingHistories = data.trainingHistories || []
         resumeData.projects = data.projects || []
         resumeData.certificates = data.certificates || []
@@ -896,7 +926,10 @@ onMounted(async () => {
 const submitResume = async () => {
   // 1. 좌표 확인
   if (!resumeData.latitude || !resumeData.longitude) {
-    alert('주소 좌표 정보가 없습니다. 주소를 다시 선택해주세요.')
+    alertStore.show(
+      '주소 좌표 정보가 없습니다. 주소를 다시 선택해주세요.',
+      'danger',
+    )
     return
   }
 
@@ -925,8 +958,20 @@ const submitResume = async () => {
     resumeGreetingTxt: resumeData.resumeGreetingTxt,
     resumeIsNotificationYn: resumeData.resumeIsNotificationYn ? 'Y' : 'N',
     resumePhotoUrl: resumeData.resumePhotoUrl || '',
-    education: resumeData.education,
-    career: resumeData.career,
+    education: resumeData.education.map((e) => ({
+      educationSchoolNm: e.educationSchoolNm,
+      educationMajorNm: e.educationMajorNm,
+      educationAdmissionDt: e.educationAdmissionDt,
+      educationGraduationDt: e.educationGraduationDt,
+      educationStatusCd: e.educationStatusCd,
+    })),
+    career: resumeData.career.map((e) => ({
+      careerCompanyNm: e.company,
+      careerDepartmentNm: e.department,
+      careerPositionNm: e.position,
+      careerStartDt: toYyyyMmDd(e.startDate),
+      careerEndDt: toYyyyMmDd(e.endDate),
+    })),
     projects: resumeData.projects,
     certificates: resumeData.certificates,
     skills: resumeData.skills,
@@ -941,17 +986,31 @@ const submitResume = async () => {
       await api.$put(`/mypage/resume/update/${resumeSq}`, payload, {
         withCredentials: true,
       })
-      alert('수정 완료!')
+      alertStore.show('이력서가 성공적으로 수정되었습니다.', 'success')
       router.push(`/mypage/resumelist`) // 리스트 페이지로 이동
     } else {
       await api.$post('/mypage/resume/new', payload, { withCredentials: true })
-      alert('등록 완료!')
+      alertStore.show('이력서가 성공적으로 등록되었습니다.', 'success')
       router.push('/mypage/resumelist') // 리스트 페이지로 이동
     }
   } catch (e) {
     console.error('[ 이력서 등록/수정 실패 ]', e)
-    alert('오류 발생')
+    alertStore.show('이력서 등록/수정 중 오류가 발생했습니다.', 'danger')
   }
+}
+//학력 날짜 변환
+function formatPeriod(admission, graduation) {
+  if (!admission) return ''
+  const start = admission.replace('-', '.')
+  if (!graduation) return `${start} ~ `
+  return `${start} ~ ${graduation.replace('-', '.')}`
+}
+//회사이력 날짜 변환
+function careerPeriod(start, end) {
+  if (!start) return ''
+  const startStr = start.replace('-', '.')
+  if (!end) return `${startStr} ~ `
+  return `${startStr} ~ ${end.replace('-', '.')}`
 }
 </script>
 

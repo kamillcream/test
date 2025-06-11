@@ -40,22 +40,20 @@ public class CertificateService {
 			
 			// XML 문자열 파싱
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-//			Document doc = factory.newDocumentBuilder()
-//					.parse(new ByteArrayInputStream(response.getBody().getBytes(StandardCharsets.UTF_8)));
+			Document doc = factory.newDocumentBuilder()
+	        .parse(new ByteArrayInputStream(response.getBody().getBytes(StandardCharsets.UTF_8)));
 
-//			// item 태그로 자격증 목록 추출
-//			NodeList itemList = doc.getElementsByTagName("item");
-			List<ResumeCertificateRequest> certificates = new ArrayList<>();
-//
-//			for (int i = 0; i < itemList.getLength(); i++) {
-//				Element item = (Element) itemList.item(i);
-//				ResumeCertificateRequest dto = new ResumeCertificateRequest();
-//				// dto.setCertificationSq(null); // 조회 시에는 null, 저장 시에는 DB에서 자동 생성
-//				// dto.setResumeSq(null);        // 이력서 저장 시에만 사용
-//				dto.setCertificationNm(getTagValue("jmNm", item));         // 자격증 이름
-//				dto.setCertificationIssuerNm(getTagValue("minClassNm", item)); // 발행 기관
-//				certificates.add(dto);
-//			}
+	     // item 태그로 자격증 목록 추출
+	     NodeList itemList = doc.getElementsByTagName("item");
+	     List<ResumeCertificateRequest> certificates = new ArrayList<>();
+
+	     for (int i = 0; i < itemList.getLength(); i++) {
+	         Element item = (Element) itemList.item(i);
+	         ResumeCertificateRequest dto = new ResumeCertificateRequest();
+	         dto.setCertificationNm(getTagValue("jmNm", item));         // 자격증 이름
+	         dto.setCertificationIssuerNm(getTagValue("minClassNm", item)); // 발행 기관
+	         certificates.add(dto);
+	     }
 
 			return certificates;
 

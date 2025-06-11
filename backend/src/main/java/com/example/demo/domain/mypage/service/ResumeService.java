@@ -1,25 +1,17 @@
 package com.example.demo.domain.mypage.service;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Value;
 
+import com.example.demo.domain.mypage.dto.request.ResumeCareerRequest;
 import com.example.demo.domain.mypage.dto.request.ResumeCertificateRequest;
+import com.example.demo.domain.mypage.dto.request.ResumeEducationRequest;
 import com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest;
 import com.example.demo.domain.mypage.dto.request.ResumeSkillRequest;
+import com.example.demo.domain.mypage.dto.request.TrainingHistoryRequest;
 import com.example.demo.domain.mypage.mapper.ResumeMapper;
 import com.example.demo.domain.mypage.mapper.ResumeSkillMapper;
 import com.example.demo.domain.mypage.dto.AddressDTO;
@@ -31,12 +23,6 @@ import com.example.demo.domain.mypage.repository.AddressRepository;
 import com.example.demo.domain.mypage.dto.response.ResumeRegisterResponse;
 
 import lombok.RequiredArgsConstructor;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import org.xml.sax.InputSource;
 
 @Service
 @RequiredArgsConstructor
@@ -46,9 +32,6 @@ public class ResumeService {
 	private final ResumeSkillMapper resumeSkillMapper;
 	private final AddressRepository addressRepository;
 	private final MypageAddressMapper addressMapper;
-
-//	@Value("${api.service.key}")
-//	private String serviceKey;
 
 	@Transactional
 	public ResumeRegisterResponse registerResume(ResumeRegisterRequest request) {
@@ -63,10 +46,28 @@ public class ResumeService {
 
 	    // 이력서 등록
 	    resumeMapper.insertResume(request);
-	    System.out.println("✅ 최종 addressSq = " + request.getAddressSq());
-
-
+	    System.out.println("insertResume 후 resumeSq: " + request.getResumeSq());
+	    
+	    // 학력 리스트 저장
+	    if (request.getEducation() != null) {
+	        for (ResumeEducationRequest edu : request.getEducation()) {
+	            edu.setResumeSq(request.getResumeSq()); // FK 세팅
+	            resumeMapper.insertEducation(edu);      // insert 쿼리 호출
+	        }
+	    }
+	   
+	   // 경력
+	    if (request.getCareer() != null) {
+	        for (ResumeCareerRequest career : request.getCareer()) {
+	            career.setResumeSq(request.getResumeSq());
+	            resumeMapper.insertCareer(career);
+	        }
+	    }
+	
+	    
 	    return createResponse(request);
+	    
+	    
 	}
 
 	private void setDefaultValues(ResumeRegisterRequest request) {
@@ -133,9 +134,17 @@ public class ResumeService {
 	
 
 	//이력서 상세조회
-	public ResumeRegisterRequest getResumeById(Long resumeSq) {
-	       ResumeRegisterRequest result = resumeMapper.selectResumeById(resumeSq);
+	public ResumeRegisterResponse getResumeById(Long resumeSq) {
+	       
+	    // 학력 리스트 별도 조회 후 세팅
+	    ResumeRegisterResponse result = resumeMapper.selectResumeById(resumeSq);
+	    result.setEducation(resumeMapper.selectEducationByResumeSq(resumeSq));
+	    // 경력 상세 조회
+	    result.setCareer(resumeMapper.selectCareerByResumeSq(resumeSq));
 	       System.out.println("selectResumeById result: " + result);
+	       
+		// ( projects, certificates, skills 등도 동일하게 조회 후 set)
+
 	       return result;
 	}
 
@@ -147,8 +156,21 @@ public class ResumeService {
 	//이력서 수정
 	@Transactional
 	public void updateResume(ResumeRegisterRequest request) {
+	    // 1. 이력서 기본 정보 수정
 	    resumeMapper.updateResume(request);
-	    // education, career 등 리스트도 별도 매퍼/쿼리로 처리 필요
+
+	    // 2. 기존 학력 모두 삭제
+	    resumeMapper.deleteEducationByResumeSq(request.getResumeSq());
+	    resumeMapper.deleteCareerByResumeSq(request.getResumeSq());
+
+	    // 3. 새 학력 리스트가 있으면 insert
+	    if (request.getEducation() != null) {
+	        for (ResumeEducationRequest edu : request.getEducation()) {
+	            edu.setResumeSq(request.getResumeSq()); // FK 세팅
+	            resumeMapper.insertEducation(edu);
+	        }
+	    }
+	    
 	}
 	
 	//이력서 삭제

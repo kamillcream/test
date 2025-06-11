@@ -71,9 +71,13 @@ public class ResumeController {
 	public ResponseEntity<ApiResponse<String>>setMainResume (@AuthenticationPrincipal Long userSq, 
 			@PathVariable("resumeSq") Long resumeSq,
 			@RequestBody(required = false) RepResumeSwitchRequest request) {
-		resumeService.setMainResume(resumeSq, request.getMemberSq());
-	    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "대표 이력서 설정 완료", "success"));
-	}
+		  Long memberSq = (request != null && request.getMemberSq() != null)
+			        ? request.getMemberSq()
+			        : userSq;
+
+			    resumeService.setMainResume(resumeSq, memberSq);
+			    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "대표 이력서 설정 완료", "success"));
+			}
 	
 	@PatchMapping("/representative/{resumeSq}/others")
 	public ResponseEntity<ApiResponse<String>>setMainResume (@AuthenticationPrincipal Long userSq, 
@@ -99,10 +103,9 @@ public class ResumeController {
 	
 	//이력서 상세조회
 	@GetMapping("/detail/{resumeSq}")
-	 public ResponseEntity<ApiResponse<ResumeRegisterRequest>> getResumeById(@PathVariable("resumeSq") Long resumeSq) {
-        ResumeRegisterRequest resume = resumeService.getResumeById(resumeSq);
+	 public ResponseEntity<ApiResponse<ResumeRegisterResponse>> getResumeById(@PathVariable("resumeSq") Long resumeSq) {
+        ResumeRegisterResponse resume = resumeService.getResumeById(resumeSq);
         if (resume == null) {
-            System.out.println("resume is null for resumeSq=" + resumeSq);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.of(HttpStatus.NOT_FOUND, "이력서가 없습니다.", null));
         }

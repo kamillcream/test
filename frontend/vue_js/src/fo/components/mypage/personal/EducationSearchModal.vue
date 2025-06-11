@@ -2,7 +2,9 @@
   <div class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
-        <span class="modal-title">{{ isDateSelection ? '학력 기간 입력' : '학력 검색' }}</span>
+        <span class="modal-title">{{
+          isDateSelection ? '학력 기간 입력' : '학력 검색'
+        }}</span>
         <button class="modal-close" @click="close">×</button>
       </div>
       <div v-if="!isDateSelection">
@@ -62,7 +64,9 @@
           >
             {{ p }}
           </button>
-          <button :disabled="page === totalPages" @click="nextPage">&gt;</button>
+          <button :disabled="page === totalPages" @click="nextPage">
+            &gt;
+          </button>
         </div>
       </div>
       <div v-else class="date-selection">
@@ -72,7 +76,7 @@
         </div>
         <div class="date-inputs">
           <div class="date-input-group">
-            <label>입학년월</label>
+            <label>입학년월 <span style="color: red">*</span></label>
             <input type="month" v-model="startDate" />
           </div>
           <div class="date-input-group">
@@ -80,12 +84,24 @@
             <input type="month" v-model="endDate" />
           </div>
         </div>
+        <div class="date-input-group" style="margin-top: 20px;">
+          <label>전공명 <span style="color: red">*</span></label>
+          <input type="text" v-model="majorName" placeholder="전공명을 입력하세요" required />
+        </div>
       </div>
       <div class="modal-footer">
-        <button v-if="isDateSelection" class="modal-footer-back" @click="backToSearch">
+        <button
+          v-if="isDateSelection"
+          class="modal-footer-back"
+          @click="backToSearch"
+        >
           이전
         </button>
-        <button v-if="isDateSelection" class="modal-footer-complete" @click="completeSelection">
+        <button
+          v-if="isDateSelection"
+          class="modal-footer-complete"
+          @click="completeSelection"
+        >
           완료
         </button>
         <button v-else class="modal-footer-close" @click="close">닫기</button>
@@ -94,13 +110,14 @@
   </div>
 </template>
 
-
 <script setup>
 import { watch } from 'vue'
 import { ref, defineProps } from 'vue'
 import { useModalStore } from '@/fo/stores/modalStore'
 import axios from 'axios'
+import { useAlertStore } from '@/fo/stores/alertStore'
 
+const alertStore = useAlertStore()
 const props = defineProps(['onComplete'])
 const modalStore = useModalStore()
 
@@ -114,6 +131,7 @@ const isDateSelection = ref(false)
 const selectedSchool = ref(null)
 const startDate = ref('')
 const endDate = ref('')
+const majorName = ref('')
 
 let allContent = ref([])
 
@@ -134,15 +152,16 @@ const fetchSchools = async () => {
           gubun,
           searchSchulNm: keyword,
         },
-      });
-      console.log('axios 요청 성공:', res);
+      },
+    )
+    console.log('axios 요청 성공:', res)
     let content = res.data?.dataSearch?.content
     if (!content) {
       content = []
     } else if (!Array.isArray(content)) {
       content = [content]
     }
-    allContent.value = content;
+    allContent.value = content
     page.value = 1
 
     schools.value = allContent.value
@@ -151,17 +170,17 @@ const fetchSchools = async () => {
         id: item.seq || idx,
         name: item.schoolName,
         address: item.adres || item.addr || '',
-        type: tab.value === 'high' ? '고등학교' : '대학교'
+        type: tab.value === 'high' ? '고등학교' : '대학교',
       }))
     totalPages.value = Math.max(1, Math.ceil(allContent.value.length / perPage))
   } catch (error) {
-    console.error('학교 검색 오류:', error);
+    console.error('학교 검색 오류:', error)
     if (error.response) {
-      console.log('에러 응답:', error.response.data);
+      console.log('에러 응답:', error.response.data)
     }
     schools.value = []
   }
-};
+}
 
 watch(page, () => {
   schools.value = allContent.value
@@ -170,7 +189,7 @@ watch(page, () => {
       id: item.seq || idx,
       name: item.schoolName,
       address: item.adres || item.addr || '',
-      type: tab.value === 'high' ? '고등학교' : '대학교'
+      type: tab.value === 'high' ? '고등학교' : '대학교',
     }))
 })
 
@@ -178,7 +197,7 @@ const selectSchool = (school) => {
   selectedSchool.value = {
     name: school.name,
     type: school.type,
-    address: school.address
+    address: school.address,
   }
   isDateSelection.value = true
 }
@@ -188,28 +207,39 @@ const backToSearch = () => {
   selectedSchool.value = null
   startDate.value = ''
   endDate.value = ''
+  majorName.value = ''
 }
 
-const formatDate = (dateString) => {
+function formatDate(dateString) {
   if (!dateString) return ''
-  const [year, month] = dateString.split('-')
-  return `${year}.${month}`
+  return dateString.substring(0, 7).replace('-', '.')
 }
 
 const completeSelection = () => {
-  if (!startDate.value || !endDate.value) {
-    alert('입학년월과 졸업년월을 모두 입력해주세요.')
+  if (!startDate.value) {
+    alertStore.show('입학년월을 입력해주세요.', 'danger')
     return
   }
-  
-  const period = `${formatDate(startDate.value)} ~ ${formatDate(endDate.value)}`
-  
+  if (!majorName.value) {
+    alertStore.show('전공명을 입력하세요!', 'danger')
+    return
+  }
+
+  const period = endDate.value
+    ? `${formatDate(startDate.value)} ~ ${formatDate(endDate.value)}`
+    : `${formatDate(startDate.value)} ~`
+
+  const admissionDate = startDate.value + '-01'
+  const graduationDate = endDate.value ? endDate.value + '-01' : null
+
   props.onComplete &&
     props.onComplete({
-      school: selectedSchool.value.name,
-      period: period,
-      startDate: startDate.value,
-      endDate: endDate.value
+      educationSchoolNm: selectedSchool.value.name,
+      educationMajorNm: majorName.value,
+      educationAdmissionDt: admissionDate,
+      educationGraduationDt: graduationDate,
+      educationStatusCd: endDate.value ? 1201 : 1202, // 졸업년월 있으면 졸업(1201), 없으면 졸업예정(1202)
+      period, // 화면표시용
     })
   close()
 }

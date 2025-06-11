@@ -39,20 +39,20 @@
           </div>
           <div class="form-group period-group">
             <label class="modal-label">근무 기간</label>
-            <div style="display: flex; gap: 8px;">
+            <div style="display: flex; gap: 8px">
               <input
                 v-model="form.startDate"
                 type="month"
                 class="form-control"
-                style="width: 48%;"
+                style="width: 48%"
                 placeholder="입사년월"
               />
-              <span style="align-self: center;">~</span>
+              <span style="align-self: center">~</span>
               <input
                 v-model="form.endDate"
                 type="month"
                 class="form-control"
-                style="width: 48%;"
+                style="width: 48%"
                 placeholder="퇴사년월"
               />
             </div>
@@ -84,19 +84,37 @@ const form = ref({
   department: '',
   position: '',
   startDate: '',
-  endDate: '',   
-  period: '',    
+  endDate: '',
+  period: '',
 })
 
+function toYyyyMmDd(dateStr) {
+  if (!dateStr) return '';
+  if (/^\d{4}-\d{2}$/.test(dateStr)) return dateStr + '-01';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  return '';
+}
+
 const submit = () => {
-  // YYYY-MM -> YYYY.MM 포맷으로 변환
+ 
+
+  // 화면 표시용 기간 (YYYY.MM ~ YYYY.MM)
   const format = (date) => {
     if (!date) return ''
     const [y, m] = date.split('-')
     return `${y}.${m}`
   }
   form.value.period = `${format(form.value.startDate)} ~ ${format(form.value.endDate)}`
-  props.onComplete({ ...form.value }) // 부모에게 데이터 전달
+
+  // 부모로 넘길 때는 YYYY-MM-dd로 넘기기
+  props.onComplete({
+    company: form.value.company,
+    department: form.value.department,
+    position: form.value.position,
+    startDate: toYyyyMmDd(form.value.startDate),
+    endDate: toYyyyMmDd(form.value.endDate),
+    period: form.value.period,
+  })
   modalStore.closeModal()
 }
 </script>

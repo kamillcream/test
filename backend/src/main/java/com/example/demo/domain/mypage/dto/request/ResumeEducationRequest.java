@@ -6,14 +6,16 @@ import lombok.Data;
 
 @Data
 
-public class ResumeEducationRequest {
-	private String schoolNm;         // 학교명
-	private String majorNm;          // 전공
-    private LocalDate admissionDt;   // 입학일자
-    private LocalDate graduationDt;  // 졸업일자
-    private Long statusCd;           //졸업상태 코드
+  public class ResumeEducationRequest {
+		private Long resumeSq;
+	    private String educationSchoolNm;
+	    private String educationMajorNm;
+	    private LocalDate educationAdmissionDt;
+	    private LocalDate educationGraduationDt;
+	    private Long educationStatusCd;
+	}
 
-}
+
 
 
 

@@ -1,8 +1,15 @@
 package com.example.demo.domain.mypage.mapper;
 
+import com.example.demo.domain.mypage.dto.request.ResumeCareerRequest;
 import com.example.demo.domain.mypage.dto.request.ResumeEducationRequest;
 import com.example.demo.domain.mypage.dto.request.ResumeRegisterRequest;
+import com.example.demo.domain.mypage.dto.request.TrainingHistoryRequest;
+import com.example.demo.domain.mypage.dto.response.ResumeCareerResponse;
+import com.example.demo.domain.mypage.dto.response.ResumeEducationResponse;
 import com.example.demo.domain.mypage.dto.response.ResumeListResponse;
+import com.example.demo.domain.mypage.dto.response.ResumeRegisterResponse;
+import com.example.demo.domain.mypage.dto.response.TrainingHistoryResponse;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import com.example.demo.domain.mypage.vo.ResumeVo;
@@ -25,7 +32,7 @@ public interface ResumeMapper {
 	public Long findRepResumeByUserSq(Long userSq);
 	public Long findLatestResumeSqByUserSq(Long userSq);
 
-	ResumeRegisterRequest selectResumeById(@Param("resumeSq") Long resumeSq);
+	ResumeRegisterResponse selectResumeById(@Param("resumeSq") Long resumeSq);
 	Long selectAreaCodeBySigunguAndParent(Map<String, Object> params);
 
 	//전체이력서 조회
@@ -45,9 +52,17 @@ public interface ResumeMapper {
 	//학력
 	void insertEducation(ResumeEducationRequest request);
 	void deleteEducationByResumeSq(Long resumeSq);
+	List<ResumeEducationResponse> selectEducationByResumeSq(@Param("resumeSq") Long resumeSq);
+	
+	//경력
+	void insertCareer(ResumeCareerRequest request);
+	void deleteCareerByResumeSq(Long resumeSq);
+	List<ResumeCareerResponse> selectCareerByResumeSq(Long resumeSq);
+	
 	
 	public List<ResumeVo> findResumeVoByUserSq(@Param("userSq") Long userSq);
 	public ResumeNmTtlVo findResumeNmTtlBySq(@Param("resumeSq") Long resumeSq);
+
 	
 	public Long findUserByResumeSq(@Param("resumeSq") Long resumeSq);
 }
