@@ -242,7 +242,9 @@ onMounted(async () => {
 
     const projectSq = route.params.project_sq
 
-    const response = await api.$get(`/projects/${projectSq}/details`)
+    const response = await api.$get(`/projects/${projectSq}/details`, {
+      withCredentials: true,
+    })
     project.value = response.output
     scrapCount.value = project.value.projectScrapCnt
   } catch (e) {

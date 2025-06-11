@@ -67,7 +67,7 @@ ew
                 }}</a>
               </div>
               <span
-                v-if="!member.careerEndDt"
+                v-if="member.leavedYn === 401"
                 class="btn btn-primary btn-outline btn-lg"
                 style="font-size: 14px; padding: 8px 12px"
                 @click="confirmFire(6, member.userSq)"
@@ -207,6 +207,7 @@ const fetchAffiliationMemberList = async () => {
 const fireMember = async (companySq, userSq) => {
   try {
     await api.$patch(`/companies/${companySq}`, {
+      withCredentials: true,
       userSq: userSq,
       newStatus: '퇴사',
     })
