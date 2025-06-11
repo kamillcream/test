@@ -78,12 +78,14 @@ public class ProjectService {
 		registerSubEntities(project, request);
 	}
 	
+	
 	public long registerAddress(ProjectCreateRequest request) {
 		AddressInsertDto addressInsertDto = AddressInsertDto.from(request);
 		addressMapper.createAddress(addressInsertDto);
 		return addressInsertDto.getAddressSq(); 
 	}
 	
+	// 계약/직무/기술스택/인터뷰 시간 등 하위 항목 등록
 	public void registerSubEntities(Project project, ProjectCreateRequest request) {
 		createContracts(project.getProjectSq(), request.workType());
 		createJobRoles(project.getProjectSq(), request.recruitJob());
@@ -92,14 +94,17 @@ public class ProjectService {
 		createInterviewTimes(project.getProjectSq(), request.interviewTime());
 	}
 	
+	// 주소코드 기반으로 하위 행정구역 정보 조회
 	public AreaInfoResponse fetchSubDistrictInfoByProjectSq(Long addressSq) {
 		return addressMapper.findAreaInfoBySq(addressSq);
 	}
 	
+	// 주소코드 기반으로 상위 행정구역 정보 조회
 	public AreaInfoResponse fetchParentDistrictInfoByCd(Long areaCode) {
 		return districtMapper.findParentDisctrictByCodeSq(areaCode);
 	}
 	
+	// 주소 문자열로 변환 (ex: "서울 강남구")
 	public String fetchAddressString(Long addressSq) {
 	    AreaInfoResponse subDistrict = addressMapper.findAreaInfoBySq(addressSq);
 	    AreaInfoResponse parentDistrict = districtMapper.findParentDisctrictByCodeSq(subDistrict.getAreaSq());
@@ -108,6 +113,7 @@ public class ProjectService {
 	    return parentName + " " + subDistrict.getAreaName();
 	}
 	
+	// 검색 조건에 따라 전체 프로젝트 목록 조회
 	public ProjectListResponse fetchAllProject(JwtAuthenticationToken token, ProjectSearchRequest request){
 		List<Project> projects = projectMapper.findProjectsBySearch(request);
 		Long totalCount = projectMapper.countProjectsBySearch(request);
@@ -132,6 +138,7 @@ public class ProjectService {
 		return new ProjectListResponse(page, request.getSize(), totalCount, totalPages, responses);	
 	}
 	
+	// 기업 기준의 프로젝트 목록 조회
 	public ProjectListResponse fetchCompanyProject(CompanyFilterRequest request, JwtAuthenticationToken jwtAuthenticationToken) {
 		
 		Long userSq = jwtAuthenticationToken.getUserSq();
@@ -163,7 +170,7 @@ public class ProjectService {
 		
 	}
 	
-	public ProjectRecruitStatus fetchCompanyProjectCount (CompanyFilterRequest request, JwtAuthenticationToken jwtAuthenticationToken) {
+	public ProjectRecruitStatus fetchCompanyProjectCount(CompanyFilterRequest request, JwtAuthenticationToken jwtAuthenticationToken) {
 
 		Long userSq = jwtAuthenticationToken.getUserSq();
 		Long userTypeCd = jwtAuthenticationToken.getUserTypeCd();
@@ -335,7 +342,7 @@ public class ProjectService {
 		projectMapper.insertInterviewTimes(projectSq, interviewTimes);
 	}
 	
-	
+	// DB에 들어가는 형태로 변환
 	public List<SkillInsertRequest> fillSkillInsertRequest(List<String> skills) {
 	    List<SkillInsertRequest> requests = new ArrayList<>();
 	    skills.forEach(skillName -> {
@@ -379,6 +386,7 @@ public class ProjectService {
 		return ProjectFormDataResponse.from(commonCodeMapper, districtMapper, skills);
 	}
 	
+	// fetch 해온 기술들을 상위 분류에 따라 분류.
 	public List<GroupSkillInfoResponse> groupingSkills(List<SingleSkillInfoResponse> responses){
 		Map<String, List<String>> grouped = responses.stream()
 		        .collect(Collectors.groupingBy(
@@ -397,6 +405,7 @@ public class ProjectService {
 		return districtMapper.findAllDistrictByParent(areaCodeSq);
 	}
 	
+	// 검색 필터에 들어갈 내용을 DB에서 조회
 	public List<?> fetchFilterInfos(String type){
 		switch (type) {
 		case "지역": return districtMapper.findAllParentDistrict();
