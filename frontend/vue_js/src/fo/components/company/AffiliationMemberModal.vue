@@ -297,11 +297,19 @@ const removeMember = (userSq) => {
 }
 
 const openResumeModal = () => {
-  modalStore.openModal(UserResumeModal)
+  modalStore.openModal(UserResumeModal, {
+    size: 'modal-lg',
+    projectSq: projectSq,
+    role: 'COMPANY',
+  })
 }
 
-const openResumeSelectModal = () => {
-  modalStore.openModal(ResumeSelectModal)
+const openResumeSelectModal = (memberSq) => {
+  modalStore.openModal(ResumeSelectModal, {
+    size: 'modal-lg',
+    userSq: memberSq,
+    role: 'COMPANY',
+  })
 }
 
 const confirmApplication = async (selectedResumes, projectSq) => {

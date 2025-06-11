@@ -270,8 +270,9 @@ const applyCheck = () => {
     alertStore.show('이미 지원한 프로젝트입니다.', 'danger')
   } else {
     modalStore.openModal(UserResumeModal, {
-      size: 'modal-md',
+      size: 'modal-lg',
       projectSq: projectSq,
+      role: 'PERSONAL',
     })
   }
 }
