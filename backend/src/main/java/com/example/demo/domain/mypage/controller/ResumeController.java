@@ -71,9 +71,13 @@ public class ResumeController {
 	public ResponseEntity<ApiResponse<String>>setMainResume (@AuthenticationPrincipal Long userSq, 
 			@PathVariable("resumeSq") Long resumeSq,
 			@RequestBody(required = false) RepResumeSwitchRequest request) {
-		resumeService.setMainResume(resumeSq, request.getMemberSq());
-	    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "대표 이력서 설정 완료", "success"));
-	}
+		  Long memberSq = (request != null && request.getMemberSq() != null)
+			        ? request.getMemberSq()
+			        : userSq;
+
+			    resumeService.setMainResume(resumeSq, memberSq);
+			    return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK, "대표 이력서 설정 완료", "success"));
+			}
 	
 	@PatchMapping("/representative/{resumeSq}/others")
 	public ResponseEntity<ApiResponse<String>>setMainResume (@AuthenticationPrincipal Long userSq, 
