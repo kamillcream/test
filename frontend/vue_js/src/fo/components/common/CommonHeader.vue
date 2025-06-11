@@ -41,13 +41,13 @@
                     ></router-link>
                   </li>
                   <li class="dropdown">
-                    <a
+                    <router-link
                       class="dropdown-item dropdown-toggle current-page-active"
-                      href="/projectListPage"
+                      to="/projectListPage"
                     >
                       프로젝트
                       <i class="fas fa-chevron-down"></i
-                    ></a>
+                    ></router-link>
                   </li>
                   <li class="dropdown">
                     <router-link
@@ -280,7 +280,7 @@
             class="header-nav-features header-nav-features-no-border header-nav-features-lg-show-border order-1 order-lg-2"
           >
             <div class="header-nav-feature d-inline-flex">
-              <router-link href="/login" class="text-muted text-decoration-none"
+              <router-link to="/login" class="text-muted text-decoration-none"
                 >로그인</router-link
               >
             </div>
