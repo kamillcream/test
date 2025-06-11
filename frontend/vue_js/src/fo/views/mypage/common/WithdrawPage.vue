@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <PasswordCheck v-if="!isConfirmed" @confirmed="isConfirmed = true">
+    <h2 class="font-weight-normal text-7 mb-0">회원 탈퇴</h2>
+  </PasswordCheck>
+  <div v-else>
     <div class="overflow-hidden mb-3">
       <h2 class="font-weight-normal text-7 mb-0">회원 탈퇴</h2>
     </div>
@@ -109,11 +112,14 @@
 </template>
 
 <script setup>
+import PasswordCheck from '@/fo/components/mypage/common/PasswordCheck.vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '@/axios'
 import { useAlertStore } from '@/fo/stores/alertStore'
 import { useUserStore } from '@/fo/stores/userStore'
+
+const isConfirmed = ref(false)
 
 const router = useRouter()
 const alertStore = useAlertStore()
